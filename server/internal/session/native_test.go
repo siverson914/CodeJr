@@ -369,16 +369,22 @@ func TestNativePull(t *testing.T) {
 	if name != "BIG.BIN" || !bytes.Equal(data, big) {
 		t.Fatalf("got %s, %d bytes", name, len(data))
 	}
-	c.waitText("Saved BIG.BIN")
 
 	// The early line now runs; the file Claude writes goes the same way.
 	name, data = c.pullFile()
 	if name != "HELLO.BAS" || string(data) != "10 PRINT \"HI\"\r\n20 END\r\n" {
 		t.Fatalf("got %s %q", name, data)
 	}
-	c.waitText("Saved HELLO.BAS")
-	if files, _, _, _ := ws.Pending(); len(files) != 0 {
-		t.Fatalf("still pending: %+v", files)
+	// The server records the file once the client reports it saved.
+	for i := 0; ; i++ {
+		files, _, _, _ := ws.Pending()
+		if len(files) == 0 {
+			break
+		}
+		if i == 50 {
+			t.Fatalf("still pending: %+v", files)
+		}
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	c.link.Send(cjp.Input, []byte("/quit"))

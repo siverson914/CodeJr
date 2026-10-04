@@ -58,7 +58,9 @@ static unsigned take(pull_chunk *pc, const unsigned char *b, unsigned n)
 {
 	unsigned seq, len;
 
-	if (n < 6 || b[3] != n - 6 ||
+	if (n < 6)
+		return 0; /* a stray byte between frames (line noise), not a block */
+	if (b[3] != n - 6 ||
 	    cjp_crc16(b, n - 2) != (((unsigned)b[n - 2] << 8) | b[n - 1])) {
 		pc->bad++;
 		return 0;

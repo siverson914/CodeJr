@@ -10,7 +10,9 @@
  *   /P  BIOS serial port (default 1)
  *   /B  the modem's saved speed (default 9600)
  *   /F  switch the modem and the PCjr to this speed for the call, and back
- *       afterwards. The PCjr's exact speeds are 18643, 37287 and 55930.
+ *       afterwards (default 37287; /F:9600 stays at the saved speed). The
+ *       PCjr's exact speeds are 18643, 37287 and 55930. On the real PCjr,
+ *       37287 is fastest: at 55930 it misses bytes.
  *   /T  type this line once connected    /X  exit after N seconds
  *   /S  save the screen to this file before exiting
  *   (/T, /X and /S are for automated tests)
@@ -29,7 +31,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "0.4"
+#define VERSION "0.5"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -115,9 +117,12 @@ static void flush_queue(void)
 	}
 }
 
+static char last_file[80]; /* details of the last transfer, for Alt-S */
+
+/* Alt-S: two short lines, so nothing wraps on the 80-column screen. */
 static void counters(char *s)
 {
-	sprintf(s, "lost %u bytes (%u late interrupt), %u framing errors, %u bad frames, %u resent",
+	sprintf(s, "Line: %u lost (%u late), %u framing errors, %u bad frames, %u resent",
 	        ser_overruns(), ser_uart_overruns(), ser_framing(), link.bad, link.resent);
 }
 
@@ -127,26 +132,6 @@ static void note(const char *s)
 {
 	scr_puts(s, 0x08);
 	scr_putc('\n', 0x08);
-}
-
-/* Reports new losses as they happen, at most once a second. */
-static void report_losses(void)
-{
-	static unsigned seen_lost, seen_bad, seen_frame;
-	static unsigned long last;
-	char s[120], c[100];
-
-	if (ticks() - last < TICKS_PER_SEC)
-		return;
-	last = ticks();
-	if (ser_overruns() == seen_lost && link.bad == seen_bad && ser_framing() == seen_frame)
-		return;
-	seen_lost = ser_overruns();
-	seen_bad = link.bad;
-	seen_frame = ser_framing();
-	counters(c);
-	sprintf(s, "[client] %s", c);
-	note(s);
 }
 
 /* Is a key waiting? Reads the BIOS keyboard buffer pointers directly
@@ -188,29 +173,33 @@ static void io_send(const unsigned char *p, unsigned n, void *ctx)
 		ser_putc(*p++);
 }
 
+static unsigned long pull_t0;   /* tick count when the current file started */
+static unsigned long pull_wire; /* bytes of it that came over the line */
+
 static unsigned io_burst(unsigned char *buf, unsigned max, unsigned fends,
                          unsigned first, unsigned gap, void *ctx)
 {
+	unsigned n;
 	(void)ctx;
-	return ser_burst(buf, max, fends, first, gap);
+	n = ser_burst(buf, max, fends, first, gap);
+	pull_wire += n;
+	return n;
 }
-
-static unsigned long pull_t0; /* tick count when the current file started */
 
 static void progress(unsigned long got)
 {
 	char s[80], bar[21];
 	unsigned long t = ticks() - pull_t0;
-	/* Bits per second as the line counts them, 10 per byte (start and
-	 * stop bits), so the figure compares directly with the baud rate:
-	 * got*10 over t/18.2 seconds. */
-	unsigned long bps = t ? got * 182UL / t : 0;
+	/* The line's speed: bytes that crossed it (compressed), 10 bits each
+	 * with start and stop bits, over t/18.2 seconds, so it compares
+	 * directly with the baud rate and can't exceed it. */
+	unsigned long bps = t ? pull_wire * 182UL / t : 0;
 	int i, n = offer.size ? (int)(got * 20 / offer.size) : 20;
 
 	for (i = 0; i < 20; i++)
 		bar[i] = i < n ? '#' : '.';
 	bar[20] = 0;
-	sprintf(s, "Receiving %s [%s] %lu/%lu  %lu bps", offer.name, bar, got, offer.size, bps);
+	sprintf(s, "Receiving %s [%s] %lu/%lu  line %lu bps", offer.name, bar, got, offer.size, bps);
 	scr_status(s);
 }
 
@@ -232,6 +221,7 @@ static void pull_file(void)
 	err[0] = 0;
 	pc.bad = 0;
 	pull_t0 = t0;
+	pull_wire = 0;
 	if (!valid_name(offer.name))
 		strcpy(err, "not a DOS file name");
 	else if ((f = fopen(PULL_TMP, "wb")) == NULL)
@@ -284,13 +274,15 @@ static void pull_file(void)
 
 	secs = (ticks() - t0) * 10 / 182;
 	if (err[0])
-		sprintf(line, "[client] %s: %s", offer.name, err);
+		sprintf(line, "Couldn't save %s: %s", offer.name, err);
 	else
 	{
-		unsigned long t = ticks() - t0, bps = t ? got * 182UL / t : 0;
-		sprintf(line, "[client] %s: %lu bytes in %lu s (%lu bps), %u requests for %u chunks, "
-		        "%u damaged blocks", offer.name, got, secs, bps,
-		        rounds, offer.chunks, pc.bad);
+		unsigned long t = ticks() - t0, bps = t ? pull_wire * 182UL / t : 0;
+		unsigned long x10 = pull_wire ? got * 10 / pull_wire : 10;
+		sprintf(line, "Saved %s (%lu.%lu KB) in %lu s, line %lu of %ld bps.",
+		        offer.name, got / 1024, got % 1024 * 10 / 1024, secs, bps, line_baud);
+		sprintf(last_file, "Last file: %lu.%lux compressed, %u damaged, %u requests for %u chunks",
+		        x10 / 10, x10 % 10, pc.bad, rounds, offer.chunks);
 	}
 	note(line);
 	scr_status(err[0] ? err : "Saved.");
@@ -366,10 +358,11 @@ static void key(unsigned k)
 	unsigned char ch = (unsigned char)k;
 
 	if (k == 0x1F00) { /* Alt-S: connection counters, into the history */
-		char s[120], c[100];
+		char c[100];
 		counters(c);
-		sprintf(s, "[client] %s", c);
-		note(s);
+		note(c);
+		if (last_file[0])
+			note(last_file);
 	} else if (k == 0x2D00) { /* Alt-X */
 		queue(CJP_BYE, NULL, 0);
 		start_quit();
@@ -510,7 +503,7 @@ int main(int argc, char **argv)
 	const char *shot = NULL;
 	long exit_after = -1;
 	int port = 0, i, sent_auto = 0;
-	long baud = 9600, fast = 0;
+	long baud = 9600, fast = 37287;
 	unsigned long start;
 	char hello[48];
 
@@ -547,7 +540,7 @@ int main(int argc, char **argv)
 		if (change_speed(baud, fast)) {
 			line_baud = fast;
 		} else {
-			sprintf(s, "[client] The modem didn't answer at %ld baud; staying at %ld.", fast, baud);
+			sprintf(s, "The modem didn't answer at %ld baud; staying at %ld.", fast, baud);
 			note(s);
 		}
 	}
@@ -575,7 +568,6 @@ int main(int argc, char **argv)
 			scr_input(input);
 			cursor_dirty = 0;
 		}
-		report_losses();
 		if (auto_text && connected && !sent_auto) {
 			queue(CJP_INPUT, auto_text, (unsigned)strlen(auto_text));
 			sent_auto = 1;

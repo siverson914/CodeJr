@@ -103,7 +103,8 @@ To leave: type /quit, or press Ctrl-] then C and type EXIT.
 // client reads it from C:\CODEJR\CODEJR.CFG.
 var ProgFiles = map[string]string{
 	"NATIVE.BAT": `@ECHO OFF
-REM CodeJr native client at 9600 baud. Alt-X hangs up.
+REM CodeJr native client. It switches the modem to 37287 baud for the call
+REM and back afterwards (/F:9600 stays at 9600). Alt-X hangs up.
 CODEJR /P:1 %1 %2 %3
 `,
 	"FAST.BAT": `@ECHO OFF

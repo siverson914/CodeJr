@@ -38,7 +38,7 @@ run() { # $1 = label, $2 = extra client options
 	check "no temporary file left behind" "[ ! -e '$p/CJPULL.\$\$\$' ]"
 	check "client hung up cleanly" "grep -q 'client hung up' '$tmp/server.log'"
 	check "screen shows the reply" "grep -q 'you asked: make hello' '$p/SCREEN.TXT'"
-	check "screen shows the transfer report" "grep -q 'BIG.BIN: .* bytes in' '$p/SCREEN.TXT'"
+	check "screen shows the transfer report" "grep -q 'Saved BIG.BIN (.* KB) in .* line' '$p/SCREEN.TXT'"
 	grep -E 'client says|native: sent' "$tmp/server.log" | sed 's/^[^ ]* [^ ]* /      /'
 	if [ $fail = 1 ]; then
 		echo "--- server log"; cat "$tmp/server.log"
@@ -47,6 +47,6 @@ run() { # $1 = label, $2 = extra client options
 	rm -rf "$tmp"
 }
 
-run "9600 baud" ""
+run "9600 baud" "/F:9600"
 run "fast: /F:37287" "/F:37287"
 exit $fail

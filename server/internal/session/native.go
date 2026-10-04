@@ -464,7 +464,10 @@ func (n *native) sync() {
 		s.ws.MarkSynced(map[string]string{f.Name: hashes[f.Name]})
 		el := time.Since(start)
 		s.logf("native: sent %s (%d bytes) in %s, %.0f bytes/s; %s", f.Name, len(f.Data), el.Round(100*time.Millisecond), float64(len(f.Data))/el.Seconds(), n.link.Stats())
-		n.print(cjp.StyleNote, fmt.Sprintf("Saved %s (%s) in %s, %s.\n", f.Name, size(len(f.Data)), ProgDir, bps(len(f.Data), el)))
+		if !n.pull {
+			// Pull clients print their own line, with the line's speed.
+			n.print(cjp.StyleNote, fmt.Sprintf("Saved %s (%s) in %s, %s.\n", f.Name, size(len(f.Data)), ProgDir, bps(len(f.Data), el)))
+		}
 	}
 }
 
