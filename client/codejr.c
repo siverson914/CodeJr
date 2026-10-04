@@ -29,7 +29,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "0.3"
+#define VERSION "0.4"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -394,9 +394,13 @@ static void key(unsigned k)
 
 static int read_cfg(char *dial, int size)
 {
+	/* /setup delivers the file to C:\ and CODEJR.BAT moves it, but only
+	 * on its next run, so look in both places. */
 	FILE *f = fopen("C:\\CODEJR\\CODEJR.CFG", "r");
 	char line[100];
 	int found = 0;
+	if (!f)
+		f = fopen("C:\\CODEJR.CFG", "r");
 	if (!f)
 		return 0;
 	while (fgets(line, sizeof line, f)) {

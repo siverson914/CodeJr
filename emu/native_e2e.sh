@@ -21,10 +21,11 @@ run() { # $1 = label, $2 = extra client options
 	cp client/CODEJR.EXE "$tmp/c/CODEJR/PROGS/"
 	cp client/CODEJR.EXE "$tmp/ws/BIG.BIN" # a real binary, about 25 KB
 	echo old > "$tmp/c/CODEJR/PROGS/BIG.BIN" # the pull must replace it
+	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG" # where /setup leaves it
 	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" > "$tmp/server.log" 2>&1 &
 	sp=$!
 	sleep 0.5
-	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 1000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /D:x:1 %s "/T:make hello" /X:60 /S:SCREEN.TXT\nexit\n' $port "$tmp" "$2" > "$tmp/dosbox.conf"
+	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 1000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 %s "/T:make hello" /X:60 /S:SCREEN.TXT\nexit\n' $port "$tmp" "$2" > "$tmp/dosbox.conf"
 	SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 200 dosbox -conf "$tmp/dosbox.conf" >/dev/null 2>&1
 	kill $sp 2>/dev/null; wait $sp 2>/dev/null
 	p="$tmp/c/CODEJR/PROGS"

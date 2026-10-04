@@ -541,6 +541,7 @@ func (s *session) sync() {
 	for _, f := range files {
 		if len(f.Data) > kermitMax && f.Name != s.forceSend {
 			s.scr.Println(term.Note, fmt.Sprintf("%s (%s) is too big for Kermit; run NATIVE to get it (or /send %s).", f.Name, size(len(f.Data)), f.Name))
+			delete(hashes, f.Name) // still waiting for the native client
 			continue
 		}
 		kept = append(kept, f)
