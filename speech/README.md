@@ -9,6 +9,19 @@ just speech                               # every clip -> speech/out/NAME.SND + 
 just deploy-speech HELLO READY            # queue SAY.EXE and clips for the PCjr
 ```
 
+**Quality presets.** `mksnd.py --quality` and the `just` tasks
+(`SPEECH_QUALITY=low just speech`) pick one of three. High is the default.
+
+| Preset | Rate | Codec | Per second of speech | A 9.6 s reply waits |
+|---|---|---|---|---|
+| high | 10,653 Hz | raw | 10.7 KB | about 39 s |
+| medium | 8,008 Hz | ADPCM 4-bit | 4.0 KB | about 15 s |
+| low | 5,996 Hz | ADPCM 3-bit | 2.2 KB | about 8 s |
+
+The waits are at the 37287 baud link (2.6 KB/s). Low arrives faster than
+it plays. High assumes the PCjr can keep up at 10.7 kHz: `SAY /V` on a high
+clip should show 0 late samples.
+
 On the PCjr: `SAY HELLO`, or `SAY HELLO READY FRIENDS`. A key stops it.
 
 | Option | What it does |
@@ -162,8 +175,9 @@ table row. Each sample is then a table lookup, an add, an overflow check
 (the clamp) and a store. In DOSBox it decodes 6 seconds of speech in 0.8 s,
 against 7.6 s for the C version. On the real PCjr I estimate about 150
 clocks a sample, so about 1.8 s per 6 s of speech, not measured yet. 3-bit
-codes don't line up with bytes, so they use the C decoder (slow). `/V`
-prints the decode time.
+codes don't line up with bytes, so the decoder takes them 3 bytes (8 codes)
+at a time, each code shifted out of its byte or byte pair by a fixed
+amount. `/V` prints the decode time.
 
 **What the grid measured** (`speech/grid.py`: the 9.6 s REPLY clip, ideal
 chip, link at 2.6 KB/s, Whisper small.en):

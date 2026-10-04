@@ -165,6 +165,10 @@ deploy-jrai: jrai
     @echo "queued: sent on the PCjr's next connection"
 
 # ---- speech ---------------------------------------------------------------
+# Speech quality for the tasks below: high (raw, 10.7 kHz), medium (4-bit
+# ADPCM, 8 kHz) or low (3-bit ADPCM, 6 kHz). SPEECH_QUALITY=low just ...
+
+speech_quality := env_var_or_default("SPEECH_QUALITY", "high")
 
 # Build SAY.EXE, the PCjr speech player
 say:
@@ -174,14 +178,14 @@ say:
 speech:
     #!/bin/sh
     set -e
-    for f in speech/clips/*.mp3; do speech/mksnd.py "$f" -o "speech/out/$(basename "$f" .mp3)"; done
+    for f in speech/clips/*.mp3; do speech/mksnd.py "$f" --quality {{speech_quality}} -o "speech/out/$(basename "$f" .mp3)"; done
 
 # New clip from text via gipity (voice: george, brian, daniel, rachel, openai:sage, gemini:Charon)
 clip name text voice="george":
     #!/bin/sh
     set -e
     n=$(echo "{{name}}" | tr a-z A-Z)
-    speech/mksnd.py --text "{{text}}" --voice "{{voice}}" --keep -o "speech/out/$n"
+    speech/mksnd.py --text "{{text}}" --voice "{{voice}}" --quality {{speech_quality}} --keep -o "speech/out/$n"
     mv "speech/out/$n.mp3" "speech/clips/$n.mp3"
     printf '%s\n' "{{text}}" > "speech/clips/$n.txt"
 
@@ -193,11 +197,11 @@ deploy-speech +clips: say
     total=$(stat -c %s speech/SAY.EXE)
     for c in {{clips}}; do
         c=$(echo "$c" | tr a-z A-Z); case "$c" in *.*) ;; *) c="$c.SND";; esac
-        m=chip; [ "${c##*.}" = SNP ] && m=pwm
-        [ -f "speech/out/$c" ] || speech/mksnd.py "speech/clips/${c%.*}.mp3" --method $m -o "speech/out/${c%.*}"
+        if [ "${c##*.}" = SNP ]; then o="--method pwm"; else o="--quality {{speech_quality}}"; fi
+        speech/mksnd.py "speech/clips/${c%.*}.mp3" $o -o "speech/out/${c%.*}"
         cp "speech/out/$c" "{{ws}}/"; total=$((total + $(stat -c %s "speech/out/$c")))
     done
-    echo "queued $((total / 1024)) KB: up to $((total / 413 / 60 + 1)) min at the measured 413 bytes/s; sent on the PCjr's next connection"
+    echo "queued $((total / 1024)) KB ({{speech_quality}} quality): about $((total / 2600 + 1)) s at 37287 baud; sent on the PCjr's next connection"
 
 # ---- tests ----------------------------------------------------------------
 

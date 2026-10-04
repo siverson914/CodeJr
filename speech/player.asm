@@ -7,10 +7,10 @@
 ; addressed relative to CS, so the copy runs as is.
 ;
 ; Block layout (offsets from the block segment):
-;   0000  this code and its parameters
-;   0400  level tables: 256 bytes each for voices 0, 1, 2 (OUT values)
-;   0700  stack (SP starts at 0A00h)
-;   0A00  samples, one byte each, any length (ES steps 64 KB at a time)
+;   0000  this code and its parameters (up to 2 KB)
+;   0800  level tables: 256 bytes each for voices 0, 1, 2 (OUT values)
+;   0B00  stack (SP starts at 0E00h)
+;   0E00  samples, one byte each, any length (ES steps 64 KB at a time)
 ;
 ; Timing: PIT channel 0 is set to mode 2 with the sample divisor, and only
 ; IRQ0 is unmasked.
@@ -82,8 +82,8 @@ d_inseg		dw 0		; 1C  ADPCM decoder (sp_dec): codes at d_inseg:d_inoff
 d_inoff		dw 0		; 1E
 d_outseg	dw 0		; 20  samples out at d_outseg:d_outoff
 d_outoff	dw 0		; 22
-d_bytes		dw 0		; 24  code bytes to decode this call
-d_bits		dw 0		; 26  4 or 2
+d_bytes		dw 0		; 24  code bytes (3-bit: 3-byte groups) to decode this call
+d_bits		dw 0		; 26  4, 3 or 2
 d_state		dw 0		; 28  in/out: SS offset of the DELTA row for the step index
 d_p		dw 0		; 2A  in/out: predictor - 8000h (signed)
 t_prev		dw 0
@@ -116,7 +116,7 @@ main:
 	mov cs:sv_sp,sp
 	mov ax,cs
 	mov ss,ax
-	mov sp,0A00h
+	mov sp,0E00h
 	mov cs:p_abort,0
 	mov cs:p_tlo,0
 	mov cs:p_thi,0
@@ -220,7 +220,7 @@ c_go:
 	out 20h,al
 	lods byte ptr es:[si]
 	mov bl,al
-	mov bh,4
+	mov bh,8
 	mov al,[bx]
 	out 0C0h,al
 	inc bh
@@ -255,7 +255,7 @@ h_go:
 	cli
 	lods byte ptr es:[si]
 	mov bl,al
-	mov bh,4
+	mov bh,8
 	mov al,[bx]
 	out 0C0h,al
 	inc bh
@@ -409,7 +409,8 @@ done2:
 
 ; ---- ADPCM decoder ---------------------------------------------------------
 ;
-; sp_dec: decodes d_bytes bytes of 4-bit or 2-bit codes (see adpcm_step in
+; sp_dec: decodes d_bytes bytes of 4-, 3- or 2-bit codes (for 3-bit,
+; d_bytes counts 3-byte groups of 8 codes) (see adpcm_step in
 ; mksnd.py) from d_inseg:d_inoff to one sample byte each at
 ; d_outseg:d_outoff. say.c calls it once per chunk of at most 32 KB of
 ; output, with SS = DGROUP, where it has built two tables for the code
@@ -442,6 +443,10 @@ sp_dec:
 	jnz dec_go
 	jmp dec_done
 dec_go:
+	cmp cs:d_bits,3
+	jne dec_n3
+	jmp dec3
+dec_n3:
 	cmp cs:d_bits,2
 	jne dec4
 	jmp dec2
@@ -550,9 +555,154 @@ d2d:
 	xor al,80h
 	stosb
 	loop dec2_far
-	jmp short dec_done
+	jmp dec_done
 dec2_far:
 	jmp dec2
+
+dec3:					; eight codes per three bytes, high bits first;
+					; each code is shifted out of its byte (or byte
+					; pair) by a fixed amount, so no bit buffer
+	mov al,[si]
+	shr al,1
+	shr al,1
+	shr al,1
+	shr al,1
+	and al,0Eh
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d3a
+	mov dx,7FFFh
+	js d3a
+	mov dx,8000h
+d3a:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	mov al,[si]
+	shr al,1
+	and al,0Eh
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d3b
+	mov dx,7FFFh
+	js d3b
+	mov dx,8000h
+d3b:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	mov ax,[si]
+	xchg al,ah
+	shr ax,1
+	shr ax,1
+	shr ax,1
+	shr ax,1
+	shr ax,1
+	shr ax,1
+	and al,0Eh
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d3c
+	mov dx,7FFFh
+	js d3c
+	mov dx,8000h
+d3c:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	mov al,[si+1]
+	shr al,1
+	shr al,1
+	shr al,1
+	and al,0Eh
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d3d
+	mov dx,7FFFh
+	js d3d
+	mov dx,8000h
+d3d:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	mov al,[si+1]
+	and al,0Eh
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d3e
+	mov dx,7FFFh
+	js d3e
+	mov dx,8000h
+d3e:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	mov ax,[si+1]
+	xchg al,ah
+	shr ax,1
+	shr ax,1
+	shr ax,1
+	shr ax,1
+	shr ax,1
+	and al,0Eh
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d3f
+	mov dx,7FFFh
+	js d3f
+	mov dx,8000h
+d3f:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	mov al,[si+2]
+	shr al,1
+	shr al,1
+	and al,0Eh
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d3g
+	mov dx,7FFFh
+	js d3g
+	mov dx,8000h
+d3g:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	mov al,[si+2]
+	shl al,1
+	and al,0Eh
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d3h
+	mov dx,7FFFh
+	js d3h
+	mov dx,8000h
+d3h:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	add si,3
+	loop dec3_far
+	jmp dec_done
+dec3_far:
+	jmp dec3
 
 dec_done:
 	mov cs:d_state,bp

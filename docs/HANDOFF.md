@@ -75,7 +75,7 @@ Ask Steve to do these in order and send the `[client]` line or a photo each time
 5. **Risky graphics paths:** `JRFLIGHT /LD` (hardware 160x100 mode, never displayed anywhere), and 320x200 mode in `lib/DEMO.EXE` (this PCjr reserves only 16 KB of video memory; the library claims its own block).
 6. **Typing in the native client while text arrives:** do letters get lost? Alt-S prints the client's loss counters into the chat.
 7. **Speech timing (SAY 1.1).** On the PCjr: `SAY /T HELLO` (chipmunk; the line to note is "can play chip clips at up to about N Hz"), then `SAY /V HELLO` (9.3 kHz) and `SAY /V HELLO10` (10.65 kHz). Want: late 0 and a speed matching "wanted". Then re-make the clips at the highest rate with some margin below the `/T` figure (`mksnd.py --hz`, then make it the default in `METHODS`). If `SAY` hangs or makes no sound with polling but `SAY /H HELLO` works, the poll command misbehaves on this 8259: say so in the journal.
-8. **ADPCM clips (SAY 1.2).** `SAY /V HELLO4` (4-bit) and `SAY /V HELLO2` (2-bit ADPCM, both 9.3 kHz). Note the "decoded ADPCM" time (estimated about 1.8 s per 6 s of speech) and whether either sounds worse than `HELLO`. The listening page from 2026-10-03 has the same comparison simulated.
+8. **Quality presets (SAY 1.3).** `SAY /V HELLOH` (high: raw 10.7 kHz), `SAY /V HELLOM` (medium: 4-bit ADPCM, 8 kHz), `SAY /V HELLOL` (low: 3-bit ADPCM, 6 kHz). Want late 0 on all three, especially high; note each "decoded ADPCM" time. If high is late, lower its rate in `QUALITY` in `speech/mksnd.py`.
 
 ## How to work in this repo
 
@@ -118,7 +118,7 @@ just deploy-speech HELLO READY  # queue SAY.EXE and clips (NAME.SNP for a PWM ve
 | `client/` | `codejr.c`, `cjp.c`, `pull.c`, `lz.c`, `serial.c`, `serisr.asm`, `screen.c`; `cjterm.c` test terminal; `test/` host harnesses |
 | `lib/` | JRGFX graphics library; read `STATUS.md` and `FAST.md` |
 | `games/doom`, `games/flight` | JRDOOM and JRFLIGHT, each with README and NOTES |
-| `speech/` | `SAY.EXE` (`say.c`, `player.asm` with the ADPCM decoder), `mksnd.py` converter (`--codec adpcm4/3/2`), `grid.py` quality grid, `clips/` (gipity mp3 + text), `test.sh` |
+| `speech/` | `SAY.EXE` (`say.c`, `player.asm` with the ADPCM decoder), `mksnd.py` converter (`--quality high/medium/low`, `--codec`), `grid.py` quality grid, `clips/` (gipity mp3 + text), `test.sh` |
 | `demos/cube` | JRCUBE, a shaded spinning cube with a moving light and real-time shadow (README there) |
 | `emu/` | headless emulator scripts |
 | `docs/attic/` | a parked selective-repeat link (didn't pass its tests) |

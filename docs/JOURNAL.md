@@ -475,3 +475,11 @@ Queued for the PCjr: SAY 1.1 and HELLO10.SND (HELLO at 10,650 Hz). HELLO.SND is 
 - `jcxz` and a `jmp short` across the new code were out of range. wasm reported it at the target label, not the jump.
 
 Not run on the real PCjr yet: SAY 1.2, the assembly decoder, and its real speed.
+
+## Speech quality presets (2026-10-04, 6:00 am)
+
+From the listening page, Steve picked three presets: **high** (raw, 10.7 kHz), **medium** (4-bit ADPCM, 8 kHz) and **low** (3-bit ADPCM, 6 kHz). `mksnd.py --quality`, and `SPEECH_QUALITY` for the `just` tasks; high is the default.
+
+- **Low needed a fast 3-bit decoder.** 3-bit codes don't line up with bytes, so `sp_dec` takes 3 bytes (8 codes) at a time and shifts each code out of its byte, or byte pair, by a fixed amount: no bit buffer. In DOSBox, 3-bit HELLO (9.3 kHz) decodes in 219 ms instead of 1,592, and it matches the reference byte for byte.
+- **The player outgrew its slot.** It was 0x3E9 bytes of a 0x400 slot before the 3-bit path. The block layout now gives code 2 KB: tables at 0800h, stack to 0E00h, samples from 0E00h.
+- The emulator test plays one clip at each preset (rates 10,662, 8,013 and 5,998 Hz on the stopwatch, all 0 late with `/H`). Whether the real PCjr keeps up at 10.7 kHz is the open question for high.

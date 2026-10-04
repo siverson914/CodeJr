@@ -8,10 +8,12 @@
   mksnd.py --text "Hi" --voice gemini:Charon -o HI     another voice
   mksnd.py song.wav -o SONG                            any audio file
   mksnd.py clips/HELLO.mp3 -o out/HELLO                text from clips/HELLO.txt
-  mksnd.py clips/HELLO.mp3 --hz 10650 -o out/HELLO10   a faster chip clip
+  mksnd.py clips/HELLO.mp3 --quality low -o out/HELLOL  small: 3-bit ADPCM, 6 kHz
+  mksnd.py clips/HELLO.mp3 --hz 9322 --codec raw -o X   any rate and codec
 
-Writes OUT.SND (method 1: the SN76496's three voices as one DAC, 9.3 kHz
-unless --hz) and OUT-chip.wav, a preview of how it should sound. With
+Writes OUT.SND (method 1: the SN76496's three voices as one DAC, at the
+--quality preset: high by default) and OUT-chip.wav, a preview of how it
+should sound. With
 --method pwm or both, also OUT.SNP (PWM on PIT channel 2, 15.9 kHz) and
 OUT-pwm.wav. On the real PCjr the chip method sounded best and PWM
 whined, so chip is the default.
@@ -40,9 +42,18 @@ VOICES = {
 }
 DEFAULT_VOICE = "george"
 
+# Speech quality presets (Steve's picks from the grid, 2026-10-04):
+# (chip sample rate, codec). The rate becomes a PIT divisor, so the real
+# rates are 10653, 8008 and 5996 Hz.
+QUALITY = {
+    "high": (10653, "raw"),     # 10.7 KB/s of speech, cleanest
+    "medium": (8008, "adpcm4"),  # 4.0 KB/s
+    "low": (5996, "adpcm3"),     # 2.2 KB/s, arrives faster than it plays at 2.6 KB/s
+}
+
 METHODS = {
     # name: (method byte, PIT divisor, extension)
-    "chip": (1, 128, ".SND"),  # 9322 Hz; --hz overrides (SAY /T measures the limit)
+    "chip": (1, 128, ".SND"),  # the rate comes from --quality or --hz
     "pwm": (2, 75, ".SNP"),    # 15909 Hz, also the PWM carrier
 }
 
@@ -407,8 +418,11 @@ def main():
                     " audio file's .txt twin, as in clips/)")
     ap.add_argument("--method", choices=["chip", "pwm", "both"], default="chip",
                     help="chip (default: it won on the real PCjr), pwm (whines), or both")
-    ap.add_argument("--hz", type=float, help="sample rate for the chip method (default 9322)")
-    ap.add_argument("--codec", choices=["raw", "adpcm4", "adpcm3", "adpcm2"], default="raw",
+    ap.add_argument("--quality", choices=list(QUALITY), default="high",
+                    help="chip preset: high (raw, 10.7 kHz), medium (4-bit ADPCM, 8 kHz) or"
+                    " low (3-bit ADPCM, 6 kHz); --hz and --codec override it")
+    ap.add_argument("--hz", type=float, help="sample rate for the chip method")
+    ap.add_argument("--codec", choices=["raw", "adpcm4", "adpcm3", "adpcm2"],
                     help="chip method: raw bytes, or ADPCM with 4, 3 or 2 bits per sample"
                     " (SAY decodes it before playing; speech/grid.py compares them)")
     ap.add_argument("--keep", action="store_true", help="also keep the source audio as OUT.mp3")
@@ -416,6 +430,8 @@ def main():
                     help="tests: write the samples SAY should decode from SND to --out, exactly")
     ap.add_argument("-o", "--out", required=True, help="output path without extension, 8 chars")
     a = ap.parse_args()
+    a.hz = a.hz or QUALITY[a.quality][0]
+    a.codec = a.codec or QUALITY[a.quality][1]
     if a.ref_decode:
         open(a.out, "wb").write(ref_decode(a.ref_decode))
         return

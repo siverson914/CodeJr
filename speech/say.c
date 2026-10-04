@@ -10,7 +10,7 @@
  *   SAY /H HELLO           time .SND clips with the timer interrupt (SAY 1.0's
  *                          way) instead of polling the 8259; DOSBox needs it
  *   SAY /X HELLO           write the decoded samples to SAYDUMP.BIN (tests)
- *   SAY /C HELLO           decode ADPCM with the C decoder (tests; 3-bit always)
+ *   SAY /C HELLO           decode ADPCM with the C decoder (tests)
  *
  * A key stops playback. The clip's method (chip or pwm) is in its header;
  * the actual playing is done by player.asm, from a block above 128 KB.
@@ -45,9 +45,9 @@ extern char __far sp_dec[];
 unsigned get_ss(void);
 #pragma aux get_ss = "mov ax,ss" value [ax];
 
-#define CODE_MAX 0x400u
-#define TABLE_OFF 0x400u
-#define DATA_PARA 0xA0u
+#define CODE_MAX 0x800u  /* player.asm's block layout */
+#define TABLE_OFF 0x800u
+#define DATA_PARA 0xE0u
 
 static int quiet, info, verbose, speedtest, irqtiming, dump, slowdec;
 
@@ -198,7 +198,7 @@ static unsigned build_tables(unsigned bits)
 				if (m & (half >> (k + 1)))
 					diff += step >> k;
 			delta[si * ncode + code] = code & half ? (unsigned)(-(int)diff) : diff;
-			s2 = (int)si + (bits == 4 ? adj4[m] : adj2[m]);
+			s2 = (int)si + (bits == 4 ? adj4[m] : bits == 3 ? adj3[m] : adj2[m]);
 			if (s2 < 0) s2 = 0;
 			if (s2 > 81) s2 = 81;
 			next[si * ncode + code] = base + (unsigned)s2 * ncode * 2;
@@ -214,7 +214,8 @@ static void adpcm_fast(unsigned block, unsigned seg, unsigned long inoff, unsign
 {
 	unsigned __far *par = (unsigned __far *)MK_FP(block, 0);
 	void (__far *dec)(void) = (void (__far *)(void))MK_FP(block, FP_OFF(sp_dec) - FP_OFF(sp_begin));
-	unsigned per = 8 / bits;
+	/* a unit is one byte of codes, or for 3-bit a group of 3 bytes */
+	unsigned per = bits == 3 ? 8 : 8 / bits, ubytes = bits == 3 ? 3 : 1;
 	unsigned long outoff = 0, nbytes = (n + per - 1) / per;
 	par[0x28 / 2] = build_tables(bits);
 	par[0x2A / 2] = 0x8000u;
@@ -228,7 +229,7 @@ static void adpcm_fast(unsigned block, unsigned seg, unsigned long inoff, unsign
 		par[0x22 / 2] = FP_OFF(out);
 		par[0x24 / 2] = (unsigned)chunk;
 		dec();
-		inoff += chunk;
+		inoff += chunk * ubytes;
 		outoff += chunk * per;
 		nbytes -= chunk;
 	}
@@ -297,7 +298,9 @@ static int play(const char *arg)
 		return 0;
 	}
 
-	paras = DATA_PARA + (n + 16 + 15) / 16; /* 16: slack for in-place ADPCM */
+	/* 16 bytes of slack keep in-place decoding ahead of its output; 16 more
+	 * cover the 3-bit decoder reading a last group past the codes' end */
+	paras = DATA_PARA + (n + 32 + 15) / 16;
 	if (paras > 0xFFFFUL || (seg = alloc_high((unsigned)paras)) == 0) {
 		printf("SAY: not enough memory for %s (%lu KB)\n", name, paras / 64);
 		_dos_close(fd);
@@ -321,7 +324,7 @@ static int play(const char *arg)
 	_fmemcpy(MK_FP(seg, 0), sp_begin, codesz);
 	if (bits) {
 		t0 = bios_ticks();
-		if (bits != 3 && FP_SEG(atab) == get_ss() && !slowdec)
+		if (FP_SEG(atab) == get_ss() && !slowdec)
 			adpcm_fast(seg, seg + DATA_PARA, n + 16 - clen, n, bits);
 		else
 			adpcm_decode(seg + DATA_PARA, n + 16 - clen, n, bits);
