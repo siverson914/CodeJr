@@ -60,7 +60,7 @@ PLAYGRP group PLAYER_TEXT
 PLAYER_TEXT segment para public 'CODE'
 	assume cs:PLAYGRP
 
-public sp_begin, sp_end
+public sp_begin, sp_end, sp_dec
 
 sp_begin:
 	jmp short main		; far call target, offset 0
@@ -78,6 +78,14 @@ p_late		dw 0		; 14  out: samples whose tick came before the loop was ready
 p_tlo		dw 0		; 16  out: PIT counts elapsed (chip only)
 p_thi		dw 0		; 18
 p_flags		dw 0		; 1A  in: bit 0 = chip method on interrupt timing (/H)
+d_inseg		dw 0		; 1C  ADPCM decoder (sp_dec): codes at d_inseg:d_inoff
+d_inoff		dw 0		; 1E
+d_outseg	dw 0		; 20  samples out at d_outseg:d_outoff
+d_outoff	dw 0		; 22
+d_bytes		dw 0		; 24  code bytes to decode this call
+d_bits		dw 0		; 26  4 or 2
+d_state		dw 0		; 28  in/out: SS offset of the DELTA row for the step index
+d_p		dw 0		; 2A  in/out: predictor - 8000h (signed)
 t_prev		dw 0
 sv_ss		dw 0
 sv_sp		dw 0
@@ -149,6 +157,9 @@ main:
 	jnz have_n
 	dec bp
 have_n:
+	sti				; take any tick that came in during setup,
+	hlt				; so the late count starts clean
+	cli
 	cmp cs:p_method,2
 	jne chip
 	jmp pwm
@@ -386,6 +397,168 @@ done2:
 	mov ss,cs:sv_ss
 	mov sp,cs:sv_sp
 	popf
+	pop dx
+	pop cx
+	pop bx
+	pop es
+	pop ds
+	pop di
+	pop si
+	pop bp
+	retf
+
+; ---- ADPCM decoder ---------------------------------------------------------
+;
+; sp_dec: decodes d_bytes bytes of 4-bit or 2-bit codes (see adpcm_step in
+; mksnd.py) from d_inseg:d_inoff to one sample byte each at
+; d_outseg:d_outoff. say.c calls it once per chunk of at most 32 KB of
+; output, with SS = DGROUP, where it has built two tables for the code
+; size: DELTA (the signed predictor change for each step index and code)
+; and, NEXTOFF bytes after it, NEXT (the DELTA row of the next step
+; index). So each sample is a lookup, an add with a clamp on overflow, and
+; a store. The predictor is kept as P - 8000h, so a signed overflow is
+; exactly the decoder's clamp to 0..65535.
+
+NEXTOFF equ 2848			; 89 step indexes x 16 codes x 2 bytes
+
+sp_dec:
+	push bp
+	push si
+	push di
+	push ds
+	push es
+	push bx
+	push cx
+	push dx
+	mov ds,cs:d_inseg
+	mov si,cs:d_inoff
+	mov es,cs:d_outseg
+	mov di,cs:d_outoff
+	mov cx,cs:d_bytes
+	mov bp,cs:d_state
+	mov dx,cs:d_p
+	cld
+	or cx,cx
+	jnz dec_go
+	jmp dec_done
+dec_go:
+	cmp cs:d_bits,2
+	jne dec4
+	jmp dec2
+
+dec4:					; two codes per byte, high nibble first
+	lodsb
+	mov ah,al
+	shr al,1
+	shr al,1
+	shr al,1
+	and al,1Eh
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d4a
+	mov dx,7FFFh
+	js d4a
+	mov dx,8000h
+d4a:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	mov al,ah
+	and al,0Fh
+	shl al,1
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d4b
+	mov dx,7FFFh
+	js d4b
+	mov dx,8000h
+d4b:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	loop dec4
+	jmp dec_done
+
+dec2:					; four codes per byte, high bits first
+	lodsb
+	mov ah,al
+	rol al,1
+	rol al,1
+	rol al,1
+	and al,6
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d2a
+	mov dx,7FFFh
+	js d2a
+	mov dx,8000h
+d2a:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	mov al,ah
+	shr al,1
+	shr al,1
+	shr al,1
+	and al,6
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d2b
+	mov dx,7FFFh
+	js d2b
+	mov dx,8000h
+d2b:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	mov al,ah
+	shr al,1
+	and al,6
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d2c
+	mov dx,7FFFh
+	js d2c
+	mov dx,8000h
+d2c:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	mov al,ah
+	shl al,1
+	and al,6
+	mov bx,bp
+	add bl,al
+	add dx,ss:[bx]
+	jno d2d
+	mov dx,7FFFh
+	js d2d
+	mov dx,8000h
+d2d:
+	mov bp,ss:[bx+NEXTOFF]
+	mov al,dh
+	xor al,80h
+	stosb
+	loop dec2_far
+	jmp short dec_done
+dec2_far:
+	jmp dec2
+
+dec_done:
+	mov cs:d_state,bp
+	mov cs:d_p,dx
+	mov cs:d_inoff,si
+	mov cs:d_outoff,di
 	pop dx
 	pop cx
 	pop bx

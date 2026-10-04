@@ -18,6 +18,8 @@ On the PCjr: `SAY HELLO`, or `SAY HELLO READY FRIENDS`. A key stops it.
 | `/T` | speed test: play as fast as the machine can (chipmunk) and report that rate |
 | `/H` | time chip clips with the timer interrupt, as SAY 1.0 did (needed in DOSBox) |
 | `/Q` | don't print the clip's text |
+| `/X` | write the decoded samples to `SAYDUMP.BIN` (tests) |
+| `/C` | decode ADPCM with the C decoder instead of the assembly one (tests) |
 
 `speech/out/NAME-chip.wav` is a preview of how the clip should sound on the
 PCjr, through a rough small-speaker filter, assuming ideal hardware.
@@ -136,6 +138,47 @@ It runs with `uv` (numpy, scipy) and needs `ffmpeg`, plus `gipity` for
 
 Whisper (small.en) transcribes every preview in `clips/` word for word.
 
+## Smaller clips: ADPCM
+
+For a voice mode, where the PCjr's Claude speaks its replies, the wait
+before it can talk is the clip's size over the link. `mksnd.py --codec
+adpcm4|adpcm3|adpcm2` makes clips with 4, 3 or 2 bits per sample instead
+of 8. SAY decodes them into the block before it plays.
+
+**The codec.** IMA-style ADPCM on the sample bytes, which are level-table
+indexes. The predictor is the index times 256. Each code moves it by a
+fraction of the current step, and moves the step up or down. IMA's step
+table is cut at 16,818, so a change always fits a signed 16-bit add.
+The encoder is a beam search (16 states): it keeps the best decoder states
+and their code histories, so a code that costs a little now but sets up a
+better step later can win. The search gained about 1.5 dB over greedy.
+Two decoder changes were tried and dropped: a slope predictor (+0.2 dB)
+and other step adaptation tables (+0.5 dB).
+
+**The decoder.** `sp_dec` in `player.asm` runs from the high block. For
+4- and 2-bit codes, `say.c` first builds two tables in DGROUP, read via SS:
+the signed change for every step index and code, and the next step's
+table row. Each sample is then a table lookup, an add, an overflow check
+(the clamp) and a store. In DOSBox it decodes 6 seconds of speech in 0.8 s,
+against 7.6 s for the C version. On the real PCjr I estimate about 150
+clocks a sample, so about 1.8 s per 6 s of speech, not measured yet. 3-bit
+codes don't line up with bytes, so they use the C decoder (slow). `/V`
+prints the decode time.
+
+**What the grid measured** (`speech/grid.py`: the 9.6 s REPLY clip, ideal
+chip, link at 2.6 KB/s, Whisper small.en):
+
+| | 6 kHz | 7 kHz | 8 kHz | 9.3 kHz | 10.7 kHz |
+|---|---|---|---|---|---|
+| raw 8-bit | 22 s wait, 35 dB | 26 s | 30 s | 34 s, 36 dB | 39 s |
+| ADPCM 4-bit | 11 s, 19 dB | 13 s | 15 s | 17 s, 21 dB | 20 s |
+| ADPCM 3-bit | 8 s, 15 dB | 10 s | 11 s | 13 s, 17 dB | 15 s |
+| ADPCM 2-bit | 6 s, 11 dB | 6 s | 7 s | 9 s, 12 dB | 10 s |
+
+Whisper heard every word in every cell. Only one-voice output at 6 kHz
+(what JRAI does) lost words. Cells under 9.6 s wait less than the reply
+lasts, so they arrive faster than they play.
+
 ## File format
 
 All fields are little-endian:
@@ -143,19 +186,22 @@ All fields are little-endian:
 | Offset | Size | Field |
 |---|---|---|
 | 0 | 4 bytes | `JRSN` |
-| 4 | u8 | version 1 |
+| 4 | u8 | version: 1 raw samples, 2 ADPCM |
 | 5 | u8 | method: 1 chip, 2 pwm |
 | 6 | u16 | PIT divisor |
 | 8 | u32 | samples |
 | 12 | u16 | text length |
 | 14 | u16 | table length |
+| 16 | u8 | version 2 only: ADPCM bits per code (2, 3 or 4), then 3 zero bytes |
 
 After the header come the text (printed while playing), then the table
 (method 1: 768 bytes, ready-made OUT values for voices 0, 1 and 2), then
-one byte per sample.
+the samples. In version 1 that's one byte per sample. In version 2 it's
+the ADPCM codes, packed most significant bit first.
 
 ## Sizes and the link
 
-At 413 bytes/s the cost is about 2.3 minutes per 6-second chip clip (56 KB)
-and 4 minutes for the PWM version (95 KB). `deploy-speech` prints the
-total. The 37287 baud link, if it holds, would make that about 20 seconds.
+The 37287 baud link moved about 2.6 KB/s on the real PCjr (JRFLIGHT,
+94.6 KB in 36 s). A raw 6-second chip clip (56 KB) takes about 22 s at
+that speed, and 4-bit ADPCM about 11 s. At the old 413 bytes/s it was
+2.3 minutes. `deploy-speech` prints the total.

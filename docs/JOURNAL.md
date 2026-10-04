@@ -458,3 +458,20 @@ One more mix-up worth recording: asked to run `CODEJR /P:1 /F:55930`, Steve type
 - Splicing the new loops into `player.asm` matched `c_key:` instead of `key:` and duplicated the old tail. The assembler's "already defined" errors caught it.
 
 Queued for the PCjr: SAY 1.1 and HELLO10.SND (HELLO at 10,650 Hz). HELLO.SND is already there.
+
+**Voice mode groundwork: ADPCM and the quality grid (11:15 pm-11:45 pm).** Steve asked for compressed audio decoded on the PCjr, with lower rates and bit depths tried, aiming at a voice mode where the PCjr's Claude speaks its replies "semi-fast".
+
+- **MP3 is out:** decoding it in real time took about a 486 at 66 MHz, and the PCjr is a few hundred times slower. General-purpose compression barely helps (zlib 1.4x, xz 1.6x), because the noise-shaped samples are deliberately noisy. So: lossy, and simple enough for an 8088. That means ADPCM.
+- **`speech/grid.py`** encodes a 9.6 s reply-style clip at 6-10.7 kHz, raw and 4/3/2-bit ADPCM, and with 3, 2 or 1 chip voices, then measures size, link wait at 2.6 KB/s, SNR and Whisper. Whisper heard every word in every cell except one voice at 6 kHz (JRAI's setup). So intelligibility isn't the limit; hiss and dullness are, and that's for ears. A listening page with all 24 versions went to Steve.
+- **Under 1.0x:** 3-bit at 6 kHz and 2-bit up to 9.3 kHz arrive faster than they play.
+- **SAY 1.2** reads version-2 clips (one extra header byte: the code size), loads the codes at the end of the block and decodes in place. The decoder in `player.asm` runs from the high block with two tables `say.c` builds in DGROUP: a lookup, an add, an overflow check, a store per sample. DOSBox: 0.8 s per 6 s of speech, against 7.6 s for the first (C) version. 3-bit stays on the C decoder. The emulator test now checks both decoders against mksnd.py's reference, byte for byte, at all three sizes.
+
+**Wrong turns.**
+
+- The first encoder stalled at silence: at the smallest step every code rounds to the same output index, so a greedy choice by output never grew the step. It now steers the predictor itself.
+- The assembly decoder diverged at sample 1,686: at the largest IMA steps a change can exceed 32,767 and wrap a signed 16-bit add. IMA's table is now cut at 16,818 in the codec itself (Python and both decoders). Quality unchanged.
+- A beam search over encoder choices gained only 1.5 dB, and a slope predictor and other step tables 0.2-0.5 dB. At 9.3 kHz this squeezed, brightened speech has little left to predict.
+- The emulator test failed once on "late 1": a timer tick that landed during setup counted as a late first sample. The player now takes any pending tick before it starts counting.
+- `jcxz` and a `jmp short` across the new code were out of range. wasm reported it at the target label, not the jump.
+
+Not run on the real PCjr yet: SAY 1.2, the assembly decoder, and its real speed.

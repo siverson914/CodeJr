@@ -1,0 +1,1 @@
+Sure. I wrote a program called STARS that draws a night sky with shooting stars. Type stars and press enter to run it, and press any key when you want to stop.

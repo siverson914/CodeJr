@@ -130,7 +130,7 @@ def frame(y, rate, ramp=0.08, quiet=0.06):
 AMP = [10 ** (-k / 10) for k in range(15)] + [0.0]  # 2 dB per attenuation step
 
 
-def chip_table(top=2.2, robust=1.0):
+def chip_table(top=2.2, robust=1.0, voices=3):
     """Up to 256 voice combinations whose summed levels cover 0..top.
 
     The fine levels only exist if the chip's 2 dB steps are exact. Real
@@ -140,7 +140,9 @@ def chip_table(top=2.2, robust=1.0):
     simulation this costs 2.5 dB on a perfect chip and gains 4 dB on one
     with 0.25 dB step errors (see README.md).
     Returns (levels scaled to 0..1, three rows of OUT bytes, 256 each)."""
-    combos = np.array(list(itertools.product(range(16), repeat=3)))
+    top = 1.0 if voices == 1 else top * voices / 3
+    combos = np.array([c + (15,) * (3 - voices)
+                       for c in itertools.product(range(16), repeat=voices)])
     amp = np.array(AMP)
     ideal = amp[combos].sum(1)
     rng = np.random.default_rng(7)
@@ -182,12 +184,131 @@ def quantize(target, levels, shaping):
     return out
 
 
-def make_chip(y, rate):
+def make_chip(y, rate, bits=0):
+    """bits 0: one raw byte per sample; 2-4: ADPCM codes of that size.
+    Returns (data, table, sample count, levels played)."""
     levels, rows = chip_table()
     target = frame(y, rate)
-    idx = quantize(target, levels, (0.5, 0.0))  # best in-band SNR (39.5 dB)
     table = bytes(rows[0] + rows[1] + rows[2])
-    return idx.astype(np.uint8).tobytes(), table, levels[idx]
+    if bits:
+        codes, idx = adpcm_encode(target, levels, bits)
+        return pack_bits(codes, bits), table, len(idx), levels[np.minimum(idx, len(levels) - 1)]
+    idx = quantize(target, levels, (0.5, 0.0))  # best in-band SNR (39.5 dB)
+    return idx.astype(np.uint8).tobytes(), table, len(idx), levels[idx]
+
+
+# ---- ADPCM: smaller clips, decoded by SAY before it plays ------------------
+#
+# IMA-style ADPCM on the sample bytes (the level-table indices, 0-255). The
+# predictor P is the index times 256; each code moves it by a fraction of
+# the current step and moves the step up or down. Decoding is shifts, adds
+# and two table lookups per sample, no multiplies: say.c's adpcm_decode
+# must match adpcm_decode_ref here bit for bit (speech/test.sh checks).
+
+# IMA's step table cut at 16818, so a code's change (at most 1.875 steps)
+# fits a signed 16-bit add, which is how player.asm's sp_dec applies it.
+STEPS = [7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 19, 21, 23, 25, 28, 31, 34, 37, 41, 45,
+         50, 55, 60, 66, 73, 80, 88, 97, 107, 118, 130, 143, 157, 173, 190, 209, 230,
+         253, 279, 307, 337, 371, 408, 449, 494, 544, 598, 658, 724, 796, 876, 963,
+         1060, 1166, 1282, 1411, 1552, 1707, 1878, 2066, 2272, 2499, 2749, 3024, 3327,
+         3660, 4026, 4428, 4871, 5358, 5894, 6484, 7132, 7845, 8630, 9493, 10442, 11487,
+         12635, 13899, 15289, 16818]
+ADJ = {4: [-1, -1, -1, -1, 2, 4, 6, 8], 3: [-1, -1, 2, 4], 2: [-1, 2]}
+
+
+def adpcm_step(p, si, code, bits):
+    """One decoder step: (P, step index, code) -> (P, step index)."""
+    step = STEPS[si]
+    half = 1 << (bits - 1)
+    m = code & (half - 1)
+    diff = step >> (bits - 1)
+    for k in range(bits - 1):  # magnitude bits, top one first
+        if m & (half >> (k + 1)):
+            diff += step >> k
+    p = p - diff if code & half else p + diff
+    p = min(max(p, 0), 65535)
+    si = min(max(si + ADJ[bits][m], 0), len(STEPS) - 1)
+    return p, si
+
+
+def adpcm_steps_np(p, si, bits):
+    """Vectorized adpcm_step over states (p, si) x every code.
+    Returns arrays shaped (len(p), 2**bits)."""
+    steps = np.array(STEPS)
+    adj = np.array(ADJ[bits])
+    half = 1 << (bits - 1)
+    codes = np.arange(1 << bits)
+    mag = codes & (half - 1)
+    step = steps[si][:, None]
+    diff = step >> (bits - 1)
+    for k in range(bits - 1):
+        diff = diff + np.where(mag & (half >> (k + 1)), step >> k, 0)
+    p1 = np.where(codes & half, p[:, None] - diff, p[:, None] + diff)
+    p1 = np.clip(p1, 0, 65535)
+    s1 = np.clip(si[:, None] + adj[mag], 0, len(STEPS) - 1)
+    return p1, s1
+
+
+def adpcm_encode(target, levels, bits, beam=16):
+    """target: wanted level per sample (0..1, as levels).
+
+    Beam search: keeps the `beam` best decoder states (predictor, step
+    index) and their code histories, so a code that costs a little now but
+    sets up a better step later can win. It steers the predictor itself (in
+    index units), not the rounded output: at the smallest step every code
+    rounds to the same index, and an encoder looking only at the output
+    would never grow the step. Returns (codes, decoded indices)."""
+    want = np.interp(target, levels, np.arange(len(levels))) * 256 + 128
+    want = np.minimum(want, (len(levels) - 1) * 256 + 255)
+    n = len(target)
+    ncode = 1 << bits
+    p = np.zeros(1, dtype=np.int64)
+    si = np.zeros(1, dtype=np.int64)
+    cost = np.zeros(1)
+    back = np.empty((n, beam), dtype=np.int32)   # parent state per kept state
+    code = np.empty((n, beam), dtype=np.int16)
+    for i in range(n):
+        p1, s1 = adpcm_steps_np(p, si, bits)
+        c1 = cost[:, None] + (p1 - want[i]) ** 2
+        flat = c1.ravel()
+        # best first, and only one survivor per (predictor, step) state
+        order = np.argsort(flat, kind="stable")
+        key = (p1.ravel()[order] << 7) | s1.ravel()[order]
+        _, first = np.unique(key, return_index=True)
+        keep = order[np.sort(first)][:beam]
+        keep = keep[np.argsort(flat[keep], kind="stable")]
+        k = len(keep)
+        back[i, :k] = keep // ncode
+        code[i, :k] = keep % ncode
+        p, si, cost = p1.ravel()[keep], s1.ravel()[keep], flat[keep]
+    j = 0  # the best final state, traced back
+    codes = np.empty(n, dtype=np.int32)
+    for i in range(n - 1, -1, -1):
+        codes[i] = code[i, j]
+        j = back[i, j]
+    return codes, adpcm_decode_ref(codes, bits, len(levels))
+
+
+def adpcm_decode_ref(codes, bits, nlevels=256):
+    p, si, out = 0, 0, []
+    for c in codes:
+        p, si = adpcm_step(p, si, int(c), bits)
+        out.append(min(p >> 8, nlevels - 1))
+    return np.array(out, dtype=np.int32)
+
+
+def pack_bits(codes, bits):
+    """Codes packed most significant bit first, padded with zero bits."""
+    acc, nacc, out = 0, 0, bytearray()
+    for c in codes:
+        acc = (acc << bits) | int(c)
+        nacc += bits
+        while nacc >= 8:
+            nacc -= 8
+            out.append((acc >> nacc) & 255)
+    if nacc:
+        out.append((acc << (8 - nacc)) & 255)
+    return bytes(out)
 
 
 # ---- method 2: PWM on PIT channel 2 ----------------------------------------
@@ -239,11 +360,33 @@ def preview_pwm(levels, divisor, path):
 
 # ---- the file --------------------------------------------------------------
 
-def write_snd(path, method, divisor, data, text, table=b""):
+def write_snd(path, method, divisor, data, text, table=b"", nsamples=None, bits=0):
+    """Version 1 for raw samples; version 2 adds 4 header bytes, the first
+    of which is the ADPCM code size (see README.md)."""
     t = text.encode("ascii", "replace")[:500]
+    n = len(data) if nsamples is None else nsamples
     with open(path, "wb") as f:
-        f.write(b"JRSN" + struct.pack("<BBHIHH", 1, method, divisor, len(data), len(t), len(table)))
+        f.write(b"JRSN" + struct.pack("<BBHIHH", 2 if bits else 1, method, divisor, n, len(t),
+                                      len(table)))
+        if bits:
+            f.write(struct.pack("<BBH", bits, 0, 0))
         f.write(t + table + data)
+
+
+def ref_decode(path):
+    """The samples SAY should end up with for a .SND file (tests)."""
+    d = open(path, "rb").read()
+    ver, n, tl, tb = d[4], struct.unpack("<I", d[8:12])[0], *struct.unpack("<HH", d[12:16])
+    if ver == 1:
+        return d[16 + tl + tb:16 + tl + tb + n]
+    bits, data = d[16], d[20 + tl + tb:]
+    codes, acc, nacc, it = [], 0, 0, iter(data)
+    for _ in range(n):
+        if nacc < bits:
+            acc, nacc = (acc << 8) | next(it), nacc + 8
+        nacc -= bits
+        codes.append((acc >> nacc) & ((1 << bits) - 1))
+    return adpcm_decode_ref(codes, bits).astype(np.uint8).tobytes()
 
 
 def asciify(s):
@@ -265,9 +408,17 @@ def main():
     ap.add_argument("--method", choices=["chip", "pwm", "both"], default="chip",
                     help="chip (default: it won on the real PCjr), pwm (whines), or both")
     ap.add_argument("--hz", type=float, help="sample rate for the chip method (default 9322)")
+    ap.add_argument("--codec", choices=["raw", "adpcm4", "adpcm3", "adpcm2"], default="raw",
+                    help="chip method: raw bytes, or ADPCM with 4, 3 or 2 bits per sample"
+                    " (SAY decodes it before playing; speech/grid.py compares them)")
     ap.add_argument("--keep", action="store_true", help="also keep the source audio as OUT.mp3")
+    ap.add_argument("--ref-decode", metavar="SND",
+                    help="tests: write the samples SAY should decode from SND to --out, exactly")
     ap.add_argument("-o", "--out", required=True, help="output path without extension, 8 chars")
     a = ap.parse_args()
+    if a.ref_decode:
+        open(a.out, "wb").write(ref_decode(a.ref_decode))
+        return
     if bool(a.audio) == bool(a.text):
         ap.error("give an audio file or --text, not both")
     base = os.path.basename(a.out)
@@ -295,15 +446,18 @@ def main():
         rate = PIT / divisor
         y = shape(x, SRC_RATE, rate)
         if m == "chip":
-            data, table, lv = make_chip(y, rate)
-            write_snd(a.out + ext, code, divisor, data, title, table)
+            bits = 0 if a.codec == "raw" else int(a.codec[-1])
+            data, table, n, lv = make_chip(y, rate, bits)
+            write_snd(a.out + ext, code, divisor, data, title, table, n, bits)
             preview_chip(lv, rate, a.out + "-chip.wav")
         else:
             data, lv = make_pwm(y, rate, divisor)
+            n = len(data)
             write_snd(a.out + ext, code, divisor, data, title)
             preview_pwm(lv, divisor, a.out + "-pwm.wav")
-        print("%s%s: %s, %.0f Hz, %.1f s, %d KB" % (base.upper(), ext, m, rate, len(data) / rate,
-                                                  (len(data) + 1023) // 1024))
+        print("%s%s: %s, %.0f Hz, %s, %.1f s, %d KB" % (
+            base.upper(), ext, m, rate, a.codec if m == "chip" else "raw", n / rate,
+            (len(data) + 1023) // 1024))
 
 
 if __name__ == "__main__":
