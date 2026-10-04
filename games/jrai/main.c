@@ -9,6 +9,9 @@
  *              or speech, so screenshots don't depend on emulator speed
  *   /SHOT:a,b  screenshots (SHOTnn.PPM) at these T values (60 Hz ticks)
  *   /BENCH     log frames per second per part to LOG.TXT
+ *   /ONEPAGE   test the fallback for a PCjr with no room for a second video page
+ *   /VIDEO     frame-locked at 15 fps, every frame saved as Fnnnn.PPM (n = T/4)
+ *              and every sound chip write logged to SND.BIN (tools/video.sh)
  * Keys: Esc quits, Space skips to the next part.
  */
 #include <stdio.h>
@@ -17,17 +20,19 @@
 #include <dos.h>
 #include "jrai.h"
 
-int opt_bench;
-static int opt_part, opt_only, opt_noboot, lockn = 4;
+int opt_bench, opt_bootdump;
+static int opt_part, opt_only, opt_noboot, opt_onepage, lockn = 4;
 static unsigned long shots[32];
-static int nshots, shot_i;
+static int nshots, shot_i, opt_video;
 
 static const part *const parts[] = { &part_plasma, &part_fire, &part_tunnel, &part_meet, &part_scroll };
 #define NPARTS 5
 
 static void prep_step(int i)
 {
+	unsigned long t = tmr_ms();
 	if (parts[i]->prep) parts[i]->prep();
+	if (opt_bench) dbg_log("prep %s: %lu ms", parts[i]->name, tmr_ms() - t);
 }
 
 static void args(int argc, char **argv)
@@ -41,6 +46,9 @@ static void args(int argc, char **argv)
 		else if (!strcmp(a, "/NOBOOT")) opt_noboot = 1;
 		else if (!strcmp(a, "/QUIET")) mus_mute = 1;
 		else if (!strcmp(a, "/BENCH")) opt_bench = 1;
+		else if (!strcmp(a, "/BOOTDUMP")) opt_bootdump = 1;
+		else if (!strcmp(a, "/ONEPAGE")) opt_onepage = 1;
+		else if (!strcmp(a, "/VIDEO")) { opt_video = 1; lockstep = 1; lockn = 4; opt_noboot = 1; }
 		else if (!strncmp(a, "/LOCK", 5)) { lockstep = 1; if (a[5] == ':') lockn = atoi(a + 6); }
 		else if (!strncmp(a, "/SHOT:", 6)) {
 			char *p = a + 6;
@@ -53,11 +61,27 @@ static void args(int argc, char **argv)
 	if (opt_part < 0 || opt_part >= NPARTS) opt_part = 0;
 }
 
+static void video_frame(void)
+{
+	char name[16];
+	fx_begin();
+	sprintf(name, "F%04u.PPM", (unsigned)(T / 4));
+	fx_screenshot(name);
+}
+
 /* After each frame: flip, advance lockstep time, screenshots. */
 static void frame_end(void)
 {
+	/* One page (no free 16K below 128K for a second one): the frame was
+	 * drawn in a RAM buffer, much of it by code the library doesn't see,
+	 * so copy all of it. */
+	if (fx_pages == 1) fx_dirty(0, 0, 159, 199);
 	fx_flip();
-	if (lockstep) T += lockn;
+	if (lockstep) {
+		int k;
+		for (k = 0; k < lockn; k++) { T++; mus_tick(); }
+		if (opt_video) video_frame();
+	}
 	else clock_poll();
 	if (shot_i < nshots && T >= shots[shot_i]) {
 		char name[16];
@@ -75,19 +99,27 @@ static int run_part(const part *p)
 	unsigned long t0, tend;
 	unsigned frames = 0;
 	unsigned long ms0;
-	int skip = 0;
+	int skip = 0, flash = 0;
 	if (p->enter) p->enter();
+	/* the part's clock starts on its first downbeat, even if drawing the
+	 * scene took a while and the music is already into the pattern */
 	if (mus_at() != p->ord) mus_start(p->ord);
-	t0 = T;
+	t0 = mus_at() == p->ord ? mus_ord_T() : T;
 	tend = t0 + (unsigned long)p->npat * PAT_TICKS;
 	ms0 = tmr_ms();
+	if (p->flash) {
+		static const unsigned char white[16] = { 15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15 };
+		fx_pal_set(white);
+		flash = 1;
+	}
 	while (T < tend) {
+		if (flash && T - t0 >= 5) { fx_pal_set(pal); flash = 0; }
 		p->frame((unsigned)(T - t0));
 		frame_end();
 		frames++;
 		if (key_down[KEY_ESC]) { quit = 1; break; }
 		if (key_down[KEY_SPACE]) { while (key_down[KEY_SPACE]) ; skip = 1; break; }
-		if (lockstep && shot_i >= nshots && nshots) { quit = 1; break; }
+		if (lockstep && !opt_video && shot_i >= nshots && nshots) { quit = 1; break; }
 	}
 	if (opt_bench) {
 		unsigned long ms = tmr_ms() - ms0;
@@ -106,18 +138,21 @@ int main(int argc, char **argv)
 	mus_init();
 	if (!opt_noboot) boot_run(prep_step, NPARTS);
 	else for (i = 0; i < NPARTS; i++) prep_step(i);
-	if (fx_init(0)) {
+	if (fx_init(opt_onepage ? 8 : 0)) {
 		printf("JRAI: can't start 160x200 graphics (error %d)\n", gfx_err);
 		return 1;
 	}
+	if (opt_bench) dbg_log("fx_pages %d, fx_irq %d, fx_seg %04X, psp %04X", fx_pages, fx_irq, fx_seg, _psp);
 	key_init();
 	pages_find();
 	clock_start();
+	if (opt_video) { snd_log_open(); say_hook = video_frame; }
 	for (i = opt_part; i < NPARTS && !quit; i++) {
 		run_part(parts[i]);
 		if (opt_only) break;
 	}
 	clock_stop();
+	snd_log_close();
 	key_done();
 	gfx_done();
 	snd_done();

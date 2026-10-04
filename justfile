@@ -141,9 +141,27 @@ flight:
 # Build both games
 games: doom flight
 
+# Build JRCUBE (demos/cube) and render its GIF headless
+cube:
+    demos/cube/build.sh
+    demos/cube/shots.sh 100
+
 # Build both games and queue them for the PCjr
 deploy-games: games
     cp games/doom/JRDOOM.EXE games/flight/JRFLIGHT.EXE "{{ws}}/"
+    @echo "queued: sent on the PCjr's next connection"
+
+# Build JRAI, the "PCjr MEETS AI" demo
+jrai:
+    games/jrai/build.sh
+
+# Preview video of JRAI with its sound, made headless (about 2 minutes)
+jrai-video out="games/jrai/jrai-preview.mp4": jrai
+    games/jrai/video.sh "$PWD/{{out}}"
+
+# Build JRAI and queue it for the PCjr
+deploy-jrai: jrai
+    cp games/jrai/JRAI.EXE "{{ws}}/"
     @echo "queued: sent on the PCjr's next connection"
 
 # ---- tests ----------------------------------------------------------------

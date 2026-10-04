@@ -144,6 +144,7 @@ int main(int argc, char **argv)
 				for (k = 0; k < 4; k++) { xy[2 * k] = cx + rnd(60) - 30; xy[2 * k + 1] = cy + rnd(60) - 30; }
 				fx_poly(3, xy, FX_SOLID2(rnd(16)));
 				fx_poly_rows(3, xy + 2, rp);
+				fx_poly_src(3, xy, src ^ 0x100);
 			}
 			fx_fill_rect(rnd(170) - 5, rnd(210) - 5, rnd(40), rnd(40), FX_DITH(1, 2));
 			fx_text(rnd(150) & ~1, rnd(190), "TRK", 14);

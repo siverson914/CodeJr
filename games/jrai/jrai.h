@@ -39,6 +39,9 @@ extern int mus_mute;               /* /QUIET */
 
 typedef struct { const unsigned char far *d; unsigned n; } speech;
 extern const speech sp_hello, sp_wait, sp_friends;
+extern void (*say_hook)(void);     /* /VIDEO: called every 4 ticks of a phrase */
+void snd_log_open(void);
+void snd_log_close(void);
 /* Plays a phrase now, busy, with the music paused (palette animation and
  * T keep running in IRQ5). mouth, if set, is called about 30 times a
  * second with the current loudness 0-15 so a face can move its lips. */
@@ -69,13 +72,15 @@ typedef struct {
 	void (*frame)(unsigned t);
 	void (*leave)(void);
 	int ord, npat;        /* where the part starts in the song, how long */
+	int flash;            /* start with a white flash on the downbeat */
 } part;
 extern const part part_plasma, part_fire, part_tunnel, part_meet, part_scroll;
 
 void boot_run(void (*work)(int step), int nsteps); /* text mode intro */
 void boot_end(void);                               /* "Done." and the glitch */
 
-extern int opt_bench;
+extern int opt_bench, opt_bootdump;
 int mus_at(void);         /* song position playing now, -1 if stopped */
+unsigned long mus_ord_T(void); /* T when that position started */
 
 #endif

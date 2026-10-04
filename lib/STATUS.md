@@ -14,6 +14,13 @@ Everything in the header is implemented. Phase 1 and Phase 2 are done.
 - See "Fast path" below. Design notes, every trick tried, the cost model and the sources are in `lib/FAST.md`.
 - The old API is unchanged and still works, and you can mix the two.
 
+**New (JRCUBE, `demos/cube`): moving objects over a static scene.**
+- `fx_track` / `fx_restore`: no clears. Every fx_ call records the bytes it drew, per page and per row; `fx_restore(bg)` copies just those back from a background buffer.
+- `fx_poly_rows`: a pattern byte per row, so gradients and 2x2 ordered dithers cost the same as a flat fill.
+- `fx_poly_src`: a polygon filled by copying from another buffer (shadows that darken the floor's own pattern).
+- `fx_pal_anim`: palette rotation run by the retrace IRQ at a steady 60 Hz pace (scrolling grids, water, twinkling stars) whatever the frame rate.
+- `fx_line` now runs in asm (same pixels), clipped sprites plot directly, and `fx_compile` is about 2x faster.
+
 ## Build and link (game agents)
 
 Use the large memory model with 8088 instructions only:
@@ -97,6 +104,28 @@ gfx_done();            /* also undoes fx_init */
 - `fx_clip(y0, y1)` limits polygons and spans to the 3D view rows.
 - Draw back to front straight into the hidden page. Per-row setup dominates, so many small polygons cost more than a few big ones.
 - If you keep your own packed buffer (like games/flight), you can also just copy it to `gfx_vseg` between fx_begin and fx_flip.
+- Shaded faces: `fx_poly_rows(n, xy, rowpat200)` fills row y with `rowpat200[y]` (only the polygon's rows are read). Alternate the two bytes of a dither by row parity for a checkerboard or 2x2 ordered dither. `demos/cube` interpolates a light value down the rows and turns it into patterns with an XLAT loop.
+- Shadows and reveals: `fx_poly_src(n, xy, seg)` copies the polygon's pixels from `seg` (page layout, e.g. `fx_alloc_buffer`). Pre-draw a darkened copy of the floor and the shadow keeps the floor's pattern.
+
+### Moving objects over a static background (fx_track, fx_restore)
+
+```c
+bg = fx_alloc_buffer();
+fx_target(bg); draw_background(); fx_target(0);
+for (i = 0; i < 2; i++) { fx_copy_rect(fx_seg, bg, 0, 0, 159, 199); fx_flip(); fx_begin(); }
+fx_track(1);
+for (;;) {
+    fx_begin();
+    fx_restore(bg);   /* undo what this page drew last time */
+    draw_objects();   /* any fx_ calls */
+    fx_flip();
+}
+```
+
+- Polygons record their exact row extents (in the fill loops themselves); other calls record their bounding box.
+- Each page keeps its own record (it shows the frame before last), so the right bytes come back after every flip.
+- Writes you make yourself into fx_seg are not recorded: redraw them every frame (JRCUBE's scroller does) or keep them out of the moving area.
+- In FX_BUFFER mode the restored area is also marked dirty, so it reaches the screen.
 
 ### HUDs and cockpit panels
 
@@ -108,6 +137,7 @@ gfx_done();            /* also undoes fx_init */
   - `fx_pal_set(pal16)` and `fx_pal_cycle(a, b, dir)` are queued and applied in the next retrace.
   - Use them for color cycling of water and sky, or a damage flash: e.g. set palette entry 0 to red for a few frames.
   - Avoid `gfx_palette` per frame: it waits a whole retrace on every call.
+  - `fx_pal_anim(i, a, b, period, dir)`: up to 4 ranges rotated by the IRQ itself every `period` retraces. The speed doesn't depend on the frame rate. Ranges set together stay in step (JRCUBE rotates the lit and shadowed grid lines this way). A later `fx_pal_set` replaces the whole palette, phase included.
 
 ### Timing
 
@@ -155,7 +185,11 @@ gfx_done();            /* also undoes fx_init */
 | fx_init / fx_flip / fx_begin (page flipping, IRQ5) | verified in DOSBox: IRQ5 fires (60 Hz), 3DFh and 40:8Ah follow each flip, B800 and gfx_vseg map to the hidden page. Tested in IRQ, polled, buffer, claimed-page and one-page modes (T3 flags 0, 1, 2, 3, 4, 8, 16, 18). Real PCjr: not tried |
 | fx_clear, fx_fill_rect, fx_hspan, fx_poly, fx_tri, fx_pset, fx_text, fx_line, fx_col, fx_texcol | verified pixel for pixel against the gfx_* versions (T3) |
 | fx_view, fx_wall, fx_wall2 | verified over 12 frames of random walls (full, low-detail and mixed) plus sprites, against a C model, on the page actually shown (T3) |
-| fx_compile, fx_sprite_draw | verified against gfx_blit at random positions, all four parities, and clipped (T3) |
+| fx_compile, fx_sprite_draw | verified against gfx_blit at random positions, all four parities, and clipped (T3). The compiler now generates each variant once (was twice, through a per-pixel accessor), and clipped sprites plot directly with one touch |
+| fx_line (asm inner loops) | verified pixel for pixel against gfx_line (T3, 200 random lines) |
+| fx_poly_rows, fx_poly_src | verified pixel for pixel against gfx_fill_poly coverage (T3, 160 polygons) |
+| fx_track, fx_restore | verified: after 5 frames of polygons, row patterns, source copies, rects, text, lines and psets, restoring gives back the background byte for byte on both pages (T3) |
+| fx_pal_anim | runs in DOSBox (JRCUBE); palette registers are write-only, so not checked on screen. Real PCjr: not tried |
 | fx_copy_rect, fx_copy_delta, FX_BUFFER dirty rectangles | verified (T3) |
 | fx_pal_set, fx_pal_cycle | run without errors; the IRQ applies them. Palette registers are write-only, so not checked on screen |
 | tmr_ticks | verified against tmr_ms over 300 ms (T3) |

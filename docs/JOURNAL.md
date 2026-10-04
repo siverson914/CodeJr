@@ -338,3 +338,62 @@ It points at the cable or the modem's RS-232 adapter coupling the PCjr's outgoin
 **Speeds, for the record.** 9600 is the modem's saved, normal speed. 2400 was tried once during the slow-link hunt and wasn't the fix (the real cause was `ATDT` dropping bytes). `FAST` is 37287 and hasn't run on the real PCjr.
 
 All tests pass (`just test`, emulator results are emulator-only). Deployed: client 0.3 with the rename fix, server restarted with no call in progress.
+
+## JRAI: "PCjr MEETS AI", a demo (2026-10-03, night)
+
+Steve asked for 80s/90s demoscene effects on the PCjr, picked plasma, fire, tunnel and a sine scroller, and asked for it "beyond epic" with an AI theme: AI faces, robots, a PCjr meeting AI. It's in `games/jrai/` (README there has the details). A separate session was building a spinning cube demo in `demos/cube/` at the same time.
+
+**The shape.** Boot in 40-column text: `C>CODEJR`, Steve's request typed in, "CodeJr is thinking", and the thinking is real: the precompute runs under it. Then a robot voice says "Hello, P C Junior" over a palette plasma, the title, fire with 1984 / 2026 / PCjr / + AI burning in it, a tunnel "into the neural net", the PCjr meeting a robot (the robot speaks its first line, they talk in a speech box, a heart rises, "friends, forever" spoken), and a sine scroller finale with raster bars and greetings (8088 MPH, Area 5150, riq, Mike Brutman, IBM Boca Raton, and Steve).
+
+**Sound.** A small tracker in the retrace interrupt, chained after the library's IRQ5 handler: lead with vibrato, bass, 60 Hz chord arpeggios, noise drums. The voice is SAM (1982) via the `sam-js` npm package, stored as 4-bit attenuations and played through tone voice 0's volume register with the tone at 111 kHz, paced by the PIT counter. No TTS was installed; SAM is also the right voice for a 1984 machine.
+
+**Wrong turns.**
+
+- The plasma came out black. It was computed before graphics started, and `jr_rowoff` (the library's row offsets) is all zeros until `gfx_init`, so every row landed on row 0. The prep now computes offsets itself.
+- Parts drifted from the music by one pattern. The song position moves to the next pattern on the last tick of the old one, but the "pattern started at" time was only set when the new pattern's first row played, one tick later. A part starting in that tick took the previous pattern's start time. Found by logging pattern starts in a frame-locked run.
+- First benchmark at DOSBox `cycles=400`: the fire ran at 1.5 fps. It called a 32-bit `rnd()` (a long multiply) for every burning letter cell and walked the letter bitmaps bit by bit. Now: a list of cell offsets, a noise table, the simulation in `#pragma aux` assembly (two cells per word add: heat 0-63 means a sum of four fits in a byte, so there is no carry between cells) with `XLAT` cooling, and output that skips cell pairs whose shades the page already shows. 8.8 fps.
+- Meeting 8 fps to 41 by redrawing only what changed on each page. Finale 7.4 to 18.8 by filling each row once (bar color or black) instead of clear-then-bars, and a precomputed column mask for the scroller. Startup precompute 42 s to 8.7 s: texture built a row at a time from templates, tunnel geometry computed for one quadrant and mirrored, 16-bit math, table-driven plasma colors, code assembled a row at a time in a near buffer.
+
+**The tunnel writes its own code**: one 14-byte instruction group per pair of screen bytes, about 43 KB, patched each frame with the offset (BX) and the target page (ES). 17 fps in DOSBox at 400 cycles, unchanged by everything else.
+
+**A real-PCjr risk found while writing it.** This PCjr reserves only one 16 KB video page. An 86 KB program loads low, probably right where the library would claim a second page, so the library may fall back to one page and a RAM buffer, and it only copies regions its own `fx_*` calls touched. Most of JRAI's drawing doesn't go through `fx_*` (generated code, assembly, direct writes). So with one page JRAI marks the whole screen dirty each frame. Tested with `/ONEPAGE` in DOSBox. JRDOOM and JRFLIGHT may have the same problem with their direct writes; not checked.
+
+**A preview video.** `/VIDEO` runs frame-locked, saves every frame and logs every SN76496 register write with its time; `render.py` emulates the chip (square waves box-filtered against aliasing, unipolar output so the speech trick works) and `video.sh` muxes an MP4 (`just jrai-video`). That is how anyone can hear it without a PCjr: DOSBox runs with the dummy audio driver here.
+
+Emulator-only so far: everything. Nobody has run JRAI on the real PCjr or heard its sound chip play it.
+
+## JRCUBE and a faster library (2026-10-03, night)
+
+Steve asked for 80s-style demos that show off the PCjr: a spinning cube that casts a shadow, colorful and high-tech, with the light circling it and moving the shadow, and to improve the graphics library as needed. It's in `demos/cube/` (README there); the library changes are in `lib/jrfast.c`. The JRAI session was running at the same time.
+
+**The scene.** A synthwave sky with stars and neon mountains, a magenta grid floor that scrolls toward you, a cube tumbling on three axes with neon edges, an orb circling it (glow, a two-spark trail, a pool of light on the floor under it), the cube's shadow on the grid, a chrome scroller, palette fades in and out.
+
+**New library calls**, each because the demo needed it:
+
+- `fx_track` / `fx_restore`: every fx_ call records the bytes it drew, per page and per row, and the next frame on that page copies just those back from a background buffer. No clear, no full copy.
+- `fx_poly_rows`: one pattern byte per row. With a light value interpolated down the face and a 2x2 ordered dither between ramp colors, each face gets 13 shades from 4 colors at the price of a flat fill.
+- `fx_poly_src`: a polygon copied from another buffer. The shadow is copied from a darkened copy of the floor, so the grid shows through it, dimmer.
+- `fx_pal_anim`: palette rotation done by the retrace IRQ. The floor's horizontal lines are drawn 4 times as dense as they look, in 4 palette entries with one lit; rotating them scrolls the floor at a steady pace with nothing redrawn. The shadowed floor has its own 4 entries, rotated in step.
+- `fx_line` got asm inner loops (pixel = old ^ ((old ^ color) & mask), the mask toggles F0h/0Fh), clipped sprites plot directly, and `fx_compile` generates each variant once.
+
+All verified by new T3 checks (pixel compares against gfx_fill_poly coverage, and "restore gives back the background byte for byte on both pages after 5 frames of everything"). Both games rebuilt against the new library and produce the same `/DEMO:150` results as before.
+
+**Wrong turns.**
+
+- The first cube was a flat sheet in some frames. It wasn't the math: the chrome ramp went through blue, the floor's color, so dark faces vanished. Neon edges fixed the outline, and the ramp dropped blue.
+- The distant grid stopped halfway to the horizon. The projection truncated toward zero, so two lines on either side of the view axis landed on the same row and the "stop when lines merge" test fired early. Fixed with floor division and a higher-precision projection, then tuned so lines stop where the lit ones get 3 rows apart, with a dithered haze beyond.
+- The asm line hung T3. Its parameter block was read through DS, but inside the library DS isn't DGROUP (the compiler itself reads statics through SS). The other new loops already used SS; the line loop now does too.
+- `far` is a Watcom keyword; a variable named `far` gave a page of errors.
+- Startup took 5.5 s in DOSBox at 400 cycles, 3.2 s of it in the sprite builder: two 32-bit divides per sprite pixel in the demo, and `fx_compile` generating every variant twice through a per-pixel accessor. The whole startup is now 3.2 s.
+- Found by the JRAI session's notes: with one video page the library only copies what fx_ calls touched, and JRCUBE's scroller and first background are direct writes. They now call `fx_dirty`; `/ONEPAGE` tests it (8.2 fps).
+
+**Speed** (DOSBox `cycles=fixed 400`, emulator only): 5.2 fps for the first version, 10.2 now (12.7 with the edges off; E toggles them). The big steps: 16-bit IMUL/IDIV helpers and a table square root (math 40 ms to 24), multiply-then-shift-left instead of 32-bit shifts (24 to 11), restore and extent tracking in asm (restore 26 ms to 10), the line loop in asm (edges 32 to 20, then 15), and the math moved in front of `fx_begin` so it overlaps the wait for the last flip.
+
+Emulator-only so far: everything. Not run on the real PCjr.
+
+**First real run of the day-2 install (9:52 pm).** `/setup` over Kermit worked: launcher, settings, then `CODEJR.EXE` 0.3 and the three launchers in 1 m 50 s. Two problems:
+
+- **The games vanished from the queue.** The Kermit sync skipped them as too big for Kermit but still recorded them as delivered. Old bug, newly hit because `/setup` now ends with a sync. Fixed: a skipped file keeps its place in the queue.
+- **`NATIVE` needed the address typed in.** `/setup` replaced `CODEJR.BAT` while it was running; DOS reads a batch file by position, so it resumed partway into the new file (an extra 15 s Kermit call at 9:55 pm) and probably skipped the lines that move `CODEJR.CFG` into `C:\CODEJR`. Client 0.4 also looks in `C:\CODEJR.CFG`. The emulator test now dials from that file with no `/D`.
+
+**`FAST` on the real PCjr, for the first time:** the client said `baud=37287` and chat worked (1 frame resent by the server). The PCjr's Alt-S counters climbed to 53 framing errors and 16 bad frames in a short chat, so 37287 is noisy on this line. No file pull at that speed yet. Also seen: the Alt-S line printed in the middle of a reply line; it should wait for the line to end.

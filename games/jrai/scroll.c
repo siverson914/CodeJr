@@ -2,7 +2,7 @@
  * parallax starfield, the logo on top, and a VU meter of the four sound
  * voices at the bottom.
  *
- * The scroller is 2x3-scaled 8x8 font, one byte (2 pixels) per font
+ * The scroller is 2x4-scaled 8x8 font, one byte (2 pixels) per font
  * column, so every byte column of the screen is one font column with its
  * own height on the wave. Its colors come from rows of palette entries
  * 1-6, which the retrace interrupt rotates: rainbow stripes for free.
@@ -29,6 +29,12 @@ static const unsigned char pal_fin[16] = {
 #define NSTARS 48
 static struct { unsigned x; unsigned char y, sp, c; } star[NSTARS];
 
+static unsigned char rowc[200]; /* scroller color byte for each row */
+
+static unsigned roff[200];               /* jr_rowoff, near */
+static unsigned char rowfill[200];       /* this frame's byte for each row */
+static unsigned char colmask[sizeof msg * 8]; /* the message, one font column a byte */
+
 #define TOP 40   /* rows above stay as drawn by enter() */
 
 static void logo(void)
@@ -43,6 +49,18 @@ static void scroll_enter(void)
 	set_pal(pal_fin);
 	fx_pal_anim(0, SC1, SC6, 4, 1);
 	both_pages(logo);
+	for (i = 0; i < 200; i++) {
+		rowc[i] = (unsigned char)((SC1 + (i >> 2) % 6) * 0x11);
+		roff[i] = jr_rowoff[i];
+	}
+	for (i = 0; i < (int)sizeof colmask; i++) {
+		int ch = msg[i >> 3], r;
+		unsigned char m = 0;
+		if (ch > 32 && ch < 128)
+			for (r = 0; r < 8; r++)
+				if (jr_font[(ch - 32) * 8 + r] & (0x80 >> (i & 7))) m |= (unsigned char)(0x80 >> r);
+		colmask[i] = m;
+	}
 	rnd_seed(2026);
 	for (i = 0; i < NSTARS; i++) {
 		star[i].x = rnd() % 160 << 6;
@@ -52,38 +70,55 @@ static void scroll_enter(void)
 	}
 }
 
+extern void fillw(unsigned seg, unsigned off, unsigned n, unsigned v);
+#pragma aux fillw = "rep stosw" parm [es] [di] [cx] [ax] modify [cx di];
+
+
+/* A bar is a run of row colors; rows not in a bar are black. */
 static void bar(int y, const unsigned *rows, int n)
 {
 	int i;
-	for (i = 0; i < n; i++)
-		if (y + i >= TOP && y + i < 188) fx_fill_rect(0, y + i, 160, 1, rows[i]);
+	for (i = 0; i < n * 2; i++) { /* each shade two rows tall */
+		int r = y + i;
+		if (r >= TOP && r < 188) {
+			unsigned p = rows[i >> 1];
+			rowfill[r] = (unsigned char)(r & 1 ? p >> 8 : p);
+		}
+	}
 }
+
+static void fill_rows(void)
+{
+	int y;
+	for (y = TOP; y < 200; y++) fillw(fx_seg, roff[y], 40, rowfill[y] * 0x101u);
+}
+
+#define COLROW(k) { v[ro[k] + bx] = rc[k]; v[ro[k + 1] + bx] = rc[k + 1]; v[ro[k + 2] + bx] = rc[k + 2]; v[ro[k + 3] + bx] = rc[k + 3]; }
 
 static void scroller(unsigned t)
 {
 	unsigned char far *v = (unsigned char far *)MK_FP(fx_seg, 0);
-	unsigned sx = (t * 3) & ~1u;
+	unsigned first = ((t * 4) & ~1u) >> 1; /* message column at the left edge */
 	int bx;
 	for (bx = 0; bx < 80; bx++) {
-		unsigned x = bx * 2 + sx;
-		unsigned ci = x >> 4;
-		int ch, fc, r, y0;
-		const unsigned char *g;
-		if (ci >= sizeof msg - 1) continue;
-		ch = msg[ci];
-		if (ch < 32 || ch > 127) continue;
-		g = jr_font + (ch - 32) * 8;
-		fc = (x & 15) >> 1;
-		y0 = 112 + sin8[(bx * 3 + t * 2) & 255] * 30 / 127 + sin8[(bx * 7 + t) & 255] * 8 / 127;
-		for (r = 0; r < 8; r++) {
-			if (g[r] & (0x80 >> fc)) {
-				int y = y0 + r * 3, k;
-				for (k = 0; k < 3; k++, y++) {
-					unsigned char c = (unsigned char)(SC1 + ((y >> 2) % 6));
-					v[jr_rowoff[y] + bx] = (unsigned char)(c * 0x11);
-				}
-			}
-		}
+		unsigned idx = first + bx;
+		unsigned char m;
+		const unsigned *ro;
+		const unsigned char *rc;
+		int y;
+		if (idx >= sizeof colmask) break;
+		m = colmask[idx];
+		if (!m) continue;
+		y = 104 + ((sin8[(bx * 2 + t * 3) & 255] * 13) >> 6);
+		ro = roff + y; rc = rowc + y;
+		if (m & 0x80) COLROW(0)
+		if (m & 0x40) COLROW(4)
+		if (m & 0x20) COLROW(8)
+		if (m & 0x10) COLROW(12)
+		if (m & 0x08) COLROW(16)
+		if (m & 0x04) COLROW(20)
+		if (m & 0x02) COLROW(24)
+		if (m & 0x01) COLROW(28)
 	}
 }
 
@@ -105,17 +140,25 @@ static void scroll_frame(unsigned t)
 		FX_SOLID2(BLUE), FX_DITH(BLUE, LBLUE), FX_SOLID2(LBLUE), FX_DITH(LBLUE, WHITE), FX_SOLID2(WHITE),
 		FX_SOLID2(WHITE), FX_SOLID2(WHITE), FX_DITH(LBLUE, WHITE), FX_SOLID2(LBLUE), FX_DITH(BLUE, LBLUE), FX_SOLID2(BLUE) };
 	int i;
-	fx_fill_rect(0, TOP, 160, 200 - TOP, FX_SOLID2(0));
+	memset(rowfill + TOP, 0, 200 - TOP);
+	/* raster bars, then every row below the logo in one pass */
+	bar(108 + sin8[(t * 2) & 255] * 60 / 127, bluebar, 11);
+	bar(108 + sin8[(t * 2 + 85) & 255] * 60 / 127, redbar, 11);
+	bar(108 + sin8[(t * 3 + 170) & 255] * 50 / 127, bluebar, 11);
+	fill_rows();
 	/* stars, three speeds */
-	for (i = 0; i < NSTARS; i++) {
-		star[i].x -= star[i].sp * 24;
-		if (star[i].x >= 160u << 6) star[i].x += 160u << 6;
-		fx_pset(star[i].x >> 6, star[i].y, star[i].c);
+	{
+		unsigned char far *v = (unsigned char far *)MK_FP(fx_seg, 0);
+		for (i = 0; i < NSTARS; i++) {
+			unsigned x;
+			star[i].x -= star[i].sp * 24;
+			if (star[i].x >= 160u << 6) star[i].x += 160u << 6;
+			x = star[i].x >> 6;
+			/* the row was just filled: no need to keep the other nibble */
+			if (rowfill[star[i].y]) continue; /* behind a bar */
+			v[roff[star[i].y] + (x >> 1)] = (unsigned char)(x & 1 ? star[i].c : star[i].c << 4);
+		}
 	}
-	/* raster bars */
-	bar(118 + sin8[(t * 2) & 255] * 60 / 127, bluebar, 11);
-	bar(118 + sin8[(t * 2 + 85) & 255] * 60 / 127, redbar, 11);
-	bar(118 + sin8[(t * 3 + 170) & 255] * 50 / 127, bluebar, 11);
 	scroller(t);
 	vu();
 	if (t >= 16 * PAT_TICKS) {
@@ -128,4 +171,4 @@ static void scroll_leave(void)
 	fx_pal_anim(0, 0, 0, 0, 0);
 }
 
-const part part_scroll = { "finale", 0, scroll_enter, scroll_frame, scroll_leave, 36, 17 };
+const part part_scroll = { "finale", 0, scroll_enter, scroll_frame, scroll_leave, 36, 17, 1 };

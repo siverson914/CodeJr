@@ -103,6 +103,7 @@ just lib             # graphics library, test-gated
 | `client/` | `codejr.c`, `cjp.c`, `pull.c`, `lz.c`, `serial.c`, `serisr.asm`, `screen.c`; `cjterm.c` test terminal; `test/` host harnesses |
 | `lib/` | JRGFX graphics library; read `STATUS.md` and `FAST.md` |
 | `games/doom`, `games/flight` | JRDOOM and JRFLIGHT, each with README and NOTES |
+| `demos/cube` | JRCUBE, a shaded spinning cube with a moving light and real-time shadow (README there) |
 | `emu/` | headless emulator scripts |
 | `docs/attic/` | a parked selective-repeat link (didn't pass its tests) |
 | `~/.local/share/codejr/workspace/` | Claude's folder (outside the repo), mirrors `C:\CODEJR\PROGS`; state in its `.codejr/` |

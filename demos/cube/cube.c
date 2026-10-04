@@ -15,16 +15,20 @@
  *   (fx_poly_src), so the grid lines stay visible, dimmer, inside it.
  * - Faces are lit per corner by the point light (diffuse + Blinn specular),
  *   and the shade is interpolated down the screen rows and drawn as a 2x2
- *   ordered dither between ramp colors (fx_poly_rows): ~17 shades per face
- *   from 5 colors, at the cost of a flat fill.
+ *   ordered dither between ramp colors (fx_poly_rows): 13 shades per face
+ *   from 4 colors, at the cost of a flat fill.
  * - The cube is three rotated axis vectors (9 multiplies); its 8 corners
  *   are sums of them.
  * - All motion runs from the retrace counter, so a slow machine shows the
  *   same speed at a lower frame rate.
  *
- *   JRCUBE            run until a key (F toggles the fps counter)
+ *   JRCUBE            run until Esc, Space or Enter (F: fps counter,
+ *                     E: neon edges on/off)
  *   JRCUBE /BENCH:n   n frames, then log the frame rate to LOG.TXT
  *   JRCUBE /GIF:n     n frames at fixed time steps, each saved as Fnnn.PPM
+ *   JRCUBE /PROF      with /BENCH: time per stage to LOG.TXT
+ *   JRCUBE /NOEDGE    start without the edges
+ *   JRCUBE /ONEPAGE   tests: as if there were no second video page
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,12 +63,40 @@ enum { C_BLACK, C_BLUE, C_G0, C_G1, C_G2, C_G3, C_S0, C_S1, C_S2, C_S3,
        C_VLINE, C_SVLINE, C_CYAN, C_LCYAN, C_WHITE, C_YELLOW };
 static const unsigned char pal[16] = { 0, 1, 13, 1, 1, 1, 5, 0, 0, 0, 13, 5, 3, 11, 15, 14 };
 
+/* Fades: each hardware color one step darker (CGA RGBI order) */
+static const unsigned char darker[16] = { 0, 0, 0, 1, 0, 1, 4, 8, 0, 1, 2, 3, 4, 5, 6, 7 };
+
+static void pal_fade(int steps)   /* steps 0 (full) to 3 (black) */
+{
+	unsigned char p[16];
+	int i, k;
+	for (i = 0; i < 16; i++) {
+		unsigned char c = pal[i];
+		for (k = 0; k < steps; k++) c = darker[c];
+		p[i] = c;
+	}
+	fx_pal_set(p);
+}
+
 static int sin14[1024];   /* sin * 16384 */
 #define SIN(a) sin14[(a) & 1023]
 #define COS(a) sin14[((a) + 256) & 1023]
 
 static unsigned bg, shbuf;      /* background and its shadowed copy    */
-static unsigned char rowpat[200];
+
+/* /PROF: time per stage, summed over the run (tmr_ticks) */
+#define NPROF 9
+static int prof;
+static unsigned long pt[NPROF], plast;
+static const char *pname[NPROF] = { "math", "wait", "restore", "shadow", "faces", "edges", "orb+strip", "m:faces", "m:shadow" };
+static void mark(int i)
+{
+	unsigned long t;
+	if (!prof) return;
+	t = tmr_ticks();
+	pt[i] += t - plast;
+	plast = t;
+}
 
 /* ---- Shading ramps: 2x2 ordered dither between neighbouring colors ----- */
 
@@ -74,7 +106,24 @@ static const unsigned char ramp_cols[NRAMP][6] = {
 	{ C_BLACK, C_SVLINE, C_VLINE, C_WHITE, 255 },         /* magenta  */
 	{ C_BLACK, C_SVLINE, C_YELLOW, C_WHITE, 255 },        /* sunset   */
 };
-static unsigned char ramp_e[NRAMP][256], ramp_o[NRAMP][256]; /* even/odd row bytes */
+/* [ramp][0-255]: even-row byte, [ramp][256-511]: odd-row byte, by shade */
+static unsigned char __near ramp[NRAMP][512];
+#define ramp_e(r) ramp[r]
+#define ramp_o(r) (ramp[r] + 256)
+
+/* n row patterns at SS:DI from shade I (8.8, DX) stepping dI (SI) per
+ * row, through the ramp at SS:BX; the first row is even if AX is 0.
+ * XLAT picks the byte; INC/DEC BH flips between the even and odd half. */
+extern void rows_asm(unsigned dst, unsigned I, unsigned dI, unsigned n, unsigned tab, unsigned odd);
+#pragma aux rows_asm = \
+	"push ds" "push es" "push ss" "pop ds" "push ss" "pop es" \
+	"or ax,ax" "jz RA1" "inc bh" "mov al,dh" "xlat" "stosb" "add dx,si" "dec bh" "dec cx" \
+	"RA1:" "shr cx,1" "pushf" "jcxz RA3" \
+	"RA2:" "mov al,dh" "xlat" "stosb" "add dx,si" "inc bh" \
+	"mov al,dh" "xlat" "stosb" "add dx,si" "dec bh" "loop RA2" \
+	"RA3:" "popf" "jnc RA4" "mov al,dh" "xlat" "stosb" \
+	"RA4:" "pop es" "pop ds" \
+	parm [di] [dx] [si] [cx] [bx] [ax] modify [ax cx dx si di];
 
 static void make_ramps(void)
 {
@@ -84,16 +133,16 @@ static void make_ramps(void)
 		while (ramp_cols[r][n + 1] != 255) n++;   /* n intervals */
 		levels = n * 4 + 1;
 		for (i = 0; i < 256; i++) {
-			int l = (int)((long)i * levels / 256), seg = l >> 2, k = l & 3;
+			int l = (i * levels) >> 8, seg = l >> 2, k = l & 3;
 			unsigned char a, b;
 			if (seg >= n) { seg = n - 1; k = 4; }
 			a = ramp_cols[r][seg]; b = ramp_cols[r][seg + 1];
 			switch (k) {
-			case 0: ramp_e[r][i] = FX_PAIR(a, a); ramp_o[r][i] = FX_PAIR(a, a); break;
-			case 1: ramp_e[r][i] = FX_PAIR(b, a); ramp_o[r][i] = FX_PAIR(a, a); break;
-			case 2: ramp_e[r][i] = FX_PAIR(b, a); ramp_o[r][i] = FX_PAIR(a, b); break;
-			case 3: ramp_e[r][i] = FX_PAIR(b, b); ramp_o[r][i] = FX_PAIR(a, b); break;
-			default: ramp_e[r][i] = FX_PAIR(b, b); ramp_o[r][i] = FX_PAIR(b, b); break;
+			case 0: ramp_e(r)[i] = FX_PAIR(a, a); ramp_o(r)[i] = FX_PAIR(a, a); break;
+			case 1: ramp_e(r)[i] = FX_PAIR(b, a); ramp_o(r)[i] = FX_PAIR(a, a); break;
+			case 2: ramp_e(r)[i] = FX_PAIR(b, a); ramp_o(r)[i] = FX_PAIR(a, b); break;
+			case 3: ramp_e(r)[i] = FX_PAIR(b, b); ramp_o(r)[i] = FX_PAIR(a, b); break;
+			default: ramp_e(r)[i] = FX_PAIR(b, b); ramp_o(r)[i] = FX_PAIR(b, b); break;
 			}
 		}
 	}
@@ -107,6 +156,15 @@ static void make_ramps(void)
 extern long imul16(int a, int b);
 #pragma aux imul16 = "imul dx" parm [ax] [dx] value [dx ax];
 extern int idiv32(long a, int b);
+/* (a * b) >> 14, >> 13 and >> 8 for results that fit an int: multiply,
+ * then shift the 32-bit product left and keep the high word (a 32-bit
+ * shift right would be a loop on the 8088) */
+extern int mul14(int a, int b);
+#pragma aux mul14 = "imul dx" "shl ax,1" "rcl dx,1" "shl ax,1" "rcl dx,1" parm [ax] [dx] value [dx] modify [ax];
+extern int mul13(int a, int b);
+#pragma aux mul13 = "imul dx" "shl ax,1" "rcl dx,1" "shl ax,1" "rcl dx,1" "shl ax,1" "rcl dx,1" parm [ax] [dx] value [dx] modify [ax];
+extern int mul8(int a, int b);
+#pragma aux mul8 = "imul dx" "mov al,ah" "mov ah,dl" parm [ax] [dx] value [ax] modify [dx];
 #pragma aux idiv32 = "idiv bx" parm [dx ax] [bx] value [ax] modify [dx];
 
 /* square root from a table: shift into 4096-16383, look up (about 1%) */
@@ -114,9 +172,10 @@ static unsigned sqt[256];   /* sqrt(64 i + 32) * 16 */
 static void make_sqrt(void)
 {
 	unsigned i, r = 0;
+	unsigned long sq = 0;
 	for (i = 0; i < 256; i++) {
 		unsigned long v = (64UL * i + 32) * 256;
-		while ((unsigned long)(r + 1) * (r + 1) <= v) r++;
+		while (sq + 2 * r + 1 <= v) { sq += 2 * r + 1; r++; }
 		sqt[i] = r;
 	}
 }
@@ -132,26 +191,24 @@ typedef struct { int x, y, z; } v3;
 /* n / d clamped to +-16000 (d > 0), so the IDIV can't overflow */
 static int cdiv(long n, int d)
 {
-	long lim = (long)d << 14;
-	if (n >= lim) return 16000;
-	if (n <= -lim) return -16000;
+	int hi = (int)(n >> 16), q = d >> 2;   /* |n| < (d / 4) * 65536 is safe */
+	if (hi >= q) return 16000;
+	if (hi < -q) return -16000;
 	return idiv32(n, d);
 }
 
 /* world point to screen; returns 0 if too close to the camera */
 static int project(int X, int Y, int Z, int *sx, int *sy)
 {
-	int dy = Y - CAMH, zp;
-	long zl = (imul16(Z, CC) - imul16(dy, SS)) >> 14, yp;
-	if (zl < 16) return 0;
-	zp = zl > 32000 ? 32000 : (int)zl;
-	yp = (imul16(dy, CC) + imul16(Z, SS)) >> 14;
+	int dy = Y - CAMH, zp = mul14(Z, CC) - mul14(dy, SS), yp;
+	if (zp < 64) return 0;
+	yp = mul14(dy, CC) + mul14(Z, SS);
 	*sx = cdiv(imul16(80, zp) + imul16(X, FX), zp);
-	*sy = cdiv(imul16(HY0, zp) - yp * FY, zp);
+	*sy = cdiv(imul16(HY0, zp) - imul16(yp, FY), zp);
 	return 1;
 }
 
-static long depth(int Y, int Z) { return ((long)Z * CC - (long)(Y - CAMH) * SS) >> 14; }
+static int depth(int Y, int Z) { return mul14(Z, CC) - mul14(Y - CAMH, SS); }
 
 /* floor z seen at screen row y (y > HORIZON) */
 static long floor_z(int y)
@@ -181,40 +238,58 @@ static unsigned dith(int a, int b, int k, int y)
 	return FX_PAIR(l, r);
 }
 
+/* clips a line to columns 0-159 (rows are already on screen) */
+static int clip_x(int *ax, int *ay, int *bx, int *by)
+{
+	int k;
+	for (k = 0; k < 2; k++) {
+		int lim = k ? 159 : 0;
+		int ao = k ? *ax > lim : *ax < lim, bo = k ? *bx > lim : *bx < lim;
+		if (ao && bo) return 0;
+		if (ao) { *ay += (int)((long)(*by - *ay) * (lim - *ax) / (*bx - *ax)); *ax = lim; }
+		else if (bo) { *by += (int)((long)(*ay - *by) * (lim - *bx) / (*ax - *bx)); *bx = lim; }
+	}
+	return 1;
+}
+
 static void draw_floor(unsigned seg, int shadow)
 {
-	int y, j, prev = 999, last = VIEW_Y1, k;
+	int y, j, prev = 999, yfar, k, ring[4];
 	int base = shadow ? C_BLACK : C_BLUE, g0 = shadow ? C_S0 : C_G0, vl = shadow ? C_SVLINE : C_VLINE;
 	long z0 = floor_z(VIEW_Y1), z;
 	fx_target(seg);
-	/* base, hazing toward the horizon: base -> magenta -> light magenta */
-	for (y = HORIZON + 1; y <= VIEW_Y1; y++) {
-		int d = y - HORIZON, p;
-		if (d < 4) p = dith(C_SVLINE, C_VLINE, 4 - d, y);
-		else if (d < 9) p = dith(base, C_SVLINE, (9 - d) * 4 / 5, y);
-		else p = FX_SOLID(base);
-		fx_hspan(y, 0, 159, (unsigned char)p);
-	}
-	/* horizontal lines every GRID/4, entry g0 + (k & 3), near to far,
-	 * until they are less than 3 rows apart */
+	/* horizontal lines every GRID/4 use entry g0 + (k & 3); they stop
+	 * where the lit ones come closer than 3 rows: haze from there up */
 	for (k = 0; ; k++) {
 		int sx, sy;
 		z = (z0 / (GRID / 4) + 1) * (GRID / 4) + (long)k * (GRID / 4);
-		if (!project(0, 0, (int)(z > 32000 ? 32000 : z), &sx, &sy)) continue;
-		if (sy <= HORIZON + 4 || z > 12000) break;
-		if (sy == prev) continue;
-		fx_hspan(sy, 0, 159, FX_SOLID(g0 + (int)((z / (GRID / 4)) & 3)));
-		prev = sy;
-		last = sy;
+		project(0, 0, (int)z, &sx, &sy);
+		if (k >= 4 && ring[k & 3] - sy < 3) break;   /* lit lines < 3 rows apart */
+		ring[k & 3] = prev = sy;
 	}
-	/* converging lines, stopped where the horizontal lines stop */
+	yfar = prev;
+	for (y = HORIZON + 1; y <= VIEW_Y1; y++) {
+		int p;
+		if (y < yfar) {   /* light magenta -> magenta -> base, 2x2 dithered */
+			int l = (y - HORIZON - 1) * 9 / (yfar - HORIZON - 1);
+			p = l < 4 ? dith(C_VLINE, C_SVLINE, l, y) : dith(C_SVLINE, base, l - 4 > 4 ? 4 : l - 4, y);
+		} else p = FX_SOLID(base);
+		fx_hspan(y, 0, 159, (unsigned char)p);
+	}
+	for (k = 0; ; k++) {
+		int sx, sy;
+		z = (z0 / (GRID / 4) + 1) * (GRID / 4) + (long)k * (GRID / 4);
+		project(0, 0, (int)z, &sx, &sy);
+		if (sy < yfar) break;
+		fx_hspan(sy, 0, 159, FX_SOLID(g0 + (int)((z / (GRID / 4)) & 3)));
+	}
+	/* converging lines, up to the haze */
 	for (j = -24; j <= 24; j++) {
 		int ax, ay, bx, by;
 		long X = (long)j * GRID;
-		project((int)X, 0, (int)floor_z(VIEW_Y1 + 40), &ax, &ay);
-		project((int)X, 0, 2600, &bx, &by);
-		if ((ax < 0 && bx < 0) || (ax > 159 && bx > 159)) continue;
-		fx_line(ax, ay, bx, by, vl);
+		project((int)X, 0, (int)floor_z(VIEW_Y1), &ax, &ay);
+		project((int)X, 0, (int)floor_z(yfar), &bx, &by);
+		if (clip_x(&ax, &ay, &bx, &by)) fx_line(ax, ay, bx, by, vl);
 	}
 	fx_target(0);
 }
@@ -279,9 +354,10 @@ static void make_strip(void)
 		const unsigned char *g = jr_font + ((ch < 32 || ch > 127 ? '?' : ch) - 32) * 8;
 		for (r = 0; r < SROWS; r++) {
 			unsigned char bits = g[r], c = rowc[r];
+			unsigned char two[4];   /* 2 font bits -> 1 packed byte */
 			unsigned char far *p = strip + (unsigned)r * sw + i * 4;
-			for (k = 0; k < 4; k++, bits <<= 2)
-				p[k] = (unsigned char)(((bits & 0x80) ? c << 4 : 0) | ((bits & 0x40) ? c : 0));
+			two[0] = 0; two[1] = c; two[2] = (unsigned char)(c << 4); two[3] = (unsigned char)(c * 0x11);
+			for (k = 0; k < 4; k++, bits <<= 2) p[k] = two[bits >> 6];
 		}
 	}
 	/* the last 80 bytes repeat the start, so any window is contiguous */
@@ -296,6 +372,7 @@ static void draw_strip(unsigned pos)
 	pos %= sw - 80;
 	for (r = 0; r < SROWS; r++)
 		_fmemcpy(MK_FP(fx_seg, jr_rowoff[SCROLL_Y + r]), strip + (unsigned)r * sw + pos, 80);
+	fx_dirty(0, SCROLL_Y, 159, SCROLL_Y + SROWS - 1);   /* one-page mode copies only dirty areas */
 }
 
 /* ---- The orb ----------------------------------------------------------- */
@@ -305,27 +382,52 @@ static fx_sprite *orb[NORB];
 static int orbw[NORB] = { 18, 14, 10 }, orbh[NORB] = { 34, 26, 19 };
 static unsigned char orbpix[NORB][18 * 34];
 
+/* glow pool under the orb (on the floor, so flattened) and two trail
+ * sparks; same shading rule, different shapes */
+static fx_sprite *pool[NORB], *spark[2];
+static int poolw[NORB] = { 26, 20, 14 }, poolh[NORB] = { 9, 7, 5 };
+static int sparkw[2] = { 6, 4 }, sparkh[2] = { 11, 7 };
+static unsigned char poolpix[NORB][26 * 9], sparkpix[2][6 * 11];
+
+/* w x h glow: d is the squared distance from the center, 4096 at the edge */
+static fx_sprite *glow(unsigned char *pix, int w, int h, int kind)
+{
+	int x, y;
+	for (y = 0; y < h; y++)
+		for (x = 0; x < w; x++) {
+			int dx = (2 * x + 1 - w) * 64 / w, dy = (2 * y + 1 - h) * 64 / h;
+			unsigned d = dx * dx + dy * dy;
+			int c, ck = (x + y) & 1;
+			if (kind == 0) {        /* orb */
+				if (d < 500) c = C_WHITE;
+				else if (d < 1300) c = ck ? C_WHITE : C_YELLOW;
+				else if (d < 2100) c = C_YELLOW;
+				else if (d < 2900) c = ck ? C_YELLOW : C_VLINE;
+				else if (d < 4096) c = ck ? 0 : C_VLINE;   /* halo: half see-through */
+				else c = 0;
+			} else if (kind == 1) { /* pool of light on the floor */
+				if (d < 900) c = ck ? C_WHITE : C_VLINE;
+				else if (d < 2200) c = C_VLINE;
+				else if (d < 4096) c = ck ? 0 : C_VLINE;
+				else c = 0;
+			} else {                /* spark */
+				if (d < 1200) c = C_YELLOW;
+				else if (d < 4096) c = ck ? 0 : C_VLINE;
+				else c = 0;
+			}
+			pix[y * w + x] = (unsigned char)c;
+		}
+	return fx_compile(pix, w, h, 0);
+}
+
 static void make_orbs(void)
 {
-	int s, x, y;
+	int s;
 	for (s = 0; s < NORB; s++) {
-		int w = orbw[s], h = orbh[s];
-		for (y = 0; y < h; y++)
-			for (x = 0; x < w; x++) {
-				/* distance in "round" units: x pixels are twice as wide */
-				long dx = (2L * x + 1 - w) * 2 * 64 / w, dy = (2L * y + 1 - h) * 64 / h;
-				long d = dx * dx + dy * dy;   /* 4096 = edge */
-				int c;
-				if (d < 500) c = C_WHITE;
-				else if (d < 1300) c = (x + y) & 1 ? C_WHITE : C_YELLOW;
-				else if (d < 2100) c = C_YELLOW;
-				else if (d < 2900) c = (x + y) & 1 ? C_YELLOW : C_VLINE;
-				else if (d < 4096) c = (x + y) & 1 ? 0 : C_VLINE;  /* halo: half see-through */
-				else c = 0;
-				orbpix[s][y * w + x] = (unsigned char)c;
-			}
-		orb[s] = fx_compile(orbpix[s], w, h, 0);
+		orb[s] = glow(orbpix[s], orbw[s], orbh[s], 0);
+		pool[s] = glow(poolpix[s], poolw[s], poolh[s], 1);
 	}
+	for (s = 0; s < 2; s++) spark[s] = glow(sparkpix[s], sparkw[s], sparkh[s], 2);
 }
 
 /* ---- Cube -------------------------------------------------------------- */
@@ -351,36 +453,37 @@ static unsigned char spec_tab[129];
 
 static void make_spec(void)
 {
-	int i, k;
-	for (i = 0; i <= 128; i++) {
-		long v = 255;          /* 255 * (i / 128) ^ 24 */
-		for (k = 0; k < 24; k++) v = v * i / 128;
-		spec_tab[i] = (unsigned char)v;
+	int i;
+	for (i = 0; i <= 128; i++) {   /* 255 * (i / 128) ^ 24, by squaring in 0.16 */
+		unsigned long x = (unsigned long)i << 9, x2, x4, x8, x16;
+		if (i == 128) { spec_tab[i] = 255; continue; }
+		x2 = x * x >> 16; x4 = x2 * x2 >> 16; x8 = x4 * x4 >> 16; x16 = x8 * x8 >> 16;
+		spec_tab[i] = (unsigned char)((x16 * x8 >> 16) * 255 >> 16);
 	}
 }
 
 static void cube_geometry(int t)
 {
 	int a1 = t * 3, a2 = t * 2, a3 = t;
-	long sa = SIN(a1), ca = COS(a1), sb = SIN(a2), cb = COS(a2), sc = SIN(a3), cc = COS(a3);
-	long m[3][3];
+	int sa = SIN(a1), ca = COS(a1), sb = SIN(a2), cb = COS(a2), sc = SIN(a3), cc = COS(a3);
+	int m[3][3], ccsb = mul14(cc, sb), scsb = mul14(sc, sb);
 	int i;
 	/* R = Rz(a3) * Ry(a2) * Rx(a1), entries 2.14 */
-	m[0][0] = (cc * cb) >> 14;
-	m[0][1] = ((((cc * sb) >> 14) * sa) >> 14) - ((sc * ca) >> 14);
-	m[0][2] = ((((cc * sb) >> 14) * ca) >> 14) + ((sc * sa) >> 14);
-	m[1][0] = (sc * cb) >> 14;
-	m[1][1] = ((((sc * sb) >> 14) * sa) >> 14) + ((cc * ca) >> 14);
-	m[1][2] = ((((sc * sb) >> 14) * ca) >> 14) - ((cc * sa) >> 14);
+	m[0][0] = mul14(cc, cb);
+	m[0][1] = mul14(ccsb, sa) - mul14(sc, ca);
+	m[0][2] = mul14(ccsb, ca) + mul14(sc, sa);
+	m[1][0] = mul14(sc, cb);
+	m[1][1] = mul14(scsb, sa) + mul14(cc, ca);
+	m[1][2] = mul14(scsb, ca) - mul14(cc, sa);
 	m[2][0] = -sb;
-	m[2][1] = (cb * sa) >> 14;
-	m[2][2] = (cb * ca) >> 14;
+	m[2][1] = mul14(cb, sa);
+	m[2][2] = mul14(cb, ca);
 	for (i = 0; i < 3; i++) {   /* column i is axis i */
-		ax3[i].x = (int)((m[0][i] * CS) >> 14);
-		ax3[i].y = (int)((m[1][i] * CS) >> 14);
-		ax3[i].z = (int)((m[2][i] * CS) >> 14);
+		ax3[i].x = mul14(m[0][i], CS);
+		ax3[i].y = mul14(m[1][i], CS);
+		ax3[i].z = mul14(m[2][i], CS);
 	}
-	ctr.x = 0; ctr.y = CY + (int)((6L * SIN(t * 4)) >> 14); ctr.z = CZ;
+	ctr.x = 0; ctr.y = CY + mul14(6, SIN(t * 4)); ctr.z = CZ;
 	for (i = 0; i < 8; i++) {
 		int sx = i & 1 ? 1 : -1, sy = i & 2 ? 1 : -1, sz = i & 4 ? 1 : -1;
 		cv[i].x = ctr.x + sx * ax3[0].x + sy * ax3[1].x + sz * ax3[2].x;
@@ -390,46 +493,54 @@ static void cube_geometry(int t)
 	}
 }
 
-static void light_geometry(int t)
+static void light_at(int t, v3 *l)
 {
 	int a = t * 5;
-	lt.x = (int)(((long)LR * COS(a)) >> 14);
-	lt.z = CZ + (int)(((long)LR * SIN(a)) >> 14);
-	lt.y = LY + (int)(((long)LYA * SIN(a)) >> 14);
+	l->x = mul14(LR, COS(a));
+	l->z = CZ + mul14(LR, SIN(a));
+	l->y = LY + mul14(LYA, SIN(a));
 }
+
+static void light_geometry(int t) { light_at(t, &lt); }
 
 /* unit vector * 256 (len = its length, > 64) */
 static void unit(v3 *o, int x, int y, int z, unsigned len)
 {
 	int inv = idiv32(1L << 21, (int)len);
-	o->x = (int)(imul16(x, inv) >> 13);
-	o->y = (int)(imul16(y, inv) >> 13);
-	o->z = (int)(imul16(z, inv) >> 13);
+	o->x = mul13(x, inv);
+	o->y = mul13(y, inv);
+	o->z = mul13(z, inv);
 }
 
 static long sq3(int x, int y, int z) { return imul16(x, x) + imul16(y, y) + imul16(z, z); }
 
-/* per corner: direction to the light and the Blinn half vector (both
- * unit * 256); one table square root and one divide each */
-static void corner_light(void)
+/* per corner, on first use in a frame: direction to the light and the
+ * Blinn half vector (both unit * 256); one table square root and one
+ * divide each */
+static unsigned char lit[8];
+
+static void view_light(void)
 {
-	int i;
 	int vx = -ctr.x, vy = CAMH - ctr.y, vz = -ctr.z;     /* view dir, from the center */
 	unit(&vdir, vx, vy, vz, fsqrt(sq3(vx, vy, vz)));
-	for (i = 0; i < 8; i++) {
-		int dx = lt.x - cv[i].x, dy = lt.y - cv[i].y, dz = lt.z - cv[i].z, hx, hy, hz;
-		unsigned hl;
-		unit(&ldir[i], dx, dy, dz, fsqrt(sq3(dx, dy, dz)));
-		hx = ldir[i].x + vdir.x; hy = ldir[i].y + vdir.y; hz = ldir[i].z + vdir.z;
-		hl = fsqrt(sq3(hx, hy, hz));
-		if (hl > 64) unit(&hv[i], hx, hy, hz, hl);
-		else hv[i].x = hv[i].y = hv[i].z = 0;
-	}
+	memset(lit, 0, sizeof lit);
+}
+
+static void corner_light(int i)
+{
+	int dx = lt.x - cv[i].x, dy = lt.y - cv[i].y, dz = lt.z - cv[i].z, hx, hy, hz;
+	unsigned hl;
+	lit[i] = 1;
+	unit(&ldir[i], dx, dy, dz, fsqrt(sq3(dx, dy, dz)));
+	hx = ldir[i].x + vdir.x; hy = ldir[i].y + vdir.y; hz = ldir[i].z + vdir.z;
+	hl = fsqrt(sq3(hx, hy, hz));
+	if (hl > 64) unit(&hv[i], hx, hy, hz, hl);
+	else hv[i].x = hv[i].y = hv[i].z = 0;
 }
 
 static int dot8(const v3 *a, const v3 *b) /* (a . b) >> 8 */
 {
-	return (int)((imul16(a->x, b->x) + imul16(a->y, b->y) + imul16(a->z, b->z)) >> 8);
+	return mul8(a->x, b->x) + mul8(a->y, b->y) + mul8(a->z, b->z);
 }
 
 /* light at corner v of a face with unit normal n (* 256): 0-255.
@@ -437,9 +548,11 @@ static int dot8(const v3 *a, const v3 *b) /* (a . b) >> 8 */
  * highlight (Blinn, exponent 24). */
 static int shade(const v3 *n, int v)
 {
-	int d = dot8(n, &ldir[v]), s = dot8(n, &hv[v]) >> 1, f = dot8(n, &vdir);
-	int i = 24 + (f > 0 ? f / 5 : 0);
-	if (d > 0) i += (d * 3) >> 2;
+	int d, s, f, i;
+	if (!lit[v]) corner_light(v);
+	d = dot8(n, &ldir[v]); s = dot8(n, &hv[v]) >> 1; f = dot8(n, &vdir);
+	i = 24 + (f > 0 ? f / 5 : 0);
+	if (d > 0) i += (d * 5) >> 3;
 	if (s > 0) i += spec_tab[s > 128 ? 128 : s];
 	return i > 255 ? 255 : i;
 }
@@ -452,17 +565,20 @@ static const unsigned char edge[12][4] = {
 };
 
 static int vis_f;
+static int nface, fxy[3][8];
+static unsigned char __near frow[3][200];   /* row patterns per visible face */
 
-static void draw_faces(void)
+/* backface test, corner shading and row patterns, before the page is free */
+static void prep_faces(void)
 {
 	int f;
-	vis_f = 0;
-	for (f = 0; f < 6; f++) {
+	vis_f = 0; nface = 0;
+	for (f = 0; f < 6 && nface < 3; f++) {
 		v3 n, nu;
 		const v3 *a = &ax3[f >> 1];
 		long vis;
-		int xy[8], k, top = 0, bot = 0, ytop, ybot, r = face_ramp[f >> 1], y, I, dI;
-		const unsigned char *pe = ramp_e[r], *po = ramp_o[r];
+		int *xy = fxy[nface], k, top = 0, bot = 0, ytop, ybot, r = face_ramp[f >> 1], I, dI;
+		unsigned I8, dI8;
 		if (f & 1) n = *a; else { n.x = -a->x; n.y = -a->y; n.z = -a->z; }
 		vis = imul16(n.x, ctr.x + n.x) + imul16(n.y, ctr.y + n.y - CAMH) + imul16(n.z, ctr.z + n.z);
 		if (vis >= 0) continue;
@@ -475,21 +591,24 @@ static void draw_faces(void)
 		}
 		ytop = xy[2 * top + 1]; ybot = xy[2 * bot + 1];
 		/* shade down the rows from the top corner's light to the bottom one's */
-		nu.x = (int)(imul16(n.x, 65536L / CS / 4) >> 6);   /* unit * 256 */
-		nu.y = (int)(imul16(n.y, 65536L / CS / 4) >> 6);
-		nu.z = (int)(imul16(n.z, 65536L / CS / 4) >> 6);
+		nu.x = mul8(n.x, 65536L / CS);   /* unit * 256 */
+		nu.y = mul8(n.y, 65536L / CS);
+		nu.z = mul8(n.z, 65536L / CS);
 		I = shade(&nu, face_v[f][top]) << 7;
 		dI = ybot > ytop ? idiv32((long)((shade(&nu, face_v[f][bot]) << 7) - I), ybot - ytop) : 0;
 		if (ytop < 0) { I += dI * -ytop; ytop = 0; }
 		if (ybot > VIEW_Y1) ybot = VIEW_Y1;
-		for (y = ytop; y <= ybot; y++, I += dI) {
-			int i = I >> 7;
-			if (i < 0) i = 0;
-			if (i > 255) i = 255;
-			rowpat[y] = y & 1 ? po[i] : pe[i];
-		}
-		fx_poly_rows(4, xy, rowpat);
+		I8 = (unsigned)I << 1; dI8 = (unsigned)dI << 1;   /* 8.8: XLAT takes the high byte */
+		if (ybot >= ytop)
+			rows_asm(FP_OFF(&frow[nface][ytop]), I8, dI8, ybot - ytop + 1, FP_OFF(ramp[r]), ytop & 1);
+		nface++;
 	}
+}
+
+static void draw_faces(void)
+{
+	int f;
+	for (f = 0; f < nface; f++) fx_poly_rows(4, fxy[f], frow[f]);
 }
 
 /* neon edges: white on the silhouette, light cyan inside */
@@ -507,33 +626,39 @@ static void draw_edges(void)
 
 /* ---- Shadow ------------------------------------------------------------ */
 
-typedef struct { int x, z; } f2;
+typedef struct { int x, y; } s2;
 
-static long cross(const f2 *o, const f2 *a, const f2 *b)
+static long cross(const s2 *o, const s2 *a, const s2 *b)
 {
-	return imul16(a->x - o->x, b->z - o->z) - imul16(a->z - o->z, b->x - o->x);
+	return imul16(a->x - o->x, b->y - o->y) - imul16(a->y - o->y, b->x - o->x);
 }
 
-static int clamp16k(long v) { return v > 16000 ? 16000 : v < -16000 ? -16000 : (int)v; }
+static int nshadow, sxy[40];
 
-static void draw_shadow(void)
+/* The shadow: the 8 corners projected from the light onto the floor,
+ * then to the screen, and their convex hull (projection keeps convexity
+ * while every point is in front of the camera, which the orbit ensures:
+ * floor points nearer than z = 40 are pushed out to it). */
+static void prep_shadow(void)
 {
-	f2 p[8], h[18], c[20];
-	int i, j, n = 0, k, m = 0, xy[40];
-	/* corners projected from the light onto the floor (y = 0) */
+	s2 p[8], h[18];
+	int i, j, n = 0, m = 0;
+	nshadow = 0;
 	for (i = 0; i < 8; i++) {
-		int den = lt.y - cv[i].y, f;
-		f2 q;
+		int den = lt.y - cv[i].y, f, x, z;
+		s2 q;
 		if (den < 8) den = 8;
 		f = idiv32((long)lt.y << 8, den);        /* 8.8 stretch factor */
-		q.x = clamp16k(lt.x + (imul16(cv[i].x - lt.x, f) >> 8));
-		q.z = clamp16k(lt.z + (imul16(cv[i].z - lt.z, f) >> 8));
-		for (j = n; j > 0 && (p[j - 1].x > q.x || (p[j - 1].x == q.x && p[j - 1].z > q.z)); j--) p[j] = p[j - 1];
+		x = lt.x + mul8(cv[i].x - lt.x, f);
+		z = lt.z + mul8(cv[i].z - lt.z, f);
+		if (z < 40) z = 40;
+		if (!project(x, 0, z, &q.x, &q.y)) return;
+		for (j = n; j > 0 && (p[j - 1].x > q.x || (p[j - 1].x == q.x && p[j - 1].y > q.y)); j--) p[j] = p[j - 1];
 		p[j] = q; n++;
 	}
 	/* convex hull (monotone chain) */
 	for (i = 0; i < n; i++) {
-		while (k = m, k >= 2 && cross(&h[k - 2], &h[k - 1], &p[i]) <= 0) m--;
+		while (m >= 2 && cross(&h[m - 2], &h[m - 1], &p[i]) <= 0) m--;
 		h[m++] = p[i];
 	}
 	for (i = n - 2, j = m + 1; i >= 0; i--) {
@@ -541,45 +666,34 @@ static void draw_shadow(void)
 		h[m++] = p[i];
 	}
 	m--;
-	/* clip to z >= 40 (in front of the camera) */
-	for (i = 0, k = 0; i < m; i++) {
-		const f2 *a = &h[i], *b = &h[(i + 1) % m];
-		int ain = a->z >= 40, bin = b->z >= 40;
-		if (ain) c[k++] = *a;
-		if (ain != bin) {
-			c[k].z = 40;
-			c[k].x = a->x + (int)((long)(b->x - a->x) * (40 - a->z) / (b->z - a->z));
-			k++;
-		}
-	}
-	if (k < 3) return;
-	for (i = 0; i < k; i++) project(c[i].x, 0, c[i].z, &xy[2 * i], &xy[2 * i + 1]);
-	fx_poly_src(k, xy, shbuf);
+	if (m < 3) return;
+	for (i = 0; i < m; i++) { sxy[2 * i] = h[i].x; sxy[2 * i + 1] = h[i].y; }
+	nshadow = m;
 }
 
 /* ---- Main -------------------------------------------------------------- */
 
-static void draw_orb(void)
+static void draw_orb(int t)
 {
-	int sx, sy, s;
-	long z = depth(lt.y, lt.z);
+	int sx, sy, s, k;
+	int z = depth(lt.y, lt.z);
+	for (k = 2; k >= 1; k--) {      /* trail: where the orb was 1/15 and 2/15 s ago */
+		v3 p;
+		light_at(t - k * 4, &p);
+		if (project(p.x, p.y, p.z, &sx, &sy))
+			fx_sprite_draw(spark[k - 1], sx - sparkw[k - 1] / 2, sy - sparkh[k - 1] / 2);
+	}
 	if (!project(lt.x, lt.y, lt.z, &sx, &sy)) return;
 	s = z < 400 ? 0 : z < 520 ? 1 : 2;
 	fx_sprite_draw(orb[s], sx - orbw[s] / 2, sy - orbh[s] / 2);
 }
 
-/* /PROF: time per stage, summed over the run (tmr_ticks) */
-#define NPROF 7
-static int prof;
-static unsigned long pt[NPROF], plast;
-static const char *pname[NPROF] = { "math", "wait", "restore", "shadow", "faces", "edges", "orb+strip" };
-static void mark(int i)
+static void draw_pool(void)
 {
-	unsigned long t;
-	if (!prof) return;
-	t = tmr_ticks();
-	pt[i] += t - plast;
-	plast = t;
+	int sx, sy, s, z = depth(0, lt.z);
+	if (!project(lt.x, 0, lt.z, &sx, &sy)) return;
+	s = z < 420 ? 0 : z < 560 ? 1 : 2;
+	fx_sprite_draw(pool[s], sx - poolw[s] / 2, sy - poolh[s] / 2);
 }
 
 static int edges_on = 1;
@@ -587,24 +701,31 @@ static int edges_on = 1;
 static void frame(int t)
 {
 	int behind;
-	mark(NPROF - 1);
+	mark(6);
+	/* everything that doesn't touch the page runs while the last flip
+	 * may still be waiting for the retrace */
 	cube_geometry(t);
 	light_geometry(t);
-	corner_light();
+	view_light();
 	mark(0);
+	prep_faces();
+	mark(7);
+	prep_shadow();
+	mark(8);
 	fx_begin();
 	mark(1);
 	fx_restore(bg);
 	mark(2);
-	draw_shadow();
+	draw_pool();
+	if (nshadow) fx_poly_src(nshadow, sxy, shbuf);
 	mark(3);
 	behind = depth(lt.y, lt.z) > depth(ctr.y, ctr.z);
-	if (behind) draw_orb();
+	if (behind) draw_orb(t);
 	draw_faces();
 	mark(4);
 	if (edges_on) draw_edges();
 	mark(5);
-	if (!behind) draw_orb();
+	if (!behind) draw_orb(t);
 }
 
 static unsigned now60(void)
@@ -614,32 +735,35 @@ static unsigned now60(void)
 
 int main(int argc, char **argv)
 {
-	int i, bench = 0, gif = 0, showfps = 0, frames = 0, fps10 = 0;
+	int i, bench = 0, gif = 0, showfps = 0, frames = 0, fps10 = 0, fade = 3, runfor = 0, fxflags = 0;
 	unsigned t0, tf, nf = 0;
 	unsigned long ms0;
 	for (i = 1; i < argc; i++) {
 		if (!strnicmp(argv[i], "/BENCH:", 7)) bench = atoi(argv[i] + 7);
 		else if (!strnicmp(argv[i], "/GIF:", 5)) gif = atoi(argv[i] + 5);
+		else if (!strnicmp(argv[i], "/RUN:", 5)) runfor = atoi(argv[i] + 5);   /* tests: stop after n frames */
 		else if (!stricmp(argv[i], "/PROF")) prof = 1;
 		else if (!stricmp(argv[i], "/NOEDGE")) edges_on = 0;
+		else if (!stricmp(argv[i], "/ONEPAGE")) fxflags = 8;   /* tests: as if no second video page */
 	}
 	for (i = 0; i < 1024; i++) sin14[i] = (int)(fix_sin(i) >> 2);
 	make_sqrt();
 	tmr_init();
-	if (fx_init(0)) { printf("JRCUBE needs a PCjr (mode 8 failed, %d)\n", gfx_err); return 1; }
+	if (fx_init(fxflags)) { printf("JRCUBE needs a PCjr (mode 8 failed, %d)\n", gfx_err); return 1; }
 	key_init();
 	bg = fx_alloc_buffer(); shbuf = fx_alloc_buffer();
 	if (!bg || !shbuf) { gfx_done(); printf("JRCUBE: not enough memory\n"); return 1; }
-	fx_pal_set(pal);
+	if (gif || bench) fx_pal_set(pal); else pal_fade(3);   /* fade in once drawn */
 	make_ramps(); make_spec(); make_orbs(); make_strip();
 	draw_sky(bg); draw_floor(bg, 0);
 	fx_copy_rect(shbuf, bg, 0, 0, 159, HORIZON);
 	draw_floor(shbuf, 1);
 	for (i = 0; i < 2; i++) {     /* background on both pages */
 		fx_copy_rect(fx_seg, bg, 0, 0, 159, 199);
+		fx_dirty(0, 0, 159, 199);
 		fx_flip(); fx_begin();
 	}
-	if (!gif) {
+	if (bench) {
 		fx_pal_anim(0, C_G0, C_G3, 4, -1);
 		fx_pal_anim(1, C_S0, C_S3, 4, -1);
 	}
@@ -655,6 +779,17 @@ int main(int argc, char **argv)
 			memcpy(p, pal, 16);
 			for (k = 0; k < 4; k++) { p[C_G0 + k] = pal[C_G0 + ((k + ph) & 3)]; p[C_S0 + k] = pal[C_S0 + ((k + ph) & 3)]; }
 			fx_pal_set(p);
+		} else if (!bench && fade >= 0) {   /* fade in over 0.4 s, then scroll the grid */
+			int st = t >= 24 ? 0 : 3 - (int)(t / 8);
+			if (st != fade) {
+				pal_fade(st);
+				fade = st;
+				if (!st) {
+					fx_pal_anim(0, C_G0, C_G3, 4, -1);
+					fx_pal_anim(1, C_S0, C_S3, 4, -1);
+					fade = -1;
+				}
+			}
 		}
 		frame(t);
 		draw_strip(t / 2);
@@ -679,10 +814,21 @@ int main(int argc, char **argv)
 			tf += d; nf = 0;
 		}
 		if (bench) { if (frames >= bench) break; continue; }
+		if (runfor && frames >= runfor) break;
 		if (key_down[KEY_ESC] || key_down[KEY_SPACE] || key_down[KEY_ENTER]) break;
 		if (key_down[0x21]) { showfps ^= 1; while (key_down[0x21]) ; }  /* F */
+		if (key_down[0x12]) { edges_on ^= 1; while (key_down[0x12]) ; } /* E */
 	}
 	ms0 = tmr_ms() - ms0;
+	if (!gif && !bench) {   /* fade out */
+		fx_pal_anim(0, 0, 0, 0, 0);
+		fx_pal_anim(1, 0, 0, 0, 0);
+		for (i = 1; i <= 3; i++) {
+			unsigned w = now60();
+			pal_fade(i);
+			while (now60() - w < 6) ;
+		}
+	}
 	dbg_log("jrcube: %d frames in %lu ms = %lu.%lu fps", frames, ms0,
 	        frames * 1000UL / ms0, frames * 10000UL / ms0 % 10);
 	for (i = 0; prof && i < NPROF; i++)

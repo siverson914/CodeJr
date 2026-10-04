@@ -14,6 +14,7 @@
 #include <conio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "jrai.h"
 
 #pragma off (check_stack) /* parts of this run inside IRQ5, on any stack */
@@ -146,7 +147,22 @@ void mus_init(void)
 
 /* ---- player ------------------------------------------------------------- */
 
-static void sn(unsigned char b) { outp(0xC0, b); }
+/* /VIDEO: every register write, with its time in 1/6000 s, goes to
+ * SND.BIN (4-byte time, 1-byte value) for tools/render.py. */
+static FILE *slog;
+static unsigned long slog_sub; /* samples into the current tick (speech) */
+void snd_log_open(void) { slog = fopen("SND.BIN", "wb"); }
+void snd_log_close(void) { if (slog) fclose(slog); slog = 0; }
+
+static void sn(unsigned char b)
+{
+	outp(0xC0, b);
+	if (slog) {
+		unsigned long t = T * 100 + slog_sub;
+		fwrite(&t, 4, 1, slog);
+		fwrite(&b, 1, 1, slog);
+	}
+}
 
 static void sn_period(int v, unsigned p)
 {
@@ -166,6 +182,7 @@ volatile int mus_row;
 volatile unsigned char mus_level[4], mus_beat;
 static volatile int playing;
 static int ord, row, tick;
+static unsigned long ordT; /* T when the current pattern started */
 static struct { int note, vol, age; } ch[3];
 static int arp_note, arp_maj, arp_i;
 static int drum, dvol, dage;
@@ -180,7 +197,7 @@ void mus_stop(void)
 void mus_start(int o)
 {
 	_disable();
-	ord = o; row = 0; tick = 0; mus_row = 0;
+	ord = o; row = 0; tick = 0; mus_row = 0; ordT = T;
 	memset(ch, 0, sizeof ch);
 	arp_note = 0; drum = 0; dvol = 0;
 	playing = !mus_mute;
@@ -252,7 +269,7 @@ void mus_tick(void)
 	if (++tick == ROW_TICKS) {
 		tick = 0;
 		mus_row++;
-		if (++row == PAT_ROWS) { row = 0; ord++; }
+		if (++row == PAT_ROWS) { row = 0; ord++; ordT = T; }
 	}
 }
 
@@ -310,13 +327,39 @@ static unsigned pit_read(void)
 	return lo | (hi << 8);
 }
 
+void (*say_hook)(void);
+
 void say(const speech *s, void (*mouth)(int level))
 {
 	const unsigned char far *d = s->d;
 	unsigned i, prev, now;
 	unsigned long el = 0, next = 0;
 	int was = playing, lv = 0, peak = 15;
-	if (lockstep || mus_mute) return;
+	if (mus_mute) return;
+	if (lockstep) { /* no real time: log the samples, move T, show the mouth */
+		if (!slog) return;
+		playing = 0;
+		mus_stop();
+		sn_period(0, 1);
+		for (i = 0; i < s->n; i++) {
+			unsigned char b = d[i >> 1];
+			unsigned char att = (unsigned char)(i & 1 ? b & 15 : b >> 4);
+			slog_sub = i % 100;
+			sn((unsigned char)(0x90 | att));
+			if (att < peak) peak = att;
+			if (i % 100 == 99) {
+				T++;
+				if (T % 4 == 0) {
+					if (mouth) { mouth(15 - peak); peak = 15; }
+					if (say_hook) say_hook();
+				}
+			}
+		}
+		slog_sub = 0;
+		sn(0x9F);
+		if (mouth) mouth(0);
+		return;
+	}
 	playing = 0;
 	mus_stop();
 	sn_period(0, 1); /* ~111 kHz: a steady level, volume does the rest */
@@ -340,10 +383,15 @@ void say(const speech *s, void (*mouth)(int level))
 	}
 	sn(0x9F);
 	if (mouth) mouth(0);
-	playing = was && !mus_mute;
+	(void)was; /* the music stays stopped: the next part starts it on its downbeat */
 }
 
 int mus_at(void)
 {
 	return playing ? ord : -1;
+}
+
+unsigned long mus_ord_T(void)
+{
+	return ordT;
 }

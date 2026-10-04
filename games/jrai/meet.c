@@ -235,6 +235,11 @@ static void scene(void)
 }
 
 
+/* What each page shows now, so a frame redraws only what changed. */
+enum { C_BOX, C_ANT, C_EYES, C_SCREEN, C_MOUTH, C_HEART, NC };
+static int shown[2][NC];
+#define CHANGED(id, v) (shown[pg][id] != (v) ? (shown[pg][id] = (v), 1) : 0)
+
 static void mouth_cb(int level)
 {
 	fx_target(page_seg[0]); robot_mouth(level);
@@ -250,27 +255,33 @@ static void meet_enter(void)
 	fx_pal_anim(1, EYE, EYE3, 9, 1);
 	both_pages(scene);
 	say(&sp_wait, mouth_cb);
+	memset(shown, 0xFF, sizeof shown); /* -1: redraw everything once */
 }
 
 static void meet_frame(unsigned t)
 {
-	int i = line_at(t);
+	int i = line_at(t), pg = fx_seg == page_seg[1];
 	char who = script[i].who;
-	int typing = (int)((t - script[i].at) / 2) < (int)(strlen(script[i].a) + strlen(script[i].b));
+	int len = (int)(strlen(script[i].a) + strlen(script[i].b));
+	int n = (int)((t - script[i].at) / 2);
+	int typing = n < len;
 	int lv;
-	box(t, 0);
-	antenna(t);
-	robot_eyes(who == 'J' || i == 0 ? -1 : 0);
-	pcjr_screen(t, who == 'J' && typing);
+	if (CHANGED(C_BOX, i * 64 + (typing ? n : 63))) box(t, 0);
+	if (CHANGED(C_ANT, (int)(t / 15) & 1)) antenna(t);
+	if (CHANGED(C_EYES, who == 'J' || i == 0 ? -1 : 0)) robot_eyes(shown[pg][C_EYES]);
+	if (who == 'J' && typing) { shown[pg][C_SCREEN] = -1; pcjr_screen(t, 1); }
+	else if (CHANGED(C_SCREEN, (int)(t / 20) & 1)) pcjr_screen(t, 0);
 	if (who == 'A' && typing) lv = 6 + ((sin8[(t * 37) & 255] + 128) >> 5);
 	else lv = mus_level[2] > 0 ? mus_level[1] / 4 : 0; /* humming along */
-	robot_mouth(lv);
+	if (CHANGED(C_MOUTH, lv)) robot_mouth(lv);
 	/* "FRIENDS?" "FRIENDS.": a heart rises between them */
 	if (t >= P * 10 + 30) {
 		int y = 70 - (int)((t - (P * 10 + 30)) / 4);
 		if (y < 50) y = 50;
-		fx_fill_rect(66, y, 14, 24, S2(BLACK));
-		draw_heart(66, y, RED);
+		if (CHANGED(C_HEART, y)) {
+			fx_fill_rect(66, y, 14, 24, S2(BLACK));
+			draw_heart(66, y, RED);
+		}
 	}
 }
 
@@ -281,4 +292,4 @@ static void meet_leave(void)
 	fx_pal_anim(1, 0, 0, 0, 0);
 }
 
-const part part_meet = { "meeting", 0, meet_enter, meet_frame, meet_leave, 24, 12 };
+const part part_meet = { "meeting", 0, meet_enter, meet_frame, meet_leave, 24, 12, 0 };

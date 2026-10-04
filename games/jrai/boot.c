@@ -150,6 +150,15 @@ void boot_run(void (*work)(int step), int nsteps)
 	say_line("CodeJr: ", 0x0B);
 	type("Done. Turn the volume up.\n", 0x0F, 45, 0);
 	blink(1500);
+	if (opt_bootdump) { /* the text screen, for headless tests */
+		int y, x;
+		for (y = 0; y < 25; y++) {
+			char l[41];
+			for (x = 0; x < 40; x++) l[x] = (char)scr[y * 40 + x];
+			l[40] = 0;
+			dbg_log("|%s|", l);
+		}
+	}
 	boot_end();
 }
 

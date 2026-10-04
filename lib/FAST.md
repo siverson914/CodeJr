@@ -114,12 +114,23 @@ These are estimates from the cost model above, not measurements: there is no rea
 | Palette writes queued to the retrace IRQ (fx_pal_set, fx_pal_cycle) | **used** | 0 ms per call (gfx_palette waits a whole frame per register) | color cycling for sky and water and damage flashes at no draw cost |
 | Dirty rectangles (FX_BUFFER mode: up to 8 per frame, union of the last two frames copied) | **used, optional** | HUD 160x40: 4.6 ms vs full 21 ms | copy cost scales with the changed area |
 | Delta present (REPE CMPSW against the page, REP MOVSW only the differing runs) | **implemented, not recommended** | identical: 2.1 ms; 1/16 changed: 22 ms; all changed: 43 ms (full copy: 21 ms) | **worse than a plain copy on real hardware.** A compare reads 4 bytes per word, just as a copy moves 4, and REPE CMPSW is ~30 clocks per word against 25 for MOVSW. It only wins in DOSBox, which charges REP compares like one instruction each |
+| Restore instead of clear (fx_track / fx_restore): each page remembers, per row, the bytes it drew; the next frame on that page copies just those back from a background buffer | **used (JRCUBE)** | restore of a cube + shadow + orb frame: 25.9 ms in C, 10.3 ms with the row loop in asm (byte runs, REP MOVSW) | copies only what moved, ~4-5 KB instead of 16 KB |
+| Extent tracking inside the span fill loops (fx_spans_pat_asm, fx_spans_src_asm) instead of a second pass over the rows | **used** | JRCUBE 9.0 fps becomes 9.5 | ~8 instructions per row instead of ~20 |
+| Per-row pattern polygons (fx_poly_rows) with 2x2 ordered dither | **used (JRCUBE)** | same cost as fx_poly | 13 shades from 4 colors per face |
+| Polygons copied from a pre-darkened floor (fx_poly_src) for shadows | **used (JRCUBE)** | REP MOVSW spans | a shadow that keeps the floor's grid, at copy speed |
+| Palette rotation in the IRQ (fx_pal_anim): a floor grid drawn 4x dense in 4 entries, one lit | **used (JRCUBE)** | 0 ms; the grid moves every 4 retraces | a scrolling floor with no redraw at all |
+| fx_line in asm (pixel = old ^ ((old ^ color) & mask); mask toggles F0h/0Fh; bank step = K - step) | **used** | JRCUBE's 9 edges: 31.7 ms becomes 19.9 ms | ~12 instructions per pixel |
+| 16x16 IMUL / 32/16 IDIV helpers and multiply-then-shift-left (mul14) instead of C's 32-bit routines and 32-bit shifts | **used in JRCUBE** | math 40 ms becomes 11 ms (same results) | a 32-bit shift by 14 is a 14-step loop on the 8088 |
 | Raw timer (tmr_ticks) | **used** | 0.16 ms vs 1.2 ms for tmr_ms | no 32-bit division |
 | Reciprocal table for texture steps (`recip[h]` in fastdemo.c) | **used in the demo** | | one DIV (~150 clk) per column becomes one table load |
 | Quarter-square multiply tables | **evaluated, not used** | | an 8x8 lookup multiply is ~50 clk against 70-77 for MUL r8. A 16x16 multiply needs 3-4 lookups (more than IMUL's 128-154), so the gain is too small for 3D transforms |
 | Compiled texture scalers (Wolf3D style: one routine per wall height) | **evaluated, not used** | | ~8 code bytes per pixel, so no faster than the DDA loop on an 8-bit bus, and 80+ KB of code |
 | 160x100 line-doubled mode (Trixter, 2013): BIOS mode 8, then port 3DFh with address-mode bits 7:6 = 00; rows become linear, each shown twice | **documented, not implemented** | cannot be tested: DOSBox 0.74 forces graphics row addressing in `TandyCheckLineMask` | halves every fill and wall cost and makes rows linear. See "Next steps" |
 | Racing the beam / retrace-aware partial copies | **not needed** | | with page flipping nothing is ever copied to the visible page. Only the one-page fallback copies to the visible page, and a 16 KB copy (~45 ms) is slower than one frame (16.7 ms) anyway |
+
+## JRCUBE (demos/cube) measurements
+
+DOSBox `cycles=fixed 400`, emulator only. A shaded, edged cube, its shadow, an orb with a trail and a pool of light, a scroller, over a static grid: **10.2 fps** (12.7 without the edges), up from 5.2 for the first version. Per frame: restore 11 ms, shadow and pool 14 ms, faces 26 ms, edges 15 ms, orb and scroller 5 ms, math 26 ms. DOSBox charges a MUL or DIV like an add, and JRCUBE does about 150 of them per frame, so on the real 8088 add roughly 5 ms. See `demos/cube/README.md`.
 
 ## Demoscene sources used
 

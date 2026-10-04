@@ -92,17 +92,20 @@ extern void fx_spans_asm(unsigned seg, const void far *tab, unsigned n, unsigned
 	parm [es] [dx si] [cx] [ax] modify [ax bx cx dx si di];
 
 /* Same walk, but each row's pattern byte comes from SS:BP (one byte per
- * row, a DGROUP array), so every row can have its own shade or dither. */
+ * row, DGROUP), so every row can have its own shade or dither. It also
+ * widens the fx_track extents of each row: e0 at [bp-400], e1 at
+ * [bp-200] (the pattern copy sits after them, see ext[]). */
 extern void fx_spans_pat_asm(unsigned seg, const void far *tab, unsigned n, unsigned pats);
 #pragma aux fx_spans_pat_asm = \
 	"push ds" "push bp" "mov ds,dx" "mov bp,ax" \
 	"SQ0:" "push cx" "lodsw" "mov dx,ax" "lodsw" "mov cx,ax" "lodsw" "mov di,ax" \
-	"mov bl,[bp+0]" "inc bp" \
 	"cmp dx,cx" "jle SQ1" "xchg dx,cx" \
 	"SQ1:" "or dx,dx" "jns SQ2" "xor dx,dx" \
 	"SQ2:" "cmp cx,159" "jle SQ3" "mov cx,159" \
 	"SQ3:" "cmp dx,cx" "jg SQ9" \
-	"mov ax,dx" "shr ax,1" "add di,ax" \
+	"mov ax,dx" "shr ax,1" "add di,ax" "cmp al,[bp-400]" "jae SQ5" "mov [bp-400],al" \
+	"SQ5:" "mov ax,cx" "shr ax,1" "cmp al,[bp-200]" "jbe SQ6" "mov [bp-200],al" \
+	"SQ6:" "mov bl,[bp+0]" \
 	"test dl,1" "jz SQ4" \
 	"mov al,es:[di]" "and al,0F0h" "mov ah,bl" "and ah,0Fh" "or al,ah" "stosb" \
 	"inc dx" "cmp dx,cx" "jg SQ9" \
@@ -110,33 +113,35 @@ extern void fx_spans_pat_asm(unsigned seg, const void far *tab, unsigned n, unsi
 	"shr cx,1" "rep stosw" "adc cx,cx" "rep stosb" \
 	"or dx,dx" "jz SQ9" \
 	"mov al,es:[di]" "and al,0Fh" "and ah,0F0h" "or al,ah" "mov es:[di],al" \
-	"SQ9:" "pop cx" "dec cx" "jnz SQ0" \
+	"SQ9:" "inc bp" "pop cx" "dec cx" "jz SQE" "jmp SQ0" "SQE:" \
 	"pop bp" "pop ds" \
 	parm [es] [dx si] [cx] [ax] modify [ax bx cx dx si di];
 
 /* Same walk again, but the pixels are copied from another buffer in the
  * same layout (segment AX, same offsets): shadows that darken whatever is
  * under them, or restoring a background. The table is read through SS:BP
- * (it is in DGROUP) so DS:SI can point at the source. */
-extern void fx_spans_src_asm(unsigned seg, unsigned tab, unsigned n, unsigned src);
+ * (it is in DGROUP) so DS:SI can point at the source; extents as above
+ * through SS:DX (e0; e1 200 bytes on). */
+extern void fx_spans_src_asm(unsigned seg, unsigned tab, unsigned n, unsigned src, unsigned e);
 #pragma aux fx_spans_src_asm = \
-	"push ds" "push bp" "mov bp,bx" "mov ds,ax" \
+	"push ds" "push bp" "mov bp,bx" "mov ds,ax" "mov bx,dx" \
 	"SR0:" "push cx" "mov dx,[bp+0]" "mov cx,[bp+2]" "mov di,[bp+4]" \
 	"cmp dx,cx" "jle SR1" "xchg dx,cx" \
 	"SR1:" "or dx,dx" "jns SR2" "xor dx,dx" \
 	"SR2:" "cmp cx,159" "jle SR3" "mov cx,159" \
 	"SR3:" "cmp dx,cx" "jg SR9" \
-	"mov ax,dx" "shr ax,1" "add di,ax" \
-	"test dl,1" "jz SR4" \
+	"mov ax,dx" "shr ax,1" "add di,ax" "cmp al,ss:[bx]" "jae SR5" "mov ss:[bx],al" \
+	"SR5:" "mov ax,cx" "shr ax,1" "cmp al,ss:[bx+200]" "jbe SR6" "mov ss:[bx+200],al" \
+	"SR6:" "test dl,1" "jz SR4" \
 	"mov al,es:[di]" "and al,0F0h" "mov ah,[di]" "and ah,0Fh" "or al,ah" "stosb" \
 	"inc dx" "cmp dx,cx" "jg SR9" \
 	"SR4:" "mov si,di" "sub cx,dx" "inc cx" "shr cx,1" "sbb dx,dx" \
 	"shr cx,1" "rep movsw" "adc cx,cx" "rep movsb" \
 	"or dx,dx" "jz SR9" \
 	"mov al,es:[di]" "and al,0Fh" "mov ah,[si]" "and ah,0F0h" "or al,ah" "mov es:[di],al" \
-	"SR9:" "add bp,6" "pop cx" "dec cx" "jnz SR0" \
+	"SR9:" "add bp,6" "inc bx" "pop cx" "dec cx" "jz SRE" "jmp SR0" "SRE:" \
 	"pop bp" "pop ds" \
-	parm [es] [bx] [cx] [ax] modify [ax bx cx dx si di];
+	parm [es] [bx] [cx] [ax] [dx] modify [ax bx cx dx si di];
 
 /* Edge DDA: n rows, stores the integer part of x (16.16, in dx:ax) every
  * 6 bytes, x += slope (si:bx). Two 16-bit adds per row, no 32-bit math. */
@@ -451,45 +456,70 @@ static void wall_reset(int s)
 /* fx_track: per target slot, per row, the byte columns drawn since that
  * slot's last fx_restore (e0 > e1: nothing), and the rows that have any. */
 static int track;
-static unsigned char e0[3][200], e1[3][200];
+/* [slot]: e0 at 0, e1 at 200, row patterns for fx_spans_pat_asm at 400.
+ * Slot 3 takes the extents when tracking is off. */
+static unsigned char __near ext[4][600];
 static int ey0[3], ey1[3];
+
+/* Updates the extents (BX: e0 of the first row, e1 200 bytes on, both in
+ * DGROUP) from n span table rows at SI (DGROUP), clipped like the fills. */
+extern void fx_ext_asm(unsigned tab, unsigned n, unsigned e);
+#pragma aux fx_ext_asm = \
+	"push ds" "push ss" "pop ds" \
+	"EX0:" "lodsw" "mov dx,ax" "lodsw" "add si,2" \
+	"cmp dx,ax" "jle EX1" "xchg dx,ax" \
+	"EX1:" "or dx,dx" "jns EX2" "xor dx,dx" \
+	"EX2:" "cmp ax,159" "jle EX3" "mov ax,159" \
+	"EX3:" "cmp dx,ax" "jg EX9" \
+	"shr dx,1" "shr ax,1" \
+	"cmp dl,[bx]" "jae EX4" "mov [bx],dl" \
+	"EX4:" "cmp al,[bx+200]" "jbe EX9" "mov [bx+200],al" \
+	"EX9:" "inc bx" "loop EX0" \
+	"pop ds" \
+	parm [si] [cx] [bx] modify [ax bx cx dx si];
+
+/* n rows: copies bytes e0..e1 of each row from DS (src) to ES (dst) at
+ * the row offsets (BP: jr_rowoff, DGROUP), then empties the extents. */
+extern void fx_restore_asm(unsigned dst, unsigned src, unsigned n, unsigned e, unsigned rows);
+#pragma aux fx_restore_asm = \
+	"push ds" "push bp" "mov ds,ax" "mov bp,dx" \
+	"RS0:" "push cx" \
+	"mov al,ss:[bx]" "mov cl,ss:[bx+200]" "mov byte ptr ss:[bx],0FFh" "mov byte ptr ss:[bx+200],0" \
+	"xor ah,ah" "xor ch,ch" "sub cx,ax" "jb RS9" "inc cx" \
+	"mov di,[bp+0]" "add di,ax" "mov si,di" \
+	"shr cx,1" "rep movsw" "adc cx,cx" "rep movsb" \
+	"RS9:" "add bp,2" "inc bx" "pop cx" "loop RS0" \
+	"pop bp" "pop ds" \
+	parm [es] [ax] [cx] [bx] [dx] modify [ax bx cx dx si di];
 
 static void ext_reset(int s)
 {
-	memset(e0[s], 255, 200);
-	memset(e1[s], 0, 200);
+	memset(ext[s], 255, 200);
+	memset(ext[s] + 200, 0, 200);
 	ey0[s] = 200; ey1[s] = -1;
 }
 
+/* widen n rows of extents at BX (DGROUP) to bytes AL..AH */
+extern void fx_extr_asm(unsigned e, unsigned n, unsigned b01);
+#pragma aux fx_extr_asm = \
+	"ER0:" "cmp al,ss:[bx]" "jae ER1" "mov ss:[bx],al" \
+	"ER1:" "cmp ah,ss:[bx+200]" "jbe ER2" "mov ss:[bx+200],ah" \
+	"ER2:" "inc bx" "loop ER0" \
+	parm [bx] [cx] [ax] modify [bx cx];
+
 static void ext_rect(int b0, int y0, int b1, int y1)
 {
-	unsigned char *a = e0[slot], *b = e1[slot];
-	int y;
 	if (y0 < ey0[slot]) ey0[slot] = y0;
 	if (y1 > ey1[slot]) ey1[slot] = y1;
-	for (y = y0; y <= y1; y++) {
-		if (b0 < a[y]) a[y] = (unsigned char)b0;
-		if (b1 > b[y]) b[y] = (unsigned char)b1;
-	}
+	fx_extr_asm(FP_OFF(&ext[slot][y0]), y1 - y0 + 1, (unsigned)b1 << 8 | b0);
 }
 
-/* exact extents from the span table rows y0..y1 (unordered, unclipped x) */
+/* exact extents from the span table rows y0..y1 */
 static void ext_spans(int y0, int y1)
 {
-	unsigned char *a = e0[slot], *b = e1[slot];
-	int y;
 	if (y0 < ey0[slot]) ey0[slot] = y0;
 	if (y1 > ey1[slot]) ey1[slot] = y1;
-	for (y = y0; y <= y1; y++) {
-		int xa = tab[y].xa, xb = tab[y].xb;
-		if (xa > xb) { int t = xa; xa = xb; xb = t; }
-		if (xb < 0 || xa > 159) continue;
-		if (xa < 0) xa = 0;
-		if (xb > 159) xb = 159;
-		xa >>= 1; xb >>= 1;
-		if (xa < a[y]) a[y] = (unsigned char)xa;
-		if (xb > b[y]) b[y] = (unsigned char)xb;
-	}
+	fx_ext_asm(FP_OFF(&tab[y0]), y1 - y0 + 1, FP_OFF(&ext[slot][y0]));
 }
 
 /* Something other than fx_wall drew pixels x0..x1, y0..y1 (clipped). */
@@ -829,20 +859,36 @@ void fx_poly(int n, const int *xy, unsigned pat2)
 	poly_touch();
 }
 
+/* after a fill that tracked its own extents into slot es */
+static void poly_touch_t(int es)
+{
+	int t = track;
+	if (es != 3) {
+		if (pymin < ey0[es]) ey0[es] = pymin;
+		if (pymax > ey1[es]) ey1[es] = pymax;
+	}
+	track = 0;
+	touch(pxmin, pymin, pxmax, pymax);
+	track = t;
+}
+
 void fx_poly_rows(int n, const int *xy, const unsigned char *rowpat200)
 {
-	static unsigned char __near pr[200];
+	int es = track ? slot : 3;
+	unsigned char *pr;
 	if (!poly_edges(n, xy)) return;
+	pr = ext[es] + 400 + pymin;
 	_fmemcpy(pr, rowpat200 + pymin, pymax - pymin + 1);
 	fx_spans_pat_asm(fx_seg, &tab[pymin], pymax - pymin + 1, FP_OFF(pr));
-	poly_touch();
+	poly_touch_t(es);
 }
 
 void fx_poly_src(int n, const int *xy, unsigned src)
 {
+	int es = track ? slot : 3;
 	if (!poly_edges(n, xy)) return;
-	fx_spans_src_asm(fx_seg, FP_OFF(&tab[pymin]), pymax - pymin + 1, src);
-	poly_touch();
+	fx_spans_src_asm(fx_seg, FP_OFF(&tab[pymin]), pymax - pymin + 1, src, FP_OFF(&ext[es][pymin]));
+	poly_touch_t(es);
 }
 
 void fx_track(int on)
@@ -853,19 +899,19 @@ void fx_track(int on)
 
 void fx_restore(unsigned bg)
 {
-	int s = slot, y, y0 = ey0[s], y1 = ey1[s], b0 = 79, b1 = 0;
+	int s = slot, y, y0 = ey0[s], y1 = ey1[s];
 	if (y0 > y1) return;
-	for (y = y0; y <= y1; y++) {
-		int a = e0[s][y], b = e1[s][y];
-		if (a <= b) {
-			tab[y].xa = a * 2; tab[y].xb = b * 2 + 1;
-			if (a < b0) b0 = a;
-			if (b > b1) b1 = b;
-		} else { tab[y].xa = 1; tab[y].xb = 0; }
+	if (flags & FX_BUFFER || user_seg) {   /* the copy to the screen must see it */
+		int b0 = 79, b1 = 0;
+		for (y = y0; y <= y1; y++)
+			if (ext[s][y] <= ext[s][200 + y]) {
+				if (ext[s][y] < b0) b0 = ext[s][y];
+				if (ext[s][200 + y] > b1) b1 = ext[s][200 + y];
+			}
+		if (b0 <= b1) dirty_add(b0, y0, b1, y1);
 	}
-	fx_spans_src_asm(fx_seg, FP_OFF(&tab[y0]), y1 - y0 + 1, bg);
-	if (flags & FX_BUFFER || user_seg) dirty_add(b0, y0, b1, y1);
-	ext_reset(s);
+	fx_restore_asm(fx_seg, bg, y1 - y0 + 1, FP_OFF(&ext[s][y0]), FP_OFF(&jr_rowoff[y0]));
+	ey0[s] = 200; ey1[s] = -1;
 }
 
 void fx_tri(int x0, int y0, int x1, int y1, int x2, int y2, unsigned pat2)
@@ -1076,32 +1122,31 @@ static unsigned char far *emit_ea(unsigned char far *o, unsigned char op, unsign
 	return o;
 }
 
-static int spx(const fx_sprite *s, int x, int y)
-{
-	int c;
-	if (x < 0 || x >= s->w) return -1;
-	c = s->pix[(unsigned)y * s->w + x];
-	return c == s->key ? -1 : (c & 15);
-}
-
 /* Generates the code for one parity variant; returns bytes (or the size
  * needed when out == NULL). */
+/* Generates the code for one parity variant into out (big enough: see
+ * fx_compile); returns its length including the RETF. Each row is first
+ * unpacked into px[] (color, or -1 where transparent or outside). */
 static unsigned gen(const fx_sprite *s, int xo, int yo, unsigned char far *out)
 {
-	static unsigned char tmp[8];
+	static int px[168];
 	unsigned n = 0;
 	int r, k, nb = (s->w + xo + 1) / 2;
 	for (r = 0; r < s->h; r++) {
 		int roff = yo ? ((r & 1) ? -0x2000 + ((r + 1) >> 1) * 80 : (r >> 1) * 80)
 		              : (r & 1) * 0x2000 + (r >> 1) * 80;
+		const unsigned char far *row = s->pix + (unsigned)r * s->w;
+		for (k = 0; k < 2 * nb + 2; k++) {
+			int x = k - xo;
+			px[k] = x < 0 || x >= s->w || row[x] == s->key ? -1 : (row[x] & 15);
+		}
 		for (k = 0; k < nb; k++) {
-			int l = spx(s, 2 * k - xo, r), rr = spx(s, 2 * k + 1 - xo, r);
+			int l = px[2 * k], rr = px[2 * k + 1];
 			int d = roff + k;
-			unsigned char far *o = out ? out + n : (unsigned char far *)tmp;
-			unsigned char far *o0 = o;
+			unsigned char far *o = out + n;
 			if (l >= 0 && rr >= 0) {
-				int l2 = k + 1 < nb ? spx(s, 2 * k + 2 - xo, r) : -1;
-				int r2 = k + 1 < nb ? spx(s, 2 * k + 3 - xo, r) : -1;
+				int l2 = k + 1 < nb ? px[2 * k + 2] : -1;
+				int r2 = k + 1 < nb ? px[2 * k + 3] : -1;
 				if (l2 >= 0 && r2 >= 0) { /* two whole bytes: MOV word */
 					o = emit_ea(o, 0xC7, 0, d);
 					*o++ = (unsigned char)(l << 4 | rr);
@@ -1118,26 +1163,34 @@ static unsigned gen(const fx_sprite *s, int xo, int yo, unsigned char far *out)
 				if (val != (unsigned char)~keep) { o = emit_ea(o, 0x80, 4, d); *o++ = keep; }
 				if (val) { o = emit_ea(o, 0x80, 1, d); *o++ = val; }
 			}
-			n += (unsigned)(o - o0);
-			if (!out) continue;
+			n += (unsigned)(o - (out + n));
 		}
 	}
-	if (out) out[n] = 0xCB; /* RETF */
+	out[n] = 0xCB; /* RETF */
 	return n + 1;
 }
 
+/* Each variant is generated once into a worst-case scratch buffer (10
+ * code bytes per screen byte: AND and OR with 16-bit displacements),
+ * then copied into a block of the exact size. */
 fx_sprite *fx_compile(const unsigned char far *pix, int w, int h, int key)
 {
-	fx_sprite *s = (fx_sprite *)malloc(sizeof *s);
+	fx_sprite *s;
+	unsigned char far *tmp;
+	unsigned long worst = ((unsigned long)w / 2 + 2) * h * 10 + 1;
 	int v;
-	if (!s) return 0;
+	if (w < 1 || w > 160 || h < 1 || worst > 65000UL) return 0;
+	if (!(s = (fx_sprite *)malloc(sizeof *s))) return 0;
+	if (!(tmp = (unsigned char far *)_fmalloc((unsigned)worst))) { free(s); return 0; }
 	s->w = w; s->h = h; s->key = key; s->pix = pix;
 	for (v = 0; v < 4; v++) {
-		unsigned len = gen(s, v & 1, v >> 1, 0);
+		unsigned len = gen(s, v & 1, v >> 1, tmp);
 		s->code[v] = (unsigned char far *)_fmalloc(len);
-		if (!s->code[v]) { while (v--) _ffree(s->code[v]); free(s); return 0; }
-		s->len[v] = gen(s, v & 1, v >> 1, s->code[v]);
+		if (!s->code[v]) { while (v--) _ffree(s->code[v]); _ffree(tmp); free(s); return 0; }
+		_fmemcpy(s->code[v], tmp, len);
+		s->len[v] = len;
 	}
+	_ffree(tmp);
 	return s;
 }
 
@@ -1155,13 +1208,22 @@ void fx_sprite_draw(const fx_sprite *s, int x, int y)
 		unsigned char far *c = s->code[((y & 1) << 1) | (x & 1)];
 		fx_call(fx_seg, jr_rowoff[y] + (x >> 1), FP_SEG(c), FP_OFF(c));
 		touch(x, y, x + s->w - 1, y + s->h - 1);
-	} else { /* clipped: per pixel */
-		int r, k;
-		for (r = 0; r < s->h; r++)
-			for (k = 0; k < s->w; k++) {
-				int c = spx(s, k, r);
-				if (c >= 0) fx_pset(x + k, y + r, c);
+	} else { /* clipped: per pixel over the visible part, one touch */
+		int r0 = y < 0 ? -y : 0, r1 = y + s->h > 200 ? 200 - y : s->h;
+		int k0 = x < 0 ? -x : 0, k1 = x + s->w > 160 ? 160 - x : s->w, r, k;
+		if (r0 >= r1 || k0 >= k1) return;
+		for (r = r0; r < r1; r++) {
+			const unsigned char far *src = s->pix + (unsigned)r * s->w;
+			unsigned char far *row = (unsigned char far *)MK_FP(fx_seg, jr_rowoff[y + r]);
+			for (k = k0; k < k1; k++) {
+				int c = src[k], X = x + k;
+				unsigned char far *p;
+				if (c == s->key) continue;
+				p = row + (X >> 1);
+				*p = (unsigned char)(X & 1 ? (*p & 0xF0) | (c & 15) : (*p & 0x0F) | (c << 4));
 			}
+		}
+		touch(x + k0, y + r0, x + k1 - 1, y + r1 - 1);
 	}
 }
 
