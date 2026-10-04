@@ -1,0 +1,24 @@
+[sdl]
+autolock=false
+
+[dosbox]
+machine=pcjr
+memsize=1
+
+[cpu]
+core=normal
+cycles=fixed 1000
+
+[render]
+aspect=true
+
+[serial]
+# DOSBox's COM1 is a TCP connection to the CodeJr server, standing in for
+# the WiFi modem. transparent:1 sends raw bytes with no DOSBox handshake.
+serial1=nullmodem server:127.0.0.1 port:@PORT@ transparent:1
+serial2=disabled
+
+[autoexec]
+mount c c
+c:
+@AUTOEXEC@

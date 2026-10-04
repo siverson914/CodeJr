@@ -1,0 +1,442 @@
+package cjp
+
+import (
+	"errors"
+	"fmt"
+	"io"
+	"sync"
+	"time"
+)
+
+// Msg is one delivered message.
+type Msg struct {
+	Type    byte
+	Payload []byte
+}
+
+// Link is a reliable, ordered message channel over a lossy byte stream.
+//
+// It uses selective repeat, because the PCjr loses roughly one received
+// byte in a hundred (its UART has no FIFO): most frames would be lost
+// under go-back-N. The receiver keeps frames that arrive after a gap and
+// asks for the missing one with a Nak (whose ack field is the sequence
+// number it is missing); the sender resends only that frame. Acks are
+// cumulative. If an ack or Nak is lost, a timer resends the oldest frame.
+type Link struct {
+	out     io.Writer
+	timeout time.Duration
+
+	mu      sync.Mutex
+	cond    *sync.Cond
+	base    byte        // oldest unacknowledged sequence number
+	next    byte        // next sequence number to send
+	pending [][]byte    // encoded frames base..next-1
+	lastTx  []time.Time // when each pending frame last went out
+	nakked  []bool      // the other side reported this frame missing
+	cps     int         // slowest hop's speed in characters per second, 0 if unknown
+
+	expected byte         // next sequence number we deliver
+	ooo      map[byte]Msg // frames received ahead of a gap
+	closed   bool
+	err      error
+
+	inq  []Msg         // received, not yet taken from recv
+	inc  *sync.Cond    // signals inq changes (uses mu)
+	ackc chan struct{} // wakes the ack sender
+	recv chan Msg
+	done chan struct{}
+
+	// Counters, for logs and tests.
+	Resent, BadFrames, NaksSent, NaksReceived int
+
+	// Trace, if set, gets a line for every frame event (for diagnosing
+	// timing on real hardware). It is called from several goroutines.
+	Trace func(string)
+}
+
+// ErrClosed is returned once the link has been closed or has failed.
+var ErrClosed = errors.New("cjp: link closed")
+
+// Receivers accept frames up to this far ahead of the one they expect.
+const rxWindow = 16
+
+func (l *Link) trace(format string, a ...any) {
+	if l.Trace != nil {
+		l.Trace(fmt.Sprintf(format, a...))
+	}
+}
+
+// NewLink starts a link reading bytes from in and writing to out. If
+// inFrame is true, a FEND was already read from in.
+func NewLink(in <-chan byte, out io.Writer, timeout time.Duration, inFrame bool) *Link {
+	l := &Link{
+		out: out, timeout: timeout,
+		ooo:  map[byte]Msg{},
+		recv: make(chan Msg, 64), done: make(chan struct{}), ackc: make(chan struct{}, 1),
+	}
+	l.cond = sync.NewCond(&l.mu)
+	l.inc = sync.NewCond(&l.mu)
+	var d Decoder
+	if inFrame {
+		d.StartInFrame()
+	}
+	go l.reader(in, &d)
+	go l.deliverer()
+	go l.acker()
+	go l.retransmitter()
+	return l
+}
+
+// SetLineSpeed tells the link how fast the slowest hop is (characters per
+// second), so resend timers allow for frames still queued ahead.
+func (l *Link) SetLineSpeed(cps int) {
+	l.mu.Lock()
+	l.cps = cps
+	l.mu.Unlock()
+}
+
+// Recv delivers incoming messages in order. Select on Done as well: Recv
+// is not closed when the link ends.
+func (l *Link) Recv() <-chan Msg { return l.recv }
+
+// Done is closed when the link ends.
+func (l *Link) Done() <-chan struct{} { return l.done }
+
+func (l *Link) reader(in <-chan byte, d *Decoder) {
+	defer l.Close()
+	for c := range in {
+		f, err := d.Feed(c)
+		if err != nil {
+			l.mu.Lock()
+			l.BadFrames++
+			l.mu.Unlock()
+			l.trace("rx BAD frame")
+			l.wakeAcker() // a Nak if we are missing something
+			continue
+		}
+		if f == nil {
+			continue
+		}
+		switch f.Type {
+		case Ack:
+			l.trace("rx ack %d", f.Ack)
+			l.handleAck(f.Ack)
+			continue
+		case Nak:
+			l.trace("rx nak %d", f.Ack)
+			l.handleAck(f.Ack)
+			l.handleNak(f.Ack)
+			continue
+		}
+		l.trace("rx type %d seq %d ack %d len %d", f.Type, f.Seq, f.Ack, len(f.Payload))
+		l.handleAck(f.Ack)
+		l.accept(f)
+		l.wakeAcker()
+	}
+}
+
+// accept files a data frame: delivered if it is the one expected (along
+// with any frames waiting behind it), kept if it is ahead of a gap.
+func (l *Link) accept(f *Frame) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	ahead := byte(f.Seq - l.expected)
+	switch {
+	case ahead == 0:
+		l.queue(Msg{Type: f.Type, Payload: f.Payload})
+		l.expected++
+		for {
+			m, ok := l.ooo[l.expected]
+			if !ok {
+				break
+			}
+			delete(l.ooo, l.expected)
+			l.queue(m)
+			l.expected++
+		}
+	case ahead < rxWindow:
+		if _, ok := l.ooo[f.Seq]; !ok {
+			l.ooo[f.Seq] = Msg{Type: f.Type, Payload: f.Payload}
+		}
+	default:
+		// A duplicate of something already delivered: just ack again.
+	}
+}
+
+// queue hands a message to the deliverer without blocking. Call with mu held.
+func (l *Link) queue(m Msg) {
+	l.inq = append(l.inq, m)
+	l.inc.Signal()
+}
+
+func (l *Link) wakeAcker() {
+	select {
+	case l.ackc <- struct{}{}:
+	default: // one is already due; it will carry the newest state
+	}
+}
+
+// acker sends acks, or a Nak naming the missing frame while there is a
+// gap. Only the newest state matters, so bursts collapse into one.
+func (l *Link) acker() {
+	for {
+		select {
+		case <-l.ackc:
+		case <-l.done:
+			return
+		}
+		l.mu.Lock()
+		typ := Ack
+		if len(l.ooo) > 0 {
+			typ = Nak
+			l.NaksSent++
+		}
+		ack := l.expected
+		l.mu.Unlock()
+		l.write(Encode(Frame{Type: typ, Ack: ack}))
+		if typ == Nak {
+			l.trace("tx nak %d", ack)
+		} else {
+			l.trace("tx ack %d", ack)
+		}
+	}
+}
+
+// deliverer moves queued messages to the recv channel.
+func (l *Link) deliverer() {
+	for {
+		l.mu.Lock()
+		for len(l.inq) == 0 && !l.closed {
+			l.inc.Wait()
+		}
+		if len(l.inq) == 0 {
+			l.mu.Unlock()
+			return
+		}
+		m := l.inq[0]
+		l.inq = l.inq[1:]
+		l.mu.Unlock()
+		select {
+		case l.recv <- m:
+		case <-l.done:
+			return
+		}
+	}
+}
+
+func inWindow(base, seq, next byte) bool {
+	// Is seq in [base, next) modulo 256?
+	return byte(seq-base) < byte(next-base)
+}
+
+// handleAck drops frames the other side has received (acks are cumulative).
+func (l *Link) handleAck(a byte) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if a == l.base || !inWindow(l.base, a-1, l.next) {
+		return
+	}
+	n := int(byte(a - l.base))
+	l.pending = l.pending[n:]
+	l.lastTx = l.lastTx[n:]
+	l.nakked = l.nakked[n:]
+	l.base = a
+	l.cond.Broadcast()
+}
+
+// handleNak resends the one frame the other side is missing, unless it went
+// out so recently it may still be on its way.
+func (l *Link) handleNak(seq byte) {
+	l.mu.Lock()
+	l.NaksReceived++
+	if !inWindow(l.base, seq, l.next) {
+		l.mu.Unlock()
+		return
+	}
+	i := int(byte(seq - l.base))
+	l.nakked[i] = true
+	if time.Since(l.lastTx[i]) < l.minGap() {
+		l.mu.Unlock()
+		return
+	}
+	fr := l.pending[i]
+	l.lastTx[i] = time.Now()
+	l.Resent++
+	l.mu.Unlock()
+	l.trace("RESEND seq %d (nak)", seq)
+	l.write(fr)
+}
+
+// minGap is how long to wait before resending the same frame again for a
+// Nak: long enough for a frame and its answer to cross the slow line.
+// Call with mu held.
+func (l *Link) minGap() time.Duration {
+	if l.cps <= 0 {
+		return 100 * time.Millisecond
+	}
+	return 100*time.Millisecond + time.Duration(2*(MaxPayload+16))*time.Second/time.Duration(l.cps)
+}
+
+// deadline is how long to wait for an ack of the oldest frame: the base
+// timeout plus the time the pending frames take on the line (the oldest
+// may be queued behind the others). Call with mu held.
+func (l *Link) deadline() time.Duration {
+	d := l.timeout
+	if l.cps > 0 {
+		n := 0
+		for _, fr := range l.pending {
+			n += len(fr)
+		}
+		d += time.Duration(n) * time.Second / time.Duration(l.cps)
+	}
+	return d
+}
+
+// retransmitter resends the oldest frame if its ack never came (for
+// example because the ack or Nak itself was lost).
+func (l *Link) retransmitter() {
+	t := time.NewTicker(50 * time.Millisecond)
+	defer t.Stop()
+	for {
+		select {
+		case <-l.done:
+			return
+		case <-t.C:
+		}
+		l.mu.Lock()
+		var fr []byte
+		// A frame the other side has reported missing is retried quickly:
+		// if the resend was lost too, nothing else will prompt another Nak.
+		wait := l.deadline()
+		if len(l.nakked) > 0 && l.nakked[0] {
+			wait = l.minGap()
+		}
+		if len(l.pending) > 0 && time.Since(l.lastTx[0]) >= wait {
+			fr = l.pending[0]
+			l.lastTx[0] = time.Now()
+			l.Resent++
+		}
+		seq := l.base
+		l.mu.Unlock()
+		if fr != nil {
+			l.trace("RESEND seq %d (timer)", seq)
+			l.write(fr)
+			l.mu.Lock()
+			if len(l.pending) > 0 && l.base == seq {
+				l.lastTx[0] = time.Now() // from when it actually went out
+			}
+			l.mu.Unlock()
+		}
+	}
+}
+
+func (l *Link) write(b []byte) {
+	if _, err := l.out.Write(b); err != nil {
+		l.fail(err)
+	}
+}
+
+func (l *Link) fail(err error) {
+	l.mu.Lock()
+	if l.err == nil {
+		l.err = err
+	}
+	l.mu.Unlock()
+	l.Close()
+}
+
+// Send queues one message, waiting while the window is full. Payloads
+// longer than MaxPayload are an error; use SendChunks to split.
+func (l *Link) Send(typ byte, payload []byte) error {
+	if len(payload) > MaxPayload {
+		return errors.New("cjp: payload too long")
+	}
+	l.mu.Lock()
+	for !l.closed && len(l.pending) >= Window {
+		l.cond.Wait()
+	}
+	if l.closed {
+		l.mu.Unlock()
+		return ErrClosed
+	}
+	seq := l.next
+	fr := Encode(Frame{Type: typ, Seq: seq, Ack: l.expected, Payload: payload})
+	l.pending = append(l.pending, fr)
+	l.lastTx = append(l.lastTx, time.Now())
+	l.nakked = append(l.nakked, false)
+	l.next++
+	l.mu.Unlock()
+	l.trace("tx type %d seq %d len %d", typ, seq, len(payload))
+	l.write(fr)
+	// The writer may have blocked while a slow line drained; time the ack
+	// from when the frame actually went out.
+	l.mu.Lock()
+	if inWindow(l.base, seq, l.next) {
+		l.lastTx[int(byte(seq-l.base))] = time.Now()
+	}
+	l.mu.Unlock()
+	return nil
+}
+
+// SendChunks sends data as several messages of the same type, each with
+// prefix in front (for example a Text style byte), ChunkSize bytes each.
+func (l *Link) SendChunks(typ byte, prefix, data []byte) error {
+	room := ChunkSize - len(prefix)
+	for first := true; first || len(data) > 0; first = false {
+		n := min(room, len(data))
+		p := append(append([]byte(nil), prefix...), data[:n]...)
+		if err := l.Send(typ, p); err != nil {
+			return err
+		}
+		data = data[n:]
+	}
+	return nil
+}
+
+// Flush waits until everything sent has been acknowledged, or timeout.
+func (l *Link) Flush(timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	for !l.closed && len(l.pending) > 0 {
+		if time.Now().After(deadline) {
+			return errors.New("cjp: flush timed out")
+		}
+		l.mu.Unlock()
+		time.Sleep(20 * time.Millisecond)
+		l.mu.Lock()
+	}
+	if l.closed && len(l.pending) > 0 {
+		return ErrClosed
+	}
+	return nil
+}
+
+// Stats summarizes the link's counters for logs.
+func (l *Link) Stats() string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return fmt.Sprintf("link: %d resent, %d naks received, %d naks sent, %d bad frames received",
+		l.Resent, l.NaksReceived, l.NaksSent, l.BadFrames)
+}
+
+// Close ends the link.
+func (l *Link) Close() {
+	l.mu.Lock()
+	if l.closed {
+		l.mu.Unlock()
+		return
+	}
+	l.closed = true
+	l.cond.Broadcast()
+	l.inc.Broadcast()
+	l.mu.Unlock()
+	close(l.done)
+}
+
+// Err reports why the link ended, if it failed.
+func (l *Link) Err() error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.err
+}

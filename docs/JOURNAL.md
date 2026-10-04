@@ -1,0 +1,324 @@
+# CodeJr journal
+
+How CodeJr got built, step by step, including what broke and how each problem was found. Newest entries go at the bottom. Times are Pacific.
+
+---
+
+## Day 0: the PCjr comes back to life (2026-10-02)
+
+**The SD card wouldn't show up.** The laptop's card reader had dropped the card mid-write a few minutes earlier, leaving the FAT filesystem marked dirty. Reinserting it brought it back. A `fsck.vfat` repair (after closing Nautilus, which was holding the mount open) cleared it. The card turned out to hold a 23.5 MB PC DOS 3.30 partition: the PCjr's boot disk.
+
+**Boot files.** Added `CONFIG.SYS` (`DEVICE=JRCONFIG.SYS`, `DEVICE=ANSI.SYS`) and `AUTOEXEC.BAT` (a blue `PROMPT $e[1;44m$p$g`, `JRIDERTC /D`, `PATH=C:\`, `VER`).
+
+- JRCONFIG 3.10, the PCjr memory driver, came from Mike Brutman's PCjr archive.
+- `JRIDERTC` was the jr-IDE's clock utility (`RTC.COM` from the jr-IDE project, renamed). At the time we didn't know the PCjr had a jr-IDE.
+- `ANSI.SYS` was added because the prompt's color codes need it.
+
+**First Kermit session.** MS-Kermit 3.14 was already on the card (`C:\MSK314`). Typing `AT` came back `AATT` or `AAATTT`: several things were echoing at once (Kermit's local echo, the modem's command echo, and the modem's online echo).
+
+## Day 1: the idea (2026-10-03, morning)
+
+**The idea:** a "mini Claude Code" for the PCjr. You type a request at the PCjr; a server on the laptop runs Claude; Claude's replies show on the PCjr, and the files it writes land on the PCjr's own disk.
+
+**Research.** The closest existing projects:
+
+- An Apple II terminal for the real `claude` CLI over a WiFi modem. Files stay on the modern machine.
+- Nick Bild's PCjr GPT-3 (Kermit plus a Raspberry Pi). Chat only.
+- AiBridgeMCP Nano, an ESP32 bridge for 8-bit machines.
+
+None of them put the AI's files onto the vintage machine's own disk and run them there.
+
+**Decisions:**
+
+- **Name:** CodeJr (7 characters, ends in JR).
+- **Port:** 4860, the PCjr's IBM machine type.
+- **Server language:** Go, because the user wanted to learn a compiled language.
+- **Claude:** headless Claude Code (`claude -p`) on the user's subscription, after checking the docs: the Agent SDK's docs disallow claude.ai logins.
+- **Version 1 needs nothing on the PCjr but MS-Kermit.** The server sends Kermit's APC escape sequence (`ESC _ receive ESC \`) to make Kermit start a file transfer by itself.
+
+**The modem's line endings.** `OK` printed on top of `AT`: the modem ended its replies with a bare carriage return. The user found `ATR1` (CR+LF line endings) and the working Kermit settings themselves, using another Claude chat on their phone: COM2, 9600 8N1, no flow control, local echo off, `ATE0 ATR1 AT&W`.
+
+## Day 1: building the server (2026-10-03, about 08:00-09:00)
+
+**Kermit protocol, written in Go** rather than driving C-Kermit through a pty, since the server already owns the socket.
+
+- Short packets, block checks 1 and 3 (CRC-16), control and 8th-bit prefixing.
+- Tests: CRC check values, round trips, a simulated noisy line, and interop against the real C-Kermit in both directions.
+- The C-Kermit interop test caught that C-Kermit auto-switches to text mode, so the tests force binary.
+- The noisy-line test later caught a real bug: if the final ACK is lost, the sender gave up even though every file had arrived.
+
+**Screen.** VT100 escape codes only, 7-bit ASCII:
+
+- a header, a scroll region for the transcript, a divider, an input line and a status bar
+- word wrap at 79 columns, so the terminal never auto-wraps
+- Unicode transliterated to ASCII
+- output paced to the line speed
+
+**Emulator.** DOSBox in PCjr mode, running the real MS-Kermit 3.14 (fetched from the Wayback Machine, because columbia.edu blocks scripted downloads), with its serial port wired straight to the server over TCP. The first full run: the emulated PCjr asked for a snake game, Claude wrote `SNAKE.BAS` in 33 s, and Kermit saved it to the emulated C: drive in 4 s.
+
+- A DOSBox window popped up on the user's screen during a test. All later emulator tests run with `SDL_VIDEODRIVER=dummy`, so no window is created at all.
+
+**`/setup`.** Installs the launcher (`CODEJR.BAT`) and Kermit settings (`CODEJR.INI`) over the connection, so the SD card never has to come downstairs.
+
+## Day 1: first calls from the real PCjr (2026-10-03, 08:50-09:40)
+
+**Chat worked on the first call.** Every file transfer failed with Kermit's "Unable to create file". Kermit's own transfer screen showed `CODEJR.BAT as C:\\CODEJR.BAT`: MS-Kermit 3.14 takes backslashes literally, so the doubled backslash I sent stayed doubled. DOSBox's DOS had tolerated it, which is why the emulator didn't catch it. **Fix:** a single backslash.
+
+**Gray bands behind the text.** MS-Kermit erases and scrolls with its own default colors, not the current ones, as real DEC terminals did. **Fix:** the server sends `SET TERMINAL COLOR 0, 37, 40, 20` through APC, and every color code sets its background explicitly.
+
+**Scrambled screen after transfers.** The PCjr needs a moment after a transfer to close the file and restore Kermit's screen, and anything sent meanwhile is lost.
+
+- I tried asking the terminal "are you back?" (Device Attributes, then a status report). MS-Kermit didn't answer reliably.
+- **Fix:** a fixed 1.5 s pause after every transfer.
+
+**Dropped characters ("VE" instead of "STEVE").** The PCjr's UART has no FIFO, and keyboard interrupts make it miss bytes. **Fix:** a short pause after Enter, and extra time allowed for each line feed, because scrolling is slow on a 4.77 MHz machine.
+
+**Programs folder.** At the user's suggestion, programs moved to `C:\CODEJR\PROGS`. Kermit can't create folders, so the launcher does.
+
+**Redial over an open call.** Leaving Kermit without `/quit` keeps the modem connected, so a second `CODEJR` sent its `ATDT` down the old call as chat text. **Fix:** the server recognizes an `ATD...` line, answers `CONNECT` and starts a fresh screen. `/quit` now also tells Kermit to `EXIT` through APC.
+
+## Day 1: the modem saga (2026-10-03, 09:00-12:30)
+
+This took the longest, and most of it was self-inflicted.
+
+1. **To fix the doubled typing,** I suggested `ATF1`, which on a Hayes modem turns off online echo. **But the modem runs Zimodem**, where `ATF` sets **flow control**: F0 is RTS/CTS, F1 is XON/XOFF.
+2. **Kermit's script never saw `CONNECT`,** so it reported "No answer" while the server had in fact answered. **Fix:** the server now repeats `CodeJr READY - press Enter` until Enter arrives, and the script waits for `READY` instead of the modem's own wording.
+3. **Data stopped reaching the PCjr.** The server's TCP send queue piled up, while the PCjr's typing still got through. When I suggested `ATF0` to "turn flow control off", it was actually RTS/CTS, which made it worse. **Lesson: read the firmware's README before suggesting any AT command.**
+4. **`AT&K0` (no flow control) worked, but `AT&W` doesn't save it,** so it came back after every power cycle.
+5. **The modem's own settings (`ATI1`, `AT+CONFIG`) were fine all along:** 9600, F1, E0, R1.
+6. **The real clue came from the user:** the modem only talked back when Kermit was set to `SET DUPLEX HALF`. In MS-Kermit, half duplex means "local echo plus RTS/CTS handshake". **Workaround:** `CODEJR.INI` uses half duplex. That made Kermit echo typing locally, so the server's echo was turned off (`/echo off`).
+
+**Cold boot worked** at about 12:40: power on, type `CODEJR`, and you're talking to Claude.
+
+## Day 1: the native client, stage 1-2 (2026-10-03, 12:40 onward)
+
+**Why.** Most of the day went into fighting MS-Kermit's defaults (APC off, renaming instead of overwriting, RTS only in half duplex, no status answers). The plan in `docs/CLIENT.md` replaces Kermit with our own PCjr program, plus tools for Claude to build, run and test programs on the real PCjr.
+
+**Smaller fixes along the way:**
+
+- **Web search and fetch.** They were enabled for the PCjr's Claude, but each use was silently denied: headless mode can't ask for approval. **Fix:** `--allowedTools WebSearch,WebFetch`.
+- **Old instructions.** Claude kept naming the old folder, because a resumed conversation reuses its original system prompt. **Fix:** `--system-prompt-snapshot off`.
+- **Renamed files.** `/setup` files got renamed when Kermit was started by hand: MS-Kermit's default renames instead of overwriting. **Fix:** every APC `receive` is preceded by `set file type binary, set file collision overwrite`.
+- **The clock.** The PCjr does have a jr-IDE Rev.B, with a DS12885 real-time clock. Its clock had never been set. `JRIDERTC` also misparses its options unless both groups are given, so the boot line is `JRIDERTC /D /O`.
+
+**Stage 1, toolchain.** Open Watcom v2, a prebuilt Linux snapshot in `~/.local/opt/openwatcom` with no root needed. A hello-world `.EXE` built on the laptop reports "machine ID FD (PCjr)" in DOSBox.
+
+**Stage 2, CJTERM**, a test terminal with our own interrupt-driven serial driver. The debugging went like this:
+
+1. **Hung in the emulator.** The status line overflowed an 81-byte buffer. Fixed.
+2. **Real PCjr, first run.** Mostly blank screen and `rx:1`. I suspected the baud rate, but the user had simply forgotten the parameters. From then on, tests ship with batch files (`CJTEST.BAT`).
+3. **Real PCjr, with dialing.** The call connected and 589 bytes arrived with 0 lost, but almost nothing displayed. I swapped hand-drawn BIOS output for plain DOS output (the user's suggestion), which also gives ANSI colors through `ANSI.SYS`.
+4. **Still nothing readable.** `RX.LOG`, fetched back with `/get`, showed all 629 received bytes were `0x00`.
+5. **Error counters added.** Every byte was a framing error plus a break, in both interrupt and polled mode. So the interrupt code is fine, and the receive line itself looks wrong.
+6. **MS-Kermit's source** (`msxibm.asm`) uses the same divisor (12 for 9600) and the same register sequence, so the speed setting isn't it.
+7. **`UARTDUMP` run right after Kermit:** divisor 12, LCR 03, **MCR 01 (DTR on, RTS off)**. `CJTERM` reusing Kermit's exact speed and format (`/K:1`) still got framing errors. So the remaining difference is RTS.
+8. **Kermit's source again:** in half duplex it raises RTS only while sending a line, and drops it after the Enter goes out. **So Kermit always receives with RTS off.** `CJTERM` held RTS on.
+
+**Current theory:** with RTS asserted, something (the cable or the modem's adapter) corrupts the PCjr's receive line. That explains every symptom: full duplex (RTS never raised) received nothing, Kermit's half duplex (RTS pulsed while sending) worked, and RTS held on gave framing errors.
+
+**Next test:** `RTSTEST.BAT` runs `CJTERM` with RTS always off (`/R:0`), then RTS only while sending (`/R:2`).
+
+**Result, 13:43: RTS off works.** Run 1 (`/R:0`) chatted with the server in plain full duplex through our own driver: "this is from rts test", "its outputting below the status line". Root cause confirmed: **on this PCjr, raising RTS corrupts the data it receives from the WiFi modem.** Kermit's half duplex only worked because it drops RTS while receiving. `CJTERM` now defaults to RTS off.
+
+The odd placement (text below the status line) is because `ANSI.SYS` doesn't support the scroll region (DECSTBM) the server uses for Kermit's screen. Expected in a test terminal. The native client draws its own screen.
+
+**Stage 2 done.** Next: Stage 3, the CodeJr protocol (framing, CRC, acknowledgements) in Go and C, tested over a noisy simulated line and in the emulator.
+
+## Day 1: Stage 3, the CodeJr protocol and the native client (2026-10-03, 13:45-14:10)
+
+**Protocol (CJP/1).**
+
+- **Frames:** `FEND type seq ack len payload CRC-16 FEND`, with SLIP-style escaping of FEND, FESC, XON, XOFF and 0xFF. XON/XOFF are escaped because the modem uses XON/XOFF flow control; 0xFF because of telnet.
+- **Reliability:** up to 4 frames in flight, cumulative acknowledgements, go-back-N resends on timeout. The PCjr acknowledges a frame only after handling it, so a slow disk write slows the server down.
+- **Handshake:** the client waits for the server's `READY` banner and sends a `HELLO` frame. The server spots the frame's first byte and switches to the native front end; anyone sending a plain Enter still gets the Kermit screen.
+- **Implementations:** Go in `server/internal/cjp`, C in `client/cjp.c`. The C file is plain portable C, so it builds both for the PCjr and on the laptop for tests.
+
+**Bugs the tests caught:**
+
+1. **Link deadlock.** The Go link's reader blocked whenever nobody was reading incoming messages, so it stopped processing acknowledgements and the other direction stalled. This would have happened whenever the server was busy sending a file. **Fix:** incoming messages go into an unbounded queue.
+2. **CRC miss on a dropped byte.** The C-versus-Go interop test, run over a line that drops and flips bytes, saw one dropped byte slip past the 16-bit CRC: a 1-in-65,536 event that turned up because the test damages hundreds of frames per run. **Fix:** a length byte in every frame, so a dropped or extra byte always fails. A new test drops each byte of a frame in turn and checks that every one is rejected.
+3. **The telnet filter** threw away NUL bytes, which the protocol uses (sequence 0, ack frames). **Fix:** NULs now pass.
+4. **A stale test** still expected the old APC text from before the "binary, overwrite" receive settings.
+
+**CODEJR.EXE (21 KB)** draws its own 80x25 screen straight into video memory: a header, a 21-line transcript, a divider, the input line and a status bar. It keeps RTS off, dials, waits for `READY`, says `HELLO`, chats, and receives files with a progress bar on the status line. Each file is written to the current directory, and only then acknowledged with a result. In the emulator, Claude's file arrived in **200 ms**; Kermit took seconds.
+
+**Testing (`./test.sh` runs it all):**
+
+- **Go unit tests:** Kermit, protocol, link, screen, text, pacing, wrapper.
+- **Go integration tests:** the full Kermit session and the full native session against fake clients, covering the handshake, turns, transfers, a refused file, commands and hang-up.
+- **Interop tests:** C-Kermit against our Kermit, and the C client protocol against the Go protocol over clean and noisy lines.
+- **Client build:** both `.EXE`s with all warnings as errors.
+- **Headless emulator runs** of the MS-Kermit path and the native path, checking the files that arrive and the client's own screen capture.
+
+**First real run of CODEJR.EXE (14:10): it worked, but chat text crawled.** Kermit had been faster. Cause: the server sent every streamed piece of Claude's reply (a few characters each) as its own frame, and each frame needed a window slot and an acknowledgement through the PCjr and the modem. The line sat mostly idle. **Fix:** the server collects text into full frames (sent every 100 ms, when a frame fills, or before anything else goes out), and its window went from 4 to 8 frames. Each side picks its own window, so the client didn't change. A new test checks that 60 streamed pieces arrive in 5 frames (it was 61).
+
+**Polish from the first real native session (14:15).**
+
+- **Lines ran together:** Claude's replies don't end with a newline, so the next prompt or command was printed on the same line ("try /help./new", "Paris.> what time is this"). **Fix:** the native front end finishes the current line before echoing input and after every reply. There's a test for it.
+- **Date, time and location:** Claude said it "can't see a clock". The current date and time now go into the system prompt on every turn (not once at startup, where it would go stale), plus the PCjr's location from a new `-location` setting ("Encinitas, CA 92024"). Looking up a location from the IP address wasn't practical: the PCjr's address is a private LAN one, and geolocating the home's public IP would mean sending it to a third party.
+
+**Slow transfers on the real PCjr (14:18).** `HELLO.BAS`, 42 bytes, took 15 s over the native protocol. **Suspected cause:** while the PCjr creates or writes a file on its SD card, it can miss serial input; the lost frames then wait out the 2 s resend timer, several times over. **Fix:** the client sends XOFF to the modem (which uses XON/XOFF flow control) before any disk work, waits for the line to go quiet, keeps any frames that arrive meanwhile in a small queue, does the disk work, then sends XON. Both decoders ignore raw XON/XOFF, which matters in the emulator, where there's no modem to swallow them. To check the theory, the server now logs resends and bad frames per transfer and per call, and the client shows bytes lost, bad frames and resends after each file and on Alt-S.
+
+**No BASIC cartridge.** `BASICA HELLO` said the cartridge is required: PC DOS's `BASICA.COM` on a PCjr is only a stub for the cartridge. GW-BASIC is on the card and works, including writing files. Claude's instructions now target standard GW-BASIC (no cartridge-only PCjr extras) and say to run programs with `GWBASIC NAME`; the user is adding GW-BASIC's folder to `PATH`. GW-BASIC showed odd colors (grey on brown), probably because it doesn't set the PCjr's color palette. Still open.
+
+**Protocol work parked (14:50).** The client's own counters (Alt-S) showed the real cause of the slowness: **the PCjr loses received bytes**, about 80 in a short session, spoiling 11 frames. Kermit lost bytes at the same rate; it just didn't notice ("VE" for "STEVE"). Every spoiled frame then waited out a timer. A test modeling a receiver that loses 1 byte in 300 reproduced it: 13 KB took 40 s. Ideas in progress: fast resend on duplicate acks, then selective repeat with Naks and 64-byte frames. The selective-repeat rewrite of `server/internal/cjp/link.go` doesn't pass its tests yet, so it is not deployed; the live server runs the previous build. The other open question is 2400 baud instead of 9600: the PCjr would have 4 ms per character instead of 1 ms to service its serial interrupt, which should stop the losses outright.
+
+## Day 1: a graphics library and two games, built by three agents in parallel (2026-10-03, 14:55)
+
+**The goal:** a reusable PCjr graphics library, plus two games to exercise it: a Doom-style shooter and a flight simulator that should beat Microsoft Flight Simulator 1.0 on the same class of hardware.
+
+**How the work is split:** to let three agents work at once, the library's interface was written first as a shared contract, `lib/jrgfx.h`:
+
+- **Graphics:** 160x200 and 320x200 in 16 colors, drawn into a back buffer in fast RAM, then copied to the PCjr's slow shared video memory once per frame. Lines, filled triangles and polygons, sprites, text, palette, vsync.
+- **Math:** 16.16 fixed point with sin/cos tables (the 8088 has no FPU).
+- **Input, time, sound:** raw keyboard state, a millisecond timer, and the SN76496's 3 voices plus noise.
+- **Testing:** a debug log, and a PPM screenshot of the back buffer.
+
+Each agent owns one folder (`lib/`, `games/doom/`, `games/flight/`) and tests headless in the emulated PCjr, looking at the screenshots it takes. The games code against the header and use temporary local versions of anything the library hasn't delivered yet; the library agent keeps `lib/STATUS.md` current for the other two.
+
+**The library is done (15:20).** Every function in `jrgfx.h` is implemented, tested headless, and builds with all warnings as errors. Hardware facts were checked against the IBM PCjr Technical Reference, the IBM BIOS listing and the DOSBox source, and three of them changed the design:
+
+- **B800 only reaches the first 16 KB of video memory,** so 320x200 mode (32 KB) is written through its real segment.
+- **320x200 mode can overwrite DOS memory.** This PCjr reserves only 16 KB of video memory (JRCONFIG says 1C00h), but the BIOS puts the 32 KB mode at 1800h. The library claims a free 32 KB block instead and moves the video page there.
+- **The PCjr's INT 9 is a software interrupt,** with the scan code in AL. The keyboard handler reads AL and passes it on to the BIOS.
+
+**Biggest cost per frame:** copying the back buffer to the slow shared video memory takes about 183 ms in 160x200 mode (DOSBox estimate, roughly 6 fps before drawing anything), so the games draw small views and copy only changed rows. An assembly textured-column routine was added for the raycaster. I re-ran the primitive test and the demo headless myself; the screenshot shows every primitive drawn correctly.
+
+**The real cause of the slow native protocol: `ATDT` (15:45).** The investigation, in order:
+
+1. **The server's frame timeline at 2400 baud:** the PCjr accepted the first frame of each burst and rejected those right behind it. Each resend got exactly one more frame through.
+2. **The PCjr's own counters:** **0 bytes lost** in its serial port, yet **49 bad frames**. So nothing was dropped on arrival; bytes were removed before they ever reached the PCjr.
+3. **The Zimodem README:** in Zimodem, the `T` in `ATDT` doesn't mean tone dialing. It means **"translate this connection as TELNET"**, and telnet drops a NUL byte that follows a CR. Binary frames contain CR NUL fairly often (sequence and ack numbers, lengths, checksums), so frames arrived a byte short and failed their checks. Kermit's packets are printable text, so Kermit never hit it.
+
+**Fixes:**
+
+- **Server:** escapes CR in every frame, which helps the client already on the PCjr, since its decoder un-escapes any escaped byte.
+- **New client:** escapes CR too, and dials with `ATD` instead of `ATDT`.
+- **On the way, the client** no longer calls the BIOS on every frame. The cursor is set directly in the CRTC, and the keyboard check reads the BIOS buffer pointers instead of calling INT 16h. Loss counters (late-interrupt overruns, framing errors, bad frames) now go into the chat history as client messages.
+
+**Misreads along the way:** I first blamed disk writes (the XOFF fix), then the pacer delaying acks, then genuine byte loss (selective repeat, now parked in the scratchpad), then BIOS calls. The client counters plus the README settled it. **Lesson:** count on both ends before theorizing.
+
+**The actual mechanism (16:05): the PCjr corrupts what it receives while it transmits.** The CR fix didn't help. A closer reading of the timeline did: the PCjr decoded most frames fine (each duplicate ack means "a good frame, but out of order"). What failed was always **the frame right after one it had just accepted**, which is exactly when the PCjr sends its ack. So anything arriving while the PCjr transmits is damaged.
+
+That explains the whole day:
+
+- holding RTS on garbled everything;
+- Kermit only worked in half duplex;
+- letters went missing while typing ("VE");
+- full-window bursts lost the frame that followed each ack.
+
+It points at the cable or the modem's RS-232 adapter coupling the PCjr's outgoing lines into its receive line.
+
+- **Immediate fix (server only):** the native link sends one frame at a time (window 1), so the PCjr only ever answers into a quiet line.
+- **Next (client):** hold acks until the line goes quiet, then acknowledge a whole burst, to get the 8-frame window back.
+- **Worth checking in hardware:** the serial cable and adapter wiring.
+
+**JRFLIGHT is done (16:10).**
+
+- **Picture:** 160x200 in 16 colors. A 160x120 windshield over an 80-line instrument panel: airspeed, altimeter, attitude indicator, heading tape, vertical speed, throttle.
+- **Scenery:** 56 objects. Two airports, the town of Juniper, a lake and river, roads, farm fields, and five snow-capped mountains.
+- **Rendering and physics:** all 16-bit integer math, with dithered filled polygons. Gauges only redraw the area their needle touched. Flight physics include stall, takeoff roll, climb and crashes.
+- **Speed in the emulator:** 3 to 5 fps at a rough 8088 speed, so about 2 to 4 fps expected on a real PCjr: comparable to or better than MSFS 1.0, with filled 16-color graphics instead of wireframe.
+- **Bypassing the library:** it skips lib's drawing and present entirely. It draws straight into the PCjr's packed 4-bit format, so the view reaches video memory in 15 to 23 ms instead of about 110 ms. That confirms the turbo library's main direction, and its requests (a packed drawing mode, the row table, a cheaper timer) were passed to the turbo agent.
+
+**The turbo library (16:20).** A new fast path (`fx_*`) draws straight into the hidden video page in the PCjr's own 4-bit format. The vertical-retrace interrupt (IRQ5) flips pages through port 3DFh, so there is no present copy at all. Highlights:
+
+- one-pass raycaster columns that never need clearing;
+- byte-wide polygon spans (REP STOSW) with free dithering;
+- compiled sprites (the sprite becomes generated 8088 code, 8x faster);
+- palette cycling applied at the next retrace;
+- a cheap tick timer;
+- tear-free double buffering for the games' existing copy code, by adding just `fx_begin`/`fx_flip` around it.
+
+**Speed:** the raycaster demo went from 1.2 to 5.0 fps in DOSBox (7.9 in low detail). The estimate for a real PCjr is 16-23 fps for a 160x100 low-detail view.
+
+**Tried and dropped:**
+
+- **Delta presents** look good in DOSBox but cost more than a plain copy on a real 8088: DOSBox undercharges repeated compares.
+- **Quarter-square multiply tables** and **compiled scalers** were evaluated and rejected.
+- **Trixter's 160x100 line-doubled mode** is understood but untested: DOSBox can't display it.
+
+**Testing:** a new pixel-exact test (T3) compares every fast primitive against the old API. The library build is now test-gated: it builds under a temporary name, runs the tests headless, and only then replaces the library the games link against. I re-ran T3 (0 failures) and the fast demo myself. Both games were asked to switch to the fast path.
+
+**JRFLIGHT on the fast path, plus speed options (16:55).**
+
+- **New options:** window sizes (full 160x120, medium 128x96, small 96x72 with a cockpit frame), wide 2-pixel columns, line doubling, a one-key `/FAST` preset, and Trixter's 160x100 hardware line-doubling mode as an untested `/LD` switch.
+- **Page flipping works:** each saved frame was checked pixel for pixel against what's on screen after the flip. That check also caught an older bug: one panel row (194) was never copied to video.
+- **The gains were modest:** 3.1 to 3.7 fps by default, and 3.7 to 6.0 with `/FAST` (DOSBox at cycles=400). The flight sim is **CPU-bound** rather than fill-bound. In the small low-detail view, culling 55 objects takes about 53 ms per frame, transforming about 140 vertices with 8088 multiplies about 77 ms, filling about 54 ms, and the attitude indicator about 30 ms. Removing the copy only saved 15-23 ms of a 200-330 ms frame.
+- **Expected on a real PCjr:** about 2-3 fps by default and 3-4 fps with `/FAST`.
+
+**JRDOOM is done (17:00).**
+
+- **The level:** a 32x32 map with 7 rooms in 6 wall textures, sliding doors, a red-key locked door and an exit switch.
+- **Enemies and weapons:** zombiemen and imps with simple AI; a pistol and a shotgun; health, ammo and key pickups.
+- **Doom feel:** a Doom-style status bar with a face, damage and muzzle flashes done through the palette, a bobbing weapon drawn as a compiled sprite, and SN76496 sound effects. View size and detail keys work like Doom's.
+- **Renderer:** rays are cast in assembly every 4th column, and the columns between are filled when both ends see the same wall. Wall textures are stored as pre-shaded color runs and drawn by jumping into unrolled store code. Sprites use the wall heights as the depth buffer. The view is drawn straight into the hidden page.
+- **Speed (DOSBox at cycles=400):** 9.3 fps at full view in low detail, up to 14-17 fps in the small view (it was 2.4 fps in the first working version). Its own assembly wall drawer beat the library's `fx_wall` (45 ms against 104-193 ms).
+- **Testing:** an autopilot (`/DEMO`) plays the whole level to the exit switch at every view size and detail level.
+
+## Day 1: burst file transfer (2026-10-03, 17:30-18:20)
+
+**Why.** Files crawled over the native link (116 bytes in 28 s on the real PCjr; Kermit manages about 235 bytes/s). Two facts shaped the fix: the PCjr garbles what it receives while it transmits, and its UART has no FIFO, so an interrupt per byte can't keep up with fast input while the program also does other work.
+
+**Design: the client pulls.**
+
+- The server offers a file (`FileOffer`), cut into 4089-byte chunks, each compressed on its own.
+- For each chunk the client sends one small `Pull` request (chunk number plus a 32-bit map of the blocks it still needs) and then **only listens**: it turns the UART interrupt off and polls the chip in a tight loop, storing raw bytes. Nothing is decoded until the line is quiet.
+- The server answers with the requested 128-byte blocks back to back, each one framed and checksummed. It keeps no state; every request is answered the same way.
+- Blocks the chunk doesn't have are sent as two bare frame markers, so a burst always has exactly two markers per requested block. The client stops listening by counting markers instead of waiting for silence.
+- The client then checks every block, asks again for only the damaged ones, unpacks the chunk, checks a CRC of the unpacked bytes, and writes to disk while the line is silent.
+
+**Speed.** The PCjr's UART clock is 1.7895 MHz, so its true speeds are 111861 divided by a whole number: 9322, 18643, 37287, 55930. Zimodem's source (`doBaudCommand`) accepts any rate from 128 to 921600, so the client can ask the modem for exactly 37287 (`ATB37287`), check that it still answers `AT`, and put it back to 9600 when the call ends. It never saves the setting, so a power cycle always restores 9600. The same source confirmed that `ATD` with no `T` dials with no telnet translation.
+
+**Other pieces.**
+
+- **Compression:** LZ4 block format. The compressor is in Go (hash chains, lazy matching); the decoder is about 50 lines of C. Measured on real files: the games shrink to 65-71%, the client itself to 88%, BASIC source to about 70%. Chunk size barely matters (71% at 4 KB against 65% for the whole file). LZSA2 would do somewhat better; LZ4 was chosen for the tiny, table-free decoder.
+- **Table-driven CRC-16** on the PCjr: the bit-by-bit version would have cost about 0.4 s per 4 KB, as much as receiving it.
+- **Assembly interrupt handler** (`client/serisr.asm`): saves four registers instead of all of them, roughly 50 µs per byte instead of 170, so chat frames survive at 37287 baud.
+- **Server pacing** follows the speed the client reports, and no longer adds scrolling time for line feeds in binary data.
+- **Kermit sessions** now leave files over 40 KB for the native client.
+
+**Bugs the tests caught.**
+
+- A line typed while a file was going over was thrown away by the server. The emulator test types its line early and hit it. Now such messages wait and run after the transfer.
+- The client's speed change started with a bare Enter, which in the emulator (no modem in between) started a Kermit session on the server.
+
+**Testing.**
+
+- Go unit tests for the compressor (round trips, every length from 0 to 300, 2000 corrupted inputs, real files) and for chunking and bursts.
+- The PCjr's own C code (`pull.c`, `lz.c`, `cjp.c`), built for the host, fetching JRDOOM.EXE from the Go server over a line that drops and flips 0.4% of bytes in both directions: intact, 129 requests for 22 chunks. On a clean line: 22 requests, 70 KB on the wire for the 88.5 KB file.
+- A fake version-2 client against the real session code.
+- The real `CODEJR.EXE` in the emulated PCjr at both speeds, pulling a 25 KB binary and comparing it byte for byte: **890 bytes/s at 9600 and 2,992 bytes/s at 37287** (emulator figures).
+
+**Not yet known:** how the real PCjr, cable and modem behave at 37287. The client reports bytes/s, requests and damaged blocks after every file, so the first real transfer will say. **Not built yet:** sending only the changed parts of an edited file.
+
+**First real pull transfers, and the stall bug (19:45-20:10).**
+
+- **The one-frame-at-a-time link works on the real PCjr.** The old client fetched the new `CODEJR.EXE` (24,900 bytes) in 60 s, 413 bytes/s, with a single resend. That confirms the "garbles what it receives while it transmits" theory, and already beats Kermit's 235 bytes/s.
+- **Pulls at 9600 worked chunk after chunk** (a 4 KB chunk every 4.6-5 s, one request each), then failed with "no answer from the server" on both games.
+- **Cause, from the server's frame timeline:** partway through a burst the WiFi link stalled for longer than the client's 0.17 s silence limit. The client took that for the end of the burst and asked for the missing blocks. The server finished the old burst first and then sent the new answer behind it. From then on every request was answered by data queued behind earlier answers, the client's marker counting stopped on stale frames, and after 20 rounds without progress it gave up.
+- **Fixes:**
+  1. The client waits 0.5 s of silence before deciding a burst is over.
+  2. After any burst that didn't bring everything, the client first takes whatever is still arriving until the line is quiet, and only then asks again.
+  3. The server abandons a burst it is still writing when a new request arrives (`Burster`), so answers can't queue up.
+- **The fetch loop moved into `pull.c`** (`pull_fetch`), so the host test runs exactly the code the PCjr runs. The interop test now includes a line that stalls for 0.7 s every 2.5 KB, with and without noise: JRDOOM arrives intact with 42 requests for 22 chunks (74 with noise).
+- **Speed in chat:** the progress bar and the end-of-transfer lines (the client's own and the server's "Saved ...", Kermit sessions too, both directions) show bps counted as the line counts them, 10 bits per byte, so the figure compares directly with the baud rate. Compressed files can come out above it.
+
+**Lesson:** the emulator's link never stalls. Timing assumptions need a test with a hostile line, not just a noisy one.
+
+## Day 1: wrap-up (2026-10-03, 21:00)
+
+- **bps, not kbps.** Transfer speeds are shown as bits per second counted the way the line counts them, 10 per byte (8 data bits plus start and stop), so a perfect transfer at 9600 baud reads 9600. Counted at 8 bits it would top out at 7680 and look 20% short.
+- **`just` tasks** replace ad hoc commands: `just status`, `restart` (refuses during a call), `log`, `link`, `transcript`, `queue`, `test`, `deploy-client`, `deploy-games` and more. Live data moved out of the repo to `~/.local/share/codejr/` (`workspace/` and `logs/`), so the server uses the same files from any checkout or gw worktree. Sessions start in `~/Github/CodeJr`, the gw workspace root, which has its own `CLAUDE.md`.
+- **Docs for whoever continues:** `docs/HANDOFF.md` (state, test list, next steps, hard-won facts, mistakes), a `CLAUDE.md` at the repo root so new sessions load the rules, a rewritten README, and status notes on the two plan files.
+
+**Where day 1 ended.** Proven on the real PCjr: the Kermit path, cold boot to `CODEJR`, native chat, the one-frame-at-a-time link at 413 bytes/s. Passing in tests only: the pull protocol's stall fix, the 37287 baud switch, the graphics library and both games. Waiting in the queue for the PCjr: client 0.3, JRDOOM and JRFLIGHT.
+
+**The lessons, in one place:**
+
+1. Read the modem firmware's documentation before suggesting AT commands (`ATF`, `ATDT`).
+2. Put counters on both ends before theorizing; four wrong causes were chased before the PCjr's own counters settled it.
+3. The emulator's timing is wrong and its serial line is perfect. Test timing code against a line that drops, flips and stalls, and label emulator-only results.
+4. Check for a call before restarting the server.
+5. A stopped or failed multi-step command may have applied its first steps. Look at the files.
+6. Measure before promising a gain.

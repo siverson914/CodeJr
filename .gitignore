@@ -1,0 +1,16 @@
+/emu/msk314/
+/server/codejr
+*.log
+/emu/c/
+/emu/dosbox.conf
+/client/*.EXE
+/client/*.o
+/client/*.err
+/lib/*.o
+/lib/*.EXE
+/lib/*.lib
+/lib/test/*.o
+/lib/test/*.EXE
+/games/*/*.o
+/games/*/*.EXE
+/demos/*/*.EXE
