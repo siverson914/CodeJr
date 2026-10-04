@@ -15,3 +15,8 @@
 /games/*/*.EXE
 /demos/*/*.EXE
 /games/jrai/*.mp4
+/speech/*.EXE
+/speech/*.o
+/speech/*.err
+/speech/out/
+/speech/__pycache__/

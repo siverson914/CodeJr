@@ -43,6 +43,7 @@ There are two ways in from the PCjr, and the server tells them apart by itself:
 - `FAST.BAT` (modem and PCjr at 37287 baud). Never run on the real machine.
 - The bps display.
 - Both games and the whole graphics library. Nobody has played them with a real keyboard, heard the sound, or seen the palette on the real monitor.
+- `SAY.EXE` and its speech clips (`speech/`, README there): ElevenLabs speech through gipity, played on the SN76496's three voices combined (`.SND`, 9.3 kHz) or as PWM on PIT channel 2 (`.SNP`, 15.9 kHz). Played in DOSBox only; nobody has heard either on the PCjr.
 
 **Queued for the PCjr** (`just queue`; sent on its next connection): `CODEJR.EXE` 0.3, `JRDOOM.EXE`, `JRFLIGHT.EXE` (the updated one), and new `NATIVE.BAT`, `FAST.BAT`, `RUN.BAT` without the address.
 
@@ -63,6 +64,7 @@ Ask Steve to do these in order and send the `[client]` line or a photo each time
 4. **Run the games:** `JRDOOM` and `JRFLIGHT`. Check keyboard, sound, colors and speed. Both take `/BENCH`, `/PROF` and `/DEMO:n` and write `LOG.TXT`. To get a log back, use the Kermit path: `CODEJR` from `C:\`, then `/get LOG.TXT` (the native client can't upload yet).
 5. **Risky graphics paths:** `JRFLIGHT /LD` (hardware 160x100 mode, never displayed anywhere), and 320x200 mode in `lib/DEMO.EXE` (this PCjr reserves only 16 KB of video memory; the library claims its own block).
 6. **Typing in the native client while text arrives:** do letters get lost? Alt-S prints the client's loss counters into the chat.
+7. **Speech.** `just deploy-speech HELLO HELLO.SNP` (168 KB: about 7 minutes at the measured 413 bytes/s, about 3 if the 9600 pull reaches its emulator speed). On the PCjr: `SAY /V HELLO`, then `SAY /V HELLO.SNP`. Ask which sounds better, whether the PWM one whines, and for the "late" numbers (anything above 0 means the loop can't keep up: lower that method's rate in `speech/mksnd.py`). Silence from `.SND` but sound from `.SNP` would mean the period-1 trick doesn't work on this chip (JRAI's voice uses it too).
 
 ## How to work in this repo
 
@@ -82,6 +84,8 @@ just emu-kermit      # the real MS-Kermit path, headless
 just deploy-client   # build CODEJR.EXE and queue it for the PCjr
 just deploy-games    # build both games and queue them
 just lib             # graphics library, test-gated
+just clip NAME "text" # new speech clip via gipity; just speech converts them all
+just deploy-speech HELLO READY  # queue SAY.EXE and clips (.SNP suffix for the PWM version)
 ```
 
 - **Toolchain:** Go, C-Kermit and DOSBox 0.74 from pacman. Open Watcom v2 is unpacked in `~/.local/opt/openwatcom` (`. client/owenv.sh`). NASM is not installed; use Open Watcom's `wasm`. `gcc` builds the host test harnesses. `magick` converts screenshots.
@@ -103,6 +107,7 @@ just lib             # graphics library, test-gated
 | `client/` | `codejr.c`, `cjp.c`, `pull.c`, `lz.c`, `serial.c`, `serisr.asm`, `screen.c`; `cjterm.c` test terminal; `test/` host harnesses |
 | `lib/` | JRGFX graphics library; read `STATUS.md` and `FAST.md` |
 | `games/doom`, `games/flight` | JRDOOM and JRFLIGHT, each with README and NOTES |
+| `speech/` | `SAY.EXE` (`say.c`, `player.asm`), `mksnd.py` converter, `clips/` (gipity mp3 + text), `test.sh` |
 | `demos/cube` | JRCUBE, a shaded spinning cube with a moving light and real-time shadow (README there) |
 | `emu/` | headless emulator scripts |
 | `docs/attic/` | a parked selective-repeat link (didn't pass its tests) |

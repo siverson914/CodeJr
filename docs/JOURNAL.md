@@ -397,3 +397,26 @@ Emulator-only so far: everything. Not run on the real PCjr.
 - **`NATIVE` needed the address typed in.** `/setup` replaced `CODEJR.BAT` while it was running; DOS reads a batch file by position, so it resumed partway into the new file (an extra 15 s Kermit call at 9:55 pm) and probably skipped the lines that move `CODEJR.CFG` into `C:\CODEJR`. Client 0.4 also looks in `C:\CODEJR.CFG`. The emulator test now dials from that file with no `/D`.
 
 **`FAST` on the real PCjr, for the first time:** the client said `baud=37287` and chat worked (1 frame resent by the server). The PCjr's Alt-S counters climbed to 53 framing errors and 16 bad frames in a short chat, so 37287 is noisy on this line. No file pull at that speed yet. Also seen: the Alt-S line printed in the middle of a reply line; it should wait for the line to end.
+
+## SAY: a real voice for the PCjr (2026-10-03, night)
+
+Steve asked what the best speech ever done on a PCjr was, and whether we could do better. The best period answer is IBM's PCjr Speech Attachment, an add-on with a speech chip. Without one, the known trick is the SN76496 volume register used as a DAC, which is what JRAI's SAM voice does. He picked the plan: a modern voice made on the laptop (ElevenLabs through gipity), shaped hard for the PCjr, and two players to compare by ear. "Make it awesome." It's in `speech/` (README there).
+
+**What got built.**
+
+- `mksnd.py` turns any audio, or text via `gipity generate speech`, into `.SND` (all three SN76496 tone voices at period 1, summed: up to 256 of the ~800 level combinations, one byte per sample, 9.3 kHz) and `.SNP` (PWM on PIT channel 2, 15.9 kHz). It also writes preview WAVs of what each should sound like.
+- `SAY.EXE` plays them. The player is copied into a "last fit" DOS block above 128 KB (code, stack, tables, samples) and paced by IRQ0 at the sample rate with `STI; HLT; CLI`, so each write lands a fixed number of clocks after the tick. A key stops it.
+- `just clip`, `just speech`, `just deploy-speech`, and `speech/test.sh` in `just test`.
+
+**Wrong turns.**
+
+- The first emulator run hung. The linker had put the player's segment at offset 680h of a code frame it shared with the C code, so every internal address was off by 680h once the code was copied to offset 0 of the new block. A group of its own (`PLAYGRP`) fixed it. Found by printing the far address of `sp_begin`.
+- 11 kHz for the chip method was the plan, and DOSBox played it fine. Counting real 8088 clocks said otherwise: 4 clocks per code byte, about 150 clocks to take the interrupt, and each SN76496 write holds the CPU in READY wait states for about 43 clocks (32 of the chip's clocks; the fact was already in `lib/STATUS.md`). Three writes per sample came to about 466 clocks against a 432-clock budget. The loop went from 55 bytes to 40 (`LODS` with ES, `LOOP`, the 64K and keyboard checks every 256 samples only), and the rate dropped to 9.3 kHz (512 clocks). PWM writes have no wait state; its loop is 22 bytes at 15.9 kHz. Both are estimates. `SAY /V` counts samples whose tick arrived before the loop was ready (the 8259's request register, read before each `HLT`), so the real PCjr will say.
+- The first level table picked the 256 combinations closest to an even grid: 39.5 dB speech-band SNR on a perfect chip. A simulation with each 2 dB step off by 0.25 dB dropped it to 27 dB, because neighboring levels used unrelated voice settings and their errors became noise. The table now weighs each combination's spread under a step-error model: 37 dB perfect, 30 dB at 0.25 dB, 23 dB at 0.5 dB.
+- Noise shaping at full strength made the chip method worse in the speech band (37.5 dB against 39.0 without); half strength measured best (39.5). PWM, with only 72 levels, gains from second-order shaping.
+
+**How it sounds, as far as a laptop can tell.** Whisper (small.en) transcribes all ten previews (five clips, both methods) word for word. The old one-voice 4-bit method, applied to the same HELLO clip: "Hello to you! I'm Cor, and I'm talking to you from an IBM TV union."
+
+**Open on the real PCjr:** whether period 1 really reads as a steady level on this chip (JRAI depends on it too), how exact its volume steps are, whether the PWM carrier whines, and the late counts. A 6-second clip is 56 KB (chip) or 95 KB (PWM), minutes at 413 bytes/s.
+
+Emulator-only so far: playback (DOSBox, 0 late samples at 1000 cycles, 0 and 1 at 400). The quality numbers are simulations assuming ideal hardware unless stated.
