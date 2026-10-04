@@ -63,6 +63,13 @@ func main() {
 	if err := ws.Init(); err != nil {
 		log.Fatal(err)
 	}
+	progs := map[string][]byte{}
+	for name, text := range session.ProgFiles {
+		progs[name] = []byte(text)
+	}
+	if err := ws.Provide(progs); err != nil {
+		log.Fatal(err)
+	}
 	var nets []netip.Prefix
 	for _, s := range strings.Split(*allow, ",") {
 		p, err := netip.ParsePrefix(strings.TrimSpace(s))

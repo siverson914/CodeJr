@@ -157,6 +157,22 @@ func (w *Workspace) MarkSynced(hashes map[string]string) error {
 	return w.saveSynced(m)
 }
 
+// Provide writes files the server supplies (launchers, the client) into
+// the workspace when they are missing or different, so the next sync sends
+// them like any file Claude wrote.
+func (w *Workspace) Provide(files map[string][]byte) error {
+	for name, b := range files {
+		p := filepath.Join(w.Dir, name)
+		if old, err := os.ReadFile(p); err == nil && bytes.Equal(old, b) {
+			continue
+		}
+		if err := os.WriteFile(p, b, 0o644); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Forget makes the next sync send name again.
 func (w *Workspace) Forget(name string) error {
 	m := w.loadSynced()

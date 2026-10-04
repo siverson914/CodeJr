@@ -6,7 +6,7 @@ Written 2026-10-03, at the end of the first working session. Read this first. `d
 
 - **Start sessions in `~/Github/CodeJr`** (the gw workspace root; it has its own `CLAUDE.md`). The repo is `~/Github/CodeJr/CodeJr`. Run `just` from inside the repo.
 - **Live data is outside the repo,** in `~/.local/share/codejr/`: `workspace/` (Claude's folder for the PCjr) and `logs/`. Every checkout and gw worktree shares it. `CODEJR_HOME` overrides the location.
-- **gw is not set up yet:** the repo has no commits and no remote, and `gw init` hasn't been run. All three need Steve's go-ahead.
+- **Git:** private repo `github.com/siverson914/CodeJr`, branch `main`. `gw init` hasn't been run in `~/Github/CodeJr` yet (ask first).
 
 ## What CodeJr is
 
@@ -44,7 +44,9 @@ There are two ways in from the PCjr, and the server tells them apart by itself:
 - The bps display.
 - Both games and the whole graphics library. Nobody has played them with a real keyboard, heard the sound, or seen the palette on the real monitor.
 
-**Queued for the PCjr** (`just queue`; sent on its next native connection): `CODEJR.EXE` 0.3, `JRDOOM.EXE`, `JRFLIGHT.EXE` (the updated one).
+**Queued for the PCjr** (`just queue`; sent on its next connection): `CODEJR.EXE` 0.3, `JRDOOM.EXE`, `JRFLIGHT.EXE` (the updated one), and new `NATIVE.BAT`, `FAST.BAT`, `RUN.BAT` without the address.
+
+**Address and install (day 2):** the server's address lives only in `C:\CODEJR\CODEJR.CFG` (`DIAL=host:port`), written by `/setup` from the address the PCjr dialed; the launchers pass no `/D` (an explicit `NATIVE /D:host:port` still overrides). The server writes `NATIVE.BAT`, `FAST.BAT` and `RUN.BAT` into the workspace at startup (`ProgFiles` in `dosfiles.go`), and `/setup` ends with a sync, so it installs the native client too (files under 40 KB go over Kermit; the games wait for the native client). The client pulls into `CJPULL.$$$` and renames only when the file is whole, so a failed update keeps the old `CODEJR.EXE`.
 
 **On the PCjr now:** `C:\CODEJR.BAT` and `C:\CODEJR\CODEJR.INI` (Kermit launcher, half duplex), `C:\MSK314\`, and in `C:\CODEJR\PROGS`: `CODEJR.EXE` 0.2, `NATIVE.BAT`, `FAST.BAT`, `RUN.BAT`, the first `JRFLIGHT.EXE`, a few BASIC programs, and test tools (`CJTERM`, `UARTDUMP`, `SCRDUMP`).
 
@@ -54,7 +56,8 @@ There are two ways in from the PCjr, and the server tells them apart by itself:
 
 Ask Steve to do these in order and send the `[client]` line or a photo each time.
 
-1. **Pull at 9600.** In `C:\CODEJR\PROGS` run `NATIVE`. It should fetch the 0.3 client, then both games. Expect roughly 7000-9000 bps. If a game fails, Alt-X and run `NATIVE` again (the second run uses 0.3).
+0. **Install over Kermit.** At `C:\` run `CODEJR`, Enter at READY, `/setup`. It installs `CODEJR.CFG`, then sends `CODEJR.EXE` 0.3 and the three launchers (about 2 minutes). `/quit`.
+1. **Pull at 9600.** `CD \CODEJR\PROGS`, then `NATIVE`. It should dial with no address on the line (from `CODEJR.CFG`) and fetch both games. Expect roughly 7000-9000 bps. If it says there's no server to dial, `CODEJR.CFG` didn't land: `NATIVE /D:192.168.0.178:4860`.
 2. **Fast speed.** Run `FAST`. Watch for "The modem didn't answer at 37287 baud" (it then stays at 9600 by itself). Note the bps and the damaged-block count. If many blocks are damaged, try `CODEJR /P:1 /F:18643 /D:192.168.0.178:4860`. If it is clean, try `/F:55930`.
 3. **After `FAST` exits,** check the Kermit path still dials (`CD \`, `CODEJR`). If not, the modem stayed at the fast speed: a power cycle restores 9600 (the client never saves the speed).
 4. **Run the games:** `JRDOOM` and `JRFLIGHT`. Check keyboard, sound, colors and speed. Both take `/BENCH`, `/PROF` and `/DEMO:n` and write `LOG.TXT`. To get a log back, use the Kermit path: `CODEJR` from `C:\`, then `/get LOG.TXT` (the native client can't upload yet).
@@ -187,5 +190,5 @@ In the order I'd do it.
    - JRDOOM: redraw only changed columns; try the 160x100 hardware mode.
    - A new trick to try: switch video pages partway down the screen so the status bar lives on a page drawn once.
 6. **Transfer extras:** send only the changed parts of an edited file; LZSA2 instead of LZ4; get a window above 1 back on the chat link by acknowledging only when the line is quiet (the parked selective-repeat link is in `docs/attic/`).
-7. **Housekeeping:** make `/setup` install `CODEJR.EXE`, `NATIVE.BAT`, `FAST.BAT` and `RUN.BAT` (today they were placed in the workspace by hand); commit the repo, add a remote and run `gw init` in `~/Github/CodeJr` (ask first); fix the `AUTOEXEC.BAT` clock line and set the clock; have someone look at the serial cable.
+7. **Housekeeping:** once the native client is proven, rename the launchers: `CODEJR` should start the native client (trying the fast speed, falling back to 9600 by itself, which replaces `NATIVE` and `FAST`), and the Kermit path becomes `CJKERMIT`. Run `gw init` in `~/Github/CodeJr` (ask first); fix the `AUTOEXEC.BAT` clock line and set the clock; have someone look at the serial cable.
 8. **Ideas Steve floated:** other "brains" behind the same server (OpenCode, a local model), and publishing CodeJr so other PCjr owners can run their own copy. A shared public server would need an API key, logins and per-user workspaces.

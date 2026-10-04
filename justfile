@@ -24,6 +24,8 @@ start *args: build
     #!/bin/sh
     if pgrep -x codejr >/dev/null; then echo "already running (just restart)"; exit 1; fi
     mkdir -p "{{ws}}" "{{logdir}}"
+    # A fresh workspace gets the client too, so /setup can install it.
+    [ -f "{{ws}}/CODEJR.EXE" ] || [ ! -f client/CODEJR.EXE ] || cp client/CODEJR.EXE "{{ws}}/"
     setsid server/codejr -workspace "{{ws}}" -location "{{location}}" -linklog "{{logdir}}/link.log" -trace "{{logdir}}/trace.bin" {{args}} >> "{{logdir}}/server.log" 2>&1 &
     sleep 1
     tail -1 "{{logdir}}/server.log"

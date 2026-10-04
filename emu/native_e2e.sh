@@ -20,6 +20,7 @@ run() { # $1 = label, $2 = extra client options
 	mkdir -p "$tmp/c/CODEJR/PROGS" "$tmp/ws"
 	cp client/CODEJR.EXE "$tmp/c/CODEJR/PROGS/"
 	cp client/CODEJR.EXE "$tmp/ws/BIG.BIN" # a real binary, about 25 KB
+	echo old > "$tmp/c/CODEJR/PROGS/BIG.BIN" # the pull must replace it
 	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" > "$tmp/server.log" 2>&1 &
 	sp=$!
 	sleep 0.5
@@ -31,7 +32,9 @@ run() { # $1 = label, $2 = extra client options
 	check "server saw the native client" "grep -q 'started (native client)' '$tmp/server.log'"
 	check "the 25 KB binary arrived byte for byte" "cmp -s '$tmp/ws/BIG.BIN' '$p/BIG.BIN'"
 	check "HELLO.BAS arrived with DOS line endings" "printf '10 PRINT \"HI\"\r\n20 END\r\n' | cmp -s - '$p/HELLO.BAS'"
-	check "server recorded both transfers" "[ \$(grep -c 'native: sent' '$tmp/server.log') = 2 ]"
+	check "server recorded both transfers" "[ \$(grep -cE 'native: sent (BIG.BIN|HELLO.BAS)' '$tmp/server.log') = 2 ]"
+	check "the launchers arrived without an address" "grep -q 'CODEJR /P:1 %1' '$p/NATIVE.BAT' && ! grep -q '/D:' '$p/FAST.BAT'"
+	check "no temporary file left behind" "[ ! -e '$p/CJPULL.\$\$\$' ]"
 	check "client hung up cleanly" "grep -q 'client hung up' '$tmp/server.log'"
 	check "screen shows the reply" "grep -q 'you asked: make hello' '$p/SCREEN.TXT'"
 	check "screen shows the transfer report" "grep -q 'BIG.BIN: .* bytes in' '$p/SCREEN.TXT'"

@@ -322,3 +322,19 @@ It points at the cable or the modem's RS-232 adapter coupling the PCjr's outgoin
 4. Check for a call before restarting the server.
 5. A stopped or failed multi-step command may have applied its first steps. Look at the files.
 6. Measure before promising a gain.
+
+## Day 2: the repo, one address, a safer install (2026-10-03, evening)
+
+**Git.** The repo went into a private GitHub repo, `siverson914/CodeJr`. The first commit is the state at the end of day 1.
+
+**Why "NATIVE".** Steve asked why the launcher is called that. It was a dev label for "the native client, not Kermit", and the naming is backwards: `CODEJR` at `C:\` starts the old Kermit fallback while the real client hides behind `NATIVE` and `FAST`. The plan is to flip them once the native client's file pull is proven on the real PCjr, since Kermit is still the repair path.
+
+**One address.** The laptop's address was typed into every launcher. Now `/setup` writes it once into `C:\CODEJR\CODEJR.CFG` (the client already read `DIAL=` from there), taken from the address the PCjr dialed, and the launchers carry no address. The Kermit settings file gets the same value in the same `/setup`.
+
+**`/setup` installs the native client.** The server writes `NATIVE.BAT`, `FAST.BAT` and `RUN.BAT` into the workspace at startup, `just start` copies `CODEJR.EXE` into a fresh workspace, and `/setup` finishes with a sync. `CODEJR.EXE` (25 KB) is under the 40 KB Kermit limit, so the 0.3 client now reaches the PCjr over the proven Kermit path instead of the unproven pull.
+
+**A failed update no longer deletes the client.** The client used to write a pulled file straight over the old one and delete it on failure, so a stalled pull of `CODEJR.EXE` left no client at all. It now pulls into `CJPULL.$$$` and renames at the end. The emulator test now pre-places an old copy and checks that it gets replaced, that the launchers arrive without an address, and that no temporary file is left. The native test's "exactly two transfers" check broke when the launchers joined the queue; it now counts the two files by name.
+
+**Speeds, for the record.** 9600 is the modem's saved, normal speed. 2400 was tried once during the slow-link hunt and wasn't the fix (the real cause was `ATDT` dropping bytes). `FAST` is 37287 and hasn't run on the real PCjr.
+
+All tests pass (`just test`, emulator results are emulator-only). Deployed: client 0.3 with the rename fix, server restarted with no call in progress.

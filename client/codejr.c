@@ -31,6 +31,7 @@
 
 #define VERSION "0.3"
 #define TICKS_PER_SEC 18
+#define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
 static const unsigned char style_attr[] = {
 	0x07, /* plain: light gray */
@@ -233,7 +234,7 @@ static void pull_file(void)
 	pull_t0 = t0;
 	if (!valid_name(offer.name))
 		strcpy(err, "not a DOS file name");
-	else if ((f = fopen(offer.name, "wb")) == NULL)
+	else if ((f = fopen(PULL_TMP, "wb")) == NULL)
 		strcpy(err, "can't create file");
 	progress(0);
 	for (k = 0; !err[0] && k < offer.chunks; k++) {
@@ -258,9 +259,18 @@ static void pull_file(void)
 		strcpy(err, "can't close file");
 	if (!err[0] && got != offer.size)
 		strcpy(err, "size mismatch");
+	/* The old copy is replaced only once the new one is whole, so a
+	 * failed pull of CODEJR.EXE leaves the working client in place. */
+	if (!err[0]) {
+		remove(offer.name);
+		if (rename(PULL_TMP, offer.name) != 0) {
+			strcpy(err, "can't rename " PULL_TMP);
+			f = NULL; /* keep the whole copy for a manual RENAME */
+		}
+	}
 	if (err[0]) {
 		if (f)
-			remove(offer.name); /* don't leave half a file */
+			remove(PULL_TMP); /* don't leave half a file */
 		r[0] = 1;
 		n = (unsigned)strlen(err);
 		memcpy(r + 1, err, n);

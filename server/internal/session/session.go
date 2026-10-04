@@ -624,7 +624,7 @@ func (s *session) setup(com string) {
 		return
 	}
 	files := DOSFiles(DOSSetup{Host: s.host, Port: s.cfg.Port, COM: com, Baud: s.cfg.Baud})
-	s.scr.Println(term.Note, fmt.Sprintf(`Installing CODEJR.BAT, CODEJR.INI and CODEJR.TXT in C:\ (dials %s:%d on %s)...`, s.host, s.cfg.Port, com))
+	s.scr.Println(term.Note, fmt.Sprintf(`Installing the CodeJr launcher and settings in C:\ (dials %s:%d on %s)...`, s.host, s.cfg.Port, com))
 	s.scr.Status("Installing the CodeJr launcher...")
 	var failed error
 	for _, f := range files {
@@ -646,8 +646,10 @@ func (s *session) setup(com string) {
 		return
 	}
 	s.logf("setup done (%s)", com)
-	s.scr.Println(term.Note, "Done. Type /quit, then CODEJR at the DOS prompt to call in. Your")
-	s.scr.Println(term.Note, "programs will be in "+ProgDir+"; modem tips in C:\\CODEJR\\CODEJR.TXT.")
+	s.scr.Println(term.Note, "Launcher installed. Now sending the native client and programs to "+ProgDir+"...")
+	s.sync()
+	s.scr.Println(term.Note, "Done. Type /quit, then CODEJR at the DOS prompt to call in, or NATIVE")
+	s.scr.Println(term.Note, "in "+ProgDir+" for the native client. Modem tips: C:\\CODEJR\\CODEJR.TXT.")
 }
 
 // abortTransfer tells the PCjr's Kermit to give up, so it returns to the

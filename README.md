@@ -44,7 +44,7 @@ CONNECT
 ATD192.168.0.178:4860
 ```
 
-Press Enter at `CodeJr READY`, then type `/setup`. That installs `CODEJR.BAT` in `C:\`. From then on type `CODEJR` at the DOS prompt. A `/sync` there fetches `CODEJR.EXE`, `NATIVE.BAT` and `FAST.BAT`; after that, run `NATIVE` (9600 baud) or `FAST` (37287 baud) from `C:\CODEJR\PROGS`.
+Press Enter at `CodeJr READY`, then type `/setup`. That installs `CODEJR.BAT` in `C:\` and the server's address in `C:\CODEJR\CODEJR.CFG`, then sends `CODEJR.EXE`, `NATIVE.BAT`, `FAST.BAT` and `RUN.BAT` to `C:\CODEJR\PROGS`. From then on type `CODEJR` at the DOS prompt for the Kermit path, or run `NATIVE` (9600 baud) or `FAST` (37287 baud) from `C:\CODEJR\PROGS` for the native client. If the laptop's address changes, `/setup` again rewrites it everywhere.
 
 The settings above are for one particular PCjr and Zimodem WiFi modem. The reasons for each are in `docs/HANDOFF.md`.
 

@@ -18,11 +18,12 @@ type DOSSetup struct {
 // ProgDir is where Claude's files live on the PCjr; the workspace mirrors it.
 const ProgDir = `C:\CODEJR\PROGS`
 
-// DOSFiles returns the launcher and Kermit settings. All three are sent to
-// C:\ because Kermit can't create folders; on its first run CODEJR.BAT
-// makes C:\CODEJR and C:\CODEJR\PROGS and moves the other two into
-// C:\CODEJR, so only CODEJR.BAT stays in the root. They are written with
-// DOS line endings.
+// DOSFiles returns the launcher, the Kermit settings, the modem notes and
+// CODEJR.CFG, the one place the native client and its launchers find the
+// server's address. All are sent to C:\ because Kermit can't create
+// folders; on its first run CODEJR.BAT makes C:\CODEJR and
+// C:\CODEJR\PROGS and moves the others into C:\CODEJR, so only
+// CODEJR.BAT stays in the root. They are written with DOS line endings.
 func DOSFiles(c DOSSetup) []kermit.File {
 	bat := `@ECHO OFF
 REM CodeJr: talk to Claude from the PCjr.
@@ -35,6 +36,8 @@ IF EXIST C:\CODEJR.INI COPY C:\CODEJR.INI C:\CODEJR >NUL
 IF EXIST C:\CODEJR.INI DEL C:\CODEJR.INI
 IF EXIST C:\CODEJR.TXT COPY C:\CODEJR.TXT C:\CODEJR >NUL
 IF EXIST C:\CODEJR.TXT DEL C:\CODEJR.TXT
+IF EXIST C:\CODEJR.CFG COPY C:\CODEJR.CFG C:\CODEJR >NUL
+IF EXIST C:\CODEJR.CFG DEL C:\CODEJR.CFG
 CD \CODEJR\PROGS
 C:\MSK314\KERMIT TAKE C:\CODEJR\CODEJR.INI
 CD \
@@ -85,9 +88,33 @@ C:\CODEJR\PROGS.
 If the screen ever looks scrambled, press Ctrl-L to redraw it.
 To leave: type /quit, or press Ctrl-] then C and type EXIT.
 `
+	cfg := fmt.Sprintf("; CodeJr native client settings. Written by /setup; type /setup to refresh.\nDIAL=%s:%d\n", c.Host, c.Port)
 	return []kermit.File{
 		{Name: "CODEJR.BAT", Data: toDOS([]byte(bat))},
+		{Name: "CODEJR.CFG", Data: toDOS([]byte(cfg))},
 		{Name: "CODEJR.INI", Data: toDOS([]byte(ini))},
 		{Name: "CODEJR.TXT", Data: toDOS([]byte(modem))},
 	}
+}
+
+// ProgFiles are the launchers that live beside the programs in
+// C:\CODEJR\PROGS. The server keeps them in the workspace, so a sync
+// delivers them with CODEJR.EXE. None holds the server's address: the
+// client reads it from C:\CODEJR\CODEJR.CFG.
+var ProgFiles = map[string]string{
+	"NATIVE.BAT": `@ECHO OFF
+REM CodeJr native client at 9600 baud. Alt-X hangs up.
+CODEJR /P:1 %1 %2 %3
+`,
+	"FAST.BAT": `@ECHO OFF
+REM CodeJr native client, switching the modem to 37287 baud for the call
+REM (an exact PCjr speed). Falls back to 9600 if the modem does not answer.
+CODEJR /P:1 /F:37287 %1 %2 %3
+`,
+	"RUN.BAT": `@ECHO OFF
+REM Runs a GW-BASIC program, then resets the screen: GW-BASIC leaves the
+REM PCjr color palette scrambled (blue on tan).
+GWBASIC %1
+MODE CO80
+`,
 }
