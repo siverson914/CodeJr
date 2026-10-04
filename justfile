@@ -170,7 +170,7 @@ deploy-jrai: jrai
 say:
     speech/build.sh
 
-# Convert every clip in speech/clips/ into speech/out/ (.SND chip, .SNP pwm, previews)
+# Convert every clip in speech/clips/ into speech/out/ (.SND and a preview WAV)
 speech:
     #!/bin/sh
     set -e
@@ -185,7 +185,7 @@ clip name text voice="george":
     mv "speech/out/$n.mp3" "speech/clips/$n.mp3"
     printf '%s\n' "{{text}}" > "speech/clips/$n.txt"
 
-# Queue SAY.EXE and clips for the PCjr: just deploy-speech HELLO READY (add .SNP for the PWM version)
+# Queue SAY.EXE and clips for the PCjr: just deploy-speech HELLO READY (NAME.SNP for PWM)
 deploy-speech +clips: say
     #!/bin/sh
     set -e
@@ -193,7 +193,8 @@ deploy-speech +clips: say
     total=$(stat -c %s speech/SAY.EXE)
     for c in {{clips}}; do
         c=$(echo "$c" | tr a-z A-Z); case "$c" in *.*) ;; *) c="$c.SND";; esac
-        [ -f "speech/out/$c" ] || speech/mksnd.py "speech/clips/${c%.*}.mp3" -o "speech/out/${c%.*}"
+        m=chip; [ "${c##*.}" = SNP ] && m=pwm
+        [ -f "speech/out/$c" ] || speech/mksnd.py "speech/clips/${c%.*}.mp3" --method $m -o "speech/out/${c%.*}"
         cp "speech/out/$c" "{{ws}}/"; total=$((total + $(stat -c %s "speech/out/$c")))
     done
     echo "queued $((total / 1024)) KB: up to $((total / 413 / 60 + 1)) min at the measured 413 bytes/s; sent on the PCjr's next connection"

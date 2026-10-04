@@ -5,17 +5,22 @@ and played by the PCjr's own sound hardware. No add-on card is needed.
 
 ```
 just clip READY "Ready when you are."     # gipity speech -> speech/clips/READY.mp3 + .txt
-just speech                               # every clip -> speech/out/NAME.SND, .SNP, previews
-just deploy-speech HELLO HELLO.SNP        # queue SAY.EXE and clips for the PCjr
+just speech                               # every clip -> speech/out/NAME.SND + preview WAV
+just deploy-speech HELLO READY            # queue SAY.EXE and clips for the PCjr
 ```
 
-On the PCjr: `SAY HELLO`, `SAY HELLO.SNP`, `SAY HELLO READY FRIENDS`. A key
-stops it. `SAY /I HELLO` shows what's in a clip, and `SAY /V HELLO` reports
-afterwards how many samples were late.
+On the PCjr: `SAY HELLO`, or `SAY HELLO READY FRIENDS`. A key stops it.
 
-`speech/out/NAME-chip.wav` and `NAME-pwm.wav` are previews: what each
-method should sound like on the PCjr, through a rough small-speaker filter.
-They assume ideal hardware.
+| Option | What it does |
+|---|---|
+| `/I` | show what's in a clip without playing it |
+| `/V` | afterwards, report the rate reached and the late samples |
+| `/T` | speed test: play as fast as the machine can (chipmunk) and report that rate |
+| `/H` | time chip clips with the timer interrupt, as SAY 1.0 did (needed in DOSBox) |
+| `/Q` | don't print the clip's text |
+
+`speech/out/NAME-chip.wav` is a preview of how the clip should sound on the
+PCjr, through a rough small-speaker filter, assuming ideal hardware.
 
 ## Two ways to make a PCjr talk
 
@@ -41,50 +46,75 @@ is a pulse width. The period is 75 counts, which gives 72 usable levels
 carrier is the sample rate, 15.9 kHz. Some people (and some speakers) will
 hear it as a faint whine.
 
-**Which is better is an open question for the real machine.** Two reasons:
+**On the real PCjr the chip method won** (2026-10-03): Steve heard both, and
+PWM had "a ton of high-pitched noise", the 15.9 kHz carrier, made worse by
+late writes. So the period-1 trick works on this PCjr's chip and audio path
+(JRAI's voice depends on it too), and the converter now makes chip clips
+only, unless asked with `--method pwm` or `both`.
 
-- The chip method's fine levels rely on the chip's 2 dB steps being exact.
-  In simulation the HELLO clip's speech-band SNR is 37 dB with exact steps,
-  30 dB if each step is off by 0.25 dB, and 23 dB at 0.5 dB. (Old JRAI
-  method on the same clip: 8.5 dB.) The level table already prefers
-  combinations that tolerate step error. Picking for exact levels alone
-  gave 39.5 dB ideal but 27 dB at 0.25 dB.
-- Whether period 1 really reads as a steady level on this PCjr's chip and
-  audio path is untested (JRAI has the same open question).
-
-PWM doesn't depend on the chip at all, only on timing.
+The chip method's fine levels rely on the chip's 2 dB steps being exact. In
+simulation the HELLO clip's speech-band SNR is 37 dB with exact steps, 30 dB
+if each step is off by 0.25 dB, and 23 dB at 0.5 dB. (Old JRAI method on the
+same clip: 8.5 dB.) The level table already prefers combinations that
+tolerate step error. Picking for exact levels alone gave 39.5 dB ideal but
+27 dB at 0.25 dB. How exact this chip's steps are is still unmeasured.
 
 ## How the player keeps time
 
-- `player.asm` is copied into a DOS block allocated "last fit", so on this
-  640 KB PCjr it lands above 128 KB, away from the video wait states (6
-  clocks per byte below 128 KB, 4 above). Its code, stack, tables and samples
-  are all up there. It has its own linker group, so its internal offsets
-  are relative to its first byte and survive the copy.
-- PIT channel 0 runs at the sample rate (mode 2), and only IRQ0 is
-  unmasked. The loop does `STI; HLT; CLI`: it wakes on the tick and writes
-  the sample a fixed number of clocks later, so the timing jitter is a few
-  clocks. That matters most for PWM, where a late write is a wrong pulse.
-- Before each `HLT` the loop reads the 8259's request register. If IRQ0 is
-  already waiting, the last sample took more than one period. `SAY /V`
-  prints that count.
-- Afterwards it restores channel 0 (mode 3, 65536), the IRQ0 vector, the
-  interrupt mask and port 61h, and adds the elapsed ticks to the BIOS clock.
+- `player.asm` is copied into a DOS block allocated "last fit", so it lands
+  at the top of memory, away from the video wait states (6 clocks per byte
+  below 128 KB, 4 above). This PCjr has memory up to 736 KB, and the
+  blocks landed at A98F and 9FCB. Its code, stack, tables and samples are
+  all up there. It has its own linker group, so its internal offsets are
+  relative to its first byte and survive the copy.
+- PIT channel 0 runs at the sample rate (mode 2), and only IRQ0 is unmasked.
+  - **Chip (default): polling.** Interrupts stay off. The loop sends the
+    8259 its poll command (OCW3 0Ch) and reads port 20h: bit 7 says the tick
+    has come, and the read itself acknowledges it, so an EOI follows. That
+    avoids taking an interrupt every sample. The cost is up to one poll of
+    timing jitter (about 10 us), which a level DAC tolerates.
+  - **Chip with `/H`, and PWM: the interrupt.** The loop does `STI; HLT;
+    CLI`: it wakes on the tick, and the handler sends EOI. The jitter is a
+    few clocks, which PWM needs. DOSBox doesn't implement the poll command
+    (it exits with "PIC: poll command not handled"), so the emulator test
+    plays chip clips with `/H`.
+- **Late count.** If the tick is already waiting when the loop gets back to
+  it (first poll, or the request register before `HLT`), the last sample
+  took more than one period, and the clip is playing slow. `SAY /V` prints
+  the count.
+- **Stopwatch** (chip only). PIT channel 2 free-runs with the speaker data
+  bit off, and is read every 256 samples. `SAY /V` prints the rate actually
+  reached and the CPU clocks per sample. `SAY /T` plays a clip with a
+  50 kHz tick, so every sample is late and the loop runs flat out, and
+  reports the fastest rate this machine can play.
+- **Cleanup.** Afterwards it restores channel 0 (mode 3, 65536), the IRQ0
+  vector, the interrupt mask and port 61h, and adds the elapsed time to the
+  BIOS clock.
 
-**Clock budget (estimates, not measured).** The 8088 is bus-bound: 4 clocks
-per code byte. Each SN76496 write also holds the CPU in READY wait states
-for 32 of the chip's clocks (about 9 us, 43 CPU clocks). Taking the
-interrupt and the 5-instruction handler costs about 150 clocks.
+**Clock budget.** The 8088 is bus-bound: 4 clocks per code byte. Each
+SN76496 write also holds the CPU in READY wait states for 32 of the chip's
+clocks (about 9 us, 43 CPU clocks).
 
-| Method | Loop bytes | Estimate per sample | Budget | Margin |
+What SAY 1.0 (interrupt timing for both methods) measured on the real
+PCjr, against my estimates:
+
+| Method | Loop bytes | Estimated | Budget | Real PCjr |
 |---|---|---|---|---|
-| chip at 9,322 Hz | 40 | ~466 | 512 | ~9% |
-| pwm at 15,909 Hz | 22 | ~254 | 300 | ~15% |
+| chip at 9,322 Hz | 40 | ~466 clocks | 512 | late on 72% of samples |
+| pwm at 15,909 Hz | 22 | ~254 clocks | 300 | late on 18% of samples |
 
-The chip method was planned at 11 kHz. That budget is 432 clocks, so it
-dropped to 9.3 kHz. If `SAY /V` reports late samples on the real PCjr,
-lower the rate in `METHODS` in `mksnd.py` (the divisor is in the header,
-and SAY doesn't care).
+So the estimates were short by roughly 10-20%, and the interrupt is the
+biggest fixed cost. The PWM loop's own code is under 100 clocks, so taking
+the interrupt plus the handler costs about 200. The chip method now polls
+instead. That should save about 100 clocks per sample, but it's not
+measured yet: `SAY /T` will say. Then set the rate with
+`mksnd.py --hz` (the divisor is in each clip's header, and SAY doesn't
+care).
+
+The other idea tried on paper, skipping writes to a voice whose volume
+didn't change, doesn't pay. The voices already change only 1.7 times per
+sample on average, and the compare-and-branch code costs about what the
+skipped writes save on this bus.
 
 ## The converter (`mksnd.py`)
 

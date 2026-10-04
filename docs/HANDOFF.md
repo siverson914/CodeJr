@@ -52,7 +52,7 @@ There are two ways in from the PCjr, and the server tells them apart by itself:
 - The pull protocol's stall fix (client 0.3). The first real pulls (client 0.2) worked chunk after chunk, then failed when the WiFi link stalled mid-burst. The fix is in `client/pull.c` (`pull_fetch`) and `cjp.Burster`.
 - Client 0.6: `/run`, the `CODEJR.BAT` run-and-call-back loop, local echo, the "thinking" line (see below).
 - Both games and the whole graphics library. Nobody has played them with a real keyboard, heard the sound, or seen the palette on the real monitor.
-- `SAY.EXE` and its speech clips (`speech/`, README there): ElevenLabs speech through gipity, played on the SN76496's three voices combined (`.SND`, 9.3 kHz) or as PWM on PIT channel 2 (`.SNP`, 15.9 kHz). Played in DOSBox only; nobody has heard either on the PCjr.
+- `SAY.EXE` and its speech clips (`speech/`, README there): ElevenLabs speech through gipity, played on the SN76496's three voices combined (`.SND`). **SAY 1.0 played on the real PCjr:** the chip version sounded best, PWM (`.SNP`) whined, but the chip loop was late on 72% of samples (playing slow). SAY 1.1 polls the 8259 instead of taking an interrupt per sample and has a stopwatch (`/V`, `/T`); the poll loop can't run in DOSBox and is untested.
 
 **Queued for the PCjr:** `CODEJR.EXE` 0.6, `SETUP.BAT`, `CODEJR.BT`, `CJKERMIT.BT`.
 
@@ -74,7 +74,7 @@ Ask Steve to do these in order and send the `[client]` line or a photo each time
 4. **Run the games:** `JRDOOM` and `JRFLIGHT`. Check keyboard, sound, colors and speed. Both take `/BENCH`, `/PROF` and `/DEMO:n` and write `LOG.TXT`. To get a log back, use the Kermit path: `CJKERMIT`, then `/get LOG.TXT` (the native client can't upload yet).
 5. **Risky graphics paths:** `JRFLIGHT /LD` (hardware 160x100 mode, never displayed anywhere), and 320x200 mode in `lib/DEMO.EXE` (this PCjr reserves only 16 KB of video memory; the library claims its own block).
 6. **Typing in the native client while text arrives:** do letters get lost? Alt-S prints the client's loss counters into the chat.
-7. **Speech.** `just deploy-speech HELLO HELLO.SNP` (168 KB: about 7 minutes at the measured 413 bytes/s, about 3 if the 9600 pull reaches its emulator speed). On the PCjr: `SAY /V HELLO`, then `SAY /V HELLO.SNP`. Ask which sounds better, whether the PWM one whines, and for the "late" numbers (anything above 0 means the loop can't keep up: lower that method's rate in `speech/mksnd.py`). Silence from `.SND` but sound from `.SNP` would mean the period-1 trick doesn't work on this chip (JRAI's voice uses it too).
+7. **Speech timing (SAY 1.1).** On the PCjr: `SAY /T HELLO` (chipmunk; the line to note is "can play chip clips at up to about N Hz"), then `SAY /V HELLO` (9.3 kHz) and `SAY /V HELLO10` (10.65 kHz). Want: late 0 and a speed matching "wanted". Then re-make the clips at the highest rate with some margin below the `/T` figure (`mksnd.py --hz`, then make it the default in `METHODS`). If `SAY` hangs or makes no sound with polling but `SAY /H HELLO` works, the poll command misbehaves on this 8259: say so in the journal.
 
 ## How to work in this repo
 
@@ -95,7 +95,7 @@ just deploy-client   # build CODEJR.EXE and queue it for the PCjr
 just deploy-games    # build both games and queue them
 just lib             # graphics library, test-gated
 just clip NAME "text" # new speech clip via gipity; just speech converts them all
-just deploy-speech HELLO READY  # queue SAY.EXE and clips (.SNP suffix for the PWM version)
+just deploy-speech HELLO READY  # queue SAY.EXE and clips (NAME.SNP for a PWM version)
 ```
 
 - **Toolchain:** Go, C-Kermit and DOSBox 0.74 from pacman. Open Watcom v2 is unpacked in `~/.local/opt/openwatcom` (`. client/owenv.sh`). NASM is not installed; use Open Watcom's `wasm`. `gcc` builds the host test harnesses. `magick` converts screenshots.

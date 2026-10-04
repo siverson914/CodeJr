@@ -436,3 +436,25 @@ Two misreadings fixed on the way. The transfer line counted uncompressed file by
 One more mix-up worth recording: asked to run `CODEJR /P:1 /F:55930`, Steve typed it at `C:\`, where `CODEJR` is the Kermit launcher, which ignored the option and showed 9600. That settled the rename.
 
 **Client 0.6: the rename and the UI requests.** `C:\CODEJR.BAT` is now the native client in a loop, and `C:\CJKERMIT.BAT` the Kermit path. `/run` lists the programs in `PROGS` with numbers; a number writes `C:\CODEJR\RUNNEXT.BAT` and hangs up, and the batch file runs it, waits for a key and dials back (BASIC goes through `RUN.BAT`; Claude is now told to end programs with `SYSTEM`). The client shows a typed line the moment Enter is pressed, hides the prompt until the server says `Ready`, and shows "CodeJr is thinking..." as a line the reply replaces. "Claude" became "CodeJr" in what the PCjr shows. A native client can only write into `PROGS`, so `SETUP.BAT` (sent with the client) copies the launchers into `C:\`. The `/T` test option now types through the keyboard path, so the emulator test covers the echo and `/run`.
+
+**SAY on the real PCjr, and SAY 1.1 (10:40-11:05 pm).** Steve played both HELLO clips. "Chip version is best. The other sounds good but has ton of high pitched noise." So the period-1 trick works on this PCjr (good news for JRAI too), and PWM's 15.9 kHz carrier is audible on this monitor. His photo of `SAY /V` settled the timing:
+
+- Chip: late on about 40,950 of 56,592 samples (72%), three runs alike. PWM: 17,338 of 96,583 (18%).
+- So my clock estimates were short by roughly 10-20%. The PWM loop's own code is under 100 clocks, which means taking the timer interrupt and running the handler costs about 200 on the real machine, much more than the 150 I assumed. When the loop runs late it just plays slower, so the chip clip came out somewhat slow and low.
+- Both blocks landed high (A98F and 9FCB): this PCjr has memory up to 736 KB.
+
+**SAY 1.1.**
+
+- The chip loop polls the 8259 instead of taking an interrupt: OCW3 0Ch, then a read of port 20h (bit 7 = tick waiting; the read acknowledges it), then EOI. Interrupts stay off. It should save about 100 clocks per sample.
+- PIT channel 2, unused by the chip method, is a stopwatch read every 256 samples. `/V` now prints the rate reached and the clocks per sample.
+- `/T` plays with a 50 kHz tick, so the loop runs flat out and reports the fastest rate this machine can play.
+- `/H` keeps the 1.0 interrupt loop.
+- mksnd makes chip clips only by default, and `--hz` sets the rate.
+
+**Wrong turns.**
+
+- Skipping writes to unchanged voices looked promising until the simulation said the voices already change only 1.7 times per sample. On a bus where every code byte is 4 clocks, the compare code eats the savings.
+- The first DOSBox run of the poll loop exited at once: "PIC: poll command not handled". DOSBox 0.74 doesn't implement the 8259 poll command. Hence `/H`: the emulator test plays chip clips with the interrupt loop, so **the poll loop is real-PCjr only, and untested**. The stopwatch agreed with the clip's rate to 0.1% in DOSBox (9,329 Hz for 9,321).
+- Splicing the new loops into `player.asm` matched `c_key:` instead of `key:` and duplicated the old tail. The assembler's "already defined" errors caught it.
+
+Queued for the PCjr: SAY 1.1 and HELLO10.SND (HELLO at 10,650 Hz). HELLO.SND is already there.

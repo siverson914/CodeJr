@@ -4,7 +4,11 @@
  *   SAY HELLO.SNP BYE      several clips in a row
  *   SAY /I HELLO           show what is in a clip without playing it
  *   SAY /Q HELLO           don't print the clip's text
- *   SAY /V HELLO           afterwards, print samples played and how many were late
+ *   SAY /V HELLO           afterwards, report the speed reached and late samples
+ *   SAY /T HELLO           speed test: play a .SND clip as fast as the PCjr can,
+ *                          and report that rate (it sounds like a chipmunk)
+ *   SAY /H HELLO           time .SND clips with the timer interrupt (SAY 1.0's
+ *                          way) instead of polling the 8259; DOSBox needs it
  *
  * A key stops playback. The clip's method (chip or pwm) is in its header;
  * the actual playing is done by player.asm, from a block above 128 KB.
@@ -34,7 +38,7 @@ extern char __far sp_end[];
 #define TABLE_OFF 0x400u
 #define DATA_PARA 0xA0u
 
-static int quiet, info, verbose;
+static int quiet, info, verbose, speedtest, irqtiming;
 
 static unsigned short rd16(const unsigned char *p)
 {
@@ -68,12 +72,13 @@ static unsigned alloc_high(unsigned paras)
 	return seg;
 }
 
-/* The player stops the BIOS clock while it runs; add the ticks back. */
-static void fix_clock(unsigned long samples, unsigned divisor)
+/* The player stops the BIOS clock while it runs; add the ticks back.
+ * pit: PIT counts (1.193 MHz) that went by. */
+static void fix_clock(unsigned long pit)
 {
 	unsigned long __far *ticks = (unsigned long __far *)MK_FP(0x40, 0x6C);
 	unsigned char __far *midnight = (unsigned char __far *)MK_FP(0x40, 0x70);
-	unsigned long add = (unsigned long)((samples >> 8) * divisor) >> 8;
+	unsigned long add = pit >> 16;
 	_disable();
 	*ticks += add;
 	if (*ticks >= 0x1800B0UL) {
@@ -100,7 +105,7 @@ static int play(const char *arg)
 {
 	static char name[80], text[512];
 	unsigned char h[16];
-	unsigned long n, done;
+	unsigned long n, done, pit;
 	unsigned method, divisor, tlen, tablen, seg, codesz, got;
 	unsigned long paras;
 	unsigned __far *par;
@@ -167,26 +172,40 @@ static int play(const char *arg)
 	_fmemcpy(MK_FP(seg, 0), sp_begin, codesz);
 	par = (unsigned __far *)MK_FP(seg, 0);
 	par[2] = method;
-	par[3] = divisor;
+	par[3] = speedtest && method == 1 ? 24 : divisor; /* 50 kHz: every tick is late */
 	par[4] = (unsigned)n;
 	par[5] = (unsigned)(n >> 16);
 	par[6] = seg + DATA_PARA;
+	par[13] = irqtiming;
 
 	if (!quiet && text[0])
 		printf("%s\n", text);
 	fn = (void (__far *)(void))MK_FP(seg, 0);
 	fn();
 	done = par[7] | ((unsigned long)par[8] << 16);
-	fix_clock(done, divisor);
+	pit = par[11] | ((unsigned long)par[12] << 16);
+	fix_clock(pit ? pit : done * par[3]);
 	if (par[9]) {
 		union REGS r;
 		r.h.ah = 0;
 		int86(0x16, &r, &r); /* eat the key */
 		rc = 2;
 	}
-	if (verbose)
+	if (verbose || speedtest)
 		printf("SAY: %s method %u divisor %u block %04X played %lu of %lu, late %u%s\n",
-		       name, method, divisor, seg, done, n, par[10], rc == 2 ? " (key)" : "");
+		       name, method, par[3], seg, done, n, par[10], rc == 2 ? " (key)" : "");
+	if ((verbose || speedtest) && pit && done) {
+		/* tenths of a PIT count per sample; the 8088 runs at 4.77 MHz,
+		 * exactly 4 CPU clocks per PIT count */
+		unsigned long t10 = pit * 10 / done;
+		printf("SAY: speed %lu Hz (wanted %lu), %lu.%lu PIT counts = %lu CPU clocks per sample\n",
+		       11931820UL / t10, 1193182UL / par[3], t10 / 10, t10 % 10, t10 * 4 / 10);
+		if (speedtest)
+			printf("SAY: so this machine can play chip clips at %s %lu Hz\n",
+			       par[10] < done / 10 * 9 ? "at least" : "up to about", 11931820UL / t10);
+	}
+	if (speedtest && method != 1)
+		printf("SAY: /T only measures chip (.SND) clips\n");
 	_dos_freemem(seg);
 	return rc;
 }
@@ -200,6 +219,8 @@ int main(int argc, char **argv)
 			if (c == 'Q') quiet = 1;
 			else if (c == 'I') info = 1;
 			else if (c == 'V') verbose = 1;
+			else if (c == 'T') speedtest = 1;
+			else if (c == 'H') irqtiming = 1;
 			else {
 				printf("SAY: unknown option %s\n", argv[i]);
 				return 1;
@@ -215,7 +236,9 @@ int main(int argc, char **argv)
 	if (!any) {
 		printf("SAY clip[.SND] ...   plays speech clips (a key stops)\n"
 		       "  /I  show what is in a clip   /Q  don't print its text\n"
-		       "  /V  report samples played and late (the player fell behind)\n");
+		       "  /V  report the speed reached and late samples (the player fell behind)\n"
+		       "  /T  speed test: play a .SND as fast as possible and report the rate\n"
+		       "  /H  time .SND clips with the timer interrupt (slower; DOSBox needs it)\n");
 		return 1;
 	}
 	return rc == 2 ? 0 : rc;

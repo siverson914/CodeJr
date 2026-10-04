@@ -8,10 +8,13 @@
   mksnd.py --text "Hi" --voice gemini:Charon -o HI     another voice
   mksnd.py song.wav -o SONG                            any audio file
   mksnd.py clips/HELLO.mp3 -o out/HELLO                text from clips/HELLO.txt
+  mksnd.py clips/HELLO.mp3 --hz 10650 -o out/HELLO10   a faster chip clip
 
-Writes OUT.SND (method 1: the SN76496's three voices as one DAC, 9.3 kHz)
-and OUT.SNP (method 2: PWM on PIT channel 2, 15.9 kHz), plus OUT-chip.wav
-and OUT-pwm.wav: previews of what each should sound like on the PCjr.
+Writes OUT.SND (method 1: the SN76496's three voices as one DAC, 9.3 kHz
+unless --hz) and OUT-chip.wav, a preview of how it should sound. With
+--method pwm or both, also OUT.SNP (PWM on PIT channel 2, 15.9 kHz) and
+OUT-pwm.wav. On the real PCjr the chip method sounded best and PWM
+whined, so chip is the default.
 
 The audio is shaped for a 4.77 MHz machine and a small monitor speaker:
 bass below 200 Hz cut, presence lifted, dynamics squeezed hard so quiet
@@ -39,7 +42,7 @@ DEFAULT_VOICE = "george"
 
 METHODS = {
     # name: (method byte, PIT divisor, extension)
-    "chip": (1, 128, ".SND"),  # 9322 Hz: the READY waits make 11 kHz too tight
+    "chip": (1, 128, ".SND"),  # 9322 Hz; --hz overrides (SAY /T measures the limit)
     "pwm": (2, 75, ".SNP"),    # 15909 Hz, also the PWM carrier
 }
 
@@ -259,7 +262,9 @@ def main():
                     % ", ".join(VOICES))
     ap.add_argument("--title", help="text SAY prints while playing (default: --text, or the"
                     " audio file's .txt twin, as in clips/)")
-    ap.add_argument("--method", choices=["chip", "pwm", "both"], default="both")
+    ap.add_argument("--method", choices=["chip", "pwm", "both"], default="chip",
+                    help="chip (default: it won on the real PCjr), pwm (whines), or both")
+    ap.add_argument("--hz", type=float, help="sample rate for the chip method (default 9322)")
     ap.add_argument("--keep", action="store_true", help="also keep the source audio as OUT.mp3")
     ap.add_argument("-o", "--out", required=True, help="output path without extension, 8 chars")
     a = ap.parse_args()
@@ -285,6 +290,8 @@ def main():
 
     for m in (["chip", "pwm"] if a.method == "both" else [a.method]):
         code, divisor, ext = METHODS[m]
+        if m == "chip" and a.hz:
+            divisor = round(PIT / a.hz)
         rate = PIT / divisor
         y = shape(x, SRC_RATE, rate)
         if m == "chip":
