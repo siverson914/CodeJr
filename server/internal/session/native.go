@@ -24,8 +24,9 @@ const nativeNote = `
 Client: the user is running CodeJr's own PCjr program (CODEJR.EXE), not
 MS-Kermit. It draws its own screen, so ignore the MS-Kermit details above:
 files arrive with an on-screen progress bar, and to run a program the user
-presses Alt-X to leave CodeJr and types RUN NAME (for BASIC) or the
-program's name at the DOS prompt. You cannot see the PCjr's screen; if the user reports a
+types /run (a numbered list of programs; a number runs one, and CodeJr
+calls back when it ends). End BASIC programs with SYSTEM rather than END,
+so they return to DOS and CodeJr comes back by itself. You cannot see the PCjr's screen; if the user reports a
 display problem, say so and suggest /help, rather than guessing settings.`
 
 type native struct {
@@ -37,6 +38,10 @@ type native struct {
 	// early, say); handled once the transfer is done.
 	backlog []cjp.Msg
 	baud    int // the serial speed the client reported
+	// The client echoes typed lines itself and takes Ready and Temp
+	// messages (it said ui=1 in its HELLO).
+	ui   bool
+	temp bool // a Temp line is showing
 
 	// Text waiting to go out. Claude streams a few characters at a time;
 	// sending each piece as its own frame wastes the window on tiny frames,
@@ -85,9 +90,13 @@ func (s *session) native() {
 		s.logf("native: no HELLO")
 		return
 	}
-	link.Send(cjp.Hello, []byte("CODEJR/2 server"))
+	if n.ui {
+		link.Send(cjp.Hello, []byte("CODEJR/2 server ui"))
+	} else {
+		link.Send(cjp.Hello, []byte("CODEJR/2 server"))
+	}
 
-	n.print(cjp.StyleBanner, "Welcome to CodeJr. Ask for a program and Claude writes it straight onto\n")
+	n.print(cjp.StyleBanner, "Welcome to CodeJr. Ask for a program and CodeJr writes it straight onto\n")
 	n.print(cjp.StyleBanner, "this PCjr, into "+ProgDir+".  Type /help for commands.\n")
 	if s.ws.Session() != "" {
 		n.print(cjp.StyleNote, "Continuing your last conversation. /new starts a fresh one.\n")
@@ -95,6 +104,7 @@ func (s *session) native() {
 	n.status("Ready.  Enter sends,  /help for commands,  Alt-X quits.")
 	n.sync()
 	n.sendPending()
+	n.ready()
 
 	for {
 		var m cjp.Msg
@@ -111,6 +121,9 @@ func (s *session) native() {
 		case cjp.Input:
 			ok := n.submit(strings.TrimSpace(string(m.Payload)))
 			n.sendPending()
+			if ok {
+				n.ready()
+			}
 			if !ok {
 				link.Send(cjp.Bye, nil)
 				link.Flush(5 * time.Second)
@@ -132,6 +145,9 @@ func (n *native) hello(h string) {
 			if p, err := strconv.Atoi(v); err == nil && p >= 2 {
 				n.pull = true
 			}
+		}
+		if f == "ui=1" {
+			n.ui = true
 		}
 		if v, ok := strings.CutPrefix(f, "baud="); ok {
 			if b, err := strconv.Atoi(v); err == nil && b >= 300 && b <= 115200 {
@@ -192,6 +208,7 @@ func (n *native) sendPull(name string, data []byte) (bool, string) {
 }
 
 func (n *native) print(style byte, text string) {
+	n.temp = false
 	n.wrap.style = style
 	n.send(n.wrap.feed(term.ToASCII(text)), style)
 }
@@ -224,6 +241,33 @@ func (n *native) send(text string, style byte) {
 	}
 }
 
+// ready tells a ui client that the user can type again.
+func (n *native) ready() {
+	if n.ui {
+		n.sendPending()
+		n.link.Send(cjp.Ready, nil)
+	}
+}
+
+// showTemp puts a transient line in a ui client's transcript ("CodeJr is
+// thinking"); the next text erases it.
+func (n *native) showTemp(msg string) {
+	if !n.ui {
+		return
+	}
+	n.endLine()
+	n.sendPending()
+	n.link.Send(cjp.Temp, []byte(msg))
+	n.temp = true
+}
+
+// clearTemp erases a Temp line nothing has replaced.
+func (n *native) clearTemp() {
+	if n.temp {
+		n.print(cjp.StylePlain, "\n") // the client drops the line instead
+	}
+}
+
 // sendPending sends collected text now.
 func (n *native) sendPending() {
 	if len(n.pend) > 0 {
@@ -250,8 +294,12 @@ func (n *native) submit(line string) bool {
 	if strings.HasPrefix(line, "/") {
 		return n.command(line)
 	}
-	n.print(cjp.StyleUser, "> "+line+"\n")
+	if !n.ui { // a ui client showed the line the moment it was typed
+		n.print(cjp.StyleUser, "> "+line+"\n")
+	}
+	n.showTemp("CodeJr is thinking...")
 	n.turn(line)
+	n.clearTemp()
 	n.endLine()
 	n.sync()
 	n.status("Ready.  Enter sends,  /help for commands,  Alt-X quits.")
@@ -264,8 +312,9 @@ const nativeHelp = `Commands:
   /sync        send files the PCjr doesn't have yet
   /send NAME   send a file again
   /new         start a fresh conversation
+  /run         number your programs; type a number to run one
   /quit        hang up (or press Alt-X)
-To run a program: Alt-X, then at DOS type RUN NAME (BASIC) or its name.
+Alt-S shows the line's error counters.
 `
 
 func (n *native) command(line string) bool {
@@ -275,13 +324,15 @@ func (n *native) command(line string) bool {
 	if len(f) > 1 {
 		arg = strings.ToUpper(f[1])
 	}
-	n.print(cjp.StyleUser, line+"\n")
+	if !n.ui {
+		n.print(cjp.StyleUser, line+"\n")
+	}
 	switch cmd {
 	case "/help", "/?":
 		n.print(cjp.StyleNote, nativeHelp)
 	case "/new":
 		s.ws.SetSession("")
-		n.print(cjp.StyleNote, "Fresh conversation. Claude has forgotten the earlier chat; files stay.\n")
+		n.print(cjp.StyleNote, "Fresh conversation. CodeJr has forgotten the earlier chat; files stay.\n")
 	case "/files", "/dir", "/ls":
 		entries, _, err := s.ws.Scan()
 		if err != nil {
@@ -337,7 +388,7 @@ func (n *native) turn(prompt string) {
 	case err == context.Canceled:
 		n.print(cjp.StyleWarn, "\nStopped.\n")
 	case err != nil:
-		n.print(cjp.StyleWarn, "\nClaude error: "+err.Error()+"\n")
+		n.print(cjp.StyleWarn, "\nCodeJr error: "+err.Error()+"\n")
 	}
 }
 
@@ -355,7 +406,7 @@ func (n *native) runClaude(session, prompt string) error {
 	}()
 
 	start := time.Now()
-	activity := "Claude is thinking"
+	activity := "CodeJr is thinking"
 	tick := time.NewTicker(time.Second)
 	defer tick.Stop()
 	textTick := time.NewTicker(100 * time.Millisecond)
@@ -379,7 +430,7 @@ func (n *native) runClaude(session, prompt string) error {
 			case claude.Text:
 				n.print(cjp.StylePlain, e.Text)
 			case claude.Thinking:
-				activity = "Claude is thinking"
+				activity = "CodeJr is thinking"
 			case claude.ToolUse:
 				note, act := describeTool(e)
 				activity = act
@@ -389,6 +440,7 @@ func (n *native) runClaude(session, prompt string) error {
 						n.print(cjp.StylePlain, "\n")
 					}
 					n.print(cjp.StyleNote, "  "+note+"\n")
+					n.showTemp("CodeJr is working...")
 				}
 			case claude.Done:
 				if e.SessionID != "" {
@@ -396,7 +448,7 @@ func (n *native) runClaude(session, prompt string) error {
 				}
 				if e.IsError {
 					n.flush()
-					n.print(cjp.StyleWarn, "\nClaude: "+firstLine(e.Result)+"\n")
+					n.print(cjp.StyleWarn, "\nCodeJr: "+firstLine(e.Result)+"\n")
 				}
 			}
 		case <-tick.C:

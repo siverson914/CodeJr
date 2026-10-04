@@ -22,46 +22,56 @@ There are two ways in from the PCjr, and the server tells them apart by itself:
 
 | | Kermit path | Native path |
 |---|---|---|
-| On the PCjr | MS-Kermit 3.14, started by `C:\CODEJR.BAT` | `CODEJR.EXE` (our own program, `client/`) |
+| On the PCjr | MS-Kermit 3.14, started by `C:\CJKERMIT.BAT` | `CODEJR.EXE` (our own program, `client/`), started by `C:\CODEJR.BAT` |
 | Screen | drawn by the server with VT100 codes | drawn by the client in video memory |
 | Files | Kermit protocol, started with APC | pull protocol (bursts, compressed) |
-| Speed measured on the real PCjr | 235 bytes/s | 413 bytes/s (old link); pull not yet measured |
-| Status | works, proven, the fallback | chat works; file pull fixed but unproven |
+| Speed measured on the real PCjr | 235 bytes/s | pull: 783 bytes/s at 9600, 2,620 at 37287 (file bytes, compressed on the line) |
+| Status | works, proven, the fallback | proven: chat, pull at 9600 and 37287; the main path |
 
 ## State at handoff
 
 **Works on the real PCjr (seen in logs or photos):**
 
 - Kermit path end to end: chat, file transfer, `/setup`, `/get`, cold boot to `CODEJR`.
-- Native client: dialing, chat, colors, own screen.
+- Native client: dialing, chat, colors, own screen, dialing from `CODEJR.CFG`.
 - The one-frame-at-a-time link (window 1): 24,900 bytes in 60 s with one resend.
+- The pull protocol (day 2, client 0.3/0.4): every file whole, damaged blocks fetched again. `JRFLIGHT.EXE` (94.6 KB) at each speed:
+
+  | Speed | Time | Requests for 24 chunks | Notes |
+  |---|---|---|---|
+  | 9600 (`JRDOOM`, 88.6 KB) | 92 s | 23 for 22 | |
+  | 27965 (divisor 4) | 42.8 s | 24 | clean |
+  | **37287 (divisor 3)** | **36.1 s** | 24 | the default from 0.5 |
+  | 55930 (divisor 2) | 49.4 s | 81 | 56 bytes lost: the PCjr can't keep up |
+
+  Even on a clean line only about 57% of the line is used: the rest is the gap between a chunk's request and its burst, plus decompressing and writing between bursts. Measure where before changing it.
 - Web search and fetch for the PCjr's Claude; date, time and location in its prompt.
 
 **Works only in tests and the emulator so far:**
 
 - The pull protocol's stall fix (client 0.3). The first real pulls (client 0.2) worked chunk after chunk, then failed when the WiFi link stalled mid-burst. The fix is in `client/pull.c` (`pull_fetch`) and `cjp.Burster`.
-- `FAST.BAT` (modem and PCjr at 37287 baud). Never run on the real machine.
-- The bps display.
+- Client 0.6: `/run`, the `CODEJR.BAT` run-and-call-back loop, local echo, the "thinking" line (see below).
 - Both games and the whole graphics library. Nobody has played them with a real keyboard, heard the sound, or seen the palette on the real monitor.
 - `SAY.EXE` and its speech clips (`speech/`, README there): ElevenLabs speech through gipity, played on the SN76496's three voices combined (`.SND`, 9.3 kHz) or as PWM on PIT channel 2 (`.SNP`, 15.9 kHz). Played in DOSBox only; nobody has heard either on the PCjr.
 
-**Queued for the PCjr** (`just queue`; sent on its next connection): `CODEJR.EXE` 0.3, `JRDOOM.EXE`, `JRFLIGHT.EXE` (the updated one), and new `NATIVE.BAT`, `FAST.BAT`, `RUN.BAT` without the address.
+**Queued for the PCjr:** `CODEJR.EXE` 0.6, `SETUP.BAT`, `CODEJR.BT`, `CJKERMIT.BT`.
 
-**Address and install (day 2):** the server's address lives only in `C:\CODEJR\CODEJR.CFG` (`DIAL=host:port`), written by `/setup` from the address the PCjr dialed; the launchers pass no `/D` (an explicit `NATIVE /D:host:port` still overrides). The server writes `NATIVE.BAT`, `FAST.BAT` and `RUN.BAT` into the workspace at startup (`ProgFiles` in `dosfiles.go`), and `/setup` ends with a sync, so it installs the native client too (files under 40 KB go over Kermit; the games wait for the native client). The client pulls into `CJPULL.$$$` and renames only when the file is whole, so a failed update keeps the old `CODEJR.EXE`.
+**Launchers (day 2):** `C:\CODEJR.BAT` starts the native client (`C:\CODEJR\PROGS\CODEJR.EXE /L:1`) in a loop: `/run` writes `C:\CODEJR\RUNNEXT.BAT` and hangs up, the batch file runs it, waits for a key and calls back. If `CODEJR.EXE` is missing it falls back to Kermit. `C:\CJKERMIT.BAT` is the Kermit path. `/setup` (Kermit) installs both, plus `CODEJR.INI`, `CODEJR.TXT` and `CODEJR.CFG` (`DIAL=host:port`, the only copy of the address), then syncs. A native client can only write into `PROGS`, so the server keeps `SETUP.BAT` and `.BT` copies of both launchers in the workspace; `SETUP` copies them to `C:\`. Keep `CJKERMIT.BAT` unchanged between versions: `/setup` rewrites it while it runs, and DOS reads a batch file by position (that cost one confusing run on day 2). The client pulls into `CJPULL.$$$` and renames when whole, so a failed update keeps the old `CODEJR.EXE`.
 
-**On the PCjr now:** `C:\CODEJR.BAT` and `C:\CODEJR\CODEJR.INI` (Kermit launcher, half duplex), `C:\MSK314\`, and in `C:\CODEJR\PROGS`: `CODEJR.EXE` 0.2, `NATIVE.BAT`, `FAST.BAT`, `RUN.BAT`, the first `JRFLIGHT.EXE`, a few BASIC programs, and test tools (`CJTERM`, `UARTDUMP`, `SCRDUMP`).
+**Client 0.6 UI:** it says `ui=1` in its HELLO and the server answers `CODEJR/2 server ui`. Then the client echoes typed lines itself, shows the `>` prompt only after the server's `Ready` message, and shows `Temp` lines ("CodeJr is thinking...") that the next text erases. Older clients get the old behavior. The transfer line shows the line's real speed (bytes on the wire, so it can't exceed the baud rate); Alt-S shows the error counters and the last file's compression, damage and request counts.
 
-**The server is running** in the background (`just status`; `just restart` to rebuild and restart it), logging to `~/.local/share/codejr/logs/`. Nothing in the repo is committed to git yet.
+**On the PCjr now:** `C:\CODEJR.BAT` (still the old Kermit launcher until `SETUP` runs), `C:\CODEJR\CODEJR.INI`, `C:\CODEJR\CODEJR.CFG`, `C:\MSK314\`, and in `C:\CODEJR\PROGS`: `CODEJR.EXE` 0.5 (if Steve synced), `NATIVE.BAT`, `FAST.BAT`, `RUN.BAT`, `JRDOOM.EXE`, `JRFLIGHT.EXE`, BASIC programs, test tools.
+
+**The server is running** in the background (`just status`; `just restart` to rebuild and restart it), logging to `~/.local/share/codejr/logs/`.
 
 ## First things to test on the real PCjr
 
 Ask Steve to do these in order and send the `[client]` line or a photo each time.
 
-0. **Install over Kermit.** At `C:\` run `CODEJR`, Enter at READY, `/setup`. It installs `CODEJR.CFG`, then sends `CODEJR.EXE` 0.3 and the three launchers (about 2 minutes). `/quit`.
-1. **Pull at 9600.** `CD \CODEJR\PROGS`, then `NATIVE`. It should dial with no address on the line (from `CODEJR.CFG`) and fetch both games. Expect roughly 7000-9000 bps. If it says there's no server to dial, `CODEJR.CFG` didn't land: `NATIVE /D:192.168.0.178:4860`.
-2. **Fast speed.** Run `FAST`. Watch for "The modem didn't answer at 37287 baud" (it then stays at 9600 by itself). Note the bps and the damaged-block count. If many blocks are damaged, try `CODEJR /P:1 /F:18643 /D:192.168.0.178:4860`. If it is clean, try `/F:55930`.
-3. **After `FAST` exits,** check the Kermit path still dials (`CD \`, `CODEJR`). If not, the modem stayed at the fast speed: a power cycle restores 9600 (the client never saves the speed).
-4. **Run the games:** `JRDOOM` and `JRFLIGHT`. Check keyboard, sound, colors and speed. Both take `/BENCH`, `/PROF` and `/DEMO:n` and write `LOG.TXT`. To get a log back, use the Kermit path: `CODEJR` from `C:\`, then `/get LOG.TXT` (the native client can't upload yet).
+1. **Install 0.6 and the launchers.** In `C:\CODEJR\PROGS`: `NATIVE` (fetches 0.6 and the setup files), Alt-X, then `SETUP`. From then on `CODEJR` from anywhere.
+2. **The new UI:** the typed line appears at once, the prompt hides while CodeJr works, "CodeJr is thinking..." appears and goes away when the reply starts.
+3. **`/run`:** a numbered list; a number runs it; a key after it ends brings CodeJr back. Try a BASIC program that ends with `SYSTEM` and one of the games.
+4. **Run the games:** `JRDOOM` and `JRFLIGHT`. Check keyboard, sound, colors and speed. Both take `/BENCH`, `/PROF` and `/DEMO:n` and write `LOG.TXT`. To get a log back, use the Kermit path: `CJKERMIT`, then `/get LOG.TXT` (the native client can't upload yet).
 5. **Risky graphics paths:** `JRFLIGHT /LD` (hardware 160x100 mode, never displayed anywhere), and 320x200 mode in `lib/DEMO.EXE` (this PCjr reserves only 16 KB of video memory; the library claims its own block).
 6. **Typing in the native client while text arrives:** do letters get lost? Alt-S prints the client's loss counters into the chat.
 7. **Speech.** `just deploy-speech HELLO HELLO.SNP` (168 KB: about 7 minutes at the measured 413 bytes/s, about 3 if the 9600 pull reaches its emulator speed). On the PCjr: `SAY /V HELLO`, then `SAY /V HELLO.SNP`. Ask which sounds better, whether the PWM one whines, and for the "late" numbers (anything above 0 means the loop can't keep up: lower that method's rate in `speech/mksnd.py`). Silence from `.SND` but sound from `.SNP` would mean the period-1 trick doesn't work on this chip (JRAI's voice uses it too).
@@ -184,11 +194,8 @@ His global `~/.claude/CLAUDE.md` applies. In practice:
 
 In the order I'd do it.
 
-1. **Prove the transfers** (the test list above), then tune: the silence timeout (`PULL_GAP`), the speed, block size.
-2. **Steve's open UI requests for the native client** (asked for, not done):
-   - Show his line in the chat the moment he presses Enter, and show the prompt only when he can type.
-   - Put "CodeJr is thinking" in the chat as a line that is erased when the reply starts, not in the status bar. Say "CodeJr", not "Claude".
-   - A program list inside the client: number the programs in `PROGS`, type a number to run one (through GW-BASIC for `.BAS`), and come back to the chat afterwards. BASIC programs should end with `SYSTEM` so they return.
+1. **Transfer speed:** time each part of a chunk on the PCjr (waiting for the burst, receiving, decompressing, writing) before changing anything. Candidates: bigger chunks (fewer round trips), asking for the next chunk while writing this one (only if the serial interrupt survives disk writes), a shorter `PULL_GAP`.
+2. **Steve's UI requests:** done in 0.6, untested on the real PCjr.
 3. **Close the loop from the plan** (`docs/CLIENT.md`, stages 5-8): file upload in the native client, `RUN` and `RESULT` (run a program on the PCjr, return its exit code, `LOG.TXT` and a screen snapshot), then tools for Claude (`pcjr_run`, `build`, `emu_run`) through a small MCP server.
 4. **Measure in real clock cycles:** get MartyPC running headless and re-benchmark the library and games. Retest the ideas DOSBox judged (table multiplies, delta copies, wide pixels).
 5. **Games:**
@@ -196,5 +203,5 @@ In the order I'd do it.
    - JRDOOM: redraw only changed columns; try the 160x100 hardware mode.
    - A new trick to try: switch video pages partway down the screen so the status bar lives on a page drawn once.
 6. **Transfer extras:** send only the changed parts of an edited file; LZSA2 instead of LZ4; get a window above 1 back on the chat link by acknowledging only when the line is quiet (the parked selective-repeat link is in `docs/attic/`).
-7. **Housekeeping:** once the native client is proven, rename the launchers: `CODEJR` should start the native client (trying the fast speed, falling back to 9600 by itself, which replaces `NATIVE` and `FAST`), and the Kermit path becomes `CJKERMIT`. Run `gw init` in `~/Github/CodeJr` (ask first); fix the `AUTOEXEC.BAT` clock line and set the clock; have someone look at the serial cable.
+7. **Housekeeping:** run `gw init` in `~/Github/CodeJr` (ask first); fix the `AUTOEXEC.BAT` clock line and set the clock; have someone look at the serial cable.
 8. **Ideas Steve floated:** other "brains" behind the same server (OpenCode, a local model), and publishing CodeJr so other PCjr owners can run their own copy. A shared public server would need an API key, logins and per-user workspaces.

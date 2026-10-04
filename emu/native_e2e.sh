@@ -34,7 +34,8 @@ run() { # $1 = label, $2 = extra client options
 	check "the 25 KB binary arrived byte for byte" "cmp -s '$tmp/ws/BIG.BIN' '$p/BIG.BIN'"
 	check "HELLO.BAS arrived with DOS line endings" "printf '10 PRINT \"HI\"\r\n20 END\r\n' | cmp -s - '$p/HELLO.BAS'"
 	check "server recorded both transfers" "[ \$(grep -cE 'native: sent (BIG.BIN|HELLO.BAS)' '$tmp/server.log') = 2 ]"
-	check "the launchers arrived without an address" "grep -q 'CODEJR /P:1 %1' '$p/NATIVE.BAT' && ! grep -q '/D:' '$p/FAST.BAT'"
+	check "the launchers arrived without an address" "grep -q 'CODEJR.EXE /P:1 /L:1 %1' '$p/CODEJR.BT' && ! grep -q '/D:' '$p/CODEJR.BT' '$p/SETUP.BAT'"
+	check "screen shows the typed line" "grep -q '> make hello' '$p/SCREEN.TXT'"
 	check "no temporary file left behind" "[ ! -e '$p/CJPULL.\$\$\$' ]"
 	check "client hung up cleanly" "grep -q 'client hung up' '$tmp/server.log'"
 	check "screen shows the reply" "grep -q 'you asked: make hello' '$p/SCREEN.TXT'"
@@ -47,6 +48,30 @@ run() { # $1 = label, $2 = extra client options
 	rm -rf "$tmp"
 }
 
+# /run: the client lists the programs here, writes RUNNEXT.BAT for the
+# one picked and hangs up, for C:\CODEJR.BAT to run it.
+runrun() {
+	tmp=$(mktemp -d)
+	mkdir -p "$tmp/c/CODEJR/PROGS" "$tmp/ws"
+	cp client/CODEJR.EXE "$tmp/c/CODEJR/PROGS/"
+	printf '@ECHO OFF\r\n' > "$tmp/c/CODEJR/PROGS/ALPHA.BAT"
+	printf '10 SYSTEM\r\n' > "$tmp/c/CODEJR/PROGS/BETA.BAS"
+	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG"
+	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" > "$tmp/server.log" 2>&1 &
+	sp=$!
+	sleep 0.5
+	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 1000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:9600 /L:1 "/T:/run 2" /X:60 /S:SCREEN.TXT\nexit\n' $port "$tmp" > "$tmp/dosbox.conf"
+	SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 200 dosbox -conf "$tmp/dosbox.conf" >/dev/null 2>&1
+	kill $sp 2>/dev/null; wait $sp 2>/dev/null
+	echo "== /run"
+	check "RUNNEXT.BAT runs the second program through RUN" "grep -q '^RUN BETA.BAS' '$tmp/c/CODEJR/RUNNEXT.BAT'"
+	check "client hung up for it" "grep -q 'client hung up' '$tmp/server.log'"
+	check "screen says it is running" "grep -q 'Running BETA.BAS' '$tmp/c/CODEJR/PROGS/SCREEN.TXT'"
+	[ $fail = 1 ] && { echo "--- screen"; cat "$tmp/c/CODEJR/PROGS/SCREEN.TXT"; cat "$tmp/c/CODEJR/RUNNEXT.BAT"; }
+	rm -rf "$tmp"
+}
+
+runrun
 run "9600 baud" "/F:9600"
 run "fast: /F:37287" "/F:37287"
 exit $fail

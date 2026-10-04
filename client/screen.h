@@ -17,9 +17,12 @@ void scr_done(void);
 void scr_putc(unsigned char c, unsigned char attr);
 void scr_puts(const char *s, unsigned char attr);
 void scr_clear_transcript(void);
+/* A transient line ("CodeJr is thinking"), erased by the next character. */
+void scr_temp(const char *s, unsigned char attr);
+int scr_col(void); /* transcript column on the bottom row */
 
 void scr_status(const char *s);   /* replaces the status bar */
-void scr_input(const char *s);    /* redraws the input line; cursor at end */
+void scr_input(const char *s, int prompt); /* input line; "> " only if prompt */
 void scr_save(const char *path);  /* writes the screen's text to a file */
 
 #endif

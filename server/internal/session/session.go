@@ -540,7 +540,7 @@ func (s *session) sync() {
 	kept := files[:0]
 	for _, f := range files {
 		if len(f.Data) > kermitMax && f.Name != s.forceSend {
-			s.scr.Println(term.Note, fmt.Sprintf("%s (%s) is too big for Kermit; run NATIVE to get it (or /send %s).", f.Name, size(len(f.Data)), f.Name))
+			s.scr.Println(term.Note, fmt.Sprintf("%s (%s) is too big for Kermit; type CODEJR at DOS to get it (or /send %s).", f.Name, size(len(f.Data)), f.Name))
 			delete(hashes, f.Name) // still waiting for the native client
 			continue
 		}
@@ -649,8 +649,8 @@ func (s *session) setup(com string) {
 	s.logf("setup done (%s)", com)
 	s.scr.Println(term.Note, "Launcher installed. Now sending the native client and programs to "+ProgDir+"...")
 	s.sync()
-	s.scr.Println(term.Note, "Done. Type /quit, then CODEJR at the DOS prompt to call in, or NATIVE")
-	s.scr.Println(term.Note, "in "+ProgDir+" for the native client. Modem tips: C:\\CODEJR\\CODEJR.TXT.")
+	s.scr.Println(term.Note, "Done. Type /quit, then CODEJR at the DOS prompt to call in (CJKERMIT")
+	s.scr.Println(term.Note, "for this Kermit way). Modem tips: C:\\CODEJR\\CODEJR.TXT.")
 }
 
 // abortTransfer tells the PCjr's Kermit to give up, so it returns to the

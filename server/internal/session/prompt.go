@@ -60,6 +60,7 @@ Programs:
   (640x200, 2 colors), COLOR, LINE, CIRCLE, PAINT, DRAW, GET/PUT, SOUND and
   single-voice PLAY. Don't use the cartridge's PCjr extras (SCREEN 3-6,
   3-voice PLAY, NOISE, PCOPY, PALETTE).
+- End programs with SYSTEM, not END, so they return to DOS by themselves.
 - Use INKEY$ for keys. Avoid PEEK/POKE/OUT unless you are sure of the PCjr's
   hardware.
 

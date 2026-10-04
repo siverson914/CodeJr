@@ -49,6 +49,8 @@ const (
 	Clear      byte = 0x0B // server: clear the transcript
 	Nak        byte = 0x0C // "I'm missing this one": ack field = missing seq
 	FileOffer  byte = 0x0D // server: size (4 LE), chunk count (2 LE), 8.3 name; the client pulls it
+	Ready      byte = 0x0E // server: the user can type now (clients that said ui=1)
+	Temp       byte = 0x0F // server: a transient transcript line, erased by the next text (ui=1)
 
 	// Types from DatagramBase up are datagrams: no sequence number, no
 	// ack, delivered as they arrive. The file pull protocol uses them

@@ -18,17 +18,9 @@ type DOSSetup struct {
 // ProgDir is where Claude's files live on the PCjr; the workspace mirrors it.
 const ProgDir = `C:\CODEJR\PROGS`
 
-// DOSFiles returns the launcher, the Kermit settings, the modem notes and
-// CODEJR.CFG, the one place the native client and its launchers find the
-// server's address. All are sent to C:\ because Kermit can't create
-// folders; on its first run CODEJR.BAT makes C:\CODEJR and
-// C:\CODEJR\PROGS and moves the others into C:\CODEJR, so only
-// CODEJR.BAT stays in the root. They are written with DOS line endings.
-func DOSFiles(c DOSSetup) []kermit.File {
-	bat := `@ECHO OFF
-REM CodeJr: talk to Claude from the PCjr.
-REM Programs Claude writes land in C:\CODEJR\PROGS.
-C:
+// prepare makes the folders and moves files /setup left in C:\ into
+// C:\CODEJR. Both launchers start with it.
+const prepare = `C:
 IF NOT EXIST C:\CODEJR\NUL MD C:\CODEJR
 IF NOT EXIST C:\CODEJR\PROGS\NUL MD C:\CODEJR\PROGS
 REM /setup delivers new settings to C:\; move them into C:\CODEJR.
@@ -39,9 +31,47 @@ IF EXIST C:\CODEJR.TXT DEL C:\CODEJR.TXT
 IF EXIST C:\CODEJR.CFG COPY C:\CODEJR.CFG C:\CODEJR >NUL
 IF EXIST C:\CODEJR.CFG DEL C:\CODEJR.CFG
 CD \CODEJR\PROGS
+`
+
+// NativeBat is C:\CODEJR.BAT: the native client, in a loop. When /run
+// picks a program, the client writes C:\CODEJR\RUNNEXT.BAT and hangs up;
+// this runs it, waits for a key, and calls back. Without the client it
+// falls back to Kermit.
+const NativeBat = `@ECHO OFF
+REM CodeJr: talk to Claude from the PCjr. CJKERMIT is the Kermit way in.
+REM Programs Claude writes land in C:\CODEJR\PROGS.
+` + prepare + `IF NOT EXIST C:\CODEJR\PROGS\CODEJR.EXE GOTO KERMIT
+:AGAIN
+IF EXIST C:\CODEJR\RUNNEXT.BAT DEL C:\CODEJR\RUNNEXT.BAT
+C:\CODEJR\PROGS\CODEJR.EXE /P:1 /L:1 %1 %2 %3
+IF NOT EXIST C:\CODEJR\RUNNEXT.BAT GOTO DONE
+COMMAND /C C:\CODEJR\RUNNEXT.BAT
+ECHO.
+ECHO Press a key to go back to CodeJr.
+PAUSE >NUL
+CD \CODEJR\PROGS
+GOTO AGAIN
+:KERMIT
 C:\MSK314\KERMIT TAKE C:\CODEJR\CODEJR.INI
+:DONE
 CD \
 `
+
+// KermitBat is C:\CJKERMIT.BAT: the MS-Kermit fallback. Keep it the same
+// from one version to the next: /setup rewrites it while it runs, and DOS
+// reads a batch file by position.
+const KermitBat = `@ECHO OFF
+REM CodeJr through MS-Kermit, the fallback. CODEJR is the usual way in.
+` + prepare + `C:\MSK314\KERMIT TAKE C:\CODEJR\CODEJR.INI
+CD \
+`
+
+// DOSFiles returns the launchers, the Kermit settings, the modem notes and
+// CODEJR.CFG, the one place the native client finds the server's address.
+// All are sent to C:\ because Kermit can't create folders; the launchers
+// make C:\CODEJR and C:\CODEJR\PROGS and move the rest into C:\CODEJR.
+// They are written with DOS line endings.
+func DOSFiles(c DOSSetup) []kermit.File {
 	ini := fmt.Sprintf(`; CodeJr connection settings for MS-Kermit 3.14 (TAKE file).
 ; Written by the CodeJr server; type /setup again to refresh it.
 set port %s
@@ -82,40 +112,44 @@ them after AT&W.
            it, and the modem then holds back everything. AT&K0 isn't saved.
   AT&W     save
 
-Then from DOS, type CODEJR to dial in. Programs Claude writes are in
-C:\CODEJR\PROGS.
+Then from DOS, type CODEJR to dial in (CJKERMIT for the Kermit way in).
+Programs Claude writes are in C:\CODEJR\PROGS.
 
 If the screen ever looks scrambled, press Ctrl-L to redraw it.
 To leave: type /quit, or press Ctrl-] then C and type EXIT.
 `
 	cfg := fmt.Sprintf("; CodeJr native client settings. Written by /setup; type /setup to refresh.\nDIAL=%s:%d\n", c.Host, c.Port)
 	return []kermit.File{
-		{Name: "CODEJR.BAT", Data: toDOS([]byte(bat))},
+		{Name: "CODEJR.BAT", Data: toDOS([]byte(NativeBat))},
+		{Name: "CJKERMIT.BAT", Data: toDOS([]byte(KermitBat))},
 		{Name: "CODEJR.CFG", Data: toDOS([]byte(cfg))},
 		{Name: "CODEJR.INI", Data: toDOS([]byte(ini))},
 		{Name: "CODEJR.TXT", Data: toDOS([]byte(modem))},
 	}
 }
 
-// ProgFiles are the launchers that live beside the programs in
-// C:\CODEJR\PROGS. The server keeps them in the workspace, so a sync
-// delivers them with CODEJR.EXE. None holds the server's address: the
-// client reads it from C:\CODEJR\CODEJR.CFG.
-var ProgFiles = map[string]string{
-	"NATIVE.BAT": `@ECHO OFF
-REM CodeJr native client. It switches the modem to 37287 baud for the call
-REM and back afterwards (/F:9600 stays at 9600). Alt-X hangs up.
-CODEJR /P:1 %1 %2 %3
-`,
-	"FAST.BAT": `@ECHO OFF
-REM CodeJr native client, switching the modem to 37287 baud for the call
-REM (an exact PCjr speed). Falls back to 9600 if the modem does not answer.
-CODEJR /P:1 /F:37287 %1 %2 %3
-`,
-	"RUN.BAT": `@ECHO OFF
+// ProgFiles are the files the server keeps in the workspace, so a sync
+// delivers them with CODEJR.EXE. SETUP.BAT installs the two launchers in
+// C:\ from the .BT copies (a native client can only write to PROGS). None
+// holds the server's address: the client reads C:\CODEJR\CODEJR.CFG.
+func ProgFiles() map[string][]byte {
+	return map[string][]byte{
+		"RUN.BAT": []byte(`@ECHO OFF
 REM Runs a GW-BASIC program, then resets the screen: GW-BASIC leaves the
 REM PCjr color palette scrambled (blue on tan).
 GWBASIC %1
 MODE CO80
-`,
+`),
+		"SETUP.BAT": []byte(`@ECHO OFF
+REM Installs the CodeJr launchers in C:\ (CODEJR and CJKERMIT).
+COPY C:\CODEJR\PROGS\CODEJR.BT C:\CODEJR.BAT >NUL
+COPY C:\CODEJR\PROGS\CJKERMIT.BT C:\CJKERMIT.BAT >NUL
+IF EXIST C:\CODEJR\PROGS\NATIVE.BAT DEL C:\CODEJR\PROGS\NATIVE.BAT
+IF EXIST C:\CODEJR\PROGS\FAST.BAT DEL C:\CODEJR\PROGS\FAST.BAT
+ECHO Done. Type CODEJR to start CodeJr, or CJKERMIT for the Kermit way in.
+`),
+		// .BT isn't a text extension, so these go as they are: DOS endings.
+		"CODEJR.BT":   toDOS([]byte(NativeBat)),
+		"CJKERMIT.BT": toDOS([]byte(KermitBat)),
+	}
 }

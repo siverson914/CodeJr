@@ -44,13 +44,13 @@ CONNECT
 ATD192.168.0.178:4860
 ```
 
-Press Enter at `CodeJr READY`, then type `/setup`. That installs `CODEJR.BAT` in `C:\` and the server's address in `C:\CODEJR\CODEJR.CFG`, then sends `CODEJR.EXE`, `NATIVE.BAT`, `FAST.BAT` and `RUN.BAT` to `C:\CODEJR\PROGS`. From then on type `CODEJR` at the DOS prompt for the Kermit path, or run `NATIVE` (9600 baud) or `FAST` (37287 baud) from `C:\CODEJR\PROGS` for the native client. If the laptop's address changes, `/setup` again rewrites it everywhere.
+Press Enter at `CodeJr READY`, then type `/setup`. That installs two launchers in `C:\` and the server's address in `C:\CODEJR\CODEJR.CFG`, then sends `CODEJR.EXE` and its helpers to `C:\CODEJR\PROGS`. From then on type `CODEJR` at the DOS prompt (the native client, at 37287 baud; `CODEJR /F:9600` stays at 9600), or `CJKERMIT` for the Kermit path. If the laptop's address changes, `/setup` again rewrites it.
 
 The settings above are for one particular PCjr and Zimodem WiFi modem. The reasons for each are in `docs/HANDOFF.md`.
 
 ## In a session
 
-Type a request and press Enter. Commands: `/files`, `/sync`, `/send NAME`, `/new`, `/quit`, `/help` (Kermit sessions also have `/get NAME`, `/setup` and `/echo`). To run a BASIC program on the PCjr: `RUN NAME` at the DOS prompt.
+Type a request and press Enter. Commands: `/files`, `/sync`, `/send NAME`, `/new`, `/run`, `/quit`, `/help` (Kermit sessions also have `/get NAME`, `/setup` and `/echo`). `/run` numbers the programs on the PCjr; type a number to run one, and CodeJr calls back when it ends. Alt-S shows the line's error counters.
 
 ## Docs
 

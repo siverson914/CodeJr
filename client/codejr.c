@@ -13,12 +13,14 @@
  *       afterwards (default 37287; /F:9600 stays at the saved speed). The
  *       PCjr's exact speeds are 18643, 37287 and 55930. On the real PCjr,
  *       37287 is fastest: at 55930 it misses bytes.
+ *   /L  set by C:\CODEJR.BAT, which runs whatever /run picked and calls
+ *       back afterwards (it reads C:\CODEJR\RUNNEXT.BAT)
  *   /T  type this line once connected    /X  exit after N seconds
  *   /S  save the screen to this file before exiting
  *   (/T, /X and /S are for automated tests)
  *
- * Keys: Enter sends, Backspace, Ctrl-C stops Claude, Alt-S shows link
- * counters, Alt-X hangs up.
+ * Keys: Enter sends, Backspace, Ctrl-C stops CodeJr, Alt-S shows link
+ * counters, Alt-X hangs up. /run lists the programs here and runs one.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,12 +28,13 @@
 #include <ctype.h>
 #include <dos.h>
 #include <bios.h>
+#include <io.h>
 #include "serial.h"
 #include "cjp.h"
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "0.5"
+#define VERSION "0.6"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -67,6 +70,12 @@ static struct {
 static long line_baud = 9600; /* the speed in use, for rate displays */
 
 static int connected, quitting;
+/* The server said "ui" in its HELLO: we echo typed lines ourselves and
+ * show the prompt only between its READY and the next line sent. */
+static int ui, ready = 1;
+static int loop_mode; /* /L: C:\CODEJR.BAT runs RUNNEXT.BAT, then redials */
+static int menu; /* the last line was /run: a bare number picks a program */
+#define RUNNEXT "C:\\CODEJR\\RUNNEXT.BAT"
 static int cursor_dirty;
 static unsigned long quit_at;
 
@@ -279,8 +288,13 @@ static void pull_file(void)
 	{
 		unsigned long t = ticks() - t0, bps = t ? pull_wire * 182UL / t : 0;
 		unsigned long x10 = pull_wire ? got * 10 / pull_wire : 10;
-		sprintf(line, "Saved %s (%lu.%lu KB) in %lu s, line %lu of %ld bps.",
-		        offer.name, got / 1024, got % 1024 * 10 / 1024, secs, bps, line_baud);
+		char sz[16];
+		if (got < 1024)
+			sprintf(sz, "%lu bytes", got);
+		else
+			sprintf(sz, "%lu.%lu KB", got / 1024, got % 1024 * 10 / 1024);
+		sprintf(line, "Saved %s (%s) in %lu s, line %lu of %ld bps.",
+		        offer.name, sz, secs, bps, line_baud);
 		sprintf(last_file, "Last file: %lu.%lux compressed, %u damaged, %u requests for %u chunks",
 		        x10 / 10, x10 % 10, pc.bad, rounds, offer.chunks);
 	}
@@ -311,7 +325,21 @@ static void handle(const cjp_frame *f)
 	switch (f->type) {
 	case CJP_HELLO:
 		connected = 1;
-		scr_status("Connected.  Enter sends,  Ctrl-C stops Claude,  Alt-X hangs up.");
+		memcpy(s, f->payload, f->len);
+		s[f->len] = 0;
+		if (strstr(s, " ui")) {
+			ui = 1;
+			ready = 0; /* until the server's READY */
+		}
+		scr_status("Connected.  Enter sends,  Ctrl-C stops CodeJr,  Alt-X hangs up.");
+		break;
+	case CJP_READY:
+		ready = 1;
+		break;
+	case CJP_TEMP:
+		memcpy(s, f->payload, f->len);
+		s[f->len] = 0;
+		scr_temp(s, 0x03);
 		break;
 	case CJP_TEXT:
 		if (f->len) {
@@ -353,6 +381,160 @@ static void poll_serial(void)
 	}
 }
 
+/* ---- /run: the programs in this directory, numbered ------------------- */
+
+#define MAXPROGS 40
+static char progs[MAXPROGS][13];
+static int nprogs;
+
+static int runnable(const char *name)
+{
+	static const char *skip[] = { "CODEJR.EXE", "RUN.BAT", "NATIVE.BAT", "FAST.BAT",
+	                              "SETUP.BAT", NULL };
+	const char *dot = strchr(name, '.');
+	int i;
+
+	if (!dot || (strcmp(dot, ".BAS") && strcmp(dot, ".EXE") && strcmp(dot, ".COM") &&
+	             strcmp(dot, ".BAT")))
+		return 0;
+	for (i = 0; skip[i]; i++)
+		if (strcmp(name, skip[i]) == 0)
+			return 0;
+	return 1;
+}
+
+static int by_name(const void *a, const void *b)
+{
+	return strcmp((const char *)a, (const char *)b);
+}
+
+static void list_progs(void)
+{
+	struct find_t ff;
+	char line[81], cell[21];
+	int i;
+
+	nprogs = 0;
+	if (_dos_findfirst("*.*", _A_NORMAL, &ff) == 0) {
+		do {
+			if (nprogs < MAXPROGS && runnable(ff.name))
+				strcpy(progs[nprogs++], ff.name);
+		} while (_dos_findnext(&ff) == 0);
+	}
+	qsort(progs, nprogs, sizeof progs[0], by_name);
+	if (nprogs == 0) {
+		note("No programs here yet. Ask for one!");
+		return;
+	}
+	line[0] = 0;
+	for (i = 0; i < nprogs; i++) {
+		sprintf(cell, "%2d %-12s    ", i + 1, progs[i]);
+		strcat(line, cell);
+		if (i % 4 == 3 || i == nprogs - 1) {
+			scr_puts(line, 0x03);
+			scr_putc('\n', 0x03);
+			line[0] = 0;
+		}
+	}
+	note("Type a number and Enter to run it.");
+	menu = 1;
+}
+
+/* Runs a program: C:\CODEJR.BAT runs RUNNEXT.BAT once we hang up, then
+ * starts CodeJr again. */
+static void run_prog(const char *name)
+{
+	char s[80];
+	FILE *f;
+	int bas = strstr(name, ".BAS") != NULL;
+
+	if (!loop_mode) {
+		sprintf(s, "Alt-X, then type %s%s. (Start with CODEJR to run from here.)",
+		        bas ? "RUN " : "", name);
+		note(s);
+		return;
+	}
+	if ((f = fopen(RUNNEXT, "w")) == NULL) {
+		note("Can't write C:\\CODEJR\\RUNNEXT.BAT.");
+		return;
+	}
+	fprintf(f, "@ECHO OFF\nCD \\CODEJR\\PROGS\n%s%s\n", bas ? "RUN " : "", name);
+	fclose(f);
+	sprintf(s, "Running %s. CodeJr calls back when it ends.", name);
+	note(s);
+	queue(CJP_BYE, NULL, 0);
+	start_quit();
+}
+
+/* Handles a line meant for the client. Returns 1 if it was. */
+static int local_line(const char *s)
+{
+	int n;
+
+	if (menu && (n = atoi(s)) > 0 && strspn(s, "0123456789") == strlen(s)) {
+		menu = 0;
+		if (n > nprogs) {
+			note("No program with that number. /run lists them.");
+			return 1;
+		}
+		run_prog(progs[n - 1]);
+		return 1;
+	}
+	menu = 0;
+	if (strnicmp(s, "/run", 4) != 0 || (s[4] && s[4] != ' '))
+		return 0;
+	s += 4;
+	while (*s == ' ')
+		s++;
+	if (!*s) {
+		list_progs();
+	} else if ((n = atoi(s)) > 0) {
+		if (nprogs == 0)
+			list_progs();
+		if (n <= nprogs)
+			run_prog(progs[n - 1]);
+		else
+			note("No program with that number. /run lists them.");
+	} else {
+		char name[13];
+		strncpy(name, s, 12);
+		name[12] = 0;
+		strupr(name);
+		if (!strchr(name, '.')) {
+			/* SNAKE finds SNAKE.BAS, SNAKE.EXE, ... */
+			static const char *ext[] = { ".BAS", ".EXE", ".COM", ".BAT" };
+			char cand[13];
+			int i;
+			for (i = 0; i < 4; i++) {
+				if (strlen(name) > 8)
+					break;
+				strcpy(cand, name);
+				strcat(cand, ext[i]);
+				if (access(cand, 0) == 0) {
+					run_prog(cand);
+					return 1;
+				}
+			}
+		} else if (valid_name(name) && access(name, 0) == 0) {
+			run_prog(name);
+			return 1;
+		}
+		note("No such program here. /run lists them.");
+	}
+	return 1;
+}
+
+/* Shows a typed line in the transcript at once, as the server would. */
+static void echo_line(const char *s)
+{
+	if (scr_col() > 0)
+		scr_putc('\n', 0x0E);
+	if (s[0] != '/')
+		scr_puts("> ", 0x0E);
+	scr_puts(s, 0x0E);
+	scr_putc('\n', 0x0E);
+}
+
 static void key(unsigned k)
 {
 	unsigned char ch = (unsigned char)k;
@@ -367,8 +549,14 @@ static void key(unsigned k)
 		queue(CJP_BYE, NULL, 0);
 		start_quit();
 	} else if (ch == '\r') {
-		if (input_len) {
-			queue(CJP_INPUT, input, input_len);
+		if (input_len && ready) {
+			if (ui)
+				echo_line(input);
+			if (!local_line(input)) {
+				queue(CJP_INPUT, input, input_len);
+				if (ui)
+					ready = 0;
+			}
 			input_len = 0;
 			input[0] = 0;
 		}
@@ -382,7 +570,7 @@ static void key(unsigned k)
 		input[input_len++] = (char)ch;
 		input[input_len] = 0;
 	}
-	scr_input(input);
+	scr_input(input, ready);
 }
 
 static int read_cfg(char *dial, int size)
@@ -510,11 +698,12 @@ int main(int argc, char **argv)
 	for (i = 1; i < argc; i++) {
 		char *a = argv[i];
 		if (a[0] != '/' || !a[1] || a[2] != ':') {
-			printf("usage: CODEJR [/D:host:port] [/P:1|2] [/B:9600] [/F:37287] [/T:text] [/X:secs]\n");
+			printf("usage: CODEJR [/D:host:port] [/P:1|2] [/B:9600] [/F:37287] [/L:1] [/T:text] [/X:secs]\n");
 			return 1;
 		}
 		switch (a[1] | 0x20) {
 		case 'd': strncpy(host, a + 3, sizeof host - 1); break;
+		case 'l': loop_mode = 1; break;
 		case 'p': port = atoi(a + 3) - 1; break;
 		case 'b': baud = atol(a + 3); break;
 		case 'f': fast = atol(a + 3); break;
@@ -554,7 +743,7 @@ int main(int argc, char **argv)
 	}
 
 	cjp_init(&link, link_write, link_now, NULL, 2 * TICKS_PER_SEC);
-	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld", line_baud);
+	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1", line_baud);
 	queue(CJP_HELLO, hello, (unsigned)strlen(hello));
 	scr_status("Connecting...");
 
@@ -565,11 +754,14 @@ int main(int argc, char **argv)
 		if (key_waiting())
 			key(_bios_keybrd(_KEYBRD_READ));
 		if (cursor_dirty && ser_rx_pending() == 0) {
-			scr_input(input);
+			scr_input(input, ready);
 			cursor_dirty = 0;
 		}
-		if (auto_text && connected && !sent_auto) {
-			queue(CJP_INPUT, auto_text, (unsigned)strlen(auto_text));
+		if (auto_text && connected && ready && !sent_auto) {
+			/* Typed as if at the keyboard, so tests cover the same path. */
+			strncpy(input, auto_text, sizeof input - 1);
+			input_len = (int)strlen(input);
+			key('\r');
 			sent_auto = 1;
 		}
 		flush_queue();

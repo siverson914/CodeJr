@@ -420,3 +420,19 @@ Steve asked what the best speech ever done on a PCjr was, and whether we could d
 **Open on the real PCjr:** whether period 1 really reads as a steady level on this chip (JRAI depends on it too), how exact its volume steps are, whether the PWM carrier whines, and the late counts. A 6-second clip is 56 KB (chip) or 95 KB (PWM), minutes at 413 bytes/s.
 
 Emulator-only so far: playback (DOSBox, 0 late samples at 1000 cycles, 0 and 1 at 400). The quality numbers are simulations assuming ideal hardware unless stated.
+
+**Speed trials on the real PCjr (10:21-10:33 pm).** `JRFLIGHT.EXE` (94.6 KB), sent again at each speed:
+
+| Speed | Time | Requests | Bytes on the line |
+|---|---|---|---|
+| 37287 | 36.1 s | 24 for 24 chunks | 68,625 |
+| 27965 | 42.8 s | 24 | 68,625 |
+| 55930 | 49.4 s | 81 | 87,392 |
+
+At 55930 the PCjr lost 56 bytes to late interrupts and 221 blocks arrived damaged, so it was slower than 37287. 27965 was perfectly clean and still slower. The old notes listed only even divisors (9322, 18643, 37287, 55930); divisors 4 and 5 (27965, 22372) are valid too. 37287 became the client's default in 0.5.
+
+Two misreadings fixed on the way. The transfer line counted uncompressed file bytes, so it showed 9606 bps on a 9600 line; it now shows the line's real speed. And "damaged blocks" climbed even when no chunk was fetched twice: it was counting stray noise bytes between frames (it tracked the framing errors). A fragment under 6 bytes no longer counts. The client also printed a counter line every time a counter changed, which flooded the chat at 37287; the counters now show only on Alt-S.
+
+One more mix-up worth recording: asked to run `CODEJR /P:1 /F:55930`, Steve typed it at `C:\`, where `CODEJR` is the Kermit launcher, which ignored the option and showed 9600. That settled the rename.
+
+**Client 0.6: the rename and the UI requests.** `C:\CODEJR.BAT` is now the native client in a loop, and `C:\CJKERMIT.BAT` the Kermit path. `/run` lists the programs in `PROGS` with numbers; a number writes `C:\CODEJR\RUNNEXT.BAT` and hangs up, and the batch file runs it, waits for a key and dials back (BASIC goes through `RUN.BAT`; Claude is now told to end programs with `SYSTEM`). The client shows a typed line the moment Enter is pressed, hides the prompt until the server says `Ready`, and shows "CodeJr is thinking..." as a line the reply replaces. "Claude" became "CodeJr" in what the PCjr shows. A native client can only write into `PROGS`, so `SETUP.BAT` (sent with the client) copies the launchers into `C:\`. The `/T` test option now types through the keyboard path, so the emulator test covers the echo and `/run`.

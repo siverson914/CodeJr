@@ -19,6 +19,7 @@
 
 static unsigned short far *vid;
 static int col; /* transcript column on the bottom row */
+static int temp; /* the bottom row holds a transient line */
 
 /* Moves the hardware cursor by programming the CRTC (6845) directly. The
  * BIOS call (INT 10h, AH=2) can hold interrupts off long enough on the
@@ -62,7 +63,7 @@ void scr_init(const char *title)
 	for (r = TOP; r <= BOTTOM; r++)
 		fill_row(r, ' ', 0x07);
 	fill_row(ROW_DIV, 0xC4, A_DIV); /* CP437 horizontal line */
-	scr_input("");
+	scr_input("", 0);
 	scr_status("");
 	col = 0;
 }
@@ -82,8 +83,25 @@ static void newline(void)
 	col = 0;
 }
 
+void scr_temp(const char *s, unsigned char attr)
+{
+	if (col > 0)
+		newline();
+	put_text(BOTTOM, 0, s, attr, COLS);
+	temp = 1;
+}
+
+int scr_col(void) { return col; }
+
 void scr_putc(unsigned char c, unsigned char attr)
 {
+	if (temp) {
+		fill_row(BOTTOM, ' ', 0x07);
+		temp = 0;
+		col = 0;
+		if (c == '\n')
+			return; /* the line it stood on is free again */
+	}
 	if (c == '\n') {
 		newline();
 		return;
@@ -108,6 +126,7 @@ void scr_clear_transcript(void)
 	for (r = TOP; r <= BOTTOM; r++)
 		fill_row(r, ' ', 0x07);
 	col = 0;
+	temp = 0;
 }
 
 void scr_status(const char *s)
@@ -116,13 +135,13 @@ void scr_status(const char *s)
 	put_text(ROW_STATUS, 1, s, A_STATUS, COLS - 2);
 }
 
-void scr_input(const char *s)
+void scr_input(const char *s, int prompt)
 {
 	int len = (int)strlen(s), room = COLS - 3;
 	const char *shown = len > room ? s + (len - room) : s;
 
 	fill_row(ROW_INPUT, ' ', A_INPUT);
-	put_text(ROW_INPUT, 0, "> ", A_PROMPT, 2);
+	put_text(ROW_INPUT, 0, prompt ? "> " : "  ", A_PROMPT, 2);
 	put_text(ROW_INPUT, 2, shown, A_INPUT, room);
 	set_cursor(ROW_INPUT, 2 + (int)strlen(shown));
 }

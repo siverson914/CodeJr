@@ -12,8 +12,8 @@ them after AT&W.
            it, and the modem then holds back everything. AT&K0 isn't saved.
   AT&W     save
 
-Then from DOS, type CODEJR to dial in. Programs Claude writes are in
-C:\CODEJR\PROGS.
+Then from DOS, type CODEJR to dial in (CJKERMIT for the Kermit way in).
+Programs Claude writes are in C:\CODEJR\PROGS.
 
 If the screen ever looks scrambled, press Ctrl-L to redraw it.
 To leave: type /quit, or press Ctrl-] then C and type EXIT.
