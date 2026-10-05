@@ -87,6 +87,7 @@ Ask Steve to do these in order and send the `[client]` line or a photo each time
 9. **Typing in the native client while text arrives:** do letters get lost? Alt-S prints the client's loss counters into the chat.
 10. **Speech timing.** SAY 1.1-1.4's `/T` froze the PCjr (power-off needed): never run `/T` from those versions. With SAY 1.5: `SAY /T HELLOH` (chipmunk; the line to note is "chip clips up to about N Hz should keep up here"), then `SAY /V HELLO` (9.3 kHz) and `SAY /V HELLO10` (10.65 kHz). Want: late 0 and a speed matching "wanted". Then re-make the clips at the highest rate with some margin below the `/T` figure (`mksnd.py --hz`, then make it the default in `METHODS`). If `SAY` hangs or makes no sound with polling but `SAY /H HELLO` works, the poll command misbehaves on this 8259: say so in the journal.
 11. **Quality presets (SAY 1.3).** `SAY /V HELLOH` (high: raw 10.7 kHz), `SAY /V HELLOM` (medium: 4-bit ADPCM, 8 kHz), `SAY /V HELLOL` (low: 3-bit ADPCM, 6 kHz). Want late 0 on all three, especially high; note each "decoded ADPCM" time. If high is late, lower its rate in `QUALITY` in `speech/mksnd.py`.
+12. **Tighter clips (SAY 1.6).** `REPLYV6`, `REPLYV5`, `REPLYV4`, `REPLYV3` (2-bit at 6/5/4/3 kHz, new pipeline) against the old `REPLY5`/`REPLY4`/`REPLY3`, and `REPLYL6` (3-bit, 6 kHz). Ask for the lowest rate that still sounds acceptable: that sets voice mode's preset.
 
 ## How to work in this repo
 

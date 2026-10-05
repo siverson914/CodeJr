@@ -35,6 +35,7 @@
 #include <dos.h>
 #include <i86.h>
 #include <io.h>
+#include "sndtable.h"
 
 extern char __far sp_begin[];
 extern char __far sp_end[];
@@ -156,22 +157,25 @@ static const signed char adj4[8] = { -1, -1, -1, -1, 2, 4, 6, 8 };
 static const signed char adj3[4] = { -1, -1, 2, 4 };
 static const signed char adj2[2] = { -1, 2 };
 
-/* Decode n samples whose codes start at byte inoff of seg:0, writing one
- * byte per sample from byte 0 up. The codes sit at the end of the same
- * area, and output never catches up with input, so it works in place. */
-static void adpcm_decode(unsigned seg, unsigned long inoff, unsigned long n, unsigned bits)
+/* The C decoder: decode n samples whose codes start at byte inoff of
+ * seg:0, writing one byte each from byte outoff. The predictor and step
+ * index carry over from call to call (records continue the stream). It
+ * runs in place: the codes sit at the end of the same area, and the output
+ * never catches up with them. Used for /C and if the tables can't be in SS. */
+static long cp;
+static int csi;
+
+static void c_run(unsigned seg, unsigned long inoff, unsigned long outoff, unsigned long n,
+                  unsigned bits)
 {
 	const signed char *adj = bits == 4 ? adj4 : bits == 3 ? adj3 : adj2;
 	unsigned half = 1u << (bits - 1), mask = (1u << bits) - 1;
 	unsigned char __far *in = at(seg, inoff);
-	unsigned char __far *out = at(seg, 0);
+	unsigned char __far *out = at(seg, outoff);
 	unsigned acc = 0, nacc = 0, step, diff, m, code, k;
-	long p = 0;
-	int si = 0;
-	unsigned long total = n;
+	long p = cp;
+	int si = csi;
 	while (n--) {
-		if ((n & 4095) == 0)
-			progress(total - n, total);
 		if (nacc < bits) {
 			acc = (acc << 8) | *in++;
 			nacc += 8;
@@ -200,6 +204,8 @@ static void adpcm_decode(unsigned seg, unsigned long inoff, unsigned long n, uns
 		if (FP_OFF(out) >= 0x8000u)
 			out = (unsigned char __far *)MK_FP(FP_SEG(out) + 0x800, FP_OFF(out) - 0x8000u);
 	}
+	cp = p;
+	csi = si;
 }
 
 /* Tables for sp_dec (player.asm), in DGROUP, which is SS: DELTA[82][codes]
@@ -234,32 +240,71 @@ static unsigned build_tables(unsigned bits)
 	return base;
 }
 
-/* Decode with sp_dec, already copied to block:0, in chunks of 32 KB of
- * output so its 16-bit offsets never wrap. */
-static void adpcm_fast(unsigned block, unsigned seg, unsigned long inoff, unsigned long n,
-                       unsigned bits)
+/* ---- decoding a clip: dec_init, then dec_run for codes and dec_rest after
+ * a pause, in stream order. sp_dec (player.asm, already copied to block:0)
+ * when the tables can live in SS, else c_run. */
+static int fast;
+static unsigned long ptotal; /* samples in the clip, for the progress line */
+
+static void dec_init(unsigned block, unsigned bits)
+{
+	unsigned __far *par = (unsigned __far *)MK_FP(block, 0);
+	fast = FP_SEG(atab) == get_ss() && !slowdec;
+	if (fast) {
+		par[0x28 / 2] = build_tables(bits);
+		par[0x2A / 2] = 0x8000u; /* P = 0, kept as P - 8000h */
+		par[0x26 / 2] = bits;
+	}
+	cp = 0;
+	csi = 0;
+}
+
+/* After a pause the predictor restarts at the rest level; the step index
+ * carries on (mksnd.py's make_chip does the same). */
+static void dec_rest(unsigned block, unsigned rest)
+{
+	unsigned p = rest * 256u + 128u;
+	((unsigned __far *)MK_FP(block, 0))[0x2A / 2] = p ^ 0x8000u;
+	cp = p;
+}
+
+/* n samples of codes at byte inoff of seg:0 to one byte each at outoff,
+ * 4K samples at a time so sp_dec's 16-bit offsets never wrap and the
+ * progress line moves. */
+static void dec_run(unsigned block, unsigned seg, unsigned long inoff, unsigned long outoff,
+                    unsigned long n, unsigned bits)
 {
 	unsigned __far *par = (unsigned __far *)MK_FP(block, 0);
 	void (__far *dec)(void) = (void (__far *)(void))MK_FP(block, FP_OFF(sp_dec) - FP_OFF(sp_begin));
-	/* a unit is one byte of codes, or for 3-bit a group of 3 bytes */
+	/* sp_dec's unit is one byte of codes, or for 3-bit a group of 3 bytes */
 	unsigned per = bits == 3 ? 8 : 8 / bits, ubytes = bits == 3 ? 3 : 1;
-	unsigned long outoff = 0, nbytes = (n + per - 1) / per;
-	par[0x28 / 2] = build_tables(bits);
-	par[0x2A / 2] = 0x8000u;
-	par[0x26 / 2] = bits;
-	while (nbytes) {
-		unsigned long chunk = nbytes > 0x1000UL / per ? 0x1000UL / per : nbytes; /* 4K samples */
-		unsigned char __far *in = at(seg, inoff), __far *out = at(seg, outoff);
-		par[0x1C / 2] = FP_SEG(in);
-		par[0x1E / 2] = FP_OFF(in);
-		par[0x20 / 2] = FP_SEG(out);
-		par[0x22 / 2] = FP_OFF(out);
-		par[0x24 / 2] = (unsigned)chunk;
-		dec();
-		inoff += chunk * ubytes;
-		outoff += chunk * per;
-		nbytes -= chunk;
-		progress(outoff, n);
+	while (n) {
+		unsigned long chunk = n > 4096UL ? 4096UL : n;
+		if (fast) {
+			unsigned char __far *in = at(seg, inoff), __far *out = at(seg, outoff);
+			par[0x1C / 2] = FP_SEG(in);
+			par[0x1E / 2] = FP_OFF(in);
+			par[0x20 / 2] = FP_SEG(out);
+			par[0x22 / 2] = FP_OFF(out);
+			par[0x24 / 2] = (unsigned)((chunk + per - 1) / per);
+			dec();
+		} else
+			c_run(seg, inoff, outoff, chunk, bits);
+		inoff += chunk / per * ubytes;
+		outoff += chunk;
+		n -= chunk;
+		progress(outoff, ptotal);
+	}
+}
+
+/* count bytes of b at byte off of seg:0 */
+static void far_fill(unsigned seg, unsigned long off, unsigned long count, unsigned char b)
+{
+	while (count) {
+		unsigned chunk = count > 0x8000UL ? 0x8000u : (unsigned)count;
+		_fmemset(at(seg, off), b, chunk);
+		off += chunk;
+		count -= chunk;
 	}
 }
 
@@ -275,9 +320,9 @@ static unsigned long bios_ticks(void)
 static int play(const char *arg)
 {
 	static char name[80], text[512];
-	unsigned char h[20];
+	unsigned char h[24];
 	unsigned long n, done, pit;
-	unsigned method, divisor, tlen, tablen, seg, codesz, got, bits = 0;
+	unsigned method, divisor, tlen, tablen, seg, codesz, got, bits = 0, flags = 0, rest = 0, ver;
 	unsigned long clen = 0, t0 = 0, dticks = 0;
 	unsigned long paras;
 	unsigned __far *par;
@@ -292,8 +337,10 @@ static int play(const char *arg)
 		printf("SAY: can't open %s\n", name);
 		return 1;
 	}
-	if (_dos_read(fd, h, 16, &got) || got != 16 || memcmp(h, "JRSN", 4) || h[4] < 1 || h[4] > 2
-	    || (h[4] == 2 && (_dos_read(fd, h + 16, 4, &got) || got != 4))) {
+	ver = 0;
+	if (_dos_read(fd, h, 16, &got) || got != 16 || memcmp(h, "JRSN", 4) || (ver = h[4]) < 1
+	    || ver > 3 || (ver == 2 && (_dos_read(fd, h + 16, 4, &got) || got != 4))
+	    || (ver == 3 && (_dos_read(fd, h + 16, 8, &got) || got != 8))) {
 		printf("SAY: %s is not a SAY clip\n", name);
 		_dos_close(fd);
 		return 1;
@@ -303,13 +350,19 @@ static int play(const char *arg)
 	n = rd32(h + 8);
 	tlen = rd16(h + 12);
 	tablen = rd16(h + 14);
-	if (h[4] == 2) {
+	if (ver >= 2) {
 		bits = h[16];
 		clen = (n * bits + 7) / 8;
 	}
+	if (ver == 3) {
+		flags = h[17];
+		rest = h[18];
+		clen = rd32(h + 20);
+	}
 	if ((method != 1 && method != 2) || divisor < 40 || n == 0
-	    || (h[4] == 2 && (method != 1 || bits < 2 || bits > 4))
-	    || tlen >= sizeof text || tablen > 768 || (method == 1 && tablen != 768)) {
+	    || (ver >= 2 && (method != 1 || bits < 2 || bits > 4)) || flags > 3
+	    || clen > n + 32 || tlen >= sizeof text || tablen > 768
+	    || (method == 1 && tablen != (flags & 1 ? 0 : 768))) {
 		printf("SAY: %s has a header I don't understand\n", name);
 		_dos_close(fd);
 		return 1;
@@ -326,9 +379,11 @@ static int play(const char *arg)
 		return 0;
 	}
 
-	/* 16 bytes of slack keep in-place decoding ahead of its output; 16 more
-	 * cover the 3-bit decoder reading a last group past the codes' end */
-	paras = DATA_PARA + (n + 32 + 15) / 16;
+	/* ADPCM codes are loaded at the end of the area and decoded in place.
+	 * 32 bytes of slack keep the output behind them (record headers
+	 * included), and 16 more cover the 3-bit decoder reading a last group
+	 * past the codes' end. */
+	paras = DATA_PARA + (n + 48 + 15) / 16;
 	if (paras > 0xFFFFUL || (seg = alloc_high((unsigned)paras)) == 0) {
 		printf("SAY: not enough memory for %s (%lu KB)\n", name, paras / 64);
 		_dos_close(fd);
@@ -338,7 +393,9 @@ static int play(const char *arg)
 	progress(0, 1);
 	if (tablen)
 		_dos_read(fd, MK_FP(seg, TABLE_OFF), tablen, &got);
-	if (bits ? read_far(fd, seg + DATA_PARA, n + 16 - clen, clen) : read_far(fd, seg + DATA_PARA, 0, n)) {
+	else
+		_fmemcpy(MK_FP(seg, TABLE_OFF), builtin_table, sizeof builtin_table);
+	if (bits ? read_far(fd, seg + DATA_PARA, n + 32 - clen, clen) : read_far(fd, seg + DATA_PARA, 0, n)) {
 		progress_clear();
 		printf("SAY: %s is shorter than its header says\n", name);
 		_dos_close(fd);
@@ -357,10 +414,32 @@ static int play(const char *arg)
 		strcpy(what, "Decoding");
 		progress(0, 1);
 		t0 = bios_ticks();
-		if (FP_SEG(atab) == get_ss() && !slowdec)
-			adpcm_fast(seg, seg + DATA_PARA, n + 16 - clen, n, bits);
-		else
-			adpcm_decode(seg + DATA_PARA, n + 16 - clen, n, bits);
+		ptotal = n;
+		dec_init(seg, bits);
+		if (flags & 2) {	/* records: pauses and runs of codes */
+			unsigned dseg = seg + DATA_PARA;
+			unsigned long in = n + 32 - clen, end = n + 32, out = 0, k;
+			while (out < n && in + 2 <= end) {
+				unsigned char __far *hp = at(dseg, in);
+				unsigned rec = hp[0] | (hp[1] << 8);
+				in += 2;
+				k = rec & 0x7FFFu;
+				if (k == 0)
+					break;	/* a damaged clip: stop rather than loop */
+				if (k > n - out)
+					k = n - out;
+				if (rec & 0x8000u) {
+					far_fill(dseg, out, k, (unsigned char)rest);
+					dec_rest(seg, rest);
+					progress(out + k, n);
+				} else {
+					dec_run(seg, dseg, in, out, k, bits);
+					in += k * bits / 8;
+				}
+				out += k;
+			}
+		} else
+			dec_run(seg, seg + DATA_PARA, n + 32 - clen, 0, n, bits);
 		dticks = bios_ticks() - t0;
 	}
 	if (dump) {

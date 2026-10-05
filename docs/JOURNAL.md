@@ -522,3 +522,21 @@ He also asked why it always says "Hello Stevvvvve". It was the source: that Elev
 - **Still open:** whether a key pressed during *normal* playback is safe. Every preset's period (112-199 counts) is also under 300. Steve's Enter releases during earlier `/V` runs didn't hang anything, but no test has deliberately pressed a key mid-clip.
 
 **Smaller than Tiny:** 2-bit REPLY at 5 kHz (12 KB for 9.3 s) and 4 kHz (10 KB): Whisper still hears every word. At 3 kHz (7.9 KB) it heard "nice guy" for "night sky" and "press enter" for "press any key", so about 4 kHz is the floor. Each clip also carries 768 bytes of level table and its text; voice mode could leave the table out.
+
+**Tighter clips, SAY 1.6 (2026-10-05, evening).** Steve asked whether MP3 or psychoacoustic ideas could pack 4 kHz tighter. Measured first: the 4 kHz REPLY clip was 10.3 KB, of which 768 bytes were the level table and 159 the text. The 2-bit codes carry 1.87 bits of information each, so Huffman-style coding would gain only about 6%.
+
+**Built (version-3 clips):**
+- The level table is now built into SAY (`sndtable.h`, generated and checked).
+- `--no-text` leaves out the subtitle.
+- Pauses are 2-byte records.
+- A CELP-style perceptual encoder: an LPC envelope per 20 ms frame, with error scored through A(z/0.6).
+
+The whole thing is encoder-side except the record parsing, and all decoders still match the reference byte for byte, pause records included. REPLY at 4 kHz: 10.3 KB down to 8.2 KB, and PESQ up from 2.10 to 2.22. At every rate from 4 to 6 kHz the new clips are 12-20% smaller and score 0.1-0.3 PESQ higher.
+
+**Wrong turns.**
+- PESQ against the original recording read about 1.4 for everything: it was scoring the deliberate band-limiting and loudness squeezing, not the codec. Against the same audio before encoding, it moves.
+- The first pause threshold (0.015) found only 11% silence. The compressor lifts breaths. 0.03 finds 17%.
+- At 4 kHz, Whisper heard "press enter" for "press any key" with both new features on. It didn't with either alone, and at 5 kHz it never did. Read as 4 kHz being at the edge, not as a fault.
+- The 768-byte table couldn't be rebuilt on the PCjr: it comes from a seeded Monte Carlo robustness model. So SAY carries a copy, and the test checks it against `mksnd.py --table-h`.
+
+SAY still reads version 2. No test covers that any more, since mksnd now writes only version 3 for ADPCM.

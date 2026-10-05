@@ -241,17 +241,75 @@ def quantize(target, levels, shaping):
     return out
 
 
-def make_chip(y, rate, bits=0):
-    """bits 0: one raw byte per sample; 2-4: ADPCM codes of that size.
-    Returns (data, table, sample count, levels played)."""
+def rest_index(levels):
+    """The table entry nearest the resting mid level: what silence plays."""
+    return int(np.abs(levels - 0.5).argmin())
+
+
+def pauses(target, rate, thr=0.03, min_quiet=0.08, margin=0.015):
+    """(start, end) sample ranges, multiples of 8, where the target sits
+    within thr of the resting level for at least min_quiet seconds, less a
+    margin at each end so word tails stay coded."""
+    quiet = np.abs(target - 0.5) < thr
+    out, i, n = [], 0, len(target)
+    while i < n:
+        if not quiet[i]:
+            i += 1
+            continue
+        j = i
+        while j < n and quiet[j]:
+            j += 1
+        a = (i + int(margin * rate) + 7) // 8 * 8
+        b = (j - int(margin * rate)) // 8 * 8
+        if b - a >= min_quiet * rate:
+            out.append((a, b))
+        i = j
+    return out
+
+
+PERCEPTUAL_GAMMA = 0.6  # PESQ was flat from 0.4 to 0.7 (README.md)
+
+
+def make_chip(y, rate, bits=0, perceptual=True, skip_pauses=True):
+    """bits 0: one raw byte per sample, version 1 with the table in the clip.
+    bits 2-4: ADPCM codes, version 3: the built-in table, and pauses as
+    records (see write_snd). Returns (data, table, sample count, levels
+    played, rest index)."""
     levels, rows = chip_table()
     target = frame(y, rate)
     table = bytes(rows[0] + rows[1] + rows[2])
-    if bits:
-        codes, idx = adpcm_encode(target, levels, bits)
-        return pack_bits(codes, bits), table, len(idx), levels[np.minimum(idx, len(levels) - 1)]
-    idx = quantize(target, levels, (0.5, 0.0))  # best in-band SNR (39.5 dB)
-    return idx.astype(np.uint8).tobytes(), table, len(idx), levels[idx]
+    if not bits:
+        idx = quantize(target, levels, (0.5, 0.0))  # best in-band SNR (39.5 dB)
+        return idx.astype(np.uint8).tobytes(), table, len(idx), levels[idx], 0
+    n = (len(target) + 7) // 8 * 8  # records hold multiples of 8 samples
+    target = np.concatenate([target, np.full(n - len(target), target[-1])])
+    weights = lpc_weights(target, rate, PERCEPTUAL_GAMMA) if perceptual else None
+    rest = rest_index(levels)
+    segs, pos = [], 0
+    for a, b in (pauses(target, rate) if skip_pauses else []):
+        if a > pos:
+            segs.append((False, pos, a))
+        segs.append((True, a, b))
+        pos = b
+    if pos < n:
+        segs.append((False, pos, n))
+    data, played, state = bytearray(), [], (0, 0)
+    for quiet, a, b in segs:
+        while a < b:  # a record holds at most 32760 samples
+            k = min(b - a, 32760)
+            if quiet:
+                data += struct.pack("<H", 0x8000 | k)
+                played.append(np.full(k, rest))
+                state = (rest * 256 + 128, state[1])
+            else:
+                w = None if weights is None else weights[a:a + k]
+                codes, idx, state = adpcm_encode_state(target[a:a + k], levels, bits,
+                                                       weights=w, start=state)
+                data += struct.pack("<H", k) + pack_bits(codes, bits)
+                played.append(idx)
+            a += k
+    idx = np.minimum(np.concatenate(played), len(levels) - 1)
+    return bytes(data), b"", n, levels[idx], rest
 
 
 # ---- ADPCM: smaller clips, decoded by SAY before it plays ------------------
@@ -306,7 +364,47 @@ def adpcm_steps_np(p, si, bits):
     return p1, s1
 
 
-def adpcm_encode(target, levels, bits, beam=16):
+def lpc_weights(target, rate, gamma, order=8, frame=0.02):
+    """Per-sample perceptual weighting filter taps (n x order).
+
+    Each 20 ms frame of the target gets a linear-prediction fit A(z) (the
+    voice's spectral envelope, Levinson on windowed autocorrelation). The
+    encoder then scores its error through A(z/gamma): error at the
+    envelope's peaks (formants) costs less than error in its valleys, so
+    the remaining noise ends up under the formants, where the voice masks
+    it. The same idea as the perceptual weighting in phone codecs (CELP);
+    only the encoder uses it, the PCjr's decoder is unchanged."""
+    n = len(target)
+    hop = max(int(frame * rate), order + 1)
+    win = np.hanning(2 * hop)
+    taps = np.zeros((n, order))
+    x = target - 0.5
+    for start in range(0, n, hop):
+        seg = x[max(0, start - hop // 2): start - hop // 2 + 2 * hop]
+        if len(seg) < 2 * hop:
+            seg = np.pad(seg, (0, 2 * hop - len(seg)))
+        r = np.correlate(seg * win, seg * win, "full")[2 * hop - 1: 2 * hop + order]
+        if r[0] <= 1e-9:
+            continue
+        r[0] *= 1.0001  # a little white noise keeps it stable
+        a = np.zeros(order + 1)
+        a[0] = 1.0
+        err = r[0]
+        for i in range(1, order + 1):  # Levinson-Durbin
+            k = -(r[i] + np.dot(a[1:i], r[i - 1:0:-1])) / err
+            a[1:i] = a[1:i] + k * a[i - 1:0:-1]
+            a[i] = k
+            err *= 1 - k * k
+        taps[start:start + hop] = a[1:] * gamma ** np.arange(1, order + 1)
+    return taps
+
+
+def adpcm_encode(target, levels, bits, beam=16, weights=None):
+    codes, idx, _ = adpcm_encode_state(target, levels, bits, beam, weights)
+    return codes, idx
+
+
+def adpcm_encode_state(target, levels, bits, beam=16, weights=None, start=(0, 0)):
     """target: wanted level per sample (0..1, as levels).
 
     Beam search: keeps the `beam` best decoder states (predictor, step
@@ -314,40 +412,54 @@ def adpcm_encode(target, levels, bits, beam=16):
     sets up a better step later can win. It steers the predictor itself (in
     index units), not the rounded output: at the smallest step every code
     rounds to the same index, and an encoder looking only at the output
-    would never grow the step. Returns (codes, decoded indices)."""
+    would never grow the step. With weights (from lpc_weights), each state
+    also carries its recent errors, and a choice is scored by its error
+    through the perceptual weighting filter. Returns (codes, decoded
+    indices)."""
     want = np.interp(target, levels, np.arange(len(levels))) * 256 + 128
     want = np.minimum(want, (len(levels) - 1) * 256 + 255)
     n = len(target)
     ncode = 1 << bits
-    p = np.zeros(1, dtype=np.int64)
-    si = np.zeros(1, dtype=np.int64)
+    order = 0 if weights is None else weights.shape[1]
+    p = np.full(1, start[0], dtype=np.int64)
+    si = np.full(1, start[1], dtype=np.int64)
     cost = np.zeros(1)
+    hist = np.zeros((1, order))  # past errors, most recent first
     back = np.empty((n, beam), dtype=np.int32)   # parent state per kept state
     code = np.empty((n, beam), dtype=np.int16)
     for i in range(n):
         p1, s1 = adpcm_steps_np(p, si, bits)
-        c1 = cost[:, None] + (p1 - want[i]) ** 2
+        e = p1 - want[i]
+        if order:
+            e = e + (hist @ weights[i])[:, None]
+        c1 = cost[:, None] + e ** 2
         flat = c1.ravel()
         # best first, and only one survivor per (predictor, step) state
-        order = np.argsort(flat, kind="stable")
-        key = (p1.ravel()[order] << 7) | s1.ravel()[order]
+        order_ = np.argsort(flat, kind="stable")
+        key = (p1.ravel()[order_] << 7) | s1.ravel()[order_]
         _, first = np.unique(key, return_index=True)
-        keep = order[np.sort(first)][:beam]
+        keep = order_[np.sort(first)][:beam]
         keep = keep[np.argsort(flat[keep], kind="stable")]
         k = len(keep)
         back[i, :k] = keep // ncode
         code[i, :k] = keep % ncode
+        parent = keep // ncode
+        if order:
+            raw = (p1.ravel()[keep] - want[i])[:, None]
+            hist = np.concatenate([raw, hist[parent, :-1]], axis=1)
         p, si, cost = p1.ravel()[keep], s1.ravel()[keep], flat[keep]
+    end = (int(p[0]), int(si[0]))
     j = 0  # the best final state, traced back
     codes = np.empty(n, dtype=np.int32)
     for i in range(n - 1, -1, -1):
         codes[i] = code[i, j]
         j = back[i, j]
-    return codes, adpcm_decode_ref(codes, bits, len(levels))
+    return codes, adpcm_decode_ref(codes, bits, len(levels), start), end
 
 
-def adpcm_decode_ref(codes, bits, nlevels=256):
-    p, si, out = 0, 0, []
+def adpcm_decode_ref(codes, bits, nlevels=256, start=(0, 0)):
+    p, si = start
+    out = []
     for c in codes:
         p, si = adpcm_step(p, si, int(c), bits)
         out.append(min(p >> 8, nlevels - 1))
@@ -417,17 +529,38 @@ def preview_pwm(levels, divisor, path):
 
 # ---- the file --------------------------------------------------------------
 
-def write_snd(path, method, divisor, data, text, table=b"", nsamples=None, bits=0):
-    """Version 1 for raw samples; version 2 adds 4 header bytes, the first
-    of which is the ADPCM code size (see README.md)."""
+def write_snd(path, method, divisor, data, text, table=b"", nsamples=None, bits=0, rest=0):
+    """Version 1 for raw samples. Version 3 (ADPCM) adds 8 header bytes: the
+    code size, flags (bit 0: SAY's built-in level table, none in the file;
+    bit 1: the data is records), the rest index, 0, and the data's
+    length (u32). A record is a u16: with
+    bit 15 set, that many samples of silence (the rest index; the decoder's
+    predictor resets to it); otherwise that many samples (a multiple of 8)
+    of packed codes follow. Version 2 (SAY 1.2-1.5: plain codes, table in
+    the file) is still read. See README.md."""
     t = text.encode("ascii", "replace")[:500]
     n = len(data) if nsamples is None else nsamples
     with open(path, "wb") as f:
-        f.write(b"JRSN" + struct.pack("<BBHIHH", 2 if bits else 1, method, divisor, n, len(t),
+        f.write(b"JRSN" + struct.pack("<BBHIHH", 3 if bits else 1, method, divisor, n, len(t),
                                       len(table)))
         if bits:
-            f.write(struct.pack("<BBH", bits, 0, 0))
+            f.write(struct.pack("<BBBBI", bits, 3, rest, 0, len(data)))
         f.write(t + table + data)
+
+
+def write_table_h(path):
+    """sndtable.h: the default level table, built into SAY.EXE so version-3
+    clips can leave it out (768 bytes, 7.5% of a 4 kHz reply)."""
+    levels, rows = chip_table()
+    out = ["/* Generated by mksnd.py --table-h: the default level table (chip_table()),",
+           " * OUT bytes for voices 0, 1, 2. Do not edit; speech/test.sh checks it. */",
+           "static const unsigned char builtin_table[768] = {"]
+    flat = rows[0] + rows[1] + rows[2]
+    for i in range(0, 768, 16):
+        out.append("\t" + ", ".join("0x%02X" % v for v in flat[i:i + 16]) + ",")
+    out.append("};")
+    out.append("#define BUILTIN_REST %d /* rest_index(): what silence plays */" % rest_index(levels))
+    open(path, "w").write("\n".join(out) + "\n")
 
 
 def ref_decode(path):
@@ -436,14 +569,32 @@ def ref_decode(path):
     ver, n, tl, tb = d[4], struct.unpack("<I", d[8:12])[0], *struct.unpack("<HH", d[12:16])
     if ver == 1:
         return d[16 + tl + tb:16 + tl + tb + n]
-    bits, data = d[16], d[20 + tl + tb:]
-    codes, acc, nacc, it = [], 0, 0, iter(data)
-    for _ in range(n):
-        if nacc < bits:
-            acc, nacc = (acc << 8) | next(it), nacc + 8
-        nacc -= bits
-        codes.append((acc >> nacc) & ((1 << bits) - 1))
-    return adpcm_decode_ref(codes, bits).astype(np.uint8).tobytes()
+    bits, data = d[16], d[(20 if ver == 2 else 24) + tl + tb:]
+
+    def unpack(buf, count):
+        codes, acc, nacc, it = [], 0, 0, iter(buf)
+        for _ in range(count):
+            if nacc < bits:
+                acc, nacc = (acc << 8) | next(it), nacc + 8
+            nacc -= bits
+            codes.append((acc >> nacc) & ((1 << bits) - 1))
+        return codes
+
+    if ver == 2 or not d[17] & 2:
+        return adpcm_decode_ref(unpack(data, n), bits).astype(np.uint8).tobytes()
+    rest, out, pos, p, si = d[18], bytearray(), 0, 0, 0
+    while len(out) < n:
+        h = struct.unpack("<H", data[pos:pos + 2])[0]
+        pos += 2
+        if h & 0x8000:
+            out += bytes([rest]) * (h & 0x7FFF)
+            p = rest * 256 + 128
+        else:
+            for c in unpack(data[pos:pos + h * bits // 8], h):
+                p, si = adpcm_step(p, si, c, bits)
+                out.append(p >> 8)
+            pos += h * bits // 8
+    return bytes(out[:n])
 
 
 def asciify(s):
@@ -462,6 +613,8 @@ def main():
                     % ", ".join(VOICES))
     ap.add_argument("--no-check", action="store_true",
                     help="with --text: skip the check for a drawn-out word")
+    ap.add_argument("--no-text", action="store_true",
+                    help="leave the text out of the clip (voice mode shows it in the chat)")
     ap.add_argument("--title", help="text SAY prints while playing (default: --text, or the"
                     " audio file's .txt twin, as in clips/)")
     ap.add_argument("--method", choices=["chip", "pwm", "both"], default="chip",
@@ -474,12 +627,17 @@ def main():
                     help="chip method: raw bytes, or ADPCM with 4, 3 or 2 bits per sample"
                     " (SAY decodes it before playing; speech/grid.py compares them)")
     ap.add_argument("--keep", action="store_true", help="also keep the source audio as OUT.mp3")
+    ap.add_argument("--table-h", action="store_true",
+                    help="write SAY's built-in level table (sndtable.h) to --out")
     ap.add_argument("--ref-decode", metavar="SND",
                     help="tests: write the samples SAY should decode from SND to --out, exactly")
     ap.add_argument("-o", "--out", required=True, help="output path without extension, 8 chars")
     a = ap.parse_args()
     a.hz = a.hz or QUALITY[a.quality][0]
     a.codec = a.codec or QUALITY[a.quality][1]
+    if a.table_h:
+        write_table_h(a.out)
+        return
     if a.ref_decode:
         open(a.out, "wb").write(ref_decode(a.ref_decode))
         return
@@ -514,8 +672,9 @@ def main():
         y = shape(x, SRC_RATE, rate)
         if m == "chip":
             bits = 0 if a.codec == "raw" else int(a.codec[-1])
-            data, table, n, lv = make_chip(y, rate, bits)
-            write_snd(a.out + ext, code, divisor, data, title, table, n, bits)
+            data, table, n, lv, rest = make_chip(y, rate, bits)
+            write_snd(a.out + ext, code, divisor, data, "" if a.no_text else title, table, n,
+                      bits, rest)
             preview_chip(lv, rate, a.out + "-chip.wav")
         else:
             data, lv = make_pwm(y, rate, divisor)
