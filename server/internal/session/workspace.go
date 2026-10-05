@@ -209,6 +209,12 @@ func (w *Workspace) Provide(files map[string][]byte) error {
 		if old, err := os.ReadFile(p); err == nil && bytes.Equal(old, b) {
 			continue
 		}
+		if b == nil {
+			continue
+		}
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			return err
+		}
 		if err := os.WriteFile(p, b, 0o644); err != nil {
 			return err
 		}

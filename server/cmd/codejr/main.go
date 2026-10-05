@@ -4,6 +4,8 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -16,10 +18,26 @@ import (
 	"sync"
 
 	"codejr/internal/claude"
+	"codejr/internal/pcjr"
 	"codejr/internal/session"
 )
 
 func main() {
+	// codejr mcp -workspace DIR -repo DIR: the PCjr's build and run tools,
+	// started by Claude Code over stdio (see internal/pcjr).
+	if len(os.Args) > 1 && os.Args[1] == "mcp" {
+		fs := flag.NewFlagSet("mcp", flag.ExitOnError)
+		ws := fs.String("workspace", "", "Claude's folder for the PCjr")
+		repo := fs.String("repo", "", "the CodeJr checkout (lib/, client/)")
+		fs.Parse(os.Args[2:])
+		w, _ := filepath.Abs(*ws)
+		r, _ := filepath.Abs(*repo)
+		if err := pcjr.Serve(context.Background(), pcjr.Env{Workspace: w, Repo: r}, os.Stdin, os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
 	listen := flag.String("listen", ":4860", "address to listen on (4860 is the PCjr's IBM machine type)")
 	wsDir := flag.String("workspace", "workspace", `Claude's working folder; mirrors C:\CODEJR\PROGS on the PCjr`)
 	baud := flag.Int("baud", 9600, "serial speed between the PCjr and its modem; output is paced to it")
@@ -88,7 +106,12 @@ func main() {
 			SystemPrompt: session.SystemPrompt(*baud),
 			Model:        *model,
 			Tools:        []string{"Read", "Write", "Edit", "Glob", "Grep", "WebSearch", "WebFetch"},
+			MCPConfig:    mcpConfig(dir),
+			Allow:        []string{"mcp__pcjr__build", "mcp__pcjr__run"},
 		},
+	}
+	if err := ws.Provide(map[string][]byte{"JRGFX/JRGFX.H": jrgfxHeader()}); err != nil {
+		log.Print(err)
 	}
 
 	ln, err := net.Listen("tcp", *listen)
@@ -171,4 +194,35 @@ func allowed(nets []netip.Prefix, a netip.Addr) bool {
 func init() {
 	log.SetFlags(log.Ltime)
 	log.SetOutput(os.Stdout)
+}
+
+// repoDir is the CodeJr checkout this binary was built in (server/codejr).
+func repoDir() string {
+	exe, err := os.Executable()
+	if err != nil {
+		return ""
+	}
+	return filepath.Dir(filepath.Dir(exe))
+}
+
+// mcpConfig starts this same binary as the PCjr tools' MCP server.
+func mcpConfig(ws string) string {
+	exe, err := os.Executable()
+	if err != nil {
+		return ""
+	}
+	b, _ := json.Marshal(map[string]any{"mcpServers": map[string]any{
+		"pcjr": map[string]any{"command": exe, "args": []string{"mcp", "-workspace", ws, "-repo", repoDir()}},
+	}})
+	return string(b)
+}
+
+// jrgfxHeader is the graphics library's header, kept in the workspace so
+// the PCjr's Claude can read it (the build tool uses the repo's copy).
+func jrgfxHeader() []byte {
+	b, err := os.ReadFile(filepath.Join(repoDir(), "lib", "jrgfx.h"))
+	if err != nil {
+		return nil
+	}
+	return b
 }

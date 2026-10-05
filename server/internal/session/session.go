@@ -490,6 +490,14 @@ func describeTool(e claude.Event) (string, string) {
 		return "", "Reading " + file
 	case "Glob", "Grep":
 		return "", "Looking through files"
+	case "mcp__pcjr__build":
+		p, _ := e.Input["project"].(string)
+		p = strings.ToUpper(p)
+		return "[builds " + p + "]", "Building " + p
+	case "mcp__pcjr__run":
+		p, _ := e.Input["program"].(string)
+		p = strings.ToUpper(p)
+		return "[tests " + p + " in the emulator]", "Testing " + p + " in the emulator"
 	}
 	return "[" + strings.ToLower(e.Name) + "]", "Working"
 }

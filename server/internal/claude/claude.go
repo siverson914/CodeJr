@@ -21,6 +21,8 @@ type Config struct {
 	SystemPrompt string   // appended to Claude Code's own system prompt
 	Model        string   // optional model alias or ID
 	Tools        []string // built-in tools Claude may use
+	MCPConfig    string   // JSON for --mcp-config (our own tools), or ""
+	Allow        []string // more tools allowed without asking (the MCP ones)
 }
 
 // EventKind is what happened.
@@ -65,7 +67,7 @@ func Run(ctx context.Context, cfg Config, session, prompt string, emit func(Even
 		"--tools", strings.Join(cfg.Tools, ","),
 		"--permission-mode", "acceptEdits",
 		// Read-only web tools need explicit approval; there's nobody to ask.
-		"--allowedTools", "WebSearch,WebFetch",
+		"--allowedTools", strings.Join(append([]string{"WebSearch", "WebFetch"}, cfg.Allow...), ","),
 		"--permission-prompts", "none",
 		// Re-read our system prompt on every turn; by default a resumed
 		// conversation keeps the prompt it started with.
@@ -73,6 +75,9 @@ func Run(ctx context.Context, cfg Config, session, prompt string, emit func(Even
 	}
 	if cfg.SystemPrompt != "" {
 		args = append(args, "--append-system-prompt", cfg.SystemPrompt)
+	}
+	if cfg.MCPConfig != "" {
+		args = append(args, "--mcp-config", cfg.MCPConfig)
 	}
 	if cfg.Model != "" {
 		args = append(args, "--model", cfg.Model)

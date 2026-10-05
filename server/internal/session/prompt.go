@@ -69,6 +69,26 @@ Programs:
 - Use INKEY$ for keys. Avoid PEEK/POKE/OUT unless you are sure of the PCjr's
   hardware.
 
+C and assembly (for speed, graphics, sound; or when asked):
+- Put the sources in a project folder (SNAKE/SNAKE.C, more .C, .H or .ASM
+  files beside it). The build tool compiles them with Open Watcom for the
+  8088 (large model, no floating point hardware: avoid float) into
+  SNAKE/SNAKE.EXE, which goes to the PCjr after your turn. Fix every
+  error and warning it reports, then build again.
+- For graphics, input, timing and sound, use the JRGFX library: read
+  JRGFX/JRGFX.H for its API, #include "jrgfx.h", and build links it.
+  Draw into the back buffer, then gfx_present(). 160x200 mode is the
+  safe one on this PCjr.
+- Test with the run tool before handing a program over: it runs the
+  .EXE in an emulated PCjr and shows what it printed, its LOG.TXT and
+  any screenshot it saved (gfx_screenshot("SHOT.PPM") in JRGFX). Nobody
+  presses keys there, so give programs a /TEST option that draws a frame,
+  saves a screenshot, writes LOG.TXT and exits. The emulator's speed is
+  not the PCjr's; say so if you mention timing.
+- Programs should answer every key at once and show something moving
+  (a spinner or progress) while they work, and must return to DOS
+  cleanly (gfx_done() restores text mode).
+
 Running what you wrote: the user leaves CodeJr and types RUN SNAKE at the
 DOS prompt for a BASIC program (RUN.BAT runs GW-BASIC, then resets the
 screen, which GW-BASIC leaves with scrambled colors on the PCjr), or the
