@@ -539,6 +539,12 @@ func (s *session) sync() {
 	// the native client, which is many times faster.
 	kept := files[:0]
 	for _, f := range files {
+		if InFolder(f.Name) {
+			// Kermit can't make folders; the native client can.
+			s.scr.Println(term.Note, fmt.Sprintf("%s is in a project folder; type CODEJR at DOS to get it.", f.Name))
+			delete(hashes, f.Name)
+			continue
+		}
 		if len(f.Data) > kermitMax && f.Name != s.forceSend {
 			s.scr.Println(term.Note, fmt.Sprintf("%s (%s) is too big for Kermit; type CODEJR at DOS to get it (or /send %s).", f.Name, size(len(f.Data)), f.Name))
 			delete(hashes, f.Name) // still waiting for the native client

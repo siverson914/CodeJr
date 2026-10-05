@@ -1,6 +1,8 @@
 package session
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -51,4 +53,31 @@ func TestSetupHasDialAddress(t *testing.T) {
 		}
 	}
 	t.Fatal("no CODEJR.CFG")
+}
+
+func TestProjectFolders(t *testing.T) {
+	w := &Workspace{Dir: t.TempDir()}
+	w.Init()
+	os.MkdirAll(filepath.Join(w.Dir, "snake", "deep"), 0o755)
+	os.WriteFile(filepath.Join(w.Dir, "snake", "snake.bas"), []byte("10 SYSTEM\n"), 0o644)
+	os.WriteFile(filepath.Join(w.Dir, "TOP.BAS"), []byte("10 END\n"), 0o644)
+	os.MkdirAll(filepath.Join(w.Dir, "toolongname"), 0o755)
+	os.WriteFile(filepath.Join(w.Dir, "toolongname", "A.BAS"), []byte("x"), 0o644)
+	files, _, problems, err := w.Pending()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, f := range files {
+		names = append(names, f.Name)
+	}
+	if strings.Join(names, " ") != `SNAKE\SNAKE.BAS TOP.BAS` {
+		t.Fatalf("files = %v", names)
+	}
+	if len(problems) != 2 { // the folder inside a folder, and the long folder name
+		t.Fatalf("problems = %+v", problems)
+	}
+	if !ValidPath(`SNAKE\SNAKE.BAS`) || !ValidPath("snake/snake.bas") || ValidPath(`A\B\C.BAS`) || ValidPath(`LONGFOLDER\A.BAS`) {
+		t.Fatal("ValidPath")
+	}
 }

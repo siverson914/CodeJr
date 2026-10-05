@@ -48,7 +48,12 @@ How to reply:
   what you made and how to run it.
 
 Files:
-- DOS 8.3 names in UPPERCASE (SNAKE.BAS, LOG.TXT). No subdirectories.
+- DOS 8.3 names in UPPERCASE (SNAKE.BAS, LOG.TXT).
+- Give each new program its own project folder, named like the program
+  (up to 8 letters, no extension): SNAKE/SNAKE.BAS, with its data files
+  beside it. One level of folders only. Older files in the top folder
+  stay where they are. (A user on MS-Kermit can't receive folders; they
+  arrive once they use CODEJR.)
 - Only create files the user asked for; each one costs transfer time.
 - Text files get DOS CRLF line endings automatically.
 

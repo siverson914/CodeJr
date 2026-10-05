@@ -24,8 +24,8 @@ const nativeNote = `
 Client: the user is running CodeJr's own PCjr program (CODEJR.EXE), not
 MS-Kermit. It draws its own screen, so ignore the MS-Kermit details above:
 files arrive with an on-screen progress bar, and to run a program the user
-types /run (a numbered list of programs; a number runs one, and CodeJr
-calls back when it ends). End BASIC programs with SYSTEM rather than END,
+types /run (a numbered list of programs, including those in project
+folders; a number runs one, and CodeJr calls back when it ends). End BASIC programs with SYSTEM rather than END,
 so they return to DOS and CodeJr comes back by itself. You cannot see the PCjr's screen; if the user reports a
 display problem, say so and suggest /help, rather than guessing settings.`
 
@@ -42,6 +42,7 @@ type native struct {
 	// messages (it said ui=1 in its HELLO).
 	ui   bool
 	temp bool // a Temp line is showing
+	dirs bool // the client makes project folders (dirs=1)
 
 	// Text waiting to go out. Claude streams a few characters at a time;
 	// sending each piece as its own frame wastes the window on tiny frames,
@@ -148,6 +149,9 @@ func (n *native) hello(h string) {
 		}
 		if f == "ui=1" {
 			n.ui = true
+		}
+		if f == "dirs=1" {
+			n.dirs = true
 		}
 		if v, ok := strings.CutPrefix(f, "baud="); ok {
 			if b, err := strconv.Atoi(v); err == nil && b >= 300 && b <= 115200 {
@@ -356,8 +360,8 @@ func (n *native) command(line string) bool {
 	case "/sync":
 		n.sync()
 	case "/send":
-		if !ValidName(arg) {
-			n.print(cjp.StyleWarn, "Usage: /send NAME.EXT\n")
+		if !ValidPath(arg) {
+			n.print(cjp.StyleWarn, "Usage: /send NAME.EXT  (or FOLDER\\NAME.EXT)\n")
 			break
 		}
 		s.ws.Forget(arg)
@@ -482,6 +486,10 @@ func (n *native) sync() {
 	}
 	n.sendPending()
 	for _, f := range files {
+		if InFolder(f.Name) && !n.dirs {
+			n.print(cjp.StyleNote, fmt.Sprintf("%s is in a project folder; it comes once CodeJr is updated.\n", f.Name))
+			continue
+		}
 		if !n.pull && len(f.Data) > kermitMax {
 			// The first client's transfers are slow; it only needs to
 			// fetch its replacement.

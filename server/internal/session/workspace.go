@@ -81,8 +81,10 @@ type Entry struct {
 	Problem string
 }
 
-// Scan lists the workspace. Hidden files are ignored; files that can't go
-// to the PCjr come back with Problem set.
+// Scan lists the workspace: its files, and the files one level down in
+// project folders (SNAKE/SNAKE.BAS on the laptop is SNAKE\SNAKE.BAS on the
+// PCjr). Hidden files are ignored; files that can't go to the PCjr come
+// back with Problem set.
 func (w *Workspace) Scan() ([]Entry, map[string][]byte, error) {
 	des, err := os.ReadDir(w.Dir)
 	if err != nil {
@@ -92,18 +94,18 @@ func (w *Workspace) Scan() ([]Entry, map[string][]byte, error) {
 	seen := map[string]bool{}
 	var out []Entry
 	data := map[string][]byte{}
-	for _, de := range des {
-		n := de.Name()
-		if strings.HasPrefix(n, ".") || !de.Type().IsRegular() {
-			continue
-		}
+	add := func(dir, n string) {
+		rel := filepath.Join(dir, n)
 		e := Entry{Name: strings.ToUpper(n)}
-		b, err := os.ReadFile(filepath.Join(w.Dir, n))
+		if dir != "" {
+			e.Name = strings.ToUpper(dir) + `\` + e.Name
+		}
+		b, err := os.ReadFile(filepath.Join(w.Dir, rel))
 		switch {
 		case err != nil:
 			e.Problem = err.Error()
-		case !ValidName(n):
-			e.Name, e.Problem = n, "not a DOS 8.3 name"
+		case !ValidName(n) || (dir != "" && !validDir(dir)):
+			e.Name, e.Problem = rel, "not a DOS 8.3 name"
 		case seen[e.Name]:
 			e.Problem = "same name as another file in a different case"
 		case len(b) > maxFile:
@@ -116,9 +118,50 @@ func (w *Workspace) Scan() ([]Entry, map[string][]byte, error) {
 		}
 		out = append(out, e)
 	}
+	for _, de := range des {
+		n := de.Name()
+		if strings.HasPrefix(n, ".") {
+			continue
+		}
+		if de.IsDir() {
+			sub, err := os.ReadDir(filepath.Join(w.Dir, n))
+			if err != nil {
+				continue
+			}
+			for _, f := range sub {
+				switch {
+				case strings.HasPrefix(f.Name(), "."):
+				case f.IsDir():
+					out = append(out, Entry{Name: n + "/" + f.Name(), Problem: "folders inside folders don't go to the PCjr"})
+				case f.Type().IsRegular():
+					add(n, f.Name())
+				}
+			}
+			continue
+		}
+		if de.Type().IsRegular() {
+			add("", n)
+		}
+	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out, data, nil
 }
+
+// validDir reports whether name works as a DOS folder name: up to 8
+// characters, no extension.
+func validDir(name string) bool { return ValidName(name) && !strings.Contains(name, ".") }
+
+// ValidPath accepts NAME.EXT or FOLDER\NAME.EXT (either slash).
+func ValidPath(p string) bool {
+	dir, name, ok := strings.Cut(strings.ReplaceAll(p, "/", `\`), `\`)
+	if !ok {
+		return ValidName(p)
+	}
+	return validDir(dir) && ValidName(name)
+}
+
+// InFolder reports whether a workspace entry lives in a project folder.
+func InFolder(name string) bool { return strings.Contains(name, `\`) }
 
 // Pending returns the files the PCjr doesn't have yet, ready to send, and
 // the hashes to record once they arrive.
@@ -173,10 +216,10 @@ func (w *Workspace) Provide(files map[string][]byte) error {
 	return nil
 }
 
-// Forget makes the next sync send name again.
+// Forget makes the next sync send name again (NAME or FOLDER\NAME).
 func (w *Workspace) Forget(name string) error {
 	m := w.loadSynced()
-	delete(m, strings.ToUpper(name))
+	delete(m, strings.ToUpper(strings.ReplaceAll(name, "/", `\`)))
 	return w.saveSynced(m)
 }
 

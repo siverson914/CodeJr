@@ -29,12 +29,13 @@
 #include <dos.h>
 #include <bios.h>
 #include <io.h>
+#include <direct.h>
 #include "serial.h"
 #include "cjp.h"
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "0.7"
+#define VERSION "0.8"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -62,7 +63,7 @@ static int outq_head, outq_n;
 /* A file the server has offered; pulled from the main loop. */
 static struct {
 	int pending;
-	char name[13];
+	char name[22]; /* NAME.EXT or FOLDER\NAME.EXT */
 	unsigned long size;
 	unsigned chunks;
 } offer;
@@ -177,6 +178,35 @@ static int valid_name(const char *s)
 	return base > 0 && ext != 0;
 }
 
+/* NAME.EXT, or FOLDER\NAME.EXT one level down (a project folder). */
+static int valid_path(const char *s)
+{
+	char dir[10];
+	const char *bs = strchr(s, '\\');
+	unsigned n;
+
+	if (!bs)
+		return valid_name(s);
+	n = (unsigned)(bs - s);
+	if (n == 0 || n > 8)
+		return 0;
+	memcpy(dir, s, n);
+	dir[n] = 0;
+	return !strchr(dir, '.') && valid_name(dir) && valid_name(bs + 1);
+}
+
+/* Makes the project folder a path needs, if it has one. */
+static void make_folder(const char *path)
+{
+	char dir[10];
+	const char *bs = strchr(path, '\\');
+	if (bs && bs - path < (int)sizeof dir) {
+		memcpy(dir, path, (size_t)(bs - path));
+		dir[bs - path] = 0;
+		mkdir(dir); /* fails harmlessly if it exists */
+	}
+}
+
 static void io_send(const unsigned char *p, unsigned n, void *ctx)
 {
 	(void)ctx;
@@ -248,7 +278,7 @@ static void pull_file(void)
 	pull_t0 = t0;
 	pull_wire = 0;
 	t_wait = t_recv = t_tail = t_disk = 0;
-	if (!valid_name(offer.name))
+	if (!valid_path(offer.name))
 		strcpy(err, "not a DOS file name");
 	else if ((f = fopen(PULL_TMP, "wb")) == NULL)
 		strcpy(err, "can't create file");
@@ -282,6 +312,7 @@ static void pull_file(void)
 	/* The old copy is replaced only once the new one is whole, so a
 	 * failed pull of CODEJR.EXE leaves the working client in place. */
 	if (!err[0]) {
+		make_folder(offer.name);
 		remove(offer.name);
 		if (rename(PULL_TMP, offer.name) != 0) {
 			strcpy(err, "can't rename " PULL_TMP);
@@ -340,7 +371,7 @@ static void file_offer(const cjp_frame *f)
 {
 	unsigned n;
 
-	if (f->len < 7 || f->len - 6 > 12)
+	if (f->len < 7 || f->len - 6 > sizeof offer.name - 1)
 		return;
 	n = f->len - 6;
 	offer.size = f->payload[0] | (unsigned long)f->payload[1] << 8 |
@@ -421,8 +452,8 @@ static void poll_serial(void)
 
 /* ---- /run: the programs in this directory, numbered ------------------- */
 
-#define MAXPROGS 40
-static char progs[MAXPROGS][13];
+#define MAXPROGS 60
+static char progs[MAXPROGS][22];
 static int nprogs;
 
 static int runnable(const char *name)
@@ -446,29 +477,58 @@ static int by_name(const void *a, const void *b)
 	return strcmp((const char *)a, (const char *)b);
 }
 
-static void list_progs(void)
+/* Adds the programs matching pattern; dir is put in front of their names. */
+static void find_progs(const char *pattern, const char *dir)
 {
 	struct find_t ff;
-	char line[81], cell[21];
-	int i;
+
+	if (_dos_findfirst(pattern, _A_NORMAL, &ff) != 0)
+		return;
+	do {
+		if (nprogs < MAXPROGS && runnable(ff.name))
+			sprintf(progs[nprogs++], "%s%s%s", dir, *dir ? "\\" : "", ff.name);
+	} while (_dos_findnext(&ff) == 0);
+}
+
+/* Fills progs: the programs here, then those in each project folder. */
+static void scan_progs(void)
+{
+	static char dirs[20][13];
+	struct find_t ff;
+	char pat[16];
+	int nd = 0, i;
 
 	nprogs = 0;
-	if (_dos_findfirst("*.*", _A_NORMAL, &ff) == 0) {
+	find_progs("*.*", "");
+	/* Collect the folders first: a search inside one would end this one. */
+	if (_dos_findfirst("*.*", _A_SUBDIR, &ff) == 0) {
 		do {
-			if (nprogs < MAXPROGS && runnable(ff.name))
-				strcpy(progs[nprogs++], ff.name);
+			if ((ff.attrib & _A_SUBDIR) && ff.name[0] != '.' && nd < 20)
+				strcpy(dirs[nd++], ff.name);
 		} while (_dos_findnext(&ff) == 0);
 	}
+	for (i = 0; i < nd; i++) {
+		sprintf(pat, "%s\\*.*", dirs[i]);
+		find_progs(pat, dirs[i]);
+	}
 	qsort(progs, nprogs, sizeof progs[0], by_name);
+}
+
+static void list_progs(void)
+{
+	char line[81], cell[30];
+	int i;
+
+	scan_progs();
 	if (nprogs == 0) {
 		note("No programs here yet. Ask for one!");
 		return;
 	}
 	line[0] = 0;
 	for (i = 0; i < nprogs; i++) {
-		sprintf(cell, "%2d %-12s    ", i + 1, progs[i]);
+		sprintf(cell, "%2d %-22s ", i + 1, progs[i]);
 		strcat(line, cell);
-		if (i % 4 == 3 || i == nprogs - 1) {
+		if (i % 3 == 2 || i == nprogs - 1) {
 			scr_puts(line, 0x03);
 			scr_putc('\n', 0x03);
 			line[0] = 0;
@@ -482,21 +542,33 @@ static void list_progs(void)
  * starts CodeJr again. */
 static void run_prog(const char *name)
 {
-	char s[80];
+	char s[90], dir[10];
+	const char *file = name, *bs = strchr(name, '\\');
 	FILE *f;
 	int bas = strstr(name, ".BAS") != NULL;
 
+	dir[0] = 0;
+	if (bs) {
+		memcpy(dir, name, (size_t)(bs - name));
+		dir[bs - name] = 0;
+		file = bs + 1;
+	}
 	if (!loop_mode) {
-		sprintf(s, "Alt-X, then type %s%s. (Start with CODEJR to run from here.)",
-		        bas ? "RUN " : "", name);
+		if (dir[0])
+			sprintf(s, "Alt-X, then CD %s and type %s%s.", dir, bas ? "RUN " : "", file);
+		else
+			sprintf(s, "Alt-X, then type %s%s.", bas ? "RUN " : "", file);
 		note(s);
+		note("(Start CodeJr with CODEJR to run programs from here.)");
 		return;
 	}
 	if ((f = fopen(RUNNEXT, "w")) == NULL) {
 		note("Can't write C:\\CODEJR\\RUNNEXT.BAT.");
 		return;
 	}
-	fprintf(f, "@ECHO OFF\nCD \\CODEJR\\PROGS\n%s%s\n", bas ? "RUN " : "", name);
+	/* RUN.BAT lives in PROGS, not in the project folder. */
+	fprintf(f, "@ECHO OFF\nCD \\CODEJR\\PROGS%s%s\n%s%s\n", dir[0] ? "\\" : "", dir,
+	        bas ? "\\CODEJR\\PROGS\\RUN " : "", file);
 	fclose(f);
 	sprintf(s, "Running %s. CodeJr calls back when it ends.", name);
 	note(s);
@@ -528,34 +600,31 @@ static int local_line(const char *s)
 		list_progs();
 	} else if ((n = atoi(s)) > 0) {
 		if (nprogs == 0)
-			list_progs();
+			scan_progs();
 		if (n <= nprogs)
 			run_prog(progs[n - 1]);
 		else
 			note("No program with that number. /run lists them.");
 	} else {
-		char name[13];
-		strncpy(name, s, 12);
-		name[12] = 0;
-		strupr(name);
-		if (!strchr(name, '.')) {
-			/* SNAKE finds SNAKE.BAS, SNAKE.EXE, ... */
-			static const char *ext[] = { ".BAS", ".EXE", ".COM", ".BAT" };
-			char cand[13];
-			int i;
-			for (i = 0; i < 4; i++) {
-				if (strlen(name) > 8)
-					break;
-				strcpy(cand, name);
-				strcat(cand, ext[i]);
-				if (access(cand, 0) == 0) {
-					run_prog(cand);
-					return 1;
-				}
+		/* SNAKE finds SNAKE.BAS, SNAKE\SNAKE.EXE, or the first program in
+		 * a SNAKE folder. */
+		char want[22];
+		int i;
+
+		strncpy(want, s, sizeof want - 1);
+		want[sizeof want - 1] = 0;
+		strupr(want);
+		scan_progs();
+		for (i = 0; i < nprogs; i++) {
+			const char *p = progs[i], *bs = strchr(p, '\\');
+			const char *file = bs ? bs + 1 : p;
+			size_t wl = strlen(want);
+			if (strcmp(p, want) == 0 || strcmp(file, want) == 0 ||
+			    (strncmp(file, want, wl) == 0 && file[wl] == '.') ||
+			    (bs && (size_t)(bs - p) == wl && strncmp(p, want, wl) == 0)) {
+				run_prog(p);
+				return 1;
 			}
-		} else if (valid_name(name) && access(name, 0) == 0) {
-			run_prog(name);
-			return 1;
 		}
 		note("No such program here. /run lists them.");
 	}
@@ -736,7 +805,7 @@ int main(int argc, char **argv)
 	unsigned long spun = 0;
 	long baud = 9600, fast = 37287;
 	unsigned long start;
-	char hello[48];
+	char hello[64];
 
 	for (i = 1; i < argc; i++) {
 		char *a = argv[i];
@@ -786,7 +855,7 @@ int main(int argc, char **argv)
 	}
 
 	cjp_init(&link, link_write, link_now, NULL, 2 * TICKS_PER_SEC);
-	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1", line_baud);
+	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1 dirs=1", line_baud);
 	queue(CJP_HELLO, hello, (unsigned)strlen(hello));
 	scr_status("Connecting...");
 
