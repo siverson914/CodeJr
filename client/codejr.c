@@ -35,7 +35,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "0.8"
+#define VERSION "0.9"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -79,6 +79,15 @@ static void key(unsigned k);
 static int loop_mode; /* /L: C:\CODEJR.BAT runs RUNNEXT.BAT, then redials */
 static int menu; /* the last line was /run: a bare number picks a program */
 #define RUNNEXT "C:\\CODEJR\\RUNNEXT.BAT"
+/* After a /run: what ran, its exit status and screen, and the report put
+ * together from them for the server (sent on the next call). */
+#define LASTRUN "C:\\CODEJR\\LASTRUN.TXT"
+#define LASTERR "C:\\CODEJR\\LASTERR.TXT"
+#define LASTSCR "C:\\CODEJR\\LASTSCR.TXT"
+#define LASTREP "C:\\CODEJR\\LASTREP.TXT"
+static FILE *report;   /* being sent, a piece at a time */
+static int results_ok; /* the server takes run reports */
+static void start_report(void);
 static int cursor_dirty;
 static unsigned long quit_at;
 
@@ -396,6 +405,10 @@ static void handle(const cjp_frame *f)
 			ui = 1;
 			ready = 0; /* until the server's READY */
 		}
+		if (strstr(s, " results")) {
+			results_ok = 1;
+			start_report();
+		}
 		scr_status("Connected.  Enter sends,  Ctrl-C stops CodeJr,  Alt-X hangs up.");
 		break;
 	case CJP_READY:
@@ -566,14 +579,142 @@ static void run_prog(const char *name)
 		note("Can't write C:\\CODEJR\\RUNNEXT.BAT.");
 		return;
 	}
-	/* RUN.BAT lives in PROGS, not in the project folder. */
-	fprintf(f, "@ECHO OFF\nCD \\CODEJR\\PROGS%s%s\n%s%s\n", dir[0] ? "\\" : "", dir,
-	        bas ? "\\CODEJR\\PROGS\\RUN " : "", file);
+	/* Run it, note a nonzero exit, and save the text screen before
+	 * anything clears it; the next call sends all that to CodeJr. A .BAT
+	 * goes through COMMAND /C so control comes back here. BASIC runs
+	 * GW-BASIC directly (RUN.BAT would clear the screen first), then
+	 * resets the palette GW-BASIC scrambles. */
+	fprintf(f, "@ECHO OFF\nCD \\CODEJR\\PROGS%s%s\n", dir[0] ? "\\" : "", dir);
+	if (bas)
+		fprintf(f, "GWBASIC %s\n", file);
+	else if (strstr(file, ".BAT"))
+		fprintf(f, "COMMAND /C %s\n", file);
+	else
+		fprintf(f, "%s\n", file);
+	fprintf(f, "IF ERRORLEVEL 1 ECHO 1 > " LASTERR "\n");
+	fprintf(f, "C:\\CODEJR\\PROGS\\SCRDUMP > " LASTSCR "\n");
+	if (bas)
+		fprintf(f, "MODE CO80\n");
 	fclose(f);
+	remove(LASTERR);
+	remove(LASTSCR);
+	if ((f = fopen(LASTRUN, "w")) != NULL) {
+		fprintf(f, "%s\n", name);
+		fclose(f);
+	}
 	sprintf(s, "Running %s. CodeJr calls back when it ends.", name);
 	note(s);
 	queue(CJP_BYE, NULL, 0);
 	start_quit();
+}
+
+/* ---- run reports ------------------------------------------------------- */
+
+/* Copies up to max bytes of a text file into out, without trailing blank
+ * lines or the spaces at line ends. */
+static void copy_text(FILE *out, const char *path, long max)
+{
+	FILE *in = fopen(path, "r");
+	char line[100];
+	int blanks = 0, i;
+	long n = 0;
+
+	if (!in)
+		return;
+	while (n < max && fgets(line, sizeof line, in)) {
+		size_t len = strlen(line);
+		while (len && (line[len - 1] == '\n' || line[len - 1] == ' ' || line[len - 1] == '\r'))
+			line[--len] = 0;
+		if (len == 0) {
+			blanks++; /* written only if more text follows */
+			continue;
+		}
+		for (i = 0; i < blanks; i++)
+			fputc('\n', out);
+		blanks = 0;
+		fprintf(out, "%s\n", line);
+		n += (long)len + 1;
+	}
+	if (n >= max)
+		fprintf(out, "... (cut)\n");
+	fclose(in);
+}
+
+/* A file's DOS date and time as one comparable number. */
+static int file_time(const char *path, unsigned long *t)
+{
+	int h;
+	unsigned d, tm;
+	if (_dos_open(path, 0, &h) != 0)
+		return 0;
+	_dos_getftime(h, &d, &tm);
+	_dos_close(h);
+	*t = (unsigned long)d << 16 | tm;
+	return 1;
+}
+
+/* If a /run left results, puts the report together and starts sending
+ * it: 'B' + the program's name now, the text from the main loop. */
+static void start_report(void)
+{
+	FILE *f = fopen(LASTRUN, "r");
+	char name[24], log[40], *nl;
+	unsigned long t_run, t_log;
+
+	if (!f)
+		return;
+	name[0] = 0;
+	fgets(name, sizeof name, f);
+	fclose(f);
+	if ((nl = strchr(name, '\n')) != NULL)
+		*nl = 0;
+	if ((f = fopen(LASTREP, "w")) == NULL)
+		return;
+	fprintf(f, "Exit status: %s\n", access(LASTERR, 0) == 0 ? "errorlevel 1 or more (a failure?)" : "0");
+	fprintf(f, "Text screen when it ended:\n");
+	copy_text(f, LASTSCR, 2400);
+	/* Its LOG.TXT, if it wrote one during this run. */
+	strcpy(log, name);
+	nl = strrchr(log, '\\');
+	strcpy(nl ? nl + 1 : log, "LOG.TXT");
+	if (file_time(LASTRUN, &t_run) && file_time(log, &t_log) && t_log >= t_run) {
+		fprintf(f, "%s:\n", log);
+		copy_text(f, log, 3000);
+	}
+	fclose(f);
+	if ((report = fopen(LASTREP, "rb")) == NULL)
+		return;
+	{
+		unsigned char b[24];
+		b[0] = 'B';
+		memcpy(b + 1, name, strlen(name));
+		queue(CJP_RESULT, b, (unsigned)strlen(name) + 1);
+	}
+	note("Sending CodeJr the results of your last run...");
+}
+
+/* Sends the next piece of the report while the queue has room. */
+static void pump_report(void)
+{
+	unsigned char b[1 + 120];
+	size_t n;
+
+	while (report && outq_n < OUTQ - 2) {
+		n = fread(b + 1, 1, 120, report);
+		if (n == 0) {
+			b[0] = 'E';
+			queue(CJP_RESULT, b, 1);
+			fclose(report);
+			report = NULL;
+			remove(LASTREP);
+			remove(LASTRUN);
+			remove(LASTERR);
+			remove(LASTSCR);
+			break;
+		}
+		b[0] = 'D';
+		queue(CJP_RESULT, b, (unsigned)n + 1);
+	}
 }
 
 /* Handles a line meant for the client. Returns 1 if it was. */
@@ -882,6 +1023,7 @@ int main(int argc, char **argv)
 			key('\r');
 			sent_auto = 1;
 		}
+		pump_report();
 		flush_queue();
 		cjp_tick(&link);
 		if (exit_after >= 0 && (long)(ticks() - start) > exit_after * 182 / 10) {

@@ -43,6 +43,9 @@ type native struct {
 	ui   bool
 	temp bool // a Temp line is showing
 	dirs bool // the client makes project folders (dirs=1)
+	// A run report arriving from the client (Result messages).
+	result     strings.Builder
+	resultName string
 
 	// Text waiting to go out. Claude streams a few characters at a time;
 	// sending each piece as its own frame wastes the window on tiny frames,
@@ -92,7 +95,7 @@ func (s *session) native() {
 		return
 	}
 	if n.ui {
-		link.Send(cjp.Hello, []byte("CODEJR/2 server ui"))
+		link.Send(cjp.Hello, []byte("CODEJR/2 server ui results"))
 	} else {
 		link.Send(cjp.Hello, []byte("CODEJR/2 server"))
 	}
@@ -130,6 +133,8 @@ func (s *session) native() {
 				link.Flush(5 * time.Second)
 				return
 			}
+		case cjp.Result:
+			n.takeResult(m.Payload)
 		case cjp.Bye:
 			s.logf("native: client hung up")
 			return
@@ -200,7 +205,7 @@ func (n *native) sendPull(name string, data []byte) (bool, string) {
 					return true, ""
 				}
 				return false, string(m.Payload[1:])
-			case cjp.Input, cjp.Bye:
+			case cjp.Input, cjp.Bye, cjp.Result:
 				n.backlog = append(n.backlog, m)
 			}
 		case <-n.link.Done():
@@ -376,9 +381,42 @@ func (n *native) command(line string) bool {
 }
 
 // turn runs one Claude reply.
+// takeResult collects the report of a program the user ran with /run:
+// 'B' + its name, then 'D' + text pieces, then 'E'. The report is kept
+// for Claude's next turn.
+func (n *native) takeResult(p []byte) {
+	if len(p) == 0 {
+		return
+	}
+	switch p[0] {
+	case 'B':
+		n.result.Reset()
+		n.resultName = string(p[1:])
+	case 'D':
+		if n.result.Len() < 16<<10 {
+			n.result.Write(p[1:])
+		}
+	case 'E':
+		report := fmt.Sprintf("Program: %s\n%s", n.resultName, n.result.String())
+		if err := n.s.ws.SetLastRun(report); err != nil {
+			n.s.logf("native: saving run report: %v", err)
+			return
+		}
+		n.s.logf("native: run report for %s (%d bytes)", n.resultName, len(report))
+		n.print(cjp.StyleNote, fmt.Sprintf("CodeJr has the results of %s: ask about it any time.\n", n.resultName))
+		n.result.Reset()
+	}
+}
+
 func (n *native) turn(prompt string) {
 	s := n.s
 	session := s.ws.Session()
+	// What happened when the user last ran a program, once.
+	if r := s.ws.LastRun(); r != "" {
+		prompt = "[The user ran a program on the real PCjr since your last reply. What the PCjr reported:\n" +
+			r + "\n]\n\n" + prompt
+		s.ws.SetLastRun("")
+	}
 	err := n.runClaude(session, prompt)
 	if err != nil && session != "" && err != context.Canceled {
 		s.logf("resume failed (%v), retrying fresh", err)
@@ -465,6 +503,9 @@ func (n *native) runClaude(session, prompt string) error {
 			}
 			if m.Type == cjp.Bye {
 				cancel()
+			}
+			if m.Type == cjp.Result {
+				n.backlog = append(n.backlog, m) // after the reply
 			}
 		case <-n.link.Done():
 			cancel()

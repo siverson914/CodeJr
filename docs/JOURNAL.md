@@ -483,3 +483,17 @@ From the listening page, Steve picked three presets: **high** (raw, 10.7 kHz), *
 - **Low needed a fast 3-bit decoder.** 3-bit codes don't line up with bytes, so `sp_dec` takes 3 bytes (8 codes) at a time and shifts each code out of its byte, or byte pair, by a fixed amount: no bit buffer. In DOSBox, 3-bit HELLO (9.3 kHz) decodes in 219 ms instead of 1,592, and it matches the reference byte for byte.
 - **The player outgrew its slot.** It was 0x3E9 bytes of a 0x400 slot before the 3-bit path. The block layout now gives code 2 KB: tables at 0800h, stack to 0E00h, samples from 0E00h.
 - The emulator test plays one clip at each preset (rates 10,662, 8,013 and 5,998 Hz on the stopwatch, all 0 late with `/H`). Whether the real PCjr keeps up at 10.7 kHz is the open question for high.
+
+## Day 2, evening: never drop a key, folders, tools, run reports
+
+**A dead-looking minute.** After a cold boot `CODEJR` was still the old Kermit launcher (`SETUP` hadn't run), which then spent 6.5 minutes sending 90 KB at Kermit speed: the new client plus the speech session's clips. Then a native call sat for 51 seconds with nothing from the PCjr. The likely cause was 0.6 itself: while the prompt was hidden it ignored Enter silently. Steve's rule from this, now in `CLAUDE.md`: every PCjr program answers input at once, shows a spinner while busy, and never drops input.
+
+**0.7:** a line typed while busy waits and goes on `Ready`, with a status message; a spinner (CP437 dots and stars, like Claude Code's) turns where the prompt goes. Each transfer over 4 KB prints a second line: seconds waiting for bursts, receiving, the gap that ends a burst, unpacking (the rest, CPU), and disk. In DOSBox `JRFLIGHT.EXE` showed 19.5 s receiving and 4.8 s unpacking; DOSBox's CPU timing is wrong, so the real split is still unknown.
+
+**Work moved to a git worktree** (`~/Github/CodeJr/CodeJr-native`, branch `native`, pushed to `main`): the JRAI session edits the main checkout all the time, and I had already swept its unfinished work into one of my commits once.
+
+**0.8, project folders.** One level of folders in the workspace, mirrored on the PCjr. Clients announce `dirs=1`; the rest skip folder files with a note. `/run` searches folders too (it collects the folder names first: a DOS find inside a folder ends the outer search).
+
+**Build and run tools.** A small MCP server inside the `codejr` binary. First attempt failed silently: Go's `exec` looks up `wcl` in the server's own `PATH`, not the one handed to the child, so it now uses the Watcom folder's full path. Second: a relative `-repo` broke once the compiler ran in a scratch folder. The DOSBox screen dump first came back full of DOSBox's banner; `@echo off`, quiet mounts and `cls` fixed it. Real `claude -p` in restricted mode loaded the tools, built a JRGFX test, ran it and described the screenshot correctly.
+
+**0.9, run reports.** `/run` now writes a `RUNNEXT.BAT` that records a failing exit and dumps the text screen right after the program; the next call sends exit, screen and the program's fresh `LOG.TXT` to the server, which puts them in front of Claude's next prompt once. An emulator test runs a C program that prints `GAME OVER`, writes `score 42` and exits 3, then calls back; all three facts reach the prompt. One full-suite run hit a timing flake in an old session test (30 runs alone pass); it probably raced with the new DOSBox test loading the CPU.

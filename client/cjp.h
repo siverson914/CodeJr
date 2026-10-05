@@ -27,6 +27,7 @@
 #define CJP_FILEOFFER   0x0D /* size (4 LE), chunk count (2 LE), 8.3 name */
 #define CJP_READY       0x0E /* server: the user can type now */
 #define CJP_TEMP        0x0F /* server: a line erased by the next text */
+#define CJP_RESULT      0x10 /* client: a /run report: 'B' name, 'D' text, 'E' */
 
 /* Types from CJP_DATAGRAM up carry no sequence number and are never
  * acknowledged. The file pull protocol uses them (pull.h). */

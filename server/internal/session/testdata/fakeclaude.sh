@@ -1,7 +1,10 @@
 #!/bin/sh
 # Stands in for `claude -p`: writes a file in the working directory and
 # prints a minimal stream-json transcript, like the real thing.
-prompt=$(cat)
+raw=$(cat)
+# Keep the whole prompt for tests to check; one line of it goes in the reply.
+printf '%s' "$raw" > .lastprompt
+prompt=$(printf '%s' "$raw" | tr '\n' ' ' | sed 's/["\\]//g')
 if [ "$prompt" = "stream" ]; then
 	# Claude streams replies a few characters at a time.
 	echo '{"type":"system","subtype":"init","session_id":"fake-session"}'

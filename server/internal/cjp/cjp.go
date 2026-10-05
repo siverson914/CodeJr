@@ -51,6 +51,7 @@ const (
 	FileOffer  byte = 0x0D // server: size (4 LE), chunk count (2 LE), 8.3 name; the client pulls it
 	Ready      byte = 0x0E // server: the user can type now (clients that said ui=1)
 	Temp       byte = 0x0F // server: a transient transcript line, erased by the next text (ui=1)
+	Result     byte = 0x10 // client: how a /run went: 'B' name, 'D' text..., 'E' (server said "results")
 
 	// Types from DatagramBase up are datagrams: no sequence number, no
 	// ack, delivered as they arrive. The file pull protocol uses them

@@ -253,6 +253,25 @@ func (w *Workspace) SaveFromPCjr(name string, data []byte) error {
 	return w.MarkSynced(map[string]string{name: hash(data)})
 }
 
+// LastRun is the report of the program the user last ran with /run, if
+// Claude hasn't seen it yet.
+func (w *Workspace) LastRun() string {
+	b, _ := os.ReadFile(w.state("lastrun.txt"))
+	return string(b)
+}
+
+// SetLastRun keeps a run report for the next turn ("" clears it).
+func (w *Workspace) SetLastRun(r string) error {
+	if r == "" {
+		err := os.Remove(w.state("lastrun.txt"))
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	return os.WriteFile(w.state("lastrun.txt"), []byte(r), 0o644)
+}
+
 // Session remembers the Claude conversation between calls.
 func (w *Workspace) Session() string {
 	b, _ := os.ReadFile(w.state("session"))

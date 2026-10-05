@@ -76,7 +76,37 @@ runrun() { # $1 = line typed, $2 = what RUNNEXT.BAT must run, $3 = label
 	rm -rf "$tmp"
 }
 
-runrun "/run 2" '\CODEJR\PROGS\RUN BETA.BAS' "/run by number: BASIC through RUN.BAT"
+# A /run's results reach CodeJr on the next call: the program's screen,
+# its LOG.TXT and a failing exit status end up in Claude's next prompt.
+runreport() {
+	tmp=$(mktemp -d)
+	g="$tmp/c/CODEJR/PROGS/GAME"
+	mkdir -p "$g" "$tmp/ws"
+	cp client/CODEJR.EXE client/SCRDUMP.EXE "$tmp/c/CODEJR/PROGS/"
+	printf '#include <stdio.h>\nint main(void)\n{\n\tFILE *f = fopen("LOG.TXT", "w");\n\tprintf("GAME OVER\\n");\n\tif (f) { fprintf(f, "score 42\\n"); fclose(f); }\n\treturn 3;\n}\n' > "$tmp/game.c"
+	(. client/owenv.sh && cd "$tmp" && wcl -q -bt=dos -ms -0 -fe=c/CODEJR/PROGS/GAME/GAME.EXE game.c >/dev/null)
+	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG"
+	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" > "$tmp/server.log" 2>&1 &
+	sp=$!
+	sleep 0.5
+	# First call: /run, then what C:\CODEJR.BAT does next. Second call: talk.
+	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 1000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:9600 /L:1 "/T:/run game" /X:60\nCOMMAND /C C:\\CODEJR\\RUNNEXT.BAT\nexit\n' $port "$tmp" > "$tmp/dosbox1.conf"
+	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 1000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:9600 /L:1 "/T:how did it go" /X:60 /S:SCREEN.TXT\nexit\n' $port "$tmp" > "$tmp/dosbox2.conf"
+	SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 200 dosbox -conf "$tmp/dosbox1.conf" >/dev/null 2>&1
+	SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 200 dosbox -conf "$tmp/dosbox2.conf" >/dev/null 2>&1
+	kill $sp 2>/dev/null; wait $sp 2>/dev/null
+	echo "== /run results reach CodeJr"
+	check "server got the run report" "grep -q 'run report for GAME.GAME.EXE' '$tmp/server.log'"
+	check "the next prompt has the program's screen" "grep -q 'GAME OVER' '$tmp/ws/.lastprompt'"
+	check "the next prompt has its LOG.TXT" "grep -q 'score 42' '$tmp/ws/.lastprompt'"
+	check "the next prompt says it failed" "grep -q 'errorlevel 1 or more' '$tmp/ws/.lastprompt'"
+	check "the PCjr cleared its report files" "[ ! -e '$tmp/c/CODEJR/LASTRUN.TXT' ] && [ ! -e '$tmp/c/CODEJR/LASTREP.TXT' ]"
+	[ $fail = 1 ] && { echo "--- server log"; cat "$tmp/server.log"; echo "--- prompt"; cat "$tmp/ws/.lastprompt"; ls -R "$tmp/c/CODEJR"; }
+	rm -rf "$tmp"
+}
+
+runreport
+runrun "/run 2" 'GWBASIC BETA.BAS' "/run by number: BASIC through GW-BASIC"
 runrun "/run game" 'CD \CODEJR\PROGS\GAME' "/run by folder name"
 run "9600 baud" "/F:9600"
 run "fast: /F:37287" "/F:37287"

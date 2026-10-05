@@ -110,7 +110,12 @@ func main() {
 			Allow:        []string{"mcp__pcjr__build", "mcp__pcjr__run"},
 		},
 	}
-	if err := ws.Provide(map[string][]byte{"JRGFX/JRGFX.H": jrgfxHeader()}); err != nil {
+	scrdump, _ := os.ReadFile(filepath.Join(repoDir(), "client", "SCRDUMP.EXE"))
+	if err := ws.Provide(map[string][]byte{
+		"JRGFX/JRGFX.H": jrgfxHeader(),
+		// /run captures the screen with it after a program ends.
+		"SCRDUMP.EXE": scrdump,
+	}); err != nil {
 		log.Print(err)
 	}
 

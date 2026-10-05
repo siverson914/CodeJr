@@ -54,23 +54,31 @@ There are two ways in from the PCjr, and the server tells them apart by itself:
 - Both games and the whole graphics library. Nobody has played them with a real keyboard, heard the sound, or seen the palette on the real monitor.
 - `SAY.EXE` and its speech clips (`speech/`, README there): ElevenLabs speech through gipity, played on the SN76496's three voices combined (`.SND`). **SAY 1.0 played on the real PCjr:** the chip version sounded best, PWM (`.SNP`) whined, but the chip loop was late on 72% of samples (playing slow). SAY 1.1 polls the 8259 instead of taking an interrupt per sample and has a stopwatch (`/V`, `/T`); the poll loop can't run in DOSBox and is untested.
 
-**Queued for the PCjr:** `CODEJR.EXE` 0.6, `SETUP.BAT`, `CODEJR.BT`, `CJKERMIT.BT`.
+**Queued for the PCjr:** `CODEJR.EXE` 0.9 (0.6's setup files went over on day 2), plus the JRAI session's demo files.
 
 **Launchers (day 2):** `C:\CODEJR.BAT` starts the native client (`C:\CODEJR\PROGS\CODEJR.EXE /L:1`) in a loop: `/run` writes `C:\CODEJR\RUNNEXT.BAT` and hangs up, the batch file runs it, waits for a key and calls back. If `CODEJR.EXE` is missing it falls back to Kermit. `C:\CJKERMIT.BAT` is the Kermit path. `/setup` (Kermit) installs both, plus `CODEJR.INI`, `CODEJR.TXT` and `CODEJR.CFG` (`DIAL=host:port`, the only copy of the address), then syncs. A native client can only write into `PROGS`, so the server keeps `SETUP.BAT` and `.BT` copies of both launchers in the workspace; `SETUP` copies them to `C:\`. Keep `CJKERMIT.BAT` unchanged between versions: `/setup` rewrites it while it runs, and DOS reads a batch file by position (that cost one confusing run on day 2). The client pulls into `CJPULL.$$$` and renames when whole, so a failed update keeps the old `CODEJR.EXE`.
 
-**Client 0.6 UI:** it says `ui=1` in its HELLO and the server answers `CODEJR/2 server ui`. Then the client echoes typed lines itself, shows the `>` prompt only after the server's `Ready` message, and shows `Temp` lines ("CodeJr is thinking...") that the next text erases. Older clients get the old behavior. The transfer line shows the line's real speed (bytes on the wire, so it can't exceed the baud rate); Alt-S shows the error counters and the last file's compression, damage and request counts.
+**Client 0.6 UI:** it says `ui=1` in its HELLO and the server answers `CODEJR/2 server ui`. Then the client echoes typed lines itself, shows the `>` prompt only after the server's `Ready` message, and shows `Temp` lines ("CodeJr is thinking...") that the next text erases. Older clients get the old behavior. 0.7 keeps a line typed while CodeJr is busy (sent on `Ready`, with a status message) and turns the prompt's spot into a spinner while busy. The transfer line shows the line's real speed (bytes on the wire, so it can't exceed the baud rate); Alt-S shows the error counters and the last file's compression, damage and request counts.
 
 **On the PCjr now:** `C:\CODEJR.BAT` (still the old Kermit launcher until `SETUP` runs), `C:\CODEJR\CODEJR.INI`, `C:\CODEJR\CODEJR.CFG`, `C:\MSK314\`, and in `C:\CODEJR\PROGS`: `CODEJR.EXE` 0.5 (if Steve synced), `NATIVE.BAT`, `FAST.BAT`, `RUN.BAT`, `JRDOOM.EXE`, `JRFLIGHT.EXE`, BASIC programs, test tools.
 
 **The server is running** in the background (`just status`; `just restart` to rebuild and restart it), logging to `~/.local/share/codejr/logs/`.
 
+**Client 0.8, project folders:** the workspace may hold one level of folders (`SNAKE/SNAKE.BAS` on the laptop is `SNAKE\SNAKE.BAS` on the PCjr). Clients that say `dirs=1` create the folder and receive them; Kermit and older clients skip them with a note. `/run` lists programs inside folders and finds them by number, file name or folder name. Claude is told to give each new program its own folder.
+
+**Build and run tools (server):** `codejr mcp` is a small MCP server (`server/internal/pcjr`) that `claude -p` starts through `--mcp-config`. `build PROJECT` compiles the folder's `.C`/`.ASM` with Open Watcom (8088, large model; JRGFX's sources are linked in when a file includes `jrgfx.h`) into `PROJECT\PROJECT.EXE`, objects in a scratch folder. `run PROJECT PROGRAM` runs it in headless DOSBox and returns what it printed, `LOG.TXT`, the text screen (via `SCRDUMP.EXE`) and any `.PPM` screenshots as images. No shell. `JRGFX/JRGFX.H` is kept in the workspace so Claude can read the API. Tested with real `claude -p` in restricted mode: it built a JRGFX program, ran it and described the screenshot correctly. GW-BASIC isn't on the laptop, so BASIC can't run in the emulator.
+
+**Client 0.9, run reports:** `/run` writes `RUNNEXT.BAT` so that after the program it notes a nonzero exit (`LASTERR.TXT`) and saves the text screen with `SCRDUMP` (`LASTSCR.TXT`) before anything clears it; BASIC now runs `GWBASIC` directly for that reason, then `MODE CO80`. On the next call the client sends a report (exit, screen, the program's `LOG.TXT` if written during the run) as `Result` messages; the server keeps it in `.codejr/lastrun.txt` and puts it in front of the next prompt, once. Only with servers that say `results`.
+
 ## First things to test on the real PCjr
 
 Ask Steve to do these in order and send the `[client]` line or a photo each time.
 
-1. **Install 0.6 and the launchers.** In `C:\CODEJR\PROGS`: `NATIVE` (fetches 0.6 and the setup files), Alt-X, then `SETUP`. From then on `CODEJR` from anywhere.
-2. **The new UI:** the typed line appears at once, the prompt hides while CodeJr works, "CodeJr is thinking..." appears and goes away when the reply starts.
-3. **`/run`:** a numbered list; a number runs it; a key after it ends brings CodeJr back. Try a BASIC program that ends with `SYSTEM` and one of the games.
+1. **Get 0.9:** connect with `CODEJR`; it downloads by itself (plus the JRAI files, about 3.5 minutes). Hang up and call again so 0.9 runs.
+2. **The UI:** your line appears at once, a spinner turns where the prompt goes, "CodeJr is thinking..." shows until the reply. Type a line while it's busy: it should wait and go by itself.
+3. **A C program, start to finish:** ask "write a bouncing ball in C with JRGFX in a BALL folder, test it, then I'll run it". Watch for `[builds BALL]` and `[tests BALL.EXE in the emulator]`, then `/run ball`.
+4. **Run report:** after the program ends and CodeJr calls back, ask "how did that go?". CodeJr should know what was on the screen and whether it failed.
+5. **Transfer timing:** after a file over 4 KB, the second line shows waiting, receiving, gap, unpacking and disk times. Send a photo of one for `JRAI.EXE` or a game.
 4. **Run the games:** `JRDOOM` and `JRFLIGHT`. Check keyboard, sound, colors and speed. Both take `/BENCH`, `/PROF` and `/DEMO:n` and write `LOG.TXT`. To get a log back, use the Kermit path: `CJKERMIT`, then `/get LOG.TXT` (the native client can't upload yet).
 5. **Risky graphics paths:** `JRFLIGHT /LD` (hardware 160x100 mode, never displayed anywhere), and 320x200 mode in `lib/DEMO.EXE` (this PCjr reserves only 16 KB of video memory; the library claims its own block).
 6. **Typing in the native client while text arrives:** do letters get lost? Alt-S prints the client's loss counters into the chat.
@@ -115,6 +123,7 @@ just deploy-speech HELLO READY  # queue SAY.EXE and clips (NAME.SNP for a PWM ve
 | `server/internal/kermit` | Kermit protocol in Go |
 | `server/internal/term` | VT100 screen, pacing, ASCII conversion |
 | `server/internal/claude` | runs `claude -p` and parses its stream |
+| `server/internal/pcjr` | the build and run tools (MCP over stdio, `codejr mcp`) |
 | `client/` | `codejr.c`, `cjp.c`, `pull.c`, `lz.c`, `serial.c`, `serisr.asm`, `screen.c`; `cjterm.c` test terminal; `test/` host harnesses |
 | `lib/` | JRGFX graphics library; read `STATUS.md` and `FAST.md` |
 | `games/doom`, `games/flight` | JRDOOM and JRFLIGHT, each with README and NOTES |
@@ -195,9 +204,9 @@ His global `~/.claude/CLAUDE.md` applies. In practice:
 
 In the order I'd do it.
 
-1. **Transfer speed:** time each part of a chunk on the PCjr (waiting for the burst, receiving, decompressing, writing) before changing anything. Candidates: bigger chunks (fewer round trips), asking for the next chunk while writing this one (only if the serial interrupt survives disk writes), a shorter `PULL_GAP`.
-2. **Steve's UI requests:** done in 0.6, untested on the real PCjr.
-3. **Close the loop from the plan** (`docs/CLIENT.md`, stages 5-8): file upload in the native client, `RUN` and `RESULT` (run a program on the PCjr, return its exit code, `LOG.TXT` and a screen snapshot), then tools for Claude (`pcjr_run`, `build`, `emu_run`) through a small MCP server.
+1. **Transfer speed:** client 0.7 prints where each transfer's time goes; get a real reading before changing anything. Candidates: bigger chunks (fewer round trips), asking for the next chunk while writing this one (only if the serial interrupt survives disk writes), a shorter `PULL_GAP`.
+2. **Done on day 2, untested on the real PCjr:** the UI requests (0.6-0.7), project folders (0.8), build and run tools, run reports (0.9).
+3. **Next:** send only the changed parts of a file (the server keeps a copy of what the PCjr has and sends an edit script: copy ranges from the old file plus new bytes, so it works for binaries where code shifts); a graphics screenshot of real-PCjr runs (the run report is text only); a general file upload from the PCjr (`/get` exists only on the Kermit path).
 4. **Measure in real clock cycles:** get MartyPC running headless and re-benchmark the library and games. Retest the ideas DOSBox judged (table multiplies, delta copies, wide pixels).
 5. **Games:**
    - JRFLIGHT is limited by math, not drawing. Ideas: mountains as a scrolling panorama, visibility by grid square, fewer multiplies, redraw the attitude indicator only where it changed.
