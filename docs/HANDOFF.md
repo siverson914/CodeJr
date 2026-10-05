@@ -70,20 +70,23 @@ There are two ways in from the PCjr, and the server tells them apart by itself:
 
 **Client 0.9, run reports:** `/run` writes `RUNNEXT.BAT` so that after the program it notes a nonzero exit (`LASTERR.TXT`) and saves the text screen with `SCRDUMP` (`LASTSCR.TXT`) before anything clears it; BASIC now runs `GWBASIC` directly for that reason, then `MODE CO80`. On the next call the client sends a report (exit, screen, the program's `LOG.TXT` if written during the run) as `Result` messages; the server keeps it in `.codejr/lastrun.txt` and puts it in front of the next prompt, once. Only with servers that say `results`.
 
+**Client 1.0, changes only:** the server keeps an exact copy of what it last sent of each file (`.codejr/have/`, seeded at startup from files the PCjr already has) and, for clients that say `delta=1`, sends an edit script instead of the whole file when the script is under 70% of the file's compressed size (`cjp.Delta`: copy ranges from the old file plus new bytes, found with a rolling hash, so shifted code still matches). The `DeltaOffer` carries the old copy's size and CRC; the client checks them, replays the script into `CJPULL.$$$` and checks the new file's size and CRC before replacing anything. If its copy differs it says so and the server sends the file whole. Measured on `JRFLIGHT.EXE` with a one-line code change: 45 KB of the 97 KB file changed, yet the script was 4.4 KB on the line instead of 64 KB.
+
 ## First things to test on the real PCjr
 
 Ask Steve to do these in order and send the `[client]` line or a photo each time.
 
-1. **Get 0.9:** connect with `CODEJR`; it downloads by itself (plus the JRAI files, about 3.5 minutes). Hang up and call again so 0.9 runs.
+1. **Get 1.0:** connect with `CODEJR`; it downloads by itself (plus the JRAI files, about 3.5 minutes). Hang up and call again so 1.0 runs.
 2. **The UI:** your line appears at once, a spinner turns where the prompt goes, "CodeJr is thinking..." shows until the reply. Type a line while it's busy: it should wait and go by itself.
 3. **A C program, start to finish:** ask "write a bouncing ball in C with JRGFX in a BALL folder, test it, then I'll run it". Watch for `[builds BALL]` and `[tests BALL.EXE in the emulator]`, then `/run ball`.
 4. **Run report:** after the program ends and CodeJr calls back, ask "how did that go?". CodeJr should know what was on the screen and whether it failed.
 5. **Transfer timing:** after a file over 4 KB, the second line shows waiting, receiving, gap, unpacking and disk times. Send a photo of one for `JRAI.EXE` or a game.
-4. **Run the games:** `JRDOOM` and `JRFLIGHT`. Check keyboard, sound, colors and speed. Both take `/BENCH`, `/PROF` and `/DEMO:n` and write `LOG.TXT`. To get a log back, use the Kermit path: `CJKERMIT`, then `/get LOG.TXT` (the native client can't upload yet).
-5. **Risky graphics paths:** `JRFLIGHT /LD` (hardware 160x100 mode, never displayed anywhere), and 320x200 mode in `lib/DEMO.EXE` (this PCjr reserves only 16 KB of video memory; the library claims its own block).
-6. **Typing in the native client while text arrives:** do letters get lost? Alt-S prints the client's loss counters into the chat.
-7. **Speech timing (SAY 1.1).** On the PCjr: `SAY /T HELLO` (chipmunk; the line to note is "can play chip clips at up to about N Hz"), then `SAY /V HELLO` (9.3 kHz) and `SAY /V HELLO10` (10.65 kHz). Want: late 0 and a speed matching "wanted". Then re-make the clips at the highest rate with some margin below the `/T` figure (`mksnd.py --hz`, then make it the default in `METHODS`). If `SAY` hangs or makes no sound with polling but `SAY /H HELLO` works, the poll command misbehaves on this 8259: say so in the journal.
-8. **Quality presets (SAY 1.3).** `SAY /V HELLOH` (high: raw 10.7 kHz), `SAY /V HELLOM` (medium: 4-bit ADPCM, 8 kHz), `SAY /V HELLOL` (low: 3-bit ADPCM, 6 kHz). Want late 0 on all three, especially high; note each "decoded ADPCM" time. If high is late, lower its rate in `QUALITY` in `speech/mksnd.py`.
+6. **Changes only:** after CodeJr rebuilds a program you already have, the line should read "sent N bytes of changes".
+7. **Run the games:** `JRDOOM` and `JRFLIGHT`. Check keyboard, sound, colors and speed. Both take `/BENCH`, `/PROF` and `/DEMO:n` and write `LOG.TXT`. To get a log back, use the Kermit path: `CJKERMIT`, then `/get LOG.TXT` (the native client can't upload yet).
+8. **Risky graphics paths:** `JRFLIGHT /LD` (hardware 160x100 mode, never displayed anywhere), and 320x200 mode in `lib/DEMO.EXE` (this PCjr reserves only 16 KB of video memory; the library claims its own block).
+9. **Typing in the native client while text arrives:** do letters get lost? Alt-S prints the client's loss counters into the chat.
+10. **Speech timing (SAY 1.1).** On the PCjr: `SAY /T HELLO` (chipmunk; the line to note is "can play chip clips at up to about N Hz"), then `SAY /V HELLO` (9.3 kHz) and `SAY /V HELLO10` (10.65 kHz). Want: late 0 and a speed matching "wanted". Then re-make the clips at the highest rate with some margin below the `/T` figure (`mksnd.py --hz`, then make it the default in `METHODS`). If `SAY` hangs or makes no sound with polling but `SAY /H HELLO` works, the poll command misbehaves on this 8259: say so in the journal.
+11. **Quality presets (SAY 1.3).** `SAY /V HELLOH` (high: raw 10.7 kHz), `SAY /V HELLOM` (medium: 4-bit ADPCM, 8 kHz), `SAY /V HELLOL` (low: 3-bit ADPCM, 6 kHz). Want late 0 on all three, especially high; note each "decoded ADPCM" time. If high is late, lower its rate in `QUALITY` in `speech/mksnd.py`.
 
 ## How to work in this repo
 
@@ -205,8 +208,8 @@ His global `~/.claude/CLAUDE.md` applies. In practice:
 In the order I'd do it.
 
 1. **Transfer speed:** client 0.7 prints where each transfer's time goes; get a real reading before changing anything. Candidates: bigger chunks (fewer round trips), asking for the next chunk while writing this one (only if the serial interrupt survives disk writes), a shorter `PULL_GAP`.
-2. **Done on day 2, untested on the real PCjr:** the UI requests (0.6-0.7), project folders (0.8), build and run tools, run reports (0.9).
-3. **Next:** send only the changed parts of a file (the server keeps a copy of what the PCjr has and sends an edit script: copy ranges from the old file plus new bytes, so it works for binaries where code shifts); a graphics screenshot of real-PCjr runs (the run report is text only); a general file upload from the PCjr (`/get` exists only on the Kermit path).
+2. **Done on day 2, untested on the real PCjr:** the UI requests (0.6-0.7), project folders (0.8), build and run tools, run reports (0.9), changes-only transfers (1.0).
+3. **Next:** a graphics screenshot of real-PCjr runs (the run report is text only); a general file upload from the PCjr (`/get` exists only on the Kermit path).
 4. **Measure in real clock cycles:** get MartyPC running headless and re-benchmark the library and games. Retest the ideas DOSBox judged (table multiplies, delta copies, wide pixels).
 5. **Games:**
    - JRFLIGHT is limited by math, not drawing. Ideas: mountains as a scrolling panorama, visibility by grid square, fewer multiplies, redraw the attitude indicator only where it changed.

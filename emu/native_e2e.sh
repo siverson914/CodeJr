@@ -105,6 +105,41 @@ runreport() {
 	rm -rf "$tmp"
 }
 
+# Changes only: the server sends an edit script for the PCjr's copy, and
+# the whole file when that copy isn't the one it expects.
+deltarun() {
+	tmp=$(mktemp -d)
+	mkdir -p "$tmp/c/CODEJR/PROGS" "$tmp/ws"
+	cp client/CODEJR.EXE "$tmp/c/CODEJR/PROGS/"
+	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG"
+	cp client/CJTERM.EXE "$tmp/ws/BIG.BIN"
+	call() { # one call that types a line, so the sync runs
+		server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" >> "$tmp/server.log" 2>&1 &
+		sp=$!
+		sleep 0.5
+		printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 1000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:37287 /X:25 /S:SCREEN.TXT\nexit\n' $port "$tmp" > "$tmp/dosbox.conf"
+		SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 200 dosbox -conf "$tmp/dosbox.conf" >/dev/null 2>&1
+		kill $sp 2>/dev/null; wait $sp 2>/dev/null
+	}
+	call # the first copy goes whole
+	# Change it the way a rebuild does: insert bytes, so the rest shifts.
+	{ head -c 3000 client/CJTERM.EXE; printf 'NEW CODE HERE'; tail -c +3001 client/CJTERM.EXE; } > "$tmp/ws/BIG.BIN"
+	call
+	echo "== changes only"
+	check "the second copy went as changes" "grep -q 'BIG.BIN: sending changes' '$tmp/server.log'"
+	check "the PCjr rebuilt it byte for byte" "cmp -s '$tmp/ws/BIG.BIN' '$tmp/c/CODEJR/PROGS/BIG.BIN'"
+	check "screen says changes" "grep -q 'bytes of changes' '$tmp/c/CODEJR/PROGS/SCREEN.TXT'"
+	# Spoil the PCjr's copy: the script must be refused, then it goes whole.
+	printf 'X' | dd of="$tmp/c/CODEJR/PROGS/BIG.BIN" bs=1 seek=100 conv=notrunc 2>/dev/null
+	printf 'MORE' >> "$tmp/ws/BIG.BIN"
+	call
+	check "a different copy is refused, then sent whole" "grep -q 'changes refused' '$tmp/server.log'"
+	check "and arrives byte for byte" "cmp -s '$tmp/ws/BIG.BIN' '$tmp/c/CODEJR/PROGS/BIG.BIN'"
+	[ $fail = 1 ] && { echo "--- server log"; cat "$tmp/server.log"; echo "--- screen"; cat "$tmp/c/CODEJR/PROGS/SCREEN.TXT"; }
+	rm -rf "$tmp"
+}
+
+deltarun
 runreport
 runrun "/run 2" 'GWBASIC BETA.BAS' "/run by number: BASIC through GW-BASIC"
 runrun "/run game" 'CD \CODEJR\PROGS\GAME' "/run by folder name"

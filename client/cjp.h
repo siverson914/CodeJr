@@ -28,6 +28,7 @@
 #define CJP_READY       0x0E /* server: the user can type now */
 #define CJP_TEMP        0x0F /* server: a line erased by the next text */
 #define CJP_RESULT      0x10 /* client: a /run report: 'B' name, 'D' text, 'E' */
+#define CJP_DELTAOFFER  0x11 /* like FILEOFFER; the chunks are an edit script */
 
 /* Types from CJP_DATAGRAM up carry no sequence number and are never
  * acknowledged. The file pull protocol uses them (pull.h). */
@@ -57,6 +58,8 @@ typedef struct {
 } cjp_decoder;
 
 unsigned cjp_crc16(const unsigned char *p, unsigned n);
+/* Continues a CRC over more bytes (start with 0xFFFF). */
+unsigned cjp_crc16_more(unsigned crc, const unsigned char *p, unsigned n);
 
 /* Writes f to out (at least CJP_MAXWIRE bytes); returns the length. */
 unsigned cjp_encode(const cjp_frame *f, unsigned char *out);

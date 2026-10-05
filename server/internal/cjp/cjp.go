@@ -52,6 +52,7 @@ const (
 	Ready      byte = 0x0E // server: the user can type now (clients that said ui=1)
 	Temp       byte = 0x0F // server: a transient transcript line, erased by the next text (ui=1)
 	Result     byte = 0x10 // client: how a /run went: 'B' name, 'D' text..., 'E' (server said "results")
+	DeltaOffer byte = 0x11 // server: like FileOffer, but the chunks are an edit script for the PCjr's copy (delta=1)
 
 	// Types from DatagramBase up are datagrams: no sequence number, no
 	// ack, delivered as they arrive. The file pull protocol uses them

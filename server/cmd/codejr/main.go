@@ -81,6 +81,9 @@ func main() {
 	if err := ws.Init(); err != nil {
 		log.Fatal(err)
 	}
+	if err := ws.SeedHave(); err != nil {
+		log.Print(err)
+	}
 	if err := ws.Provide(session.ProgFiles()); err != nil {
 		log.Fatal(err)
 	}

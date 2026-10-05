@@ -6,9 +6,13 @@
  * as receiving the data. The table is built on first use. */
 unsigned cjp_crc16(const unsigned char *p, unsigned n)
 {
+	return cjp_crc16_more(0xFFFF, p, n);
+}
+
+unsigned cjp_crc16_more(unsigned crc, const unsigned char *p, unsigned n)
+{
 	static unsigned short tab[256];
 	static char ready;
-	unsigned crc = 0xFFFF;
 
 	if (!ready) {
 		unsigned i, j, c;

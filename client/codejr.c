@@ -35,7 +35,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "0.9"
+#define VERSION "1.0"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -66,6 +66,11 @@ static struct {
 	char name[22]; /* NAME.EXT or FOLDER\NAME.EXT */
 	unsigned long size;
 	unsigned chunks;
+	/* A DELTAOFFER: the chunks are an edit script for our copy, which
+	 * must have this size and CRC; the result must have new_crc. */
+	int delta;
+	unsigned long script, base_size;
+	unsigned base_crc, new_crc;
 } offer;
 
 static long line_baud = 9600; /* the speed in use, for rate displays */
@@ -267,6 +272,105 @@ static void tenths(char *s, unsigned long t)
 	sprintf(s, "%lu.%lu", x / 10, x % 10);
 }
 
+/* ---- edit scripts (see server/internal/cjp/delta.go) ------------------- */
+
+static struct {
+	int st;                 /* 0 op, 1 copy header, 2 data header, 3 data, 4 done */
+	unsigned char hdr[6];
+	int hn;
+	unsigned long left;     /* data bytes still to come */
+	unsigned long made;     /* bytes of the new file written */
+	unsigned crc;
+	FILE *old, *out;
+} ds;
+
+static int ds_write(const unsigned char *p, unsigned n)
+{
+	if (fwrite(p, 1, n, ds.out) != n)
+		return -1;
+	ds.crc = cjp_crc16_more(ds.crc, p, n);
+	ds.made += n;
+	return 0;
+}
+
+/* Copies n bytes from offset off of the old file into the new one. */
+static int ds_copy(unsigned long off, unsigned long n)
+{
+	static unsigned char buf[512];
+	if (fseek(ds.old, (long)off, SEEK_SET) != 0)
+		return -1;
+	while (n) {
+		unsigned k = n > sizeof buf ? sizeof buf : (unsigned)n;
+		if (fread(buf, 1, k, ds.old) != k || ds_write(buf, k) != 0)
+			return -1;
+		n -= k;
+	}
+	return 0;
+}
+
+/* Replays more of the script. Returns -1 if it is broken. */
+static int ds_feed(const unsigned char *p, unsigned n)
+{
+	unsigned i = 0;
+	while (i < n) {
+		switch (ds.st) {
+		case 0:
+			switch (p[i++]) {
+			case 0: ds.st = 4; break;
+			case 1: ds.st = 1; ds.hn = 0; break;
+			case 2: ds.st = 2; ds.hn = 0; break;
+			default: return -1;
+			}
+			break;
+		case 1:
+			ds.hdr[ds.hn++] = p[i++];
+			if (ds.hn == 6) {
+				unsigned long off = ds.hdr[0] | (unsigned long)ds.hdr[1] << 8 |
+				                    (unsigned long)ds.hdr[2] << 16 | (unsigned long)ds.hdr[3] << 24;
+				if (ds_copy(off, ds.hdr[4] | (unsigned)ds.hdr[5] << 8) != 0)
+					return -1;
+				ds.st = 0;
+			}
+			break;
+		case 2:
+			ds.hdr[ds.hn++] = p[i++];
+			if (ds.hn == 2) {
+				ds.left = ds.hdr[0] | (unsigned)ds.hdr[1] << 8;
+				ds.st = ds.left ? 3 : 0;
+			}
+			break;
+		case 3: {
+			unsigned k = n - i;
+			if (k > ds.left)
+				k = (unsigned)ds.left;
+			if (ds_write(p + i, k) != 0)
+				return -1;
+			i += k;
+			ds.left -= k;
+			if (!ds.left)
+				ds.st = 0;
+			break;
+		}
+		default:
+			return -1; /* bytes after the end */
+		}
+	}
+	return 0;
+}
+
+/* Does our copy of the file match what the server's script expects? */
+static int base_matches(FILE *f)
+{
+	static unsigned char buf[512];
+	unsigned long n = 0;
+	unsigned crc = 0xFFFF, k;
+	while ((k = (unsigned)fread(buf, 1, sizeof buf, f)) > 0) {
+		crc = cjp_crc16_more(crc, buf, k);
+		n += k;
+	}
+	return n == offer.base_size && crc == offer.base_crc;
+}
+
 /* Fetches the offered file chunk by chunk: ask for a chunk, then only
  * listen while the server sends it as one burst (the PCjr corrupts what
  * it receives while it transmits), and ask again for whatever arrived
@@ -287,10 +391,17 @@ static void pull_file(void)
 	pull_t0 = t0;
 	pull_wire = 0;
 	t_wait = t_recv = t_tail = t_disk = 0;
+	ds.old = NULL;
 	if (!valid_path(offer.name))
 		strcpy(err, "not a DOS file name");
+	else if (offer.delta && ((ds.old = fopen(offer.name, "rb")) == NULL || !base_matches(ds.old)))
+		strcpy(err, "old copy differs"); /* the server then sends it whole */
 	else if ((f = fopen(PULL_TMP, "wb")) == NULL)
 		strcpy(err, "can't create file");
+	ds.st = 0;
+	ds.made = 0;
+	ds.crc = 0xFFFF;
+	ds.out = f;
 	progress(0);
 	for (k = 0; !err[0] && k < offer.chunks; k++) {
 		int len;
@@ -307,17 +418,25 @@ static void pull_file(void)
 		}
 		{
 			unsigned long d = ticks();
-			if (fwrite(out, 1, (size_t)len, f) != (size_t)len)
+			if (offer.delta) {
+				if (ds_feed(out, (unsigned)len) != 0)
+					strcpy(err, "bad change list (or disk full)");
+			} else if (fwrite(out, 1, (size_t)len, f) != (size_t)len) {
 				strcpy(err, "disk full?");
+			}
 			t_disk += ticks() - d;
 		}
-		got += (unsigned long)len;
+		got = offer.delta ? ds.made : got + (unsigned long)len;
 		progress(got);
 	}
 	if (f && fclose(f) != 0 && !err[0])
 		strcpy(err, "can't close file");
+	if (ds.old)
+		fclose(ds.old);
 	if (!err[0] && got != offer.size)
 		strcpy(err, "size mismatch");
+	if (!err[0] && offer.delta && (ds.st != 4 || ds.crc != offer.new_crc))
+		strcpy(err, "changes didn't check out");
 	/* The old copy is replaced only once the new one is whole, so a
 	 * failed pull of CODEJR.EXE leaves the working client in place. */
 	if (!err[0]) {
@@ -343,7 +462,9 @@ static void pull_file(void)
 	offer.pending = 0;
 
 	secs = (ticks() - t0) * 10 / 182;
-	if (err[0])
+	if (err[0] && offer.delta && strcmp(err, "old copy differs") == 0)
+		sprintf(line, "Getting all of %s (this PCjr's copy is different).", offer.name);
+	else if (err[0])
 		sprintf(line, "Couldn't save %s: %s", offer.name, err);
 	else {
 		unsigned long t = ticks() - t0, bps = t ? pull_wire * 182UL / t : 0;
@@ -355,8 +476,12 @@ static void pull_file(void)
 			sprintf(sz, "%lu bytes", got);
 		else
 			sprintf(sz, "%lu.%lu KB", got / 1024, got % 1024 * 10 / 1024);
-		sprintf(line, "Saved %s (%s) in %lu s, line %lu of %ld bps.",
-		        offer.name, sz, secs, bps, line_baud);
+		if (offer.delta)
+			sprintf(line, "Saved %s (%s; sent %lu bytes of changes) in %lu s.",
+			        offer.name, sz, offer.script, secs);
+		else
+			sprintf(line, "Saved %s (%s) in %lu s, line %lu of %ld bps.",
+			        offer.name, sz, secs, bps, line_baud);
 		note(line);
 		/* Where the time went, so the slow part can be found. */
 		tenths(tw, t_wait);
@@ -366,7 +491,7 @@ static void pull_file(void)
 		tenths(td, t_disk);
 		sprintf(line, "  %s s waiting, %s receiving, %s gap, %s unpacking, %s disk; %lu.%lux",
 		        tw, tr, tg, tu, td, x10 / 10, x10 % 10);
-		if (got <= 4096)
+		if (offer.chunks <= 1)
 			line[0] = 0; /* one chunk: nothing to learn */
 		sprintf(last_file, "Last file: %lu.%lux compressed, %u damaged, %u requests for %u chunks",
 		        x10 / 10, x10 % 10, pc.bad, rounds, offer.chunks);
@@ -388,7 +513,32 @@ static void file_offer(const cjp_frame *f)
 	offer.chunks = f->payload[4] | ((unsigned)f->payload[5] << 8);
 	memcpy(offer.name, f->payload + 6, n);
 	offer.name[n] = 0;
+	offer.delta = 0;
 	offer.pending = 1; /* pulled from the main loop, once this frame is acked */
+}
+
+static unsigned long le32(const unsigned char *p)
+{
+	return p[0] | (unsigned long)p[1] << 8 | (unsigned long)p[2] << 16 | (unsigned long)p[3] << 24;
+}
+
+static void delta_offer(const cjp_frame *f)
+{
+	unsigned n;
+
+	if (f->len < 19 || f->len - 18 > sizeof offer.name - 1)
+		return;
+	n = f->len - 18;
+	offer.size = le32(f->payload);
+	offer.chunks = f->payload[4] | ((unsigned)f->payload[5] << 8);
+	offer.script = le32(f->payload + 6);
+	offer.base_size = le32(f->payload + 10);
+	offer.base_crc = f->payload[14] | ((unsigned)f->payload[15] << 8);
+	offer.new_crc = f->payload[16] | ((unsigned)f->payload[17] << 8);
+	memcpy(offer.name, f->payload + 18, n);
+	offer.name[n] = 0;
+	offer.delta = 1;
+	offer.pending = 1;
 }
 
 static void handle(const cjp_frame *f)
@@ -440,6 +590,9 @@ static void handle(const cjp_frame *f)
 		break;
 	case CJP_FILEOFFER:
 		file_offer(f);
+		break;
+	case CJP_DELTAOFFER:
+		delta_offer(f);
 		break;
 	case CJP_BYE:
 		start_quit();
@@ -996,7 +1149,7 @@ int main(int argc, char **argv)
 	}
 
 	cjp_init(&link, link_write, link_now, NULL, 2 * TICKS_PER_SEC);
-	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1 dirs=1", line_baud);
+	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1 dirs=1 delta=1", line_baud);
 	queue(CJP_HELLO, hello, (unsigned)strlen(hello));
 	scr_status("Connecting...");
 

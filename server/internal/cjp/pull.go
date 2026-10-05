@@ -87,6 +87,20 @@ func ParsePull(p []byte) (index int, bitmap uint32, ok bool) {
 	return int(binary.LittleEndian.Uint16(p)), binary.LittleEndian.Uint32(p[2:]), true
 }
 
+// DeltaOfferPayload builds a DeltaOffer: the new file's size, the
+// script's chunk count and size, the old file's size and CRC (the client
+// checks it has exactly that), the new file's CRC, then the name.
+func DeltaOfferPayload(name string, size, chunks, script int, base []byte, newCRC uint16) []byte {
+	p := make([]byte, 18, 18+len(name))
+	binary.LittleEndian.PutUint32(p, uint32(size))
+	binary.LittleEndian.PutUint16(p[4:], uint16(chunks))
+	binary.LittleEndian.PutUint32(p[6:], uint32(script))
+	binary.LittleEndian.PutUint32(p[10:], uint32(len(base)))
+	binary.LittleEndian.PutUint16(p[14:], CRC16(base))
+	binary.LittleEndian.PutUint16(p[16:], newCRC)
+	return append(p, name...)
+}
+
 // OfferPayload builds a FileOffer message.
 func OfferPayload(name string, size, chunks int) []byte {
 	p := make([]byte, 6, 6+len(name))

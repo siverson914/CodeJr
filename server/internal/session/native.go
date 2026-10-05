@@ -40,9 +40,10 @@ type native struct {
 	baud    int // the serial speed the client reported
 	// The client echoes typed lines itself and takes Ready and Temp
 	// messages (it said ui=1 in its HELLO).
-	ui   bool
-	temp bool // a Temp line is showing
-	dirs bool // the client makes project folders (dirs=1)
+	ui    bool
+	temp  bool // a Temp line is showing
+	dirs  bool // the client makes project folders (dirs=1)
+	delta bool // the client applies edit scripts (delta=1)
 	// A run report arriving from the client (Result messages).
 	result     strings.Builder
 	resultName string
@@ -158,6 +159,9 @@ func (n *native) hello(h string) {
 		if f == "dirs=1" {
 			n.dirs = true
 		}
+		if f == "delta=1" {
+			n.delta = true
+		}
 		if v, ok := strings.CutPrefix(f, "baud="); ok {
 			if b, err := strconv.Atoi(v); err == nil && b >= 300 && b <= 115200 {
 				n.baud = b
@@ -173,7 +177,34 @@ func (n *native) hello(h string) {
 // chunks until the client reports the result (see cjp/pull.go).
 func (n *native) sendPull(name string, data []byte) (bool, string) {
 	chunks := cjp.MakeChunks(data)
-	if err := n.link.Send(cjp.FileOffer, cjp.OfferPayload(name, len(data), len(chunks))); err != nil {
+	return n.serve(name, chunks, cjp.FileOffer, cjp.OfferPayload(name, len(data), len(chunks)))
+}
+
+// sendDelta sends only what changed since the copy the PCjr has: an edit
+// script, pulled like a file. It returns ok=false with used=false when
+// the script wouldn't save much, so the caller sends the whole file.
+func (n *native) sendDelta(name string, base, data []byte) (ok, used bool, msg string) {
+	script := cjp.Delta(base, data)
+	chunks := cjp.MakeChunks(script)
+	if chunksLen(chunks)*10 > chunksLen(cjp.MakeChunks(data))*7 {
+		return false, false, ""
+	}
+	n.s.logf("native: %s: sending changes, %d bytes of script for %d bytes", name, len(script), len(data))
+	ok, msg = n.serve(name, chunks, cjp.DeltaOffer,
+		cjp.DeltaOfferPayload(name, len(data), len(chunks), len(script), base, cjp.CRC16(data)))
+	return ok, true, msg
+}
+
+func chunksLen(cs [][]byte) (n int) {
+	for _, c := range cs {
+		n += len(c)
+	}
+	return n
+}
+
+// serve offers chunks and answers the client's pulls until it reports.
+func (n *native) serve(name string, chunks [][]byte, offerType byte, offer []byte) (bool, string) {
+	if err := n.link.Send(offerType, offer); err != nil {
 		return false, "connection lost"
 	}
 	const quiet = 60 * time.Second
@@ -543,7 +574,18 @@ func (n *native) sync() {
 		if n.pull {
 			n.status(fmt.Sprintf("Sending %s (%s)...", f.Name, size(len(f.Data))))
 			n.link.Flush(10 * time.Second) // the line must be quiet before bursts
-			ok, msg = n.sendPull(f.Name, f.Data)
+			used := false
+			if base := s.ws.Have(f.Name); n.delta && base != nil {
+				ok, used, msg = n.sendDelta(f.Name, base, f.Data)
+				if used && !ok {
+					// Most likely the PCjr's copy isn't the one we kept.
+					s.logf("native: %s: changes refused (%s), sending it whole", f.Name, msg)
+					n.link.Flush(10 * time.Second)
+				}
+			}
+			if !used || !ok {
+				ok, msg = n.sendPull(f.Name, f.Data)
+			}
 		} else {
 			// The first client (0.1): every frame acknowledged in turn.
 			var hdr [4]byte
@@ -563,6 +605,9 @@ func (n *native) sync() {
 			continue
 		}
 		s.ws.MarkSynced(map[string]string{f.Name: hashes[f.Name]})
+		if err := s.ws.SetHave(f.Name, f.Data); err != nil {
+			s.logf("native: keeping a copy of %s: %v", f.Name, err)
+		}
 		el := time.Since(start)
 		s.logf("native: sent %s (%d bytes) in %s, %.0f bytes/s; %s", f.Name, len(f.Data), el.Round(100*time.Millisecond), float64(len(f.Data))/el.Seconds(), n.link.Stats())
 		if !n.pull {

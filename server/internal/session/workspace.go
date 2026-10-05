@@ -253,6 +253,52 @@ func (w *Workspace) SaveFromPCjr(name string, data []byte) error {
 	return w.MarkSynced(map[string]string{name: hash(data)})
 }
 
+// The PCjr's copies: what was last sent of each file, exactly as sent,
+// so the next version can go as changes (see cjp.Delta).
+func (w *Workspace) havePath(name string) string {
+	return w.state(filepath.Join("have", filepath.FromSlash(strings.ReplaceAll(strings.ToUpper(name), `\`, "/"))))
+}
+
+// Have returns the copy the PCjr has of name, or nil.
+func (w *Workspace) Have(name string) []byte {
+	b, err := os.ReadFile(w.havePath(name))
+	if err != nil {
+		return nil
+	}
+	return b
+}
+
+// SetHave records what the PCjr now has of name.
+func (w *Workspace) SetHave(name string, data []byte) error {
+	p := w.havePath(name)
+	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(p, data, 0o644)
+}
+
+// SeedHave keeps a copy of every file the PCjr is known to have now, so
+// its next version can go as changes.
+func (w *Workspace) SeedHave() error {
+	entries, data, err := w.Scan()
+	if err != nil {
+		return err
+	}
+	for _, e := range entries {
+		if !e.OnPCjr || w.Have(e.Name) != nil {
+			continue
+		}
+		b := data[e.Name]
+		if isText(e.Name) {
+			b = toDOS(b)
+		}
+		if err := w.SetHave(e.Name, b); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // LastRun is the report of the program the user last ran with /run, if
 // Claude hasn't seen it yet.
 func (w *Workspace) LastRun() string {
