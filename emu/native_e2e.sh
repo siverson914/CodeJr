@@ -40,6 +40,7 @@ run() { # $1 = label, $2 = extra client options
 	check "client hung up cleanly" "grep -q 'client hung up' '$tmp/server.log'"
 	check "screen shows the reply" "grep -q 'you asked: make hello' '$p/SCREEN.TXT'"
 	check "screen shows the transfer report" "grep -q 'Saved BIG.BIN (.* KB) in .* line' '$p/SCREEN.TXT'"
+	check "screen shows where the time went" "grep -q 's waiting, .* receiving, .* unpacking' '$p/SCREEN.TXT'"
 	grep -E 'client says|native: sent' "$tmp/server.log" | sed 's/^[^ ]* [^ ]* /      /'
 	if [ $fail = 1 ]; then
 		echo "--- server log"; cat "$tmp/server.log"

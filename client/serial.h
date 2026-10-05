@@ -20,6 +20,9 @@ unsigned ser_set_baud(long baud);
 
 /* Receives a burst by tight polling (see serial.c). Returns the count. */
 unsigned ser_burst(unsigned char *buf, unsigned max, unsigned fends, unsigned first_ticks, unsigned gap_ticks);
+/* Tick counts (low word of the BIOS clock) of the last burst's first and
+ * last bytes; both equal the start time if nothing came. */
+extern unsigned ser_burst_first, ser_burst_last;
 
 int ser_getc(void);            /* next received byte, or -1 if none */
 unsigned ser_rx_pending(void); /* bytes waiting in the receive buffer */

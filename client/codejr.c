@@ -34,7 +34,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "0.6"
+#define VERSION "0.7"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -73,6 +73,8 @@ static int connected, quitting;
 /* The server said "ui" in its HELLO: we echo typed lines ourselves and
  * show the prompt only between its READY and the next line sent. */
 static int ui, ready = 1;
+static int line_waits; /* Enter was pressed while busy: send on READY */
+static void key(unsigned k);
 static int loop_mode; /* /L: C:\CODEJR.BAT runs RUNNEXT.BAT, then redials */
 static int menu; /* the last line was /run: a bare number picks a program */
 #define RUNNEXT "C:\\CODEJR\\RUNNEXT.BAT"
@@ -184,14 +186,21 @@ static void io_send(const unsigned char *p, unsigned n, void *ctx)
 
 static unsigned long pull_t0;   /* tick count when the current file started */
 static unsigned long pull_wire; /* bytes of it that came over the line */
+/* Where the current file's time goes, in ticks: waiting for a burst to
+ * start, receiving it, the silence that ends it, and writing to disk. The
+ * rest is the CPU: unescaping, checks and unpacking. */
+static unsigned long t_wait, t_recv, t_tail, t_disk;
 
 static unsigned io_burst(unsigned char *buf, unsigned max, unsigned fends,
                          unsigned first, unsigned gap, void *ctx)
 {
-	unsigned n;
+	unsigned n, t0 = (unsigned)ticks();
 	(void)ctx;
 	n = ser_burst(buf, max, fends, first, gap);
 	pull_wire += n;
+	t_wait += ser_burst_first - t0;
+	t_recv += ser_burst_last - ser_burst_first;
+	t_tail += (unsigned)ticks() - ser_burst_last;
 	return n;
 }
 
@@ -210,6 +219,13 @@ static void progress(unsigned long got)
 	bar[20] = 0;
 	sprintf(s, "Receiving %s [%s] %lu/%lu  line %lu bps", offer.name, bar, got, offer.size, bps);
 	scr_status(s);
+}
+
+/* Ticks as seconds with one decimal: "12.3". */
+static void tenths(char *s, unsigned long t)
+{
+	unsigned long x = t * 100 / 182;
+	sprintf(s, "%lu.%lu", x / 10, x % 10);
 }
 
 /* Fetches the offered file chunk by chunk: ask for a chunk, then only
@@ -231,6 +247,7 @@ static void pull_file(void)
 	pc.bad = 0;
 	pull_t0 = t0;
 	pull_wire = 0;
+	t_wait = t_recv = t_tail = t_disk = 0;
 	if (!valid_name(offer.name))
 		strcpy(err, "not a DOS file name");
 	else if ((f = fopen(PULL_TMP, "wb")) == NULL)
@@ -249,8 +266,12 @@ static void pull_file(void)
 			strcpy(err, "the server stopped answering");
 			break;
 		}
-		if (fwrite(out, 1, (size_t)len, f) != (size_t)len)
-			strcpy(err, "disk full?");
+		{
+			unsigned long d = ticks();
+			if (fwrite(out, 1, (size_t)len, f) != (size_t)len)
+				strcpy(err, "disk full?");
+			t_disk += ticks() - d;
+		}
 		got += (unsigned long)len;
 		progress(got);
 	}
@@ -284,21 +305,34 @@ static void pull_file(void)
 	secs = (ticks() - t0) * 10 / 182;
 	if (err[0])
 		sprintf(line, "Couldn't save %s: %s", offer.name, err);
-	else
-	{
+	else {
 		unsigned long t = ticks() - t0, bps = t ? pull_wire * 182UL / t : 0;
 		unsigned long x10 = pull_wire ? got * 10 / pull_wire : 10;
-		char sz[16];
+		unsigned long spent = t_wait + t_recv + t_tail + t_disk;
+		char sz[16], tw[8], tr[8], tg[8], tu[8], td[8];
+
 		if (got < 1024)
 			sprintf(sz, "%lu bytes", got);
 		else
 			sprintf(sz, "%lu.%lu KB", got / 1024, got % 1024 * 10 / 1024);
 		sprintf(line, "Saved %s (%s) in %lu s, line %lu of %ld bps.",
 		        offer.name, sz, secs, bps, line_baud);
+		note(line);
+		/* Where the time went, so the slow part can be found. */
+		tenths(tw, t_wait);
+		tenths(tr, t_recv);
+		tenths(tg, t_tail);
+		tenths(tu, t > spent ? t - spent : 0);
+		tenths(td, t_disk);
+		sprintf(line, "  %s s waiting, %s receiving, %s gap, %s unpacking, %s disk; %lu.%lux",
+		        tw, tr, tg, tu, td, x10 / 10, x10 % 10);
+		if (got <= 4096)
+			line[0] = 0; /* one chunk: nothing to learn */
 		sprintf(last_file, "Last file: %lu.%lux compressed, %u damaged, %u requests for %u chunks",
 		        x10 / 10, x10 % 10, pc.bad, rounds, offer.chunks);
 	}
-	note(line);
+	if (line[0])
+		note(line);
 	scr_status(err[0] ? err : "Saved.");
 }
 
@@ -335,6 +369,10 @@ static void handle(const cjp_frame *f)
 		break;
 	case CJP_READY:
 		ready = 1;
+		if (line_waits) {
+			line_waits = 0;
+			key('\r'); /* the line typed while CodeJr was busy */
+		}
 		break;
 	case CJP_TEMP:
 		memcpy(s, f->payload, f->len);
@@ -549,7 +587,11 @@ static void key(unsigned k)
 		queue(CJP_BYE, NULL, 0);
 		start_quit();
 	} else if (ch == '\r') {
-		if (input_len && ready) {
+		if (input_len && !ready) {
+			/* Never drop it: it goes as soon as CodeJr is ready. */
+			line_waits = 1;
+			scr_status("Your line goes as soon as CodeJr is ready.");
+		} else if (input_len) {
 			if (ui)
 				echo_line(input);
 			if (!local_line(input)) {
@@ -691,6 +733,7 @@ int main(int argc, char **argv)
 	const char *shot = NULL;
 	long exit_after = -1;
 	int port = 0, i, sent_auto = 0;
+	unsigned long spun = 0;
 	long baud = 9600, fast = 37287;
 	unsigned long start;
 	char hello[48];
@@ -757,8 +800,14 @@ int main(int argc, char **argv)
 			scr_input(input, ready);
 			cursor_dirty = 0;
 		}
-		if (auto_text && connected && ready && !sent_auto) {
-			/* Typed as if at the keyboard, so tests cover the same path. */
+		/* Busy: keep something moving, so the PCjr never looks stuck. */
+		if (connected && !ready && ticks() - spun >= 2) {
+			spun = ticks();
+			scr_spin();
+		}
+		if (auto_text && connected && !sent_auto) {
+			/* Typed as if at the keyboard, so tests cover the same path
+			 * (including a line typed before CodeJr is ready). */
 			strncpy(input, auto_text, sizeof input - 1);
 			input_len = (int)strlen(input);
 			key('\r');

@@ -149,6 +149,8 @@ unsigned ser_set_baud(long baud)
  * Stops after `fends` bytes of value 0xC0 (frame delimiters), when buf is
  * full, or when the line goes quiet: `first_ticks` BIOS ticks (18.2/s)
  * before the first byte, `gap_ticks` after the last one. */
+unsigned ser_burst_first, ser_burst_last;
+
 unsigned ser_burst(unsigned char *buf, unsigned max, unsigned fends, unsigned first_ticks, unsigned gap_ticks)
 {
 	unsigned far *tick = (unsigned far *)MK_FP(0x40, 0x6C);
@@ -157,6 +159,7 @@ unsigned ser_burst(unsigned char *buf, unsigned max, unsigned fends, unsigned fi
 	unsigned char ier = (unsigned char)inp(base + IER);
 	int c, got = 0;
 
+	ser_burst_first = ser_burst_last = mark;
 	if (fends == 0)
 		fends = 0xFFFF;
 	outp(base + IER, 0);
@@ -177,6 +180,9 @@ unsigned ser_burst(unsigned char *buf, unsigned max, unsigned fends, unsigned fi
 				lost++;
 				uart_overruns++;
 			}
+			ser_burst_last = *tick;
+			if (n == 0)
+				ser_burst_first = ser_burst_last;
 			buf[n++] = ch;
 			got = 1;
 			idle = 0;

@@ -23,6 +23,7 @@ int scr_col(void); /* transcript column on the bottom row */
 
 void scr_status(const char *s);   /* replaces the status bar */
 void scr_input(const char *s, int prompt); /* input line; "> " only if prompt */
+void scr_spin(void); /* busy: advances the spinner where the prompt goes */
 void scr_save(const char *path);  /* writes the screen's text to a file */
 
 #endif

@@ -20,6 +20,7 @@
 static unsigned short far *vid;
 static int col; /* transcript column on the bottom row */
 static int temp; /* the bottom row holds a transient line */
+static int spin;  /* spinner frame */
 
 /* Moves the hardware cursor by programming the CRTC (6845) directly. The
  * BIOS call (INT 10h, AH=2) can hold interrupts off long enough on the
@@ -133,6 +134,15 @@ void scr_status(const char *s)
 {
 	fill_row(ROW_STATUS, ' ', A_STATUS);
 	put_text(ROW_STATUS, 1, s, A_STATUS, COLS - 2);
+}
+
+/* A twinkle like Claude Code's, in CP437: dot, bullet, plus, star, sun. */
+static const unsigned char spin_chars[] = { 0xFA, 0xF9, '+', '*', 0x0F, '*', '+', 0xF9 };
+
+void scr_spin(void)
+{
+	spin = (spin + 1) % (int)sizeof spin_chars;
+	vid[ROW_INPUT * COLS] = (unsigned short)(0x0E << 8 | spin_chars[spin]);
 }
 
 void scr_input(const char *s, int prompt)
