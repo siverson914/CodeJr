@@ -144,6 +144,77 @@ static void tex_dim(unsigned char far *dst, const unsigned char far *src)
 	}
 }
 
+/* ---- /DIAG and /TUNC: finding out why the tunnel is gray on the PCjr ---- */
+
+int opt_diag, opt_tunc;
+
+static unsigned sum16(unsigned seg, unsigned n) /* 16-bit sum of n bytes */
+{
+	const unsigned char far *p = (const unsigned char far *)MK_FP(seg, 0);
+	unsigned s = 0, i;
+	for (i = 0; i < n; i++) s += p[i];
+	return s;
+}
+
+static unsigned largest_free(void) /* paragraphs */
+{
+	union REGS r;
+	r.h.ah = 0x48; r.x.bx = 0xFFFF;
+	intdos(&r, &r);
+	return r.x.bx;
+}
+
+static void diag(const char *when)
+{
+	if (!opt_diag) return;
+	dbg_log("tunnel %s: tex %04X %04X code %04X len %u free %u paras", when, tex[0], tex[1], code, codelen, largest_free());
+	if (tex[0]) dbg_log("  sums: tex0 %04X/%04X tex1 %04X/%04X code %04X",
+		sum16(tex[0], 32768u), sum16(tex[0] + 0x800, 32768u),
+		tex[1] ? sum16(tex[1], 32768u) : 0, tex[1] ? sum16(tex[1] + 0x800, 32768u) : 0,
+		code ? sum16(code, codelen) : 0);
+	if (tex[0]) {
+		const unsigned char far *p = (const unsigned char far *)MK_FP(tex[0], 0x4000);
+		dbg_log("  tex0 row 64: %02X %02X %02X %02X %02X %02X %02X %02X", p[0], p[4], p[8], p[16], p[32], p[33], p[64], p[100]);
+	}
+	if (code) {
+		const unsigned char far *c = (const unsigned char far *)MK_FP(code, 0);
+		dbg_log("  code: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X ... %02X",
+			c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[10], c[13], c[14], c[15], c[16], c[codelen - 1]);
+	}
+}
+
+/* what a frame put on the page: a sum, and how many different bytes */
+static void diag_page(const char *when)
+{
+	const unsigned char far *p = (const unsigned char far *)MK_FP(fx_seg, 0);
+	static unsigned char seen[256];
+	unsigned i, kinds = 0;
+	if (!opt_diag) return;
+	memset(seen, 0, sizeof seen);
+	for (i = 0; i < 16384u; i++) if (!seen[p[i]]) { seen[p[i]] = 1; kinds++; }
+	dbg_log("  page %s: seg %04X pages %d sum %04X, %u kinds of byte, row 100: %02X %02X %02X %02X %02X %02X",
+		when, fx_seg, fx_pages, sum16(fx_seg, 16384u), kinds,
+		p[50 * 80 + 10], p[50 * 80 + 20], p[50 * 80 + 30], p[50 * 80 + 50], p[50 * 80 + 60], p[50 * 80 + 70]);
+}
+
+/* the same tunnel in plain C (slow): what the generated code should draw */
+static void tunnel_c(unsigned v)
+{
+	unsigned char far *pg = (unsigned char far *)MK_FP(fx_seg, 0);
+	int cr, bx;
+	for (cr = CR0; cr < CR1; cr++)
+		for (bx = 0; bx < 80; bx += 2) { /* pairs, the way the code is made */
+			unsigned o1, o2, d = cr * 80 + bx;
+			int s1, s2, sh;
+			cell(bx, cr, &o1, &s1);
+			cell(bx + 1, cr, &o2, &s2);
+			sh = s1 < s2 ? s1 : s2;
+			if (sh == 2) continue;
+			pg[d] = pg[0x2000 + d] = *((unsigned char far *)MK_FP(tex[sh], (o1 + v) & 0xFFFF));
+			pg[d + 1] = pg[0x2001 + d] = *((unsigned char far *)MK_FP(tex[sh], (o2 + v) & 0xFFFF));
+		}
+}
+
 static void tunnel_prep(void)
 {
 	int d, cr, bx;
@@ -193,6 +264,7 @@ static void tunnel_prep(void)
 	emit(0xCB);                                                                         /* retf */
 	flush();
 	codelen = FP_OFF(cp) - off0;
+	diag("after prep");
 }
 
 static const unsigned char pal_net[16] = {
@@ -216,12 +288,22 @@ static void statics(void)
 	caption();
 }
 
+static void tunnel_frame(unsigned t);
+
 static void tunnel_enter(void)
 {
+	diag("at the start of the part");
 	set_pal(pal_net);
 	both_pages(statics);
 	fx_pal_anim(0, 2, 9, 2, 1);
 	fx_pal_anim(1, 11, 14, 3, 1);
+	if (code) { /* the first frame on both pages, then the announcer */
+		tunnel_frame(0);
+		diag_page("after the first frame");
+		fx_flip(); fx_begin();
+		tunnel_frame(0); fx_flip(); fx_begin();
+	}
+	voice_say("JNET", 0);
 }
 
 static void tunnel_frame(unsigned t)
@@ -240,7 +322,8 @@ static void tunnel_frame(unsigned t)
 	c[8] = (unsigned char)v; c[9] = (unsigned char)(v >> 8);
 	c[11] = (unsigned char)fx_seg; c[12] = (unsigned char)(fx_seg >> 8);
 	run = (void (__far *)(void))MK_FP(code, 0);
-	run();
+	if (opt_tunc) tunnel_c(v);
+	else run();
 	/* the readout at the bottom */
 	li = (int)(t / 112) % 5;
 	fx_fill_rect(0, 184, 160, 8, FX_SOLID2(0));
@@ -255,6 +338,11 @@ static void tunnel_frame(unsigned t)
 
 static void tunnel_leave(void)
 {
+	/* 192 KB back to DOS: SAY needs room for the meeting's lines */
+	if (code) jr_dos_free(code);
+	if (tex[1] && tex[1] != tex[0]) jr_dos_free(tex[1]);
+	if (tex[0]) jr_dos_free(tex[0]);
+	code = tex[0] = tex[1] = 0;
 	fx_pal_anim(0, 0, 0, 0, 0);
 	fx_pal_anim(1, 0, 0, 0, 0);
 }

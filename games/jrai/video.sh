@@ -6,9 +6,10 @@
 set -e
 cd "$(dirname "$0")"
 out=${1:-$PWD/jrai-preview.mp4}
+./mkvoice.sh >/dev/null   # the voice clips (made once, from voice/*.mp3)
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
-EMU_TIMEOUT=1500 ../../lib/emu.sh "$tmp/run" 60000 JRAI.EXE /VIDEO >/dev/null 2>&1 || true
+EMU_FILES="$(ls voice/out/*.SND 2>/dev/null | tr '\n' ' ')" EMU_TIMEOUT=1500 ../../lib/emu.sh "$tmp/run" 60000 JRAI.EXE /VIDEO >/dev/null 2>&1 || true
 python3 render.py "$tmp/run/SND.BIN" "$tmp/audio.wav"
 # frames are named by time (T/4); a phrase or a slow scene skips numbers,
 # so repeat the last frame to keep the video in step with the audio
@@ -24,4 +25,5 @@ while [ "$i" -le "$((10#$n))" ]; do
 done
 ffmpeg -loglevel error -y -framerate 15 -start_number 0 -i "$tmp/seq/%05d.png" -i "$tmp/audio.wav" \
 	-vf "scale=640:480:flags=neighbor" -c:v libx264 -pix_fmt yuv420p -crf 18 -c:a aac -b:a 128k -shortest "$out"
+cp "$tmp/run/LOG.TXT" "${out%.mp4}.log" 2>/dev/null || true
 ls -l "$out"

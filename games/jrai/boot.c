@@ -82,7 +82,7 @@ static void blink(unsigned ms)
 
 static void header(void)
 {
-	static const char h[] = " CodeJr                       9600 bps ";
+	static const char h[] = " CodeJr                      37287 bps  ";
 	int i;
 	for (i = 0; i < 40; i++) put(i, 0, h[i], 0x1F);
 	for (i = 0; i < 40; i++) put(i, 1, (char)0xC4, 0x09);

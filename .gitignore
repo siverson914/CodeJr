@@ -20,3 +20,5 @@
 /speech/*.err
 /speech/out/
 /speech/__pycache__/
+/games/jrai/voice/out/
+/games/jrai/*.log

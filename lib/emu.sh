@@ -3,12 +3,14 @@
 # files back.  Never opens a window.
 #   lib/emu.sh <outdir> <cycles> <EXE> [args...]
 # Copies every file the program wrote (LOG.TXT, *.PPM ...) into <outdir>.
+# EMU_FILES="a b" puts more files next to the program first.
 set -u
 out=$1; cyc=$2; exe=$3; shift 3
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/c" "$out"
 cp "$exe" "$tmp/c/"
+[ -n "${EMU_FILES:-}" ] && cp $EMU_FILES "$tmp/c/"   # extra files the program reads
 base=$(basename "$exe")
 printf '[dosbox]\nmachine=pcjr\n[cpu]\ncore=normal\ncycles=fixed %s\n[autoexec]\nmount c %s/c\nc:\n%s %s > OUT.TXT\nexit\n' "$cyc" "$tmp" "$base" "$*" > "$tmp/dosbox.conf"
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout ${EMU_TIMEOUT:-120} dosbox -conf "$tmp/dosbox.conf" >/dev/null 2>&1

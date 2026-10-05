@@ -66,7 +66,7 @@ static void draw_stage(void)
 	if (stage >= 3) big_text(80 - big_width("AI", 8) / 2, 116, "AI", 8, 8, FX_SOLID2(15), 0);
 	if (stage >= 4) {
 		fx_fill_rect(0, 186, 160, 14, FX_SOLID2(0));
-		center_text(189, "a PCjr demo by CodeJr", 15);
+		center_text(189, "by CodeJr, 2026", 15); /* 20 letters at most */
 	}
 }
 
@@ -76,7 +76,7 @@ static void plasma_enter(void)
 	set_pal(pal_cool);
 	if (buf) both_pages(draw_stage);
 	fx_pal_anim(0, 1, 14, 3, 1);
-	say(&sp_hello, 0);
+	voice_say("JHELLO", 0);
 }
 
 static int redraw; /* pages still showing the old stage */
@@ -89,7 +89,15 @@ static void plasma_frame(unsigned t)
 		set_pal(pal_hot);
 		fx_pal_anim(0, 1, 14, 2, -1);
 	}
-	if (want != stage) { stage = want; redraw = 2; }
+	if (want != stage) {
+		stage = want; redraw = 2;
+		if (stage == 3 && buf) {
+			/* "AI" lands: the music drops out for the announcer */
+			both_pages(draw_stage);
+			redraw = 0;
+			voice_say("JTITLE", 0);
+		}
+	}
 	if (redraw && buf) { draw_stage(); redraw--; }
 }
 

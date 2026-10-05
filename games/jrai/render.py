@@ -3,13 +3,13 @@
 PCjr's SN76496: 3 square-wave voices and a noise voice, 2 dB volume steps,
 unipolar output (which is what makes the speech trick work: a voice at an
 inaudible pitch averages to half its volume, so the volume register acts
-as a 4-bit DAC).
+as a DAC), then a rough small-speaker low-pass.
 Usage: render.py SND.BIN out.wav
 """
 import struct, sys, wave
 
 CLOCK = 3579545
-RATE = 22050
+RATE = 22050  # the log's times are in 1/48000 s
 VOL = [10 ** (-2 * k / 20) for k in range(15)] + [0.0]
 
 
@@ -23,13 +23,13 @@ def main(src, dst):
     noise_ctl = 0
     lfsr = 0x4000
     latch = 0
-    end = (ev[-1][0] if ev else 0) * RATE // 6000 + RATE
+    end = (ev[-1][0] if ev else 0) * RATE // 48000 + RATE
     buf = bytearray()
     ei = 0
     step = CLOCK / 16 / RATE  # counter ticks per output sample
     for n in range(end):
-        t6 = n * 6000 // RATE
-        while ei < len(ev) and ev[ei][0] <= t6:
+        t48 = n * 48000 // RATE
+        while ei < len(ev) and ev[ei][0] <= t48:
             b = ev[ei][1]
             ei += 1
             if b & 0x80:
@@ -79,6 +79,16 @@ def main(src, dst):
         s += VOL[att[3]] * acc / step
         v = int((s / 4 - 0.25) * 2 * 30000)
         buf += struct.pack("<h", max(-32767, min(32767, v)))
+    # a small speaker: two one-pole low-passes at about 4.5 kHz
+    smp = struct.unpack("<%dh" % (len(buf) // 2), bytes(buf))
+    k = 1 - pow(2.718281828, -2 * 3.14159265 * 4500 / RATE)
+    a = b = 0.0
+    out = []
+    for x in smp:
+        a += k * (x - a)
+        b += k * (a - b)
+        out.append(int(b))
+    buf = struct.pack("<%dh" % len(out), *out)
     w = wave.open(dst, "wb")
     w.setnchannels(1)
     w.setsampwidth(2)

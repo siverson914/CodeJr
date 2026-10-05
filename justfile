@@ -159,10 +159,14 @@ jrai:
 jrai-video out="games/jrai/jrai-preview.mp4": jrai
     games/jrai/video.sh "$PWD/{{out}}"
 
-# Build JRAI and queue it for the PCjr
-deploy-jrai: jrai
-    cp games/jrai/JRAI.EXE "{{ws}}/"
-    @echo "queued: sent on the PCjr's next connection"
+# JRAI's voice clips (ElevenLabs via gipity, made once; then speech/mksnd.py)
+jrai-voice:
+    games/jrai/mkvoice.sh
+
+# Build JRAI and queue it with its voice clips for the PCjr
+deploy-jrai: jrai jrai-voice
+    cp games/jrai/JRAI.EXE games/jrai/voice/out/*.SND "{{ws}}/"
+    @echo "queued: JRAI.EXE and $(ls games/jrai/voice/out/*.SND | wc -l) clips, sent on the PCjr's next connection"
 
 # ---- speech ---------------------------------------------------------------
 # Speech quality for the tasks below. Medium (4-bit ADPCM, 8 kHz) is the one

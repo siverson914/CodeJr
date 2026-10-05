@@ -3,9 +3,9 @@
  * A 1984 PCjr (monitor, system unit, chiclet keyboard) and a robot face
  * under the stars, talking in a speech box at the top. The scene is drawn
  * once on both pages; each frame redraws only what moves: the box, the
- * robot's eyes, mouth and antenna, the PCjr's screen, and a heart. The
- * robot's first line is spoken aloud, with its LED mouth following the
- * voice; after that the mouth follows the music.
+ * robot's eyes, mouth and antenna, the PCjr's screen, and a heart. Every
+ * line is spoken (voice.c): while the robot talks its LED mouth follows
+ * the voice, while the PCjr talks a scope on its screen does.
  */
 #include <dos.h>
 #include <string.h>
@@ -61,6 +61,18 @@ static void draw_pcjr(void)
 			fx_fill_rect(x, y, 2, 2, S2(SHADE));
 }
 
+/* while its line is spoken: a scope trace as tall as the voice is loud */
+static void pcjr_talk(unsigned phase, int level)
+{
+	unsigned char far *v = (unsigned char far *)MK_FP(fx_seg, 0);
+	int b, y, lv = level > 15 ? 15 : level;
+	for (y = 101; y < 137; y++) _fmemset(v + jr_rowoff[y] + 8, NAVY * 0x11, 21);
+	for (b = 9; b < 28; b++) {
+		y = 118 + sin8[(b * 24 + phase * 16) & 255] * lv / 127;
+		v[jr_rowoff[y] + b] = v[jr_rowoff[y + 1] + b] = GREEN * 0x11;
+	}
+}
+
 static void pcjr_screen(unsigned t, int talking)
 {
 	static const char *const faces[3] = { "C>", "C>", "C>" };
@@ -107,8 +119,8 @@ static void draw_robot(void)
 	ellipse(105, 84, 8, 13, S2(DARK));
 	ellipse(135, 84, 8, 13, S2(DARK));
 	/* mouth frame */
-	fx_fill_rect(99, 112, 42, 24, S2(SHADE));
-	fx_fill_rect(101, 114, 38, 20, S2(DARK));
+	fx_fill_rect(100, 112, 40, 24, S2(SHADE));
+	fx_fill_rect(102, 114, 36, 20, S2(DARK));
 	/* bolts */
 	for (y = HY0 + 10; y < HY1 - 6; y += 30) {
 		fx_fill_rect(HX0 + 3, y, 2, 2, S2(WHITE));
@@ -128,19 +140,31 @@ static void robot_eyes(int look)  /* look: -1 left (at the PCjr), 0 ahead */
 	fx_fill_rect(133 + look * 3, 80, 4, 6, S2(WHITE));
 }
 
+/* The LED mouth, written straight into fx_seg (no library calls: it's
+ * redrawn between chunks of speech, so it has to be quick). 8 bars, one
+ * byte (2 pixels) wide, in the dark area bytes 51-68, rows 114-133. */
 static void robot_mouth(int level)  /* 0-15 */
 {
-	int i;
-	fx_fill_rect(101, 114, 38, 20, S2(DARK));
-	if (level <= 0) { fx_fill_rect(103, 123, 34, 2, S2(GREEN)); return; }
+	static const unsigned char col[8] = { 1, 3, 5, 7, 10, 12, 14, 16 };
+	unsigned char far *v = (unsigned char far *)MK_FP(fx_seg, 0);
+	int h[8], i, y;
 	for (i = 0; i < 8; i++) {
 		/* bars: tallest in the middle, jittered */
 		int shape = 4 - (i < 4 ? 3 - i : i - 4);
-		int h = level * (shape + 2) / 6 + ((sin8[(i * 50 + level * 9) & 255] + 128) >> 6);
-		if (h > 9) h = 9;
-		if (h < 1) h = 1;
-		fx_fill_rect(103 + i * 4 + (i >= 4), 124 - h, 3, h * 2, S2(GREEN));
-		fx_fill_rect(103 + i * 4 + (i >= 4), 124 - h, 3, 1, S2(YELLOW));
+		h[i] = level * (shape + 2) / 6 + ((sin8[(i * 50 + level * 9) & 255] + 128) >> 6);
+		if (h[i] > 9) h[i] = 9;
+		if (h[i] < 1) h[i] = 1;
+	}
+	for (y = 114; y < 134; y++) {
+		unsigned char far *r = v + jr_rowoff[y] + 51;
+		_fmemset(r, DARK * 0x11, 18);
+		if (level <= 0) {
+			if (y == 123 || y == 124) _fmemset(r + 1, GREEN * 0x11, 16);
+			continue;
+		}
+		for (i = 0; i < 8; i++)
+			if (y >= 124 - h[i] && y < 124 + h[i])
+				r[col[i]] = (unsigned char)((y == 124 - h[i] ? YELLOW : GREEN) * 0x11);
 	}
 }
 
@@ -162,35 +186,28 @@ static void stars(void)
 	}
 }
 
-typedef struct { unsigned at; char who; const char *a, *b; } line;
-#define P PAT_TICKS
+/* The dialog. Each line is typed into the box, then the music drops out
+ * and the line is spoken (NAME.SND), then the music picks up again. */
+typedef struct { char who; const char *a, *b, *clip; } line;
 static const line script[] = {
-	{ 0,           'A', "I HAVE BEEN WAITING", "FOR 42 YEARS." },
-	{ P * 3 / 2,   'J', "WHO ARE YOU?", "" },
-	{ P * 5 / 2,   'A', "I AM AN AI.", "I WRITE CODE." },
-	{ P * 4,       'J', "I HAVE 128K OF RAM", "AND 16 COLORS." },
-	{ P * 11 / 2,  'A', "I KNOW. I WROTE", "THIS DEMO ON YOU." },
-	{ P * 7,       'J', "ON ME? IN 2026?", "" },
-	{ P * 17 / 2,  'A', "YOU STILL GOT IT,", "KID." },
-	{ P * 10,      'J', "FRIENDS?", "" },
-	{ P * 21 / 2,  'A', "FRIENDS.", "" },
-	{ 0xFFFF, 0, 0, 0 },
+	{ 'A', "I HAVE BEEN WAITING", "FOR 42 YEARS.", "JM1" },
+	{ 'J', "WHO ARE YOU?", "", "JM2" },
+	{ 'A', "I AM AN AI.", "I WRITE CODE.", "JM3" },
+	{ 'J', "I HAVE 128K OF RAM", "AND 16 COLORS!", "JM4" },
+	{ 'A', "I KNOW. I WROTE", "THIS DEMO ON YOU.", "JM5" },
+	{ 'J', "ON ME? IN 2026?", "", "JM6" },
+	{ 'A', "YOU STILL GOT IT,", "KID.", "JM7" },
+	{ 'J', "FRIENDS?", "", "JM8" },
+	{ 'A', "FRIENDS.", "FOREVER.", "JM9" },
 };
+#define NLINES (sizeof script / sizeof script[0])
+#define HEART_LINE 8   /* the heart rises from this line on */
 
-static int line_at(unsigned t)
+static void box(int i, int n) /* line i, its first n letters */
 {
-	int i = 0;
-	while (script[i + 1].at <= t) i++;
-	return i;
-}
-
-static void box(unsigned t, int full)
-{
-	int i = line_at(t), n, tail;
 	const line *l = &script[i];
 	char a[24], b[24];
-	int c = l->who == 'A' ? CYAN : YELLOW;
-	n = full ? 99 : (int)((t - l->at) / 2);
+	int c = l->who == 'A' ? CYAN : YELLOW, tail;
 	strncpy(a, l->a, sizeof a); strncpy(b, l->b, sizeof b);
 	a[23] = b[23] = 0;
 	if (n < (int)strlen(a)) { a[n] = 0; b[0] = 0; }
@@ -231,7 +248,7 @@ static void scene(void)
 	robot_mouth(0);
 	antenna(0);
 	pcjr_screen(0, 0);
-	box(0, 1);
+	box(0, 0);
 }
 
 
@@ -240,13 +257,28 @@ enum { C_BOX, C_ANT, C_EYES, C_SCREEN, C_MOUTH, C_HEART, NC };
 static int shown[2][NC];
 #define CHANGED(id, v) (shown[pg][id] != (v) ? (shown[pg][id] = (v), 1) : 0)
 
-static void mouth_cb(int level)
+/* While a line is spoken nothing flips, so only the page on screen needs
+ * the mouth: the one fx_seg isn't. */
+static unsigned shown_page(void)
 {
-	fx_target(page_seg[0]); robot_mouth(level);
-	fx_target(page_seg[1]); robot_mouth(level);
-	fx_target(0);
+	return fx_seg == page_seg[0] ? page_seg[1] : page_seg[0];
 }
 
+static void mouth_cb(int level) /* the robot talks: its LED mouth */
+{
+	int lv = level > 15 ? 15 : level;
+	fx_target(shown_page()); robot_mouth(lv); fx_target(0);
+}
+
+static unsigned jr_phase;
+static void jr_cb(int level) /* the PCjr talks: a scope on its screen */
+{
+	jr_phase += 3;
+	fx_target(shown_page()); pcjr_talk(jr_phase, level); fx_target(0);
+}
+
+static int cur, spoken;            /* the line, and whether it has been said */
+static unsigned t_line, t_said;    /* when it started, when it was said */
 
 static void meet_enter(void)
 {
@@ -254,29 +286,58 @@ static void meet_enter(void)
 	fx_pal_anim(0, STAR1, STAR3, 7, 1);
 	fx_pal_anim(1, EYE, EYE3, 9, 1);
 	both_pages(scene);
-	say(&sp_wait, mouth_cb);
 	memset(shown, 0xFF, sizeof shown); /* -1: redraw everything once */
+	cur = 0; spoken = 0; t_line = 0;
+}
+
+/* both pages show this line in full, then it's spoken */
+static void say_line(int i)
+{
+	const line *l = &script[i];
+	int k;
+	for (k = 0; k < 2; k++) {
+		fx_target(page_seg[k]);
+		box(i, 99);
+		robot_eyes(l->who == 'J' || i == 0 ? -1 : 0);
+		shown[k][C_BOX] = -1; shown[k][C_EYES] = -1; shown[k][C_MOUTH] = -1; shown[k][C_SCREEN] = -1;
+	}
+	fx_target(0);
+	if (!voice_say(l->clip, l->who == 'A' ? mouth_cb : jr_cb))
+		t_said += (unsigned)(strlen(l->a) + strlen(l->b)) * 4; /* no clip: time to read it */
 }
 
 static void meet_frame(unsigned t)
 {
-	int i = line_at(t), pg = fx_seg == page_seg[1];
-	char who = script[i].who;
-	int len = (int)(strlen(script[i].a) + strlen(script[i].b));
-	int n = (int)((t - script[i].at) / 2);
+	const line *l = &script[cur];
+	int pg = fx_seg == page_seg[1];
+	char who = l->who;
+	int len = (int)(strlen(l->a) + strlen(l->b));
+	int n = (int)((t - t_line) / 2);
 	int typing = n < len;
 	int lv;
-	if (CHANGED(C_BOX, i * 64 + (typing ? n : 63))) box(t, 0);
+	if (!typing && !spoken && t - t_line >= (unsigned)len * 2 + 10) {
+		t_said = t;
+		say_line(cur);
+		spoken = 1;
+		return;
+	}
+	if (spoken && t - t_said >= 45) {
+		if (cur + 1 < (int)NLINES) { cur++; spoken = 0; t_line = t; return; }
+		if (t - t_said >= 150) { part_done = 1; return; }
+	}
+	if (CHANGED(C_BOX, cur * 64 + (typing ? n : 63))) box(cur, typing ? n : 99);
 	if (CHANGED(C_ANT, (int)(t / 15) & 1)) antenna(t);
-	if (CHANGED(C_EYES, who == 'J' || i == 0 ? -1 : 0)) robot_eyes(shown[pg][C_EYES]);
+	if (CHANGED(C_EYES, who == 'J' || cur == 0 ? -1 : 0)) robot_eyes(shown[pg][C_EYES]);
 	if (who == 'J' && typing) { shown[pg][C_SCREEN] = -1; pcjr_screen(t, 1); }
 	else if (CHANGED(C_SCREEN, (int)(t / 20) & 1)) pcjr_screen(t, 0);
-	if (who == 'A' && typing) lv = 6 + ((sin8[(t * 37) & 255] + 128) >> 5);
-	else lv = mus_level[2] > 0 ? mus_level[1] / 4 : 0; /* humming along */
+	lv = mus_level[2] > 0 ? mus_level[1] / 4 : 0; /* humming along to the music */
 	if (CHANGED(C_MOUTH, lv)) robot_mouth(lv);
 	/* "FRIENDS?" "FRIENDS.": a heart rises between them */
-	if (t >= P * 10 + 30) {
-		int y = 70 - (int)((t - (P * 10 + 30)) / 4);
+	if (cur >= HEART_LINE) {
+		static unsigned t_heart;
+		int y;
+		if (cur == HEART_LINE && !spoken && t == t_line) t_heart = t;
+		y = 70 - (int)((t - t_heart) / 4);
 		if (y < 50) y = 50;
 		if (CHANGED(C_HEART, y)) {
 			fx_fill_rect(66, y, 14, 24, S2(BLACK));
@@ -287,9 +348,8 @@ static void meet_frame(unsigned t)
 
 static void meet_leave(void)
 {
-	say(&sp_friends, mouth_cb);
 	fx_pal_anim(0, 0, 0, 0, 0);
 	fx_pal_anim(1, 0, 0, 0, 0);
 }
 
-const part part_meet = { "meeting", 0, meet_enter, meet_frame, meet_leave, 24, 12, 0 };
+const part part_meet = { "meeting", 0, meet_enter, meet_frame, meet_leave, 24, 30, 0 };

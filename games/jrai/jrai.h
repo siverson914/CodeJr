@@ -24,7 +24,7 @@ void clock_start(void);            /* hook IRQ5 (after fx_init)              */
 void clock_stop(void);
 void clock_poll(void);             /* advance T without IRQ5, or in lockstep */
 
-/* ---- music and speech (music.c, speech.c) -------------------------------- */
+/* ---- music (music.c) ------------------------------------------------------ */
 #define ROW_TICKS 7                /* 60/7 rows a second: 128.6 bpm, 4 rows a beat */
 #define PAT_ROWS 16
 #define PAT_TICKS (ROW_TICKS * PAT_ROWS)
@@ -37,15 +37,23 @@ extern volatile unsigned char mus_level[4]; /* recent volume per voice, 0-15 (fo
 extern volatile unsigned char mus_beat;     /* set on every kick drum; parts clear it */
 extern int mus_mute;               /* /QUIET */
 
-typedef struct { const unsigned char far *d; unsigned n; } speech;
-extern const speech sp_hello, sp_wait, sp_friends;
-extern void (*say_hook)(void);     /* /VIDEO: called every 4 ticks of a phrase */
+int mus_pause(void);               /* stop where it is; 1 if it was playing */
+void mus_resume(int was, unsigned long ticks); /* pick up again, ticks later */
+
+/* ---- spoken lines (voice.c) ----------------------------------------------
+ * voice_say plays NAME.SND from the current directory with SAY.EXE, with
+ * the music paused, and returns 0 if SAY or the clip isn't there (the demo
+ * goes on without it). Nothing moves while SAY plays; mouth, if set, gets
+ * a talking level before and 0 after (in /VIDEO, about 15 times a second). */
+void voice_init(void);
+extern int say_h;                  /* /SAYH: pass /H to SAY (DOSBox) */
+int voice_say(const char *name, void (*mouth)(int level));
+extern unsigned long Tpause;       /* ticks spent speaking, in all */
+extern void (*say_hook)(void);     /* /VIDEO: called every 4 ticks of a line (voice.c) */
 void snd_log_open(void);
 void snd_log_close(void);
-/* Plays a phrase now, busy, with the music paused (palette animation and
- * T keep running in IRQ5). mouth, if set, is called about 30 times a
- * second with the current loudness 0-15 so a face can move its lips. */
-void say(const speech *s, void (*mouth)(int level));
+void snd_log_at(unsigned long t);
+void sn_out(unsigned char b);   /* one SN76496 write (logged) */
 
 /* ---- drawing helpers (draw.c) -------------------------------------------- */
 extern unsigned char pal[16];      /* the palette the current part set      */
@@ -80,6 +88,8 @@ void boot_run(void (*work)(int step), int nsteps); /* text mode intro */
 void boot_end(void);                               /* "Done." and the glitch */
 
 extern int opt_bench, opt_bootdump;
+extern int opt_diag, opt_tunc;   /* tunnel.c: /DIAG log, /TUNC tunnel in C */
+extern int part_done;      /* a part sets it to end early (meet.c) */
 int mus_at(void);         /* song position playing now, -1 if stopped */
 unsigned long mus_ord_T(void); /* T when that position started */
 

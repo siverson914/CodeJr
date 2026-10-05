@@ -1,0 +1,15 @@
+# JRAI's spoken lines: NAME|voice|text (NAME.SND on the PCjr, 8 letters max).
+# Voices: ai = Atlas (the robot), jr = Brittney (the PCjr, a kid), ann = the announcer.
+JHELLO|ai|Hello... P.C. junior.
+JTITLE|ann|P.C. Junior meets A.I.
+JNET|ann|Entering the neural net.
+JM1|ai|I have been waiting for you. For forty-two years.
+JM2|jr|Who are you?
+JM3|ai|I am an A.I. I write code.
+JM4|jr|I have a hundred and twenty-eight K of RAM. And sixteen colors!
+JM5|ai|I know. I wrote this demo on you.
+JM6|jr|On me? In twenty twenty-six?
+JM7|ai|You still got it, kid.
+JM8|jr|Friends?
+JM9|ai|Friends. Forever.
+JEND|ann|Long live the P.C. junior!

@@ -1,14 +1,12 @@
-/* Music, speech and the demo clock.
+/* Music and the demo clock.
  *
  * A small tracker for the PCjr's SN76496: voice 0 lead, voice 1 bass,
  * voice 2 chord arpeggios (a new chord note every 60 Hz tick, the classic
  * chip sound), and the noise voice for drums. It runs inside the vertical
  * retrace interrupt, so it keeps time whatever the drawing code is doing.
  *
- * Speech: the SN76496 has no DAC, but a tone held at an ultrasonic pitch
- * acts as a constant level, and its 4-bit volume register then works as a
- * crude logarithmic DAC. say() writes one sample per 1/6000 s, timed from
- * the PIT counter.
+ * Spoken lines are in voice.c: the music pauses for them (mus_pause) and
+ * picks up where it stopped (mus_resume).
  */
 #include <dos.h>
 #include <conio.h>
@@ -147,22 +145,26 @@ void mus_init(void)
 
 /* ---- player ------------------------------------------------------------- */
 
-/* /VIDEO: every register write, with its time in 1/6000 s, goes to
- * SND.BIN (4-byte time, 1-byte value) for tools/render.py. */
+/* /VIDEO: every register write, with its time in 1/48000 s, goes to
+ * SND.BIN (4-byte time, 1-byte value) for render.py. The time is T's,
+ * unless voice.c sets one between ticks (snd_log_at; 0 = T's again). */
 static FILE *slog;
-static unsigned long slog_sub; /* samples into the current tick (speech) */
+static unsigned long slog_t;
 void snd_log_open(void) { slog = fopen("SND.BIN", "wb"); }
 void snd_log_close(void) { if (slog) fclose(slog); slog = 0; }
+void snd_log_at(unsigned long t) { slog_t = t; }
 
 static void sn(unsigned char b)
 {
 	outp(0xC0, b);
 	if (slog) {
-		unsigned long t = T * 100 + slog_sub;
+		unsigned long t = slog_t ? slog_t : T * 800;
 		fwrite(&t, 4, 1, slog);
 		fwrite(&b, 1, 1, slog);
 	}
 }
+
+void sn_out(unsigned char b) { sn(b); }
 
 static void sn_period(int v, unsigned p)
 {
@@ -315,75 +317,25 @@ void clock_poll(void)
 	while (T < want) { T++; mus_tick(); }
 }
 
-/* ---- speech ------------------------------------------------------------- */
-
-static unsigned pit_read(void)
+/* Stops the music where it is; returns whether it was playing. */
+int mus_pause(void)
 {
-	unsigned lo, hi;
-	_disable();
-	outp(0x43, 0x00);
-	lo = inp(0x40); hi = inp(0x40);
-	_enable();
-	return lo | (hi << 8);
+	int was = playing;
+	mus_stop();
+	return was;
 }
 
-void (*say_hook)(void);
-
-void say(const speech *s, void (*mouth)(int level))
+/* Picks the music up where mus_pause left it, `ticks` later. The pattern's
+ * start time moves by as much, so the parts' clocks skip the pause too. */
+void mus_resume(int was, unsigned long ticks)
 {
-	const unsigned char far *d = s->d;
-	unsigned i, prev, now;
-	unsigned long el = 0, next = 0;
-	int was = playing, lv = 0, peak = 15;
-	if (mus_mute) return;
-	if (lockstep) { /* no real time: log the samples, move T, show the mouth */
-		if (!slog) return;
-		playing = 0;
-		mus_stop();
-		sn_period(0, 1);
-		for (i = 0; i < s->n; i++) {
-			unsigned char b = d[i >> 1];
-			unsigned char att = (unsigned char)(i & 1 ? b & 15 : b >> 4);
-			slog_sub = i % 100;
-			sn((unsigned char)(0x90 | att));
-			if (att < peak) peak = att;
-			if (i % 100 == 99) {
-				T++;
-				if (T % 4 == 0) {
-					if (mouth) { mouth(15 - peak); peak = 15; }
-					if (say_hook) say_hook();
-				}
-			}
-		}
-		slog_sub = 0;
-		sn(0x9F);
-		if (mouth) mouth(0);
-		return;
-	}
-	playing = 0;
-	mus_stop();
-	sn_period(0, 1); /* ~111 kHz: a steady level, volume does the rest */
-	prev = pit_read();
-	for (i = 0; i < s->n; i++) {
-		unsigned char b = d[i >> 1];
-		unsigned char att = (unsigned char)(i & 1 ? b & 15 : b >> 4);
-		next += 199; /* 1193182 / 6000 */
-		do {
-			now = pit_read();
-			el += (unsigned)(prev - now);
-			prev = now;
-		} while (el < next);
-		sn((unsigned char)(0x90 | att));
-		if (att < peak) peak = att;
-		if (mouth && (i & 255) == 0) {
-			lv = 15 - peak; peak = 15;
-			mouth(lv);
-		}
-		if (!lockstep && !hooked) clock_poll();
-	}
-	sn(0x9F);
-	if (mouth) mouth(0);
-	(void)was; /* the music stays stopped: the next part starts it on its downbeat */
+	if (!was || mus_mute) return;
+	_disable();
+	ordT += ticks;
+	memset(ch, 0, sizeof ch);
+	arp_note = 0; dvol = 0;
+	playing = 1;
+	_enable();
 }
 
 int mus_at(void)
