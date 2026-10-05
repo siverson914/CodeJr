@@ -5,7 +5,7 @@
  *   SAY /I HELLO           show what is in a clip without playing it
  *   SAY /Q HELLO           don't print the clip's text
  *   SAY /V HELLO           afterwards, report the speed reached and late samples
- *   SAY /T HELLO           speed test: play a .SND clip as fast as the PCjr can,
+ *   SAY /T HELLO           speed test: play a .SND clip as fast as the loop goes
  *                          and report that rate (it sounds like a chipmunk)
  *   SAY /H HELLO           time .SND clips with the timer interrupt (SAY 1.0's
  *                          way) instead of polling the 8259; DOSBox needs it
@@ -377,11 +377,11 @@ static int play(const char *arg)
 
 	par = (unsigned __far *)MK_FP(seg, 0);
 	par[2] = method;
-	par[3] = speedtest && method == 1 ? 24 : divisor; /* 50 kHz: every tick is late */
+	par[3] = divisor; /* never shorter: see f_next in player.asm */
 	par[4] = (unsigned)n;
 	par[5] = (unsigned)(n >> 16);
 	par[6] = seg + DATA_PARA;
-	par[13] = irqtiming;
+	par[13] = irqtiming | (speedtest && method == 1 ? 2 : 0);
 
 	progress_clear();
 	if (!quiet && text[0])
@@ -408,9 +408,9 @@ static int play(const char *arg)
 		unsigned long t10 = pit * 10 / done;
 		printf("SAY: speed %lu Hz (wanted %lu), %lu.%lu PIT counts = %lu CPU clocks per sample\n",
 		       11931820UL / t10, 1193182UL / par[3], t10 / 10, t10 % 10, t10 * 4 / 10);
-		if (speedtest)
-			printf("SAY: so this machine can play chip clips at %s %lu Hz\n",
-			       par[10] < done / 10 * 9 ? "at least" : "up to about", 11931820UL / t10);
+		if (speedtest)	/* the loop alone; waiting for each tick adds about 80 clocks */
+			printf("SAY: chip clips up to about %lu Hz should keep up here\n",
+			       47727270UL / (t10 * 4 + 800) * 95 / 100);
 	}
 	if (speedtest && method != 1)
 		printf("SAY: /T only measures chip (.SND) clips\n");

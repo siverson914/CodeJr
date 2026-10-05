@@ -41,7 +41,7 @@ On the PCjr: `SAY HELLO`, or `SAY HELLO READY FRIENDS`. A key stops it.
 |---|---|
 | `/I` | show what's in a clip without playing it |
 | `/V` | afterwards, report the rate reached and the late samples |
-| `/T` | speed test: play as fast as the machine can (chipmunk) and report that rate |
+| `/T` | speed test: run the play loop flat out (chipmunk) and report the rate clips can safely use |
 | `/H` | time chip clips with the timer interrupt, as SAY 1.0 did (needed in DOSBox) |
 | `/Q` | don't print the clip's text |
 | `/X` | write the decoded samples to `SAYDUMP.BIN` (tests) |
@@ -112,9 +112,16 @@ tolerate step error. Picking for exact levels alone gave 39.5 dB ideal but
   the count.
 - **Stopwatch** (chip only). PIT channel 2 free-runs with the speaker data
   bit off, and is read every 256 samples. `SAY /V` prints the rate actually
-  reached and the CPU clocks per sample. `SAY /T` plays a clip with a
-  50 kHz tick, so every sample is late and the loop runs flat out, and
-  reports the fastest rate this machine can play.
+  reached and the CPU clocks per sample. `SAY /T` runs the chip loop
+  with no waiting at all, times it, and reports the highest rate that
+  should keep up once the per-sample wait (about 80 clocks) is added back.
+  Channel 0 keeps the clip's own rate. SAY 1.1-1.4 ran channel 0 at 50 kHz
+  for `/T` instead, and that froze the real PCjr so hard that Ctrl-Alt-Del
+  did nothing and only a power-off helped (2026-10-05). The likely cause
+  is the BIOS keyboard NMI routine, which handles Ctrl-Alt-Del: like the
+  disk BIOS, which hangs on a channel-0 period of 300 counts or less, it
+  probably can't cope with a very short one. **Never shorten channel 0's
+  period below a clip's own rate.**
 - **Cleanup.** Afterwards it restores channel 0 (mode 3, 65536), the IRQ0
   vector, the interrupt mask and port 61h, and adds the elapsed time to the
   BIOS clock.

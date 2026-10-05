@@ -513,3 +513,12 @@ He also asked why it always says "Hello Stevvvvve". It was the source: that Elev
 - What worked is purely acoustic: 10 ms log spectra (100 Hz-5 kHz) that stay above 0.95 cosine similarity while loud. The bad take measured 1.05 s, and 12 normal takes and clips 0.18-0.56 s.
 
 **SAY 1.4** shows a progress line on the screen while it loads and decodes ("Loading HELLOL.SND 37%", "Decoding 80%"), per the new rule that PCjr programs never sit silent. The on-screen line is untested; the emulator test redirects output, where SAY prints no progress.
+
+**`SAY /T` froze the PCjr; going smaller (2026-10-05, afternoon).** With Brian, "Stevvvvve" is gone, and 2-bit at 6 kHz ("Tiny") sounds the same to Steve as 3-bit. Then `SAY /T HELLOH` locked the PCjr so hard that Ctrl-Alt-Del did nothing, and only a power-off brought it back.
+
+- `/T` measured the loop's top speed by running PIT channel 0 at 50 kHz (divisor 24), so every sample was late. On the PCjr, Ctrl-Alt-Del is handled inside the BIOS keyboard NMI routine, which works even with interrupts off. So that routine itself was stuck, not just SAY.
+- The likely trigger is releasing Enter right after typing the command, during playback. The BIOS listing notes already say the disk BIOS hangs when channel 0's period is 300 counts or less (CLOCK_WAIT), and the keyboard routine probably has a similar wait. Not confirmed: the BIOS listing isn't on this machine.
+- **SAY 1.5's `/T`** keeps channel 0 at the clip's own rate and runs a separate chip loop with no waiting at all, timed by the channel-2 stopwatch. It reports the rate that should keep up once the per-sample wait (about 80 clocks) is added back. So `/T` is no riskier than playing the clip.
+- **Still open:** whether a key pressed during *normal* playback is safe. Every preset's period (112-199 counts) is also under 300. Steve's Enter releases during earlier `/V` runs didn't hang anything, but no test has deliberately pressed a key mid-clip.
+
+**Smaller than Tiny:** 2-bit REPLY at 5 kHz (12 KB for 9.3 s) and 4 kHz (10 KB): Whisper still hears every word. At 3 kHz (7.9 KB) it heard "nice guy" for "night sky" and "press enter" for "press any key", so about 4 kHz is the floor. Each clip also carries 768 bytes of level table and its text; voice mode could leave the table out.

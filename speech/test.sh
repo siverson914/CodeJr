@@ -36,7 +36,8 @@ echo "$out" | grep -Eq 'FRIENDS.SNP method 2 .* played ([0-9]+) of \1, late 0$' 
 echo "$out" | grep -Eq 'speed 106[0-9][0-9] Hz \(wanted 1065[0-9]\)' || ok=0	# high
 echo "$out" | grep -Eq 'FRIM.SND method 1 divisor 149 .* played ([0-9]+) of \1, late 0$' || ok=0
 echo "$out" | grep -Eq 'FRIL.SND method 1 divisor 199 .* played ([0-9]+) of \1, late 0$' || ok=0
-echo "$out" | grep -q 'can play chip clips at' || ok=0
+echo "$out" | grep -q 'should keep up here' || ok=0
+echo "$out" | grep -Eq 'FRIENDS.SND method 1 divisor 112 .* late 0$' || ok=0	# /T keeps channel 0 at the clip's rate
 echo "$out" | grep -q "can't open NOPE.SND" || ok=0
 echo "$out" | grep -Eq 'FRI4.SND method 1 .* played ([0-9]+) of \1, late 0$' || ok=0
 for f in D4:4 D3:3 D2:2 C4:4; do	# the 8088 decoders against mksnd.py's, byte for byte

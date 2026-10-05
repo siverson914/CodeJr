@@ -77,7 +77,8 @@ p_abort		dw 0		; 12  out: 1 if a key stopped it
 p_late		dw 0		; 14  out: samples whose tick came before the loop was ready
 p_tlo		dw 0		; 16  out: PIT counts elapsed (chip only)
 p_thi		dw 0		; 18
-p_flags		dw 0		; 1A  in: bit 0 = chip method on interrupt timing (/H)
+p_flags		dw 0		; 1A  in: bit 0 = chip method on interrupt timing (/H),
+				;     bit 1 = chip method free-running, no timing (/T)
 d_inseg		dw 0		; 1C  ADPCM decoder (sp_dec): codes at d_inseg:d_inoff
 d_inoff		dw 0		; 1E
 d_outseg	dw 0		; 20  samples out at d_outseg:d_outoff
@@ -199,6 +200,10 @@ chip:
 	call rd2
 	mov cs:t_prev,ax
 
+	test cs:p_flags,2		; /T: as fast as the loop goes
+	jz c_timed
+	jmp f_next
+c_timed:
 	test cs:p_flags,1		; /H: interrupt timing, as in SAY 1.0
 	jz c_next
 	jmp h_next
@@ -274,6 +279,36 @@ h_loop:
 h_rare:
 	call rare
 	je h_loop
+	jmp key
+
+; /T: the chip loop with no waiting at all, timed by the stopwatch. SAY 1.1
+; to 1.4 measured this by running channel 0 at 50 kHz instead, and that
+; froze a real PCjr so hard that Ctrl-Alt-Del did nothing (2026-10-05):
+; most likely the BIOS keyboard NMI routine, like the disk BIOS, can't
+; cope with a very short channel-0 period. Channel 0 now keeps the clip's
+; own rate, so /T is no riskier than playing the clip.
+f_next:
+	lods byte ptr es:[si]
+	mov bl,al
+	mov bh,8
+	mov al,[bx]
+	out 0C0h,al
+	inc bh
+	mov al,[bx]
+	out 0C0h,al
+	inc bh
+	mov al,[bx]
+	out 0C0h,al
+	test si,0FFh
+	jz f_rare
+f_loop:
+	loop f_next
+	sub bp,1
+	jnc f_next
+	jmp done
+f_rare:
+	call rare
+	je f_loop
 	jmp key
 
 ; ---- method 2: PWM on PIT channel 2 ---------------------------------------
