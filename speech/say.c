@@ -34,6 +34,7 @@
 #include <string.h>
 #include <dos.h>
 #include <i86.h>
+#include <io.h>
 
 extern char __far sp_begin[];
 extern char __far sp_end[];
@@ -50,6 +51,27 @@ unsigned get_ss(void);
 #define DATA_PARA 0xE0u
 
 static int quiet, info, verbose, speedtest, irqtiming, dump, slowdec;
+static int tty; /* stdout is the screen: show progress while loading and decoding */
+static char what[40];
+
+/* "Loading HELLO.SND  37%" on one line, rewritten in place. Loading a
+ * clip and decoding ADPCM take a second or two on the PCjr, and a program
+ * that sits silent that long looks hung (CLAUDE.md). */
+static void progress(unsigned long done, unsigned long total)
+{
+	if (!tty)
+		return;
+	printf("\r%s %3lu%%", what, total ? done * 100 / total : 100);
+	fflush(stdout);
+}
+
+static void progress_clear(void)
+{
+	if (tty) {
+		printf("\r%39s\r", "");
+		fflush(stdout);
+	}
+}
 
 static unsigned short rd16(const unsigned char *p)
 {
@@ -107,9 +129,11 @@ static unsigned char __far *at(unsigned seg, unsigned long off)
 
 static int read_far(int fd, unsigned seg, unsigned long off, unsigned long n)
 {
+	unsigned long total = n;
 	while (n) {
-		unsigned chunk = n > 0x8000UL ? 0x8000u : (unsigned)n;
+		unsigned chunk = n > 0x1000UL ? 0x1000u : (unsigned)n;
 		unsigned got;
+		progress(total - n, total);
 		if (_dos_read(fd, at(seg, off), chunk, &got) || got != chunk)
 			return -1;
 		n -= chunk;
@@ -144,7 +168,10 @@ static void adpcm_decode(unsigned seg, unsigned long inoff, unsigned long n, uns
 	unsigned acc = 0, nacc = 0, step, diff, m, code, k;
 	long p = 0;
 	int si = 0;
+	unsigned long total = n;
 	while (n--) {
+		if ((n & 4095) == 0)
+			progress(total - n, total);
 		if (nacc < bits) {
 			acc = (acc << 8) | *in++;
 			nacc += 8;
@@ -221,7 +248,7 @@ static void adpcm_fast(unsigned block, unsigned seg, unsigned long inoff, unsign
 	par[0x2A / 2] = 0x8000u;
 	par[0x26 / 2] = bits;
 	while (nbytes) {
-		unsigned long chunk = nbytes > 0x8000UL / per ? 0x8000UL / per : nbytes;
+		unsigned long chunk = nbytes > 0x1000UL / per ? 0x1000UL / per : nbytes; /* 4K samples */
 		unsigned char __far *in = at(seg, inoff), __far *out = at(seg, outoff);
 		par[0x1C / 2] = FP_SEG(in);
 		par[0x1E / 2] = FP_OFF(in);
@@ -232,6 +259,7 @@ static void adpcm_fast(unsigned block, unsigned seg, unsigned long inoff, unsign
 		inoff += chunk * ubytes;
 		outoff += chunk * per;
 		nbytes -= chunk;
+		progress(outoff, n);
 	}
 }
 
@@ -306,9 +334,12 @@ static int play(const char *arg)
 		_dos_close(fd);
 		return 1;
 	}
+	sprintf(what, "Loading %.20s", name);
+	progress(0, 1);
 	if (tablen)
 		_dos_read(fd, MK_FP(seg, TABLE_OFF), tablen, &got);
 	if (bits ? read_far(fd, seg + DATA_PARA, n + 16 - clen, clen) : read_far(fd, seg + DATA_PARA, 0, n)) {
+		progress_clear();
 		printf("SAY: %s is shorter than its header says\n", name);
 		_dos_close(fd);
 		_dos_freemem(seg);
@@ -323,6 +354,8 @@ static int play(const char *arg)
 	}
 	_fmemcpy(MK_FP(seg, 0), sp_begin, codesz);
 	if (bits) {
+		strcpy(what, "Decoding");
+		progress(0, 1);
 		t0 = bios_ticks();
 		if (FP_SEG(atab) == get_ss() && !slowdec)
 			adpcm_fast(seg, seg + DATA_PARA, n + 16 - clen, n, bits);
@@ -350,6 +383,7 @@ static int play(const char *arg)
 	par[6] = seg + DATA_PARA;
 	par[13] = irqtiming;
 
+	progress_clear();
 	if (!quiet && text[0])
 		printf("%s\n", text);
 	fn = (void (__far *)(void))MK_FP(seg, 0);
@@ -387,6 +421,7 @@ static int play(const char *arg)
 int main(int argc, char **argv)
 {
 	int i, any = 0, rc = 0;
+	tty = isatty(fileno(stdout));
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] == '/' || argv[i][0] == '-') {
 			char c = argv[i][1] & 0xDF;

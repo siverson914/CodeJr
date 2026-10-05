@@ -40,7 +40,7 @@ VOICES = {
     "daniel": ("elevenlabs", "onwK4e9ZLuTAKqWW03F9"),
     "rachel": ("elevenlabs", "21m00Tcm4TlvDq8ikWAM"),
 }
-DEFAULT_VOICE = "george"
+DEFAULT_VOICE = "brian"  # Steve's pick, 2026-10-05
 
 # Speech quality presets (Steve's picks from the grid, 2026-10-04):
 # (chip sample rate, codec). The rate becomes a PIT divisor, so the real
@@ -73,6 +73,52 @@ def tts(text, voice, path):
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode or not os.path.exists(path):
         sys.exit("gipity failed:\n" + r.stdout + r.stderr)
+
+
+HELD_MAX = 0.75  # seconds one sound may hold steady before a take is redone
+
+
+def held(path):
+    """The longest stretch of steady sound in a speech file: (seconds, at).
+
+    TTS voices sometimes hold the end of a word for most of a second
+    ("Hello Stevvvvve": 1.05 s of unchanging sound in one George take). Ten
+    ms spectra (100 Hz-5 kHz, log scale) that stay above 0.95 cosine
+    similarity to the one before, while loud, count as one held sound.
+    Measured on 12 normal takes and clips: 0.18-0.56 s. Whisper's word
+    timings were tried first and missed it: they stretch along with the
+    held sound."""
+    x = decode(path)
+    f, _, z = signal.stft(x, fs=SRC_RATE, nperseg=1024, noverlap=1024 - SRC_RATE // 100)
+    mag = np.abs(z)
+    spec = np.log1p(mag[(f > 100) & (f < 5000)] / (mag.max() * 1e-3))
+    e = np.sqrt(np.mean(mag ** 2, 0))
+    loud = e > np.median(e[e > 0]) * 0.3
+    unit = spec / (np.linalg.norm(spec, axis=0) + 1e-9)
+    same = (np.sum(unit[:, 1:] * unit[:, :-1], 0) > 0.95) & loud[1:] & loud[:-1]
+    best = run = at = 0
+    for i, v in enumerate(same):
+        run = run + 1 if v else 0
+        if run > best:
+            best, at = run, i - run + 1
+    return best / 100, at / 100
+
+
+def tts_checked(text, voice, path, tries=3):
+    """tts(), asking again (up to tries times) while a sound is held too long."""
+    best = None
+    for k in range(tries):
+        p = "%s.%d.mp3" % (path, k)
+        tts(text, voice, p)
+        sec, at = held(p)
+        if best is None or sec < best[0]:
+            best = (sec, at, p)
+        if sec <= HELD_MAX:
+            break
+        print("take %d holds one sound for %.2f s (at %.1f s); asking again" % (k + 1, sec, at))
+    shutil.copy(best[2], path)
+    if best[0] > HELD_MAX:
+        print("kept the best of %d takes (a %.2f s held sound at %.1f s)" % (tries, best[0], best[1]))
 
 
 def decode(path):
@@ -414,6 +460,8 @@ def main():
     ap.add_argument("--voice", default=DEFAULT_VOICE,
                     help="%s, provider:voice (openai:sage, gemini:Charon) or an ElevenLabs id"
                     % ", ".join(VOICES))
+    ap.add_argument("--no-check", action="store_true",
+                    help="with --text: skip the check for a drawn-out word")
     ap.add_argument("--title", help="text SAY prints while playing (default: --text, or the"
                     " audio file's .txt twin, as in clips/)")
     ap.add_argument("--method", choices=["chip", "pwm", "both"], default="chip",
@@ -446,7 +494,10 @@ def main():
         src = a.audio
         if a.text:
             src = os.path.join(tmp, "tts.mp3")
-            tts(a.text, a.voice, src)
+            if a.no_check:
+                tts(a.text, a.voice, src)
+            else:
+                tts_checked(a.text, a.voice, src)
             if a.keep:
                 shutil.copy(src, a.out + ".mp3")
         x = decode(src)

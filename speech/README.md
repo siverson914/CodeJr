@@ -1,7 +1,20 @@
 # SAY: speech on the PCjr
 
-A modern neural voice (ElevenLabs through gipity), reshaped on the laptop
-and played by the PCjr's own sound hardware. No add-on card is needed.
+A modern neural voice (ElevenLabs' "Brian" through gipity), reshaped on
+the laptop and played by the PCjr's own sound hardware. No add-on card is
+needed.
+
+**Drawn-out words.** TTS voices sometimes hold the end of a word for most
+of a second: one George take said "Hello Stevvvvve", 1.29 s from "Steve"
+to the pause, against 0.41-0.61 s in other takes of the same line. With
+`--text`, mksnd measures the longest steady sound in each take (10 ms
+spectra that stay alike while loud). It asks again, up to 3 times, if one
+lasts over 0.75 s: the bad take measured 1.05 s, and 12 normal takes and
+clips 0.18-0.56 s. Whisper's word timings were tried first and missed it,
+because they stretch along with the held sound. `--no-check` skips it.
+
+**Progress.** On the screen, SAY shows "Loading NAME.SND  37%" and then
+"Decoding  80%" while it gets a clip ready, so it never sits silent.
 
 ```
 just clip READY "Ready when you are."     # gipity speech -> speech/clips/READY.mp3 + .txt

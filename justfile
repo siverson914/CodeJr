@@ -180,8 +180,8 @@ speech:
     set -e
     for f in speech/clips/*.mp3; do speech/mksnd.py "$f" --quality {{speech_quality}} -o "speech/out/$(basename "$f" .mp3)"; done
 
-# New clip from text via gipity (voice: george, brian, daniel, rachel, openai:sage, gemini:Charon)
-clip name text voice="george":
+# New clip from text via gipity (voice: brian, george, daniel, rachel, openai:sage, gemini:Charon)
+clip name text voice="brian":
     #!/bin/sh
     set -e
     n=$(echo "{{name}}" | tr a-z A-Z)

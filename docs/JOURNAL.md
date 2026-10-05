@@ -499,3 +499,17 @@ From the listening page, Steve picked three presets: **high** (raw, 10.7 kHz), *
 **0.9, run reports.** `/run` now writes a `RUNNEXT.BAT` that records a failing exit and dumps the text screen right after the program; the next call sends exit, screen and the program's fresh `LOG.TXT` to the server, which puts them in front of Claude's next prompt once. An emulator test runs a C program that prints `GAME OVER`, writes `score 42` and exits 3, then calls back; all three facts reach the prompt. One full-suite run hit a timing flake in an old session test (30 runs alone pass); it probably raced with the new DOSBox test loading the CPU.
 
 **1.0, changes only.** Measured first: two builds of `JRFLIGHT.EXE` around a one-line change (`if (argc > 7) return 9;` in `main`) differ in 45,131 of 97,784 bytes, because everything after shifts. A rolling-hash diff (16-byte blocks of the old file, copies extended byte by byte) turns that into a 4.7 KB script, 4.4 KB compressed, against 64 KB for the whole file: about 15 times less on the line. The server keeps exact copies of what it sent; the client checks its own copy's size and CRC before replaying a script and the result's CRC after, and the server falls back to the whole file if the PCjr's copy is different. Emulator test: send, change (bytes inserted), send again as changes; then spoil the PCjr's copy and check the fallback. Building the scratch copy of the game also showed `games/flight/build.sh src` leaves out `jrfast.c` and doesn't link; the build tool includes it.
+
+## "Hello Stevvvvve", and Brian (2026-10-05)
+
+Steve on the real PCjr: all three presets sound good, and **even low is close to high**. That fits: ADPCM's hiss follows the voice's loudness so the voice masks it, the real chip's imperfect volume steps cap high below its simulated 37 dB, and the monitor's small speaker loses most of what 10.7 kHz adds over 6 kHz. Decisions: low (or 2-bit, if it passes his ears) for voice mode, high for canned clips. `HELLOT`, `REPLYL` and `REPLYT` (2-bit and 3-bit at 6 kHz) went to the PCjr for that comparison.
+
+He also asked why it always says "Hello Stevvvvve". It was the source: that ElevenLabs George take held "Steve" for 1.29 s before the pause, against 0.41-0.61 s for other voices and for two new George takes. The compressor made it worse by keeping the held tail at full volume. Steve heard five voices through the PCjr preview and picked **Brian**. HELLO, READY, WAITING, FRIENDS, HOWTO and REPLY are re-recorded with him.
+
+**A guard against it.** `mksnd.py --text` now measures the longest steady sound in each take and asks again (up to 3 times) when one lasts over 0.75 s. Wrong turns on the way:
+
+- Whisper's word timings, as "sound after the word's end": missed the bad take. base.en stretches the word's end along with the held sound.
+- The same, measured from the word's start per letter: Whisper put "I'm" inside the held sound, so "Steve" looked like it ran straight into the next word.
+- What worked is purely acoustic: 10 ms log spectra (100 Hz-5 kHz) that stay above 0.95 cosine similarity while loud. The bad take measured 1.05 s, and 12 normal takes and clips 0.18-0.56 s.
+
+**SAY 1.4** shows a progress line on the screen while it loads and decodes ("Loading HELLOL.SND 37%", "Decoding 80%"), per the new rule that PCjr programs never sit silent. The on-screen line is untested; the emulator test redirects output, where SAY prints no progress.
