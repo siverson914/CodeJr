@@ -49,6 +49,7 @@ QUALITY = {
     "high": (10653, "raw"),     # 10.7 KB/s of speech, cleanest
     "medium": (8008, "adpcm4"),  # 4.0 KB/s
     "low": (5996, "adpcm3"),     # 2.2 KB/s, arrives faster than it plays at 2.6 KB/s
+    "fast": (4004, "adpcm2"),    # 0.9 KB/s with pauses skipped; Steve's pick for /voice
 }
 
 METHODS = {
@@ -620,8 +621,9 @@ def main():
     ap.add_argument("--method", choices=["chip", "pwm", "both"], default="chip",
                     help="chip (default: it won on the real PCjr), pwm (whines), or both")
     ap.add_argument("--quality", choices=list(QUALITY), default="high",
-                    help="chip preset: high (raw, 10.7 kHz), medium (4-bit ADPCM, 8 kHz) or"
-                    " low (3-bit ADPCM, 6 kHz); --hz and --codec override it")
+                    help="chip preset: high (raw, 10.7 kHz), medium (4-bit ADPCM, 8 kHz),"
+                    " low (3-bit ADPCM, 6 kHz) or fast (2-bit ADPCM, 4 kHz); --hz and"
+                    " --codec override it")
     ap.add_argument("--hz", type=float, help="sample rate for the chip method")
     ap.add_argument("--codec", choices=["raw", "adpcm4", "adpcm3", "adpcm2"],
                     help="chip method: raw bytes, or ADPCM with 4, 3 or 2 bits per sample"

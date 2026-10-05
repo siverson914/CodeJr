@@ -23,13 +23,14 @@ just deploy-speech HELLO READY            # queue SAY.EXE and clips for the PCjr
 ```
 
 **Quality presets.** `mksnd.py --quality` and the `just` tasks
-(`SPEECH_QUALITY=low just speech`) pick one of three. High is the default.
+(`SPEECH_QUALITY=low just speech`) pick one of four. High is the default; fast is what `/voice` will use.
 
 | Preset | Rate | Codec | Per second of speech | A 9.6 s reply waits |
 |---|---|---|---|---|
 | high | 10,653 Hz | raw | 10.7 KB | about 39 s |
 | medium | 8,008 Hz | ADPCM 4-bit | 4.0 KB | about 15 s |
 | low | 5,996 Hz | ADPCM 3-bit | 2.2 KB | about 8 s |
+| fast | 4,004 Hz | ADPCM 2-bit | 0.9 KB (pauses skipped) | about 3 s |
 
 The waits are at the 37287 baud link (2.6 KB/s). Low arrives faster than
 it plays. High assumes the PCjr can keep up at 10.7 kHz: `SAY /V` on a high

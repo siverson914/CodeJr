@@ -540,3 +540,5 @@ The whole thing is encoder-side except the record parsing, and all decoders stil
 - The 768-byte table couldn't be rebuilt on the PCjr: it comes from a seeded Monte Carlo robustness model. So SAY carries a copy, and the test checks it against `mksnd.py --table-h`.
 
 SAY still reads version 2. No test covers that any more, since mksnd now writes only version 3 for ADPCM.
+
+**Picking voice mode's settings (2026-10-05, night).** On the PCjr, Steve found 2-bit at 3 kHz understandable but clearly lower quality, and picked 2-bit at 4 kHz as the fastest option. That's now the **fast** preset, intended for `/voice`; `/voice high` waits on his comparison of a long reply at high, medium and low. The new stock clip is JUNIOR ("Hi Steve, this is the IBM PC Junior speaking..."). Sample files are now named PHRASE_Q (Q = H, M, L or F), replacing the pile of HELLOx/REPLYxx test names. Sync only adds and updates files on the PCjr and never deletes there, so a one-off `SAYCLEAN.BAT` clears the old samples.
