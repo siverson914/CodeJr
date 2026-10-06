@@ -88,6 +88,14 @@ static void header(void)
 	for (i = 0; i < 40; i++) put(i, 1, (char)0xC4, 0x09);
 }
 
+static int spin_x = -1, spin_y, spin_k;
+
+void boot_spin(void)
+{
+	static const char sp[4] = { '|', '/', '-', '\\' };
+	if (spin_x >= 0) put(spin_x, spin_y, sp[++spin_k & 3], 0x0E);
+}
+
 void boot_run(void (*work)(int step), int nsteps)
 {
 	static const char *const think[] = {
@@ -138,7 +146,9 @@ void boot_run(void (*work)(int step), int nsteps)
 			say_line(t, 0x08);
 			for (k = 0; k < 8; k++) { put(sx, sl, spin[k & 3], 0x0F); wait_ms(80); }
 			put(sx, sl, '*', 0x0E);
+			spin_x = sx; spin_y = sl;
 			work(i);
+			spin_x = -1;
 			cx = 0;
 			say_line(t, 0x07);
 			say_line(" ok", 0x0A);

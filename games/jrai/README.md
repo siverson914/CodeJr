@@ -4,9 +4,10 @@ A demoscene-style demo for the IBM PCjr (8088 at 4.77 MHz, 16 colors, the
 SN76496 sound chip), written by CodeJr. About two and a half minutes, with
 a 3-voice chiptune and spoken dialog.
 
-Run `JRAI` from DOS, in the folder with `SAY.EXE` (speech/) and its voice
-clips (`J*.SND`, 13 files, 366 KB). Without them it runs silent where the
-voices would be, and the dialog just shows as text. Esc quits, Space skips to the next part.
+Run `JRAI` from DOS, in the folder with its voice clips (`J*.SND`, 13
+files, 118 KB). It doesn't need `SAY.EXE`: SAY's player is built in.
+Without the clips it runs silent where the voices would be, and the dialog
+just shows as text. Esc quits, Space skips to the next part.
 
 ## The parts
 
@@ -31,7 +32,7 @@ voices would be, and the dialog just shows as text. Esc quits, Space skips to th
 
 `music.c` is a small tracker: lead (voice 0, with vibrato), bass (voice 1), chord arpeggios at 60 Hz (voice 2, the classic chip sound), and drums on the noise voice. It runs inside the retrace interrupt, chained after the library's handler, so it keeps time whatever the drawing does. Every part starts on its pattern's downbeat. The demo clock T comes from the same interrupt.
 
-**The voices** are ElevenLabs voices through gipity, turned into PCjr clips by SAY's converter (`speech/mksnd.py`, see `speech/README.md`) at its default quality: SAY's `.SND` format, the three SN76496 tone voices held at period 1 as one 256-level DAC, the method that won on the real PCjr. `voice/lines.txt` lists every line (name, speaker, text). `mkvoice.sh` (`just jrai-voice`) makes `voice/NAME.mp3` once through gipity and keeps it in the repo, then makes `voice/out/NAME.SND`. The speakers:
+**The voices** are ElevenLabs voices through gipity, turned into PCjr clips by SAY's converter (`speech/mksnd.py`, see `speech/README.md`) at its default quality, the one Steve picked on the real PCjr: 8 kHz, 4-bit ADPCM, about 4 KB a second. `voice/lines.txt` lists every line (name, speaker, text). `mkvoice.sh` (`just jrai-voice`) makes `voice/NAME.mp3` once through gipity and keeps it in the repo, then makes `voice/out/NAME.SND`. The speakers:
 
 | Speaker | ElevenLabs voice |
 |---|---|
@@ -41,9 +42,15 @@ voices would be, and the dialog just shows as text. Esc quits, Space skips to th
 
 To change a line, edit `voice/lines.txt` and run `mkvoice.sh NAME`. Whisper (small.en) heard all 13 lines word for word in the preview video's soundtrack. "Meets" in the title needed a rewrite: as "P.C. junior... meets... A.I.!" it was heard as "miss".
 
-**Playing them.** JRAI runs `SAY /Q NAME` for each line (`voice.c`), with the music paused, and picks the music up where it stopped. SAY is the player proven on the real PCjr: it turns off every interrupt but its timer while it plays, so the picture holds still (the robot and the PCjr show a talking pose), and T stops too, so the parts' clocks skip the line. Afterwards JRAI puts PIT channel 0 back in mode 2 (SAY leaves the BIOS's mode 3). The tunnel gives its 192 KB back to DOS when it ends, so SAY has room in the meeting. `/SAYH` passes SAY `/H` for DOSBox, which lacks the 8259 poll command SAY uses.
+**Playing them** (`voice.c`). SAY's player and decoder are built into JRAI: `build.sh` assembles `speech/player.asm`, and `voice.c` compiles `speech/say.c` in (its `main` renamed) for the decoder, the built-in level table and the clip format. So JRAI plays exactly what SAY plays, with no copy of SAY's code to keep in step.
 
-A first version had its own player inside JRAI, which kept the retrace interrupt running so the mouth could move. It played on time in DOSBox, but SAY was already proven and sounds great on the PCjr, so JRAI uses SAY. In `/VIDEO` mode JRAI still reads the clips itself, logs the writes SAY would make, and moves T on, so the preview video has the voices.
+- **Loaded once, at startup.** While "CodeJr is thinking", every clip is read from disk into its own DOS block and decoded to one byte per sample (tables first, then samples). After that a line starts at once, and nothing touches DOS or the disk mid-demo.
+- **Memory.** The decoded clips are about 275 KB. At startup JRAI keeps 96 KB free for the graphics library. Once graphics have started it gives the library's unused 64 KB back buffer to DOS and loads whatever didn't fit (a "LOADING VOICES" screen), and tries once more when the tunnel frees its 192 KB. In DOSBox's 640 KB, 11 clips fit before the first scene and the last 2 after the tunnel. A clip that never fits is skipped: its line shows as text.
+- **Playing.** The player's code sits in its own block at the top of memory, as in SAY. For a line, JRAI copies the clip's tables in, empties the BIOS keyboard buffer (the player stops on a waiting key), pauses the music, and calls it. The player turns off every interrupt but its timer, so the picture holds still (the robot and the PCjr show a talking pose) and T stops, so the parts' clocks skip the line. Afterwards JRAI adds the missed ticks to the BIOS clock, puts PIT channel 0 back in mode 2, and the music picks up where it stopped. `/SAYH` uses the player's interrupt timing, for DOSBox, which lacks the 8259 poll command.
+
+Two earlier versions: JRAI's own player (interrupts on, never heard on the real machine), then running `SAY.EXE` for each line. That one played on the real PCjr, but every line waited seconds for DOS to load SAY and the clip, and SAY's "Loading" text scrolled the picture.
+
+In `/VIDEO` mode JRAI logs the writes the player would make and moves T on, so the preview video has the voices.
 
 ## Building and testing
 
@@ -78,4 +85,5 @@ Nothing here has run on real hardware yet. Things to watch:
 - **Memory.** About 350 KB beyond the program: two 64 KB tunnel textures, 64 KB of tunnel code, the library's 64 KB back buffer, a 64 KB clip buffer, the 16 KB plasma. Fine with this PCjr's 736 KB. If a texture can't be allocated, the tunnel uses one; with no room at all it says so.
 - **The second video page.** The PCjr shows only 16 KB pages in the low 128K, and this PCjr reserves one. The 86 KB program probably loads right where a second page would go, so the library may fall back to one page plus a RAM buffer. JRAI then copies the whole frame each time (correct, slower, may tear). `/ONEPAGE` tests this path in DOSBox. `/BENCH` logs which mode it got (`fx_pages`) and where the program loaded (`psp`).
 - **The tunnel was all gray** on the real PCjr (the first version). `JRAI /PART:2 /ONLY /DIAG` logs where its memory landed, checksums of its texture and generated code, and a checksum of the first frame (41FB in DOSBox). `/TUNC` draws the same tunnel in plain C instead of generated code; it gives the same checksum in DOSBox. Comparing the two on the PCjr says whether the generated code or the texture is at fault.
-- **Running SAY from inside JRAI** works in DOSBox (all 13 lines, back to DOS cleanly). Not yet on the PCjr.
+- **DOS calls while the retrace interrupt is live** hung the real PCjr (see `dos_begin` in `jrai.h`): they are all masked now, and the voices no longer make any after startup, except for clips that didn't fit.
+- **The built-in player and preloading** work in DOSBox (all 13 lines, Whisper hears each one right in the preview). Not yet on the PCjr.

@@ -338,11 +338,12 @@ static void tunnel_frame(unsigned t)
 
 static void tunnel_leave(void)
 {
-	/* 192 KB back to DOS: SAY needs room for the meeting's lines */
+	/* 192 KB back to DOS, for any voice clips that didn't fit at startup */
 	if (code) jr_dos_free(code);
 	if (tex[1] && tex[1] != tex[0]) jr_dos_free(tex[1]);
 	if (tex[0]) jr_dos_free(tex[0]);
 	code = tex[0] = tex[1] = 0;
+	voice_more();
 	fx_pal_anim(0, 0, 0, 0, 0);
 	fx_pal_anim(1, 0, 0, 0, 0);
 }

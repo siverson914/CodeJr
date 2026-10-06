@@ -352,4 +352,4 @@ static void meet_leave(void)
 	fx_pal_anim(1, 0, 0, 0, 0);
 }
 
-const part part_meet = { "meeting", 0, meet_enter, meet_frame, meet_leave, 24, 30, 0 };
+const part part_meet = { "meeting", voice_preload, meet_enter, meet_frame, meet_leave, 24, 30, 0 };

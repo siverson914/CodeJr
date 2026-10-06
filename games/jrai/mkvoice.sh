@@ -1,7 +1,7 @@
 #!/bin/sh
 # Makes JRAI's voice clips: voice/lines.txt -> voice/NAME.mp3 (ElevenLabs
-# through gipity, made once and kept) -> voice/out/NAME.SND (speech/mksnd.py
-# at its default quality, the clips SAY.EXE plays best).
+# through gipity, made once and kept) -> voice/out/NAME.SND (speech/mksnd.py at
+# its default quality, the one Steve picked on the real PCjr: 8 kHz, 4-bit ADPCM).
 #   games/jrai/mkvoice.sh          make what's missing
 #   games/jrai/mkvoice.sh JM4      remake one line's audio (after editing its text)
 set -e

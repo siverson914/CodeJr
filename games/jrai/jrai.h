@@ -53,12 +53,15 @@ int mus_pause(void);               /* stop where it is; 1 if it was playing */
 void mus_resume(int was, unsigned long ticks); /* pick up again, ticks later */
 
 /* ---- spoken lines (voice.c) ----------------------------------------------
- * voice_say plays NAME.SND from the current directory with SAY.EXE, with
- * the music paused, and returns 0 if SAY or the clip isn't there (the demo
- * goes on without it). Nothing moves while SAY plays; mouth, if set, gets
- * a talking level before and 0 after (in /VIDEO, about 15 times a second). */
-void voice_init(void);
-extern int say_h;                  /* /SAYH: pass /H to SAY (DOSBox) */
+ * The clips (NAME.SND) are loaded into memory at startup (voice_preload)
+ * and played by SAY's player, built in. voice_say plays one with the music
+ * paused, and returns 0 if it isn't loaded (the demo goes on without it).
+ * Nothing moves while a line plays; mouth, if set, gets a talking level
+ * before and 0 after (in /VIDEO, about 15 times a second). */
+void voice_preload(void);          /* in text mode, while CodeJr "thinks" */
+void voice_more(void);             /* load what didn't fit, once memory is freed */
+int voice_missing(void);           /* clips not in memory */
+extern int say_h;                  /* /SAYH: time with the interrupt (DOSBox) */
 int voice_say(const char *name, void (*mouth)(int level));
 extern unsigned long Tpause;       /* ticks spent speaking, in all */
 extern void (*say_hook)(void);     /* /VIDEO: called every 4 ticks of a line (voice.c) */
@@ -98,6 +101,7 @@ extern const part part_plasma, part_fire, part_tunnel, part_meet, part_scroll;
 
 void boot_run(void (*work)(int step), int nsteps); /* text mode intro */
 void boot_end(void);                               /* "Done." and the glitch */
+void boot_spin(void);      /* turn the "thinking" spinner (long steps call it) */
 
 extern int opt_bench, opt_bootdump;
 extern int opt_diag, opt_tunc;   /* tunnel.c: /DIAG log, /TUNC tunnel in C */

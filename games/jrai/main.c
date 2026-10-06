@@ -11,7 +11,7 @@
  *   /BENCH     log frames per second per part to LOG.TXT
  *   /DIAG      log the tunnel's memory and checksums (and /BENCH) to LOG.TXT
  *   /TUNC      draw the tunnel in plain C instead of generated code (slow)
- *   /SAYH      run SAY with /H (interrupt timing: DOSBox has no 8259 poll)
+ *   /SAYH      time speech with the interrupt (DOSBox has no 8259 poll)
  *   /ONEPAGE   test the fallback for a PCjr with no room for a second video page
  *   /VIDEO     frame-locked at 15 fps, every frame saved as Fnnnn.PPM (n = T/4)
  *              and every sound chip write logged to SND.BIN (tools/video.sh)
@@ -156,8 +156,18 @@ int main(int argc, char **argv)
 	}
 	if (opt_bench) dbg_log("fx_pages %d, fx_irq %d, fx_seg %04X, psp %04X", fx_pages, fx_irq, fx_seg, _psp);
 	key_init();
-	voice_init();
 	pages_find();
+	if (voice_missing()) {
+		/* The library's 64 KB back buffer is for its other drawing model:
+		 * JRAI only uses the fast path, so that memory goes to the voices.
+		 * (gfx_done frees it again at exit: by then nothing is in use.) */
+		jr_dos_free(FP_SEG(gfx_back));
+		center_text(96, "LOADING VOICES", 15);
+		fx_flip(); fx_begin();
+		voice_more();
+		fx_clear(0);
+		fx_flip(); fx_begin();
+	}
 	clock_start();
 	if (opt_video) { snd_log_open(); say_hook = video_frame; }
 	for (i = opt_part; i < NPARTS && !quit; i++) {
