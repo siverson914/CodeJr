@@ -8,7 +8,7 @@
 set -u
 cd "$(dirname "$0")/.."
 claudebin=${1:-$PWD/server/internal/session/testdata/fakeclaude.sh}
-port=4872
+port=${E2E_PORT:-4872}
 fail=0
 check() { if eval "$2"; then echo "ok:   $1"; else echo "FAIL: $1"; fail=1; fi; }
 
@@ -23,10 +23,10 @@ run() { # $1 = label, $2 = extra client options
 	mkdir -p "$tmp/ws/proj"; printf 'IN A FOLDER\n' > "$tmp/ws/proj/notes.txt" # a project folder
 	echo old > "$tmp/c/CODEJR/PROGS/BIG.BIN" # the pull must replace it
 	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG" # where /setup leaves it
-	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" > "$tmp/server.log" 2>&1 &
+	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "" > "$tmp/server.log" 2>&1 &
 	sp=$!
 	sleep 0.5
-	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 1000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 %s "/T:make hello" /X:60 /S:SCREEN.TXT\nexit\n' $port "$tmp" "$2" > "$tmp/dosbox.conf"
+	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 1000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 %s "/T:make hello" /X:110 /S:SCREEN.TXT\nexit\n' $port "$tmp" "$2" > "$tmp/dosbox.conf"
 	SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 200 dosbox -conf "$tmp/dosbox.conf" >/dev/null 2>&1
 	kill $sp 2>/dev/null; wait $sp 2>/dev/null
 	p="$tmp/c/CODEJR/PROGS"
@@ -62,7 +62,7 @@ runrun() { # $1 = line typed, $2 = what RUNNEXT.BAT must run, $3 = label
 	mkdir -p "$tmp/c/CODEJR/PROGS/GAME"
 	printf '@ECHO OFF\r\n' > "$tmp/c/CODEJR/PROGS/GAME/PLAY.BAT"
 	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG"
-	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" > "$tmp/server.log" 2>&1 &
+	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "" > "$tmp/server.log" 2>&1 &
 	sp=$!
 	sleep 0.5
 	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 1000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:9600 /L:1 "/T:%s" /X:60 /S:SCREEN.TXT\nexit\n' $port "$tmp" "$1" > "$tmp/dosbox.conf"
@@ -86,7 +86,7 @@ runreport() {
 	printf '#include <stdio.h>\nint main(void)\n{\n\tFILE *f = fopen("LOG.TXT", "w");\n\tprintf("GAME OVER\\n");\n\tif (f) { fprintf(f, "score 42\\n"); fclose(f); }\n\treturn 3;\n}\n' > "$tmp/game.c"
 	(. client/owenv.sh && cd "$tmp" && wcl -q -bt=dos -ms -0 -fe=c/CODEJR/PROGS/GAME/GAME.EXE game.c >/dev/null)
 	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG"
-	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" > "$tmp/server.log" 2>&1 &
+	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "" > "$tmp/server.log" 2>&1 &
 	sp=$!
 	sleep 0.5
 	# First call: /run, then what C:\CODEJR.BAT does next. Second call: talk.
@@ -114,7 +114,7 @@ deltarun() {
 	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG"
 	cp client/CJTERM.EXE "$tmp/ws/BIG.BIN"
 	call() { # one call that types a line, so the sync runs
-		server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" >> "$tmp/server.log" 2>&1 &
+		server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "" >> "$tmp/server.log" 2>&1 &
 		sp=$!
 		sleep 0.5
 		printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 1000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:37287 /X:25 /S:SCREEN.TXT\nexit\n' $port "$tmp" > "$tmp/dosbox.conf"
@@ -139,6 +139,59 @@ deltarun() {
 	rm -rf "$tmp"
 }
 
+# A reply longer than the screen stops at -- More -- with the rest
+# waiting in memory; /exit says it is hanging up at once.
+pagerun() { # $1 = typed line, $2 = label, then grep patterns that must match SCREEN.TXT
+	tmp=$(mktemp -d)
+	mkdir -p "$tmp/c/CODEJR/PROGS" "$tmp/ws"
+	cp client/CODEJR.EXE "$tmp/c/CODEJR/PROGS/"
+	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG"
+	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "" > "$tmp/server.log" 2>&1 &
+	sp=$!
+	sleep 0.5
+	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 1000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:37287 "/T:%s" /X:30 /S:SCREEN.TXT\nexit\n' $port "$tmp" "$1" > "$tmp/dosbox.conf"
+	SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 200 dosbox -conf "$tmp/dosbox.conf" >/dev/null 2>&1
+	kill $sp 2>/dev/null; wait $sp 2>/dev/null
+	echo "== $2"
+	label=$2
+	shift 2
+	for pat in "$@"; do
+		case $pat in
+		!*) check "screen lacks: ${pat#!}" "! grep -q -- '${pat#!}' '$tmp/c/CODEJR/PROGS/SCREEN.TXT'" ;;
+		*) check "screen: $pat" "grep -q -- '$pat' '$tmp/c/CODEJR/PROGS/SCREEN.TXT'" ;;
+		esac
+	done
+	[ $fail = 1 ] && { echo "--- screen"; cat "$tmp/c/CODEJR/PROGS/SCREEN.TXT"; }
+	rm -rf "$tmp"
+}
+
+# /voice: the fixed "voice on" clip plays at once, and with voice on a
+# reply is turned into VOICE\REPLY.SND and played with the real SAY.EXE
+# (SAY /X leaves SAYDUMP.BIN behind as proof it ran).
+voicerun() { # $1 = typed line, $2 = label, $3 = 1 to start with voice on, $4 = the clip that must play
+	tmp=$(mktemp -d)
+	mkdir -p "$tmp/c/CODEJR/PROGS" "$tmp/ws/.codejr"
+	cp client/CODEJR.EXE speech/SAY.EXE "$tmp/c/CODEJR/PROGS/"
+	[ "$3" = 1 ] && touch "$tmp/ws/.codejr/voice"
+	printf "DIAL=x:1\r\nSAY=/H /X\r\n" > "$tmp/c/CODEJR.CFG"
+	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "$PWD/server/internal/session/testdata/fakemksnd.sh" > "$tmp/server.log" 2>&1 &
+	sp=$!
+	sleep 1.5 # the fixed clips are made in the background
+	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 3000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:37287 "/T:%s" /X:45 /S:SCREEN.TXT\nexit\n' $port "$tmp" "$1" > "$tmp/dosbox.conf"
+	SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 200 dosbox -conf "$tmp/dosbox.conf" >/dev/null 2>&1
+	kill $sp 2>/dev/null; wait $sp 2>/dev/null
+	echo "== $2"
+	check "the clip reached the PCjr" "[ -s '$tmp/c/CODEJR/PROGS/VOICE/$4' ]"
+	check "SAY.EXE played it" "[ -s '$tmp/c/CODEJR/PROGS/SAYDUMP.BIN' ]"
+	check "the screen survived SAY" "grep -q 'CodeJr 1' '$tmp/c/CODEJR/PROGS/SCREEN.TXT'"
+	[ $fail = 1 ] && { echo "--- server log"; cat "$tmp/server.log"; echo "--- screen"; cat "$tmp/c/CODEJR/PROGS/SCREEN.TXT"; ls -R "$tmp/c/CODEJR"; }
+	rm -rf "$tmp"
+}
+
+voicerun /voice "/voice plays its clip" 0 ON.SND
+voicerun "hi there" "a voiced reply is spoken" 1 REPLY.SND
+pagerun long "a long reply stops at More" "line 20" "!line 21"
+pagerun /exit "/exit answers at once" "Hanging up"
 deltarun
 runreport
 runrun "/run 2" 'GWBASIC BETA.BAS' "/run by number: BASIC through GW-BASIC"

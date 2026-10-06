@@ -2,6 +2,7 @@
 #include <dos.h>
 #include <stdio.h>
 #include <string.h>
+#include <malloc.h>
 #include "screen.h"
 
 #define COLS 80
@@ -18,9 +19,25 @@
 #define A_STATUS 0x30 /* black on cyan */
 
 static unsigned short far *vid;
-static int col; /* transcript column on the bottom row */
-static int temp; /* the bottom row holds a transient line */
 static int spin;  /* spinner frame */
+
+/* The transcript is a view of a scrollback buffer: RING lines of 80
+ * cells (character and color) in far memory. Lines are numbered from 0;
+ * "last" is the line being written. The screen shows ROWS lines from
+ * view_top. Following, the view keeps the last line at the bottom; paused
+ * (a page was filled, or the user scrolled back) new text goes only into
+ * the buffer, ready to show at once. */
+#define RING 200
+#define ROWS (BOTTOM - TOP + 1)
+#define PAGE (ROWS - 1) /* keep one line of the last page in view */
+static unsigned short far *ring;
+static long last, first, view_top;
+static int col;        /* column in the last line */
+static int temp;       /* the last line holds a transient line */
+static int follow = 1; /* the view tracks the end */
+static int since;      /* lines added since the user's line or a page */
+
+static unsigned short far *line_at(long k) { return ring + (unsigned)(k % RING) * COLS; }
 
 /* Moves the hardware cursor by programming the CRTC (6845) directly. The
  * BIOS call (INT 10h, AH=2) can hold interrupts off long enough on the
@@ -66,7 +83,9 @@ void scr_init(const char *title)
 	fill_row(ROW_DIV, 0xC4, A_DIV); /* CP437 horizontal line */
 	scr_input("", 0);
 	scr_status("");
-	col = 0;
+	if (!ring)
+		ring = (unsigned short far *)_fmalloc((size_t)RING * COLS * 2);
+	scr_clear_transcript();
 }
 
 void scr_done(void)
@@ -76,19 +95,78 @@ void scr_done(void)
 	int86(0x10, &x, &x);
 }
 
+/* Shows buffer line k on screen row r (blank if there is none). */
+static void draw_row(int r, long k)
+{
+	unsigned short far *p = vid + r * COLS;
+	if (k < first || k > last || !ring) {
+		fill_row(r, ' ', 0x07);
+		return;
+	}
+	_fmemcpy(p, line_at(k), COLS * 2);
+}
+
+static void redraw(void)
+{
+	int r;
+	for (r = 0; r < ROWS; r++)
+		draw_row(TOP + r, view_top + r);
+}
+
+static void clear_line(long k)
+{
+	unsigned short far *p = line_at(k);
+	int i;
+	for (i = 0; i < COLS; i++)
+		p[i] = 0x0720;
+}
+
+/* The row the last line is on, or -1 if it is out of view. */
+static int last_row(void)
+{
+	long r = last - view_top;
+	return r >= 0 && r < ROWS ? TOP + (int)r : -1;
+}
+
 static void newline(void)
 {
+	last++;
+	if (last - first >= RING)
+		first++; /* the oldest line falls out of the buffer */
+	clear_line(last);
+	col = 0;
+	since++;
+	if (!follow) {
+		if (view_top < first) {
+			view_top = first;
+			redraw();
+		}
+		return;
+	}
+	if (since > PAGE) {
+		/* A page filled since the user last read: hold here. */
+		follow = 0;
+		return;
+	}
 	/* Scroll the transcript up one row. */
+	view_top++;
 	_fmemmove(vid + TOP * COLS, vid + (TOP + 1) * COLS, (BOTTOM - TOP) * COLS * 2);
 	fill_row(BOTTOM, ' ', 0x07);
-	col = 0;
 }
 
 void scr_temp(const char *s, unsigned char attr)
 {
+	unsigned short far *p;
+	int i, r;
+	if (!ring)
+		return;
 	if (col > 0)
 		newline();
-	put_text(BOTTOM, 0, s, attr, COLS);
+	p = line_at(last);
+	for (i = 0; i < COLS; i++)
+		p[i] = (unsigned short)(attr << 8 | (unsigned char)(*s ? *s++ : ' '));
+	if ((r = last_row()) >= 0)
+		draw_row(r, last);
 	temp = 1;
 }
 
@@ -96,8 +174,13 @@ int scr_col(void) { return col; }
 
 void scr_putc(unsigned char c, unsigned char attr)
 {
+	int r;
+	if (!ring)
+		return;
 	if (temp) {
-		fill_row(BOTTOM, ' ', 0x07);
+		clear_line(last);
+		if ((r = last_row()) >= 0)
+			draw_row(r, last);
 		temp = 0;
 		col = 0;
 		if (c == '\n')
@@ -111,7 +194,9 @@ void scr_putc(unsigned char c, unsigned char attr)
 		return;
 	if (col >= COLS)
 		newline();
-	vid[BOTTOM * COLS + col] = (unsigned short)(attr << 8 | c);
+	line_at(last)[col] = (unsigned short)(attr << 8 | c);
+	if ((r = last_row()) >= 0)
+		vid[r * COLS + col] = (unsigned short)(attr << 8 | c);
 	col++;
 }
 
@@ -123,11 +208,48 @@ void scr_puts(const char *s, unsigned char attr)
 
 void scr_clear_transcript(void)
 {
-	int r;
-	for (r = TOP; r <= BOTTOM; r++)
-		fill_row(r, ' ', 0x07);
-	col = 0;
-	temp = 0;
+	last = first = 0;
+	view_top = last - (ROWS - 1);
+	col = temp = since = 0;
+	follow = 1;
+	if (ring)
+		clear_line(0);
+	redraw();
+}
+
+long scr_unread(void)
+{
+	long bottom = view_top + ROWS - 1;
+	return last > bottom ? last - bottom : 0;
+}
+
+int scr_following(void) { return follow; }
+
+/* Moves the view by delta lines (negative: back), redrawing it. Reaching
+ * the end resumes following. */
+void scr_scroll(long delta)
+{
+	long end = last - (ROWS - 1), lo = first < end ? first : end;
+	view_top += delta;
+	if (view_top < lo)
+		view_top = lo;
+	if (view_top >= end) {
+		view_top = end;
+		follow = 1;
+	} else {
+		follow = 0;
+	}
+	since = 0;
+	redraw();
+}
+
+void scr_page(void) { scr_scroll(PAGE); }
+
+void scr_mark_input(void)
+{
+	since = 0;
+	if (!follow || view_top != last - (ROWS - 1))
+		scr_scroll(last); /* back to the end */
 }
 
 void scr_status(const char *s)

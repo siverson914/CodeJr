@@ -30,12 +30,14 @@
 #include <bios.h>
 #include <io.h>
 #include <direct.h>
+#include <process.h>
+#include <fcntl.h>
 #include "serial.h"
 #include "cjp.h"
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.0"
+#define VERSION "1.2"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -80,10 +82,22 @@ static int connected, quitting;
  * show the prompt only between its READY and the next line sent. */
 static int ui, ready = 1;
 static int line_waits; /* Enter was pressed while busy: send on READY */
+/* The server's last status line, and whether the More prompt covers it. */
+static char server_status[CJP_MAXPAYLOAD + 1];
+static int more_shown;
+static long more_lines = -1;
+static void hang_up(void);
+/* Voice: clips are played with SAY.EXE (the speech project's player),
+ * run as a child program while CodeJr stays in memory and connected. */
+static int voice_on;
+static char play_name[24];   /* a clip to play when the reply is done */
+static char say_opts[24];    /* SAY= line of CODEJR.CFG (/H in DOSBox) */
+static void speak(const char *clip);
 static void key(unsigned k);
 static int loop_mode; /* /L: C:\CODEJR.BAT runs RUNNEXT.BAT, then redials */
 static int menu; /* the last line was /run: a bare number picks a program */
 #define RUNNEXT "C:\\CODEJR\\RUNNEXT.BAT"
+#define BOTTOM_ROWS 21 /* transcript rows (screen.h) */
 /* After a /run: what ran, its exit status and screen, and the report put
  * together from them for the server (sent on the next call). */
 #define LASTRUN "C:\\CODEJR\\LASTRUN.TXT"
@@ -476,6 +490,8 @@ static void pull_file(void)
 			sprintf(sz, "%lu bytes", got);
 		else
 			sprintf(sz, "%lu.%lu KB", got / 1024, got % 1024 * 10 / 1024);
+		if (bps > (unsigned long)line_baud)
+			bps = (unsigned long)line_baud; /* the clock ticks 18 times a second */
 		if (offer.delta)
 			sprintf(line, "Saved %s (%s; sent %lu bytes of changes) in %lu s.",
 			        offer.name, sz, offer.script, secs);
@@ -562,11 +578,26 @@ static void handle(const cjp_frame *f)
 		scr_status("Connected.  Enter sends,  Ctrl-C stops CodeJr,  Alt-X hangs up.");
 		break;
 	case CJP_READY:
+		if (play_name[0]) {
+			/* The reply and its files are all here and the line is
+			 * quiet: say it before handing the prompt back. */
+			speak(play_name);
+			play_name[0] = 0;
+		}
 		ready = 1;
 		if (line_waits) {
 			line_waits = 0;
 			key('\r'); /* the line typed while CodeJr was busy */
 		}
+		break;
+	case CJP_PLAY:
+		if (f->len && f->len < sizeof play_name) {
+			memcpy(play_name, f->payload, f->len);
+			play_name[f->len] = 0;
+		}
+		break;
+	case CJP_VOICE:
+		voice_on = f->len && f->payload[0];
 		break;
 	case CJP_TEMP:
 		memcpy(s, f->payload, f->len);
@@ -581,9 +612,10 @@ static void handle(const cjp_frame *f)
 		}
 		break;
 	case CJP_STATUS:
-		memcpy(s, f->payload, f->len);
-		s[f->len] = 0;
-		scr_status(s);
+		memcpy(server_status, f->payload, f->len);
+		server_status[f->len] = 0;
+		if (!more_shown)
+			scr_status(server_status);
 		break;
 	case CJP_CLEAR:
 		scr_clear_transcript();
@@ -885,6 +917,10 @@ static int local_line(const char *s)
 		return 1;
 	}
 	menu = 0;
+	if (!stricmp(s, "/exit") || !stricmp(s, "/quit") || !stricmp(s, "/bye")) {
+		hang_up();
+		return 1;
+	}
 	if (strnicmp(s, "/run", 4) != 0 || (s[4] && s[4] != ' '))
 		return 0;
 	s += 4;
@@ -936,9 +972,115 @@ static void echo_line(const char *s)
 	scr_putc('\n', 0x0E);
 }
 
+/* Keeps the status bar honest about paging: "-- More --" while new lines
+ * wait below the view, the server's status otherwise. */
+static void show_more(void)
+{
+	long n = scr_following() ? 0 : scr_unread();
+	char s[80];
+
+	if (n == more_lines)
+		return;
+	more_lines = n;
+	if (n > 0) {
+		sprintf(s, "-- More -- %ld new line%s.  Space: next page   PgUp/PgDn, arrows: scroll",
+		        n, n == 1 ? "" : "s");
+		scr_status(s);
+		more_shown = 1;
+	} else if (!scr_following()) {
+		scr_status("Scrolled back.  PgDn or End returns to the latest.");
+		more_shown = 1;
+	} else if (more_shown) {
+		scr_status(server_status);
+		more_shown = 0;
+	}
+}
+
+/* Plays a clip with SAY.EXE. SAY's own messages go to NUL: CodeJr owns
+ * the screen. A key stops the speech. The serial line is quiet by then
+ * (the server sends PLAY just before READY, or we are hanging up). */
+static void speak(const char *clip)
+{
+	int nul, out, err;
+
+	if (access(clip, 0) != 0 || access("SAY.EXE", 0) != 0)
+		return;
+	scr_status("Speaking...  (a key stops it)");
+	more_shown = 0;
+	nul = open("NUL", O_WRONLY);
+	out = dup(1);
+	err = dup(2);
+	if (nul >= 0) {
+		dup2(nul, 1);
+		dup2(nul, 2);
+	}
+	{
+		/* Up to two options from SAY= (e.g. /H in DOSBox). */
+		char o[sizeof say_opts], *o2;
+		const char *args[6];
+		int n = 0;
+		strcpy(o, say_opts);
+		args[n++] = "SAY.EXE";
+		args[n++] = "/Q";
+		if (o[0]) {
+			args[n++] = o;
+			if ((o2 = strchr(o, ' ')) != NULL) {
+				*o2++ = 0;
+				args[n++] = o2;
+			}
+		}
+		args[n++] = clip;
+		args[n] = NULL;
+		spawnv(P_WAIT, "SAY.EXE", args);
+	}
+	if (nul >= 0) {
+		dup2(out, 1);
+		dup2(err, 2);
+		close(nul);
+	}
+	close(out);
+	close(err);
+	scr_status(server_status);
+	cursor_dirty = 1;
+}
+
+/* Hangs up at once, saying so. */
+static void hang_up(void)
+{
+	note("Hanging up...");
+	scr_status("Hanging up...");
+	more_shown = 0;
+	if (voice_on)
+		speak("VOICE\\BYE.SND");
+	queue(CJP_BYE, NULL, 0);
+	start_quit();
+}
+
 static void key(unsigned k)
 {
 	unsigned char ch = (unsigned char)k;
+	unsigned scan = k >> 8;
+
+	/* Scrolling and paging keys first. */
+	if (ch == 0 || ch == 0xE0) {
+		switch (scan) {
+		case 0x49: scr_scroll(-(BOTTOM_ROWS - 1)); show_more(); return; /* PgUp */
+		case 0x51: scr_scroll(BOTTOM_ROWS - 1); show_more(); return;    /* PgDn */
+		case 0x48: scr_scroll(-1); show_more(); return;                 /* Up */
+		case 0x50: scr_scroll(1); show_more(); return;                  /* Down */
+		case 0x4F: scr_scroll(100000L); show_more(); return;            /* End */
+		}
+	}
+	if (!scr_following() && scr_unread() > 0 && k != 0x2D00) {
+		/* -- More --: Space (or Enter on an empty line) shows the next
+		 * page; any other key also shows it, then does its own job. */
+		scr_page();
+		show_more();
+		if (ch == ' ' && input_len == 0)
+			return;
+		if (ch == '\r' && input_len == 0)
+			return;
+	}
 
 	if (k == 0x1F00) { /* Alt-S: connection counters, into the history */
 		char c[100];
@@ -947,14 +1089,15 @@ static void key(unsigned k)
 		if (last_file[0])
 			note(last_file);
 	} else if (k == 0x2D00) { /* Alt-X */
-		queue(CJP_BYE, NULL, 0);
-		start_quit();
+		hang_up();
 	} else if (ch == '\r') {
 		if (input_len && !ready) {
 			/* Never drop it: it goes as soon as CodeJr is ready. */
 			line_waits = 1;
 			scr_status("Your line goes as soon as CodeJr is ready.");
 		} else if (input_len) {
+			scr_mark_input();
+			show_more();
 			if (ui)
 				echo_line(input);
 			if (!local_line(input)) {
@@ -990,6 +1133,12 @@ static int read_cfg(char *dial, int size)
 	if (!f)
 		return 0;
 	while (fgets(line, sizeof line, f)) {
+		if (strncmp(line, "SAY=", 4) == 0) {
+			char *e = line + strlen(line);
+			while (e > line && (e[-1] == '\n' || e[-1] == '\r' || e[-1] == ' '))
+				*--e = 0;
+			strncpy(say_opts, line + 4, sizeof say_opts - 1);
+		}
 		if (strncmp(line, "DIAL=", 5) == 0) {
 			char *e = line + strlen(line);
 			while (e > line && (e[-1] == '\n' || e[-1] == '\r' || e[-1] == ' '))
@@ -1118,7 +1267,14 @@ int main(int argc, char **argv)
 		case 's': shot = a + 3; break;
 		}
 	}
-	if (!host[0] && !read_cfg(host, sizeof host)) {
+	{
+		/* CODEJR.CFG: the address to dial (unless /D gave one) and SAY=. */
+		char dial[64];
+		int have = read_cfg(dial, sizeof dial);
+		if (!host[0] && have)
+			strcpy(host, dial);
+	}
+	if (!host[0]) {
 		printf("CODEJR: no server to dial. Use /D:host:port or put DIAL=host:port\n"
 		       "in C:\\CODEJR\\CODEJR.CFG\n");
 		return 1;
@@ -1149,7 +1305,7 @@ int main(int argc, char **argv)
 	}
 
 	cjp_init(&link, link_write, link_now, NULL, 2 * TICKS_PER_SEC);
-	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1 dirs=1 delta=1", line_baud);
+	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1 dirs=1 delta=1 voice=1", line_baud);
 	queue(CJP_HELLO, hello, (unsigned)strlen(hello));
 	scr_status("Connecting...");
 
@@ -1176,6 +1332,7 @@ int main(int argc, char **argv)
 			key('\r');
 			sent_auto = 1;
 		}
+		show_more();
 		pump_report();
 		flush_queue();
 		cjp_tick(&link);

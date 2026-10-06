@@ -5,6 +5,17 @@ raw=$(cat)
 # Keep the whole prompt for tests to check; one line of it goes in the reply.
 printf '%s' "$raw" > .lastprompt
 prompt=$(printf '%s' "$raw" | tr '\n' ' ' | sed 's/["\\]//g')
+if [ "$prompt" = "long" ]; then
+	# A reply longer than the screen, one line per delta.
+	echo '{"type":"system","subtype":"init","session_id":"fake-session"}'
+	i=1
+	while [ $i -le 60 ]; do
+		echo '{"type":"stream_event","event":{"type":"content_block_delta","delta":{"type":"text_delta","text":"line '$i'\n"}}}'
+		i=$((i + 1))
+	done
+	echo '{"type":"result","subtype":"success","session_id":"fake-session","is_error":false,"result":"ok"}'
+	exit 0
+fi
 if [ "$prompt" = "stream" ]; then
 	# Claude streams replies a few characters at a time.
 	echo '{"type":"system","subtype":"init","session_id":"fake-session"}'

@@ -51,6 +51,7 @@ func main() {
 	location := flag.String("location", "", `where the PCjr is, told to Claude (e.g. "Encinitas, CA 92024")`)
 	linkLog := flag.String("linklog", "", "append a timeline of native protocol frames to this file (diagnostics)")
 	trace := flag.String("trace", "", "append everything sent to callers to this file (for debugging the screen)")
+	speech := flag.String("speech", "auto", `speech converter for /voice (speech/mksnd.py); "auto" finds it in the repo, "" turns voice off`)
 	flag.Parse()
 
 	_, portStr, err := net.SplitHostPort(*listen)
@@ -84,6 +85,9 @@ func main() {
 	if err := ws.SeedHave(); err != nil {
 		log.Print(err)
 	}
+	if cfg := speechTool(*speech); cfg != "" {
+		go session.EnsureCannedClips(cfg, dir, log.Printf)
+	}
 	if err := ws.Provide(session.ProgFiles()); err != nil {
 		log.Fatal(err)
 	}
@@ -101,6 +105,7 @@ func main() {
 		Baud:      *baud,
 		Port:      port,
 		COM:       strings.ToUpper(*com),
+		Speech:    speechTool(*speech),
 		Location:  *location,
 		LinkLog:   *linkLog,
 		Claude: claude.Config{
@@ -114,10 +119,14 @@ func main() {
 		},
 	}
 	scrdump, _ := os.ReadFile(filepath.Join(repoDir(), "client", "SCRDUMP.EXE"))
+	sayExe, _ := os.ReadFile(filepath.Join(repoDir(), "speech", "SAY.EXE"))
 	if err := ws.Provide(map[string][]byte{
 		"JRGFX/JRGFX.H": jrgfxHeader(),
 		// /run captures the screen with it after a program ends.
 		"SCRDUMP.EXE": scrdump,
+		// /voice plays clips with it; the repo's build matches the clips
+		// the converter makes (nil, and skipped, if it isn't built).
+		"SAY.EXE": sayExe,
 	}); err != nil {
 		log.Print(err)
 	}
@@ -233,4 +242,16 @@ func jrgfxHeader() []byte {
 		return nil
 	}
 	return b
+}
+
+// speechTool resolves the -speech flag.
+func speechTool(f string) string {
+	if f != "auto" {
+		return f
+	}
+	p := filepath.Join(repoDir(), "speech", "mksnd.py")
+	if _, err := os.Stat(p); err != nil {
+		return ""
+	}
+	return p
 }

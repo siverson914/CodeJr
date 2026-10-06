@@ -22,7 +22,7 @@ printf '@ECHO OFF\r\nIF NOT EXIST C:\\CODEJR\\NUL MD C:\\CODEJR\r\nIF NOT EXIST 
 rm -f c/EXITED.TXT
 
 mkdir -p "$tmp/ws"
-../server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -trace "$tmp/trace.bin" > "$tmp/server.log" 2>&1 &
+../server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "" -trace "$tmp/trace.bin" > "$tmp/server.log" 2>&1 &
 sp=$!
 sleep 0.5
 HEADLESS=1 PORT=$port AUTOEXEC=AUTO ./run.sh > "$tmp/dosbox.log" 2>&1 &

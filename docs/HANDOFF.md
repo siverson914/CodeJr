@@ -72,22 +72,28 @@ There are two ways in from the PCjr, and the server tells them apart by itself:
 
 **Client 1.0, changes only:** the server keeps an exact copy of what it last sent of each file (`.codejr/have/`, seeded at startup from files the PCjr already has) and, for clients that say `delta=1`, sends an edit script instead of the whole file when the script is under 70% of the file's compressed size (`cjp.Delta`: copy ranges from the old file plus new bytes, found with a rolling hash, so shifted code still matches). The `DeltaOffer` carries the old copy's size and CRC; the client checks them, replays the script into `CJPULL.$$$` and checks the new file's size and CRC before replacing anything. If its copy differs it says so and the server sends the file whole. Measured on `JRFLIGHT.EXE` with a one-line code change: 45 KB of the 97 KB file changed, yet the script was 4.4 KB on the line instead of 64 KB.
 
+**Client 1.1, scrollback and paging:** the transcript is a view of a 200-line scrollback buffer in far memory (`screen.c`). After a page of new lines since the user's last line, the view holds and the status bar says `-- More -- N new lines`; the client keeps receiving and acking, so the next page is already in memory when Space is pressed. PgUp/PgDn, the arrows and End scroll. Alt-X and `/exit` (also `/quit`, `/bye`) are handled by the client: "Hanging up..." appears at once.
+
+**Client 1.2, `/voice`:** toggles a workspace flag. While on, Claude is told to answer in a sentence or two, and after each reply the server runs the speech project's converter (`speech/mksnd.py --text ... --quality fast`: gipity's neural voice, 2-bit ADPCM at 4 kHz, about 0.9 KB per second of speech) into `VOICE/REPLY.SND`, syncs it, and sends `Play`. The client plays it on `READY` (the line is quiet then) by running `SAY.EXE` as a child program with its output sent to NUL, so CodeJr stays connected and keeps its screen; a key stops the speech. Fixed clips `VOICE\ON.SND`, `OFF.SND`, `BYE.SND` are made once in the background at server start; `/exit` plays `BYE` with voice on. Measured at the earlier low preset: a 2.4 s clip took 3.7 s to make and was 5 KB; fast is under half that. The server also provides the repo's `speech/SAY.EXE`, so the player matches the clips. `SAY=` in `CODEJR.CFG` passes up to two options to SAY (the tests use `/H /X`: DOSBox needs `/H`). SAY's code is not linked into the client on purpose: running SAY.EXE picks up the speech session's improvements with no client change.
+
 ## First things to test on the real PCjr
 
 Ask Steve to do these in order and send the `[client]` line or a photo each time.
 
-1. **Get 1.0:** connect with `CODEJR`; it downloads by itself (plus the JRAI files, about 3.5 minutes). Hang up and call again so 1.0 runs.
-2. **The UI:** your line appears at once, a spinner turns where the prompt goes, "CodeJr is thinking..." shows until the reply. Type a line while it's busy: it should wait and go by itself.
-3. **A C program, start to finish:** ask "write a bouncing ball in C with JRGFX in a BALL folder, test it, then I'll run it". Watch for `[builds BALL]` and `[tests BALL.EXE in the emulator]`, then `/run ball`.
-4. **Run report:** after the program ends and CodeJr calls back, ask "how did that go?". CodeJr should know what was on the screen and whether it failed.
-5. **Transfer timing:** after a file over 4 KB, the second line shows waiting, receiving, gap, unpacking and disk times. Send a photo of one for `JRAI.EXE` or a game.
-6. **Changes only:** after CodeJr rebuilds a program you already have, the line should read "sent N bytes of changes".
-7. **Run the games:** `JRDOOM` and `JRFLIGHT`. Check keyboard, sound, colors and speed. Both take `/BENCH`, `/PROF` and `/DEMO:n` and write `LOG.TXT`. To get a log back, use the Kermit path: `CJKERMIT`, then `/get LOG.TXT` (the native client can't upload yet).
-8. **Risky graphics paths:** `JRFLIGHT /LD` (hardware 160x100 mode, never displayed anywhere), and 320x200 mode in `lib/DEMO.EXE` (this PCjr reserves only 16 KB of video memory; the library claims its own block).
-9. **Typing in the native client while text arrives:** do letters get lost? Alt-S prints the client's loss counters into the chat.
-10. **Speech timing.** SAY 1.1-1.4's `/T` froze the PCjr (power-off needed): never run `/T` from those versions. With SAY 1.5: `SAY /T HELLOH` (chipmunk; the line to note is "chip clips up to about N Hz should keep up here"), then `SAY /V HELLO` (9.3 kHz) and `SAY /V HELLO10` (10.65 kHz). Want: late 0 and a speed matching "wanted". Then re-make the clips at the highest rate with some margin below the `/T` figure (`mksnd.py --hz`, then make it the default in `METHODS`). If `SAY` hangs or makes no sound with polling but `SAY /H HELLO` works, the poll command misbehaves on this 8259: say so in the journal.
-11. **Quality presets (SAY 1.3).** `SAY /V HELLOH` (high: raw 10.7 kHz), `SAY /V HELLOM` (medium: 4-bit ADPCM, 8 kHz), `SAY /V HELLOL` (low: 3-bit ADPCM, 6 kHz). Want late 0 on all three, especially high; note each "decoded ADPCM" time. If high is late, lower its rate in `QUALITY` in `speech/mksnd.py`.
-12. **Tighter clips (SAY 1.6).** `REPLYV6`, `REPLYV5`, `REPLYV4`, `REPLYV3` (2-bit at 6/5/4/3 kHz, new pipeline) against the old `REPLY5`/`REPLY4`/`REPLY3`, and `REPLYL6` (3-bit, 6 kHz). Ask for the lowest rate that still sounds acceptable: that sets voice mode's preset.
+1. **Get 1.2:** connect with `CODEJR`; it downloads by itself. Hang up and call again so 1.2 runs.
+2. **Paging:** ask for something long ("tell me a long story"). It should stop at `-- More --`; Space shows the next page at once. PgUp/PgDn scroll back (on the PCjr keyboard these may need the Fn key).
+3. **`/voice`:** "Voice on" should play right away; then ask a question: text first, speech a few seconds later; a key stops it. `/exit` should say goodbye.
+4. **The UI:** your line appears at once, a spinner turns where the prompt goes, "CodeJr is thinking..." shows until the reply. Type a line while it's busy: it should wait and go by itself.
+5. **A C program, start to finish:** ask "write a bouncing ball in C with JRGFX in a BALL folder, test it, then I'll run it". Watch for `[builds BALL]` and `[tests BALL.EXE in the emulator]`, then `/run ball`.
+6. **Run report:** after the program ends and CodeJr calls back, ask "how did that go?". CodeJr should know what was on the screen and whether it failed.
+7. **Transfer timing:** after a file over 4 KB, the second line shows waiting, receiving, gap, unpacking and disk times. Send a photo of one for `JRAI.EXE` or a game.
+8. **Changes only:** after CodeJr rebuilds a program you already have, the line should read "sent N bytes of changes".
+9. **Run the games:** `JRDOOM` and `JRFLIGHT`. Check keyboard, sound, colors and speed. Both take `/BENCH`, `/PROF` and `/DEMO:n` and write `LOG.TXT`. To get a log back, use the Kermit path: `CJKERMIT`, then `/get LOG.TXT` (the native client can't upload yet).
+10. **Risky graphics paths:** `JRFLIGHT /LD` (hardware 160x100 mode, never displayed anywhere), and 320x200 mode in `lib/DEMO.EXE` (this PCjr reserves only 16 KB of video memory; the library claims its own block).
+11. **Typing in the native client while text arrives:** do letters get lost? Alt-S prints the client's loss counters into the chat.
+12. **Speech timing.** SAY 1.1-1.4's `/T` froze the PCjr (power-off needed): never run `/T` from those versions. With SAY 1.5: `SAY /T HELLOH` (chipmunk; the line to note is "chip clips up to about N Hz should keep up here"), then `SAY /V HELLO` (9.3 kHz) and `SAY /V HELLO10` (10.65 kHz). Want: late 0 and a speed matching "wanted". Then re-make the clips at the highest rate with some margin below the `/T` figure (`mksnd.py --hz`, then make it the default in `METHODS`). If `SAY` hangs or makes no sound with polling but `SAY /H HELLO` works, the poll command misbehaves on this 8259: say so in the journal.
+13. **Quality presets (SAY 1.3).** `SAY /V HELLOH` (high: raw 10.7 kHz), `SAY /V HELLOM` (medium: 4-bit ADPCM, 8 kHz), `SAY /V HELLOL` (low: 3-bit ADPCM, 6 kHz). Want late 0 on all three, especially high; note each "decoded ADPCM" time. If high is late, lower its rate in `QUALITY` in `speech/mksnd.py`.
+14. **Tighter clips (SAY 1.6).** `REPLYV6`, `REPLYV5`, `REPLYV4`, `REPLYV3` (2-bit at 6/5/4/3 kHz, new pipeline) against the old `REPLY5`/`REPLY4`/`REPLY3`, and `REPLYL6` (3-bit, 6 kHz). Ask for the lowest rate that still sounds acceptable: that sets voice mode's preset.
 
 ## How to work in this repo
 
@@ -149,6 +155,10 @@ just deploy-speech HELLO READY  # queue SAY.EXE and clips (NAME.SNP for a PWM ve
 - **jr-IDE Rev.B** card: disk, memory to 640K (JRCONFIG 3.10), and a DS12885 clock that was never set. `JRIDERTC` misparses options unless both groups are given: use `JRIDERTC /D /O`. The `AUTOEXEC.BAT` line still says `/D` and errors at boot.
 - **Video:** only 16 KB of video memory is reserved (segment 1C00h). 320x200x16 needs 32 KB and the BIOS would put it over DOS memory; `lib` claims its own block. `INT 9` on the PCjr is a software interrupt with the scan code in AL.
 - Addresses: PCjr modem 192.168.0.119, laptop 192.168.0.178 (docked ethernet), port 4860 (`ufw` allows the LAN).
+
+### The laptop's network (fixed 2026-10-05)
+
+- **The first message of a call took about 50 seconds** (since day 1, on both paths). A packet capture showed why: the docked laptop is on the LAN twice, ethernet (192.168.0.178, the address the modem dials) and WiFi (192.168.0.156). Linux answers ARP for any of its addresses on any interface, so the modem sometimes sent to the WiFi card while the server answered over ethernet; after a few idle seconds the WiFi side swallowed the modem's packets until the modem asked again about 45 s later. Fix: `net.ipv4.conf.all.arp_ignore=1` and `arp_announce=2` in `/etc/sysctl.d/90-codejr-arp.conf`. Turning the laptop's WiFi off while docked also works. `tcpdump` is now installed for the next time (`sudo tcpdump -i any -n port 4860 -w /tmp/cj.pcap`).
 
 ### The WiFi modem (Zimodem)
 

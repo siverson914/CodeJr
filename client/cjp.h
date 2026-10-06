@@ -29,6 +29,8 @@
 #define CJP_TEMP        0x0F /* server: a line erased by the next text */
 #define CJP_RESULT      0x10 /* client: a /run report: 'B' name, 'D' text, 'E' */
 #define CJP_DELTAOFFER  0x11 /* like FILEOFFER; the chunks are an edit script */
+#define CJP_PLAY        0x12 /* server: play this clip (SAY.EXE) when the reply is done */
+#define CJP_VOICE       0x13 /* server: voice on (1) or off (0) */
 
 /* Types from CJP_DATAGRAM up carry no sequence number and are never
  * acknowledged. The file pull protocol uses them (pull.h). */

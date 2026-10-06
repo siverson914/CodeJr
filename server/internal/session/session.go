@@ -26,6 +26,7 @@ type Config struct {
 	Location  string // where the PCjr is, for Claude (optional)
 	LinkLog   string // native protocol event timeline, for diagnosis (optional)
 	COM       string // Kermit port name written by /setup (default COM2)
+	Speech    string // speech/mksnd.py, for /voice ("" turns voice off)
 }
 
 type session struct {

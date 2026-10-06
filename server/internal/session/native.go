@@ -40,10 +40,13 @@ type native struct {
 	baud    int // the serial speed the client reported
 	// The client echoes typed lines itself and takes Ready and Temp
 	// messages (it said ui=1 in its HELLO).
-	ui    bool
-	temp  bool // a Temp line is showing
-	dirs  bool // the client makes project folders (dirs=1)
-	delta bool // the client applies edit scripts (delta=1)
+	ui       bool
+	temp     bool            // a Temp line is showing
+	dirs     bool            // the client makes project folders (dirs=1)
+	delta    bool            // the client applies edit scripts (delta=1)
+	voice    bool            // the client plays clips (voice=1)
+	reply    strings.Builder // this turn's reply text, to speak
+	playNext string          // a clip to play once this turn's files are over
 	// A run report arriving from the client (Result messages).
 	result     strings.Builder
 	resultName string
@@ -106,9 +109,10 @@ func (s *session) native() {
 	if s.ws.Session() != "" {
 		n.print(cjp.StyleNote, "Continuing your last conversation. /new starts a fresh one.\n")
 	}
-	n.status("Ready.  Enter sends,  /help for commands,  Alt-X quits.")
+	n.status("Ready.  Enter sends,  /help for commands,  /exit quits.")
 	n.sync()
 	n.sendPending()
+	n.sendVoiceState()
 	n.ready()
 
 	for {
@@ -161,6 +165,9 @@ func (n *native) hello(h string) {
 		}
 		if f == "delta=1" {
 			n.delta = true
+		}
+		if f == "voice=1" {
+			n.voice = true
 		}
 		if v, ok := strings.CutPrefix(f, "baud="); ok {
 			if b, err := strconv.Atoi(v); err == nil && b >= 300 && b <= 115200 {
@@ -338,11 +345,14 @@ func (n *native) submit(line string) bool {
 		n.print(cjp.StyleUser, "> "+line+"\n")
 	}
 	n.showTemp("CodeJr is thinking...")
+	n.reply.Reset()
 	n.turn(line)
 	n.clearTemp()
 	n.endLine()
+	n.speak()
 	n.sync()
-	n.status("Ready.  Enter sends,  /help for commands,  Alt-X quits.")
+	n.playQueued()
+	n.status("Ready.  Enter sends,  /help for commands,  /exit quits.")
 	s.logf("native turn done; %s", n.link.Stats())
 	return true
 }
@@ -353,8 +363,10 @@ const nativeHelp = `Commands:
   /send NAME   send a file again
   /new         start a fresh conversation
   /run         number your programs; type a number to run one
-  /quit        hang up (or press Alt-X)
-Alt-S shows the line's error counters.
+  /voice       speak replies aloud (on/off); replies get short
+  /exit        hang up (or press Alt-X)
+Alt-S shows the line's error counters. PgUp, PgDn and the arrows scroll
+back through the chat; a long reply stops at -- More -- (Space goes on).
 `
 
 func (n *native) command(line string) bool {
@@ -402,6 +414,8 @@ func (n *native) command(line string) bool {
 		}
 		s.ws.Forget(arg)
 		n.sync()
+	case "/voice":
+		n.toggleVoice()
 	case "/quit", "/bye", "/exit":
 		n.print(cjp.StyleNote, "Bye! Hanging up.\n")
 		return false
@@ -471,6 +485,9 @@ func (n *native) runClaude(session, prompt string) error {
 	defer cancel()
 	cfg := s.cfg.Claude
 	cfg.SystemPrompt += nativeNote + contextNote(time.Now(), s.cfg.Location)
+	if n.voiceOn() {
+		cfg.SystemPrompt += voiceNote
+	}
 	events := make(chan claude.Event, 256)
 	errc := make(chan error, 1)
 	go func() {
@@ -502,6 +519,7 @@ func (n *native) runClaude(session, prompt string) error {
 			switch e.Kind {
 			case claude.Text:
 				n.print(cjp.StylePlain, e.Text)
+				n.reply.WriteString(e.Text)
 			case claude.Thinking:
 				activity = "CodeJr is thinking"
 			case claude.ToolUse:
@@ -689,3 +707,76 @@ func (w *wrapper) flushWord() string {
 }
 
 func (w *wrapper) flush() string { return w.flushWord() }
+
+// ---- voice (see voice.go) ----
+
+// voiceOn: this client plays clips, the server can make them, and the
+// user turned voice on.
+func (n *native) voiceOn() bool {
+	return n.voice && n.s.cfg.Speech != "" && n.s.ws.Flag("voice")
+}
+
+func (n *native) sendVoiceState() {
+	if !n.voice {
+		return
+	}
+	b := byte(0)
+	if n.voiceOn() {
+		b = 1
+	}
+	n.link.Send(cjp.Voice, []byte{b})
+}
+
+func (n *native) toggleVoice() {
+	s := n.s
+	if !n.voice {
+		n.print(cjp.StyleWarn, "This CODEJR.EXE can't play speech yet; it updates itself on the next call.\n")
+		return
+	}
+	if s.cfg.Speech == "" {
+		n.print(cjp.StyleWarn, "Voice isn't set up on the server (no speech converter).\n")
+		return
+	}
+	on := !s.ws.Flag("voice")
+	s.ws.SetFlag("voice", on)
+	n.sendVoiceState()
+	clip := "OFF"
+	if on {
+		clip = "ON"
+		n.print(cjp.StyleNote, "Voice on: replies are spoken too, and kept to a sentence or two.\n")
+	} else {
+		n.print(cjp.StyleNote, "Voice off.\n")
+	}
+	n.sync() // the fixed clips, if the PCjr doesn't have them yet
+	n.queuePlay(VoiceDir + `\` + clip + ".SND")
+	n.playQueued()
+}
+
+// speak turns this turn's reply into VOICE\REPLY.SND, if voice is on.
+func (n *native) speak() {
+	text := spokenText(n.reply.String())
+	if !n.voiceOn() || text == "" {
+		return
+	}
+	n.status("Making speech...")
+	start := time.Now()
+	if err := MakeClip(context.Background(), n.s.cfg.Speech, n.s.ws.Dir, "REPLY", text); err != nil {
+		n.s.logf("voice: %v", err)
+		n.print(cjp.StyleWarn, "(Couldn't make speech for that reply.)\n")
+		return
+	}
+	n.s.logf("voice: made the reply clip in %s (%d characters)", time.Since(start).Round(100*time.Millisecond), len(text))
+	n.queuePlay(VoiceDir + `\REPLY.SND`)
+}
+
+func (n *native) queuePlay(name string) { n.playNext = name }
+
+// playQueued tells the client to play the waiting clip; it does so when
+// the turn ends (READY), when the line is quiet.
+func (n *native) playQueued() {
+	if n.playNext != "" && n.voice {
+		n.sendPending()
+		n.link.Send(cjp.Play, []byte(n.playNext))
+	}
+	n.playNext = ""
+}

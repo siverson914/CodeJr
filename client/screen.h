@@ -20,6 +20,14 @@ void scr_clear_transcript(void);
 /* A transient line ("CodeJr is thinking"), erased by the next character. */
 void scr_temp(const char *s, unsigned char attr);
 int scr_col(void); /* transcript column on the bottom row */
+/* Scrollback and paging: after a page of new lines since the user's last
+ * line (or the last page), the view holds and new text waits in the
+ * buffer. */
+long scr_unread(void);       /* lines below the view */
+int scr_following(void);     /* the view tracks the end */
+void scr_page(void);         /* show the next page */
+void scr_scroll(long delta); /* PgUp/PgDn: move the view */
+void scr_mark_input(void);   /* the user sent a line: count from here */
 
 void scr_status(const char *s);   /* replaces the status bar */
 void scr_input(const char *s, int prompt); /* input line; "> " only if prompt */
