@@ -26,8 +26,10 @@ const voiceNote = `
 
 Voice is on: your reply is also spoken aloud on the PCjr, and audio is
 slow to send over its modem. Answer in one or two short sentences (under
-25 words) unless the user asks for more. Plain words only: no lists,
-symbols or code in the reply.`
+25 words), whatever the question, unless the user asks for more detail.
+Plain words only: no lists or code in the reply. Write names and numbers
+as usual (PCjr, 2 + 2 = 4); they are spelled out for the voice
+automatically.`
 
 // cannedClips are made once and kept; the client plays them from disk.
 var cannedClips = map[string]string{

@@ -754,7 +754,9 @@ func (n *native) toggleVoice() {
 
 // speak turns this turn's reply into VOICE\REPLY.SND, if voice is on.
 func (n *native) speak() {
-	text := spokenText(n.reply.String())
+	// The screen keeps the reply as written; the voice gets it spelled out
+	// ("PCjr" as "PC Junior", "=" as "equals").
+	text := Speakable(spokenText(n.reply.String()))
 	if !n.voiceOn() || text == "" {
 		return
 	}
