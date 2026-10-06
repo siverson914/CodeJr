@@ -12,7 +12,7 @@
   mksnd.py clips/HELLO.mp3 --hz 9322 --codec raw -o X   any rate and codec
 
 Writes OUT.SND (method 1: the SN76496's three voices as one DAC, at the
---quality preset: high by default) and OUT-chip.wav, a preview of how it
+--quality preset: medium by default) and OUT-chip.wav, a preview of how it
 should sound. With
 --method pwm or both, also OUT.SNP (PWM on PIT channel 2, 15.9 kHz) and
 OUT-pwm.wav. On the real PCjr the chip method sounded best and PWM
@@ -42,14 +42,16 @@ VOICES = {
 }
 DEFAULT_VOICE = "brian"  # Steve's pick, 2026-10-05
 
-# Speech quality presets (Steve's picks from the grid, 2026-10-04):
+# Speech quality presets. Medium is the one used for everything (clips and
+# /voice): Steve's decision after hearing all four on the real PCjr,
+# 2026-10-05, "no switching". The others stay for experiments.
 # (chip sample rate, codec). The rate becomes a PIT divisor, so the real
 # rates are 10653, 8008 and 5996 Hz.
 QUALITY = {
     "high": (10653, "raw"),     # 10.7 KB/s of speech, cleanest
     "medium": (8008, "adpcm4"),  # 4.0 KB/s
     "low": (5996, "adpcm3"),     # 2.2 KB/s, arrives faster than it plays at 2.6 KB/s
-    "fast": (4004, "adpcm2"),    # 0.9 KB/s with pauses skipped; Steve's pick for /voice
+    "fast": (4004, "adpcm2"),    # 0.9 KB/s with pauses skipped
 }
 
 METHODS = {
@@ -620,7 +622,7 @@ def main():
                     " audio file's .txt twin, as in clips/)")
     ap.add_argument("--method", choices=["chip", "pwm", "both"], default="chip",
                     help="chip (default: it won on the real PCjr), pwm (whines), or both")
-    ap.add_argument("--quality", choices=list(QUALITY), default="high",
+    ap.add_argument("--quality", choices=list(QUALITY), default="medium",
                     help="chip preset: high (raw, 10.7 kHz), medium (4-bit ADPCM, 8 kHz),"
                     " low (3-bit ADPCM, 6 kHz) or fast (2-bit ADPCM, 4 kHz); --hz and"
                     " --codec override it")

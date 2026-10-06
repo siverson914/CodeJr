@@ -165,10 +165,10 @@ deploy-jrai: jrai
     @echo "queued: sent on the PCjr's next connection"
 
 # ---- speech ---------------------------------------------------------------
-# Speech quality for the tasks below: high (raw, 10.7 kHz), medium (4-bit
-# ADPCM, 8 kHz) or low (3-bit ADPCM, 6 kHz). SPEECH_QUALITY=low just ...
+# Speech quality for the tasks below. Medium (4-bit ADPCM, 8 kHz) is the one
+# setting for everything; SPEECH_QUALITY=high|low|fast is for experiments.
 
-speech_quality := env_var_or_default("SPEECH_QUALITY", "high")
+speech_quality := env_var_or_default("SPEECH_QUALITY", "medium")
 
 # Build SAY.EXE, the PCjr speech player
 say:

@@ -23,7 +23,9 @@ just deploy-speech HELLO READY            # queue SAY.EXE and clips for the PCjr
 ```
 
 **Quality presets.** `mksnd.py --quality` and the `just` tasks
-(`SPEECH_QUALITY=low just speech`) pick one of four. High is the default; fast is what `/voice` will use.
+(`SPEECH_QUALITY=low just speech`) pick one of four. **Medium is the one setting for everything**, stock
+clips and `/voice` alike, with no switching: Steve's decision on the real
+PCjr (2026-10-05). The other three stay for experiments.
 
 | Preset | Rate | Codec | Per second of speech | A 9.6 s reply waits |
 |---|---|---|---|---|

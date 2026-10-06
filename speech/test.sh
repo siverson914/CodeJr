@@ -17,7 +17,7 @@ cd "$(dirname "$0")"
 t=$(mktemp -d)
 trap 'rm -rf "$t"' EXIT
 mkdir -p "$t/c"
-./mksnd.py clips/FRIENDS.mp3 --method both -o "$t/c/FRIENDS" >/dev/null	# high quality
+./mksnd.py clips/FRIENDS.mp3 --method both --quality high -o "$t/c/FRIENDS" >/dev/null
 ./mksnd.py clips/FRIENDS.mp3 --quality medium -o "$t/c/FRIM" >/dev/null
 ./mksnd.py clips/FRIENDS.mp3 --quality low -o "$t/c/FRIL" >/dev/null
 ./mksnd.py clips/REPLY.mp3 --hz 4004 --codec adpcm2 --no-text -o "$t/c/REP4" >/dev/null	# pauses as records
