@@ -13,18 +13,18 @@ rendered by `games/jrai/render.py`, which emulates the SN76496.
 
 ## The show
 
-The song is 38 patterns of 1.87 s (see `music.h`), and the pictures follow it:
+The song is 17 patterns of 1.87 s, about 32 seconds (see `music.h`), and the pictures follow it. It was 38 patterns at first; Steve asked for a shorter run that moves through everything faster, with less text in the scroller.
 
 | Patterns | Music | Pictures |
 |---|---|---|
-| 0-3 | intro, arpeggios, no drums | fade in, the cube turns slowly, the grid creeps |
-| 4-11 | groove: kick, snare, octave bass; the hook at 8 | the orb flares on every kick, the grid lines flash on the snares |
-| 12-19 | second melody, a crash every 2 patterns | the cube morphs: octahedron, back, tetrahedron, back. The floor flashes on each crash |
-| 20-21 | build, snare roll | the solid glides away into the distance |
-| 22-29 | the drop | a glass floor reflects it, the grid runs twice as fast, the spin speeds up, and it morphs to a cuboctahedron and back twice |
-| 30-31 | crash, a noise sweep, drums stop | the cube bursts into its six faces; they tumble, each casting its own shadow |
-| 32-33 | riser | the faces fly back together, landing on the crash at 34 |
-| 34-37 | the hook, then it rings out | glass floor again, fade out; the show loops |
+| 0-1 | intro, arpeggios, no drums | fade in, the cube turns slowly, the grid creeps |
+| 2-3 | groove: kick, snare, octave bass, the hook | the orb flares on every kick, the grid lines flash on the snares |
+| 4-7 | second melody, a crash on each | the cube morphs: octahedron, back, tetrahedron, back, a pattern each way |
+| 8 | build, snare roll | the solid glides away into the distance |
+| 9-12 | the drop | a glass floor reflects it, the grid runs twice as fast, the spin speeds up, it morphs to a cuboctahedron and back, and glides home |
+| 13 | crash, a noise sweep | the cube bursts into its six faces; they tumble, each casting its own shadow |
+| 14 | riser | the faces fly back together |
+| 15-16 | the hook, then it rings out | glass floor again, fade out; the show loops |
 
 ## Run it
 
@@ -79,7 +79,7 @@ should look. **Only the real PCjr will tell whether it works.**
 ```sh
 demos/cube/build.sh            # JRCUBE.EXE (cube.c, music.c, shapes.c, lib/jrgfx.lib)
 python3 demos/cube/genshape.py > demos/cube/shapes.c   # after changing the shapes
-demos/cube/shots.sh 100        # shots/jrcube.gif (from pattern 12) and shots/frame.png
+demos/cube/shots.sh 100        # shots/jrcube.gif (from pattern 4) and shots/frame.png
 demos/cube/video.sh            # shots/jrcube.mp4, the whole show with sound (about 10 min)
 demos/cube/musictest.sh        # shots/song.wav, the song alone
 lib/emu.sh /tmp/out 400 demos/cube/JRCUBE.EXE /BENCH:60 /PROF

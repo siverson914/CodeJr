@@ -56,6 +56,7 @@ const (
 	Play       byte = 0x12 // server: play this clip with SAY.EXE once the reply is done (voice=1)
 	Voice      byte = 0x13 // server: 1 voice on, 0 off, so the client can say goodbye (voice=1)
 	InputMore  byte = 0x14 // client: the start of a typed line too long for one frame; InputMore or Input follows
+	Info       byte = 0x15 // server: short text for the right end of the client's header ("3274 chars")
 
 	// Types from DatagramBase up are datagrams: no sequence number, no
 	// ack, delivered as they arrive. The file pull protocol uses them

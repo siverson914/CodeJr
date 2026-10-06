@@ -30,6 +30,7 @@ void scr_scroll(long delta); /* PgUp/PgDn: move the view */
 void scr_mark_input(void);   /* the user sent a line: count from here */
 
 void scr_status(const char *s);   /* replaces the status bar */
+void scr_info(const char *s);     /* right-justified in the header */
 void scr_input(const char *s, int prompt); /* input line; "> " only if prompt */
 void scr_input_off(void);                  /* no input line, no cursor: typing isn't taken */
 void scr_spin(void); /* busy: advances the spinner where the prompt goes */

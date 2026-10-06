@@ -105,12 +105,16 @@ func (s *session) native() {
 		link.Send(cjp.Hello, []byte("CODEJR/2 server"))
 	}
 
-	n.print(cjp.StyleBanner, "Welcome to CodeJr. Ask for a program and CodeJr writes it straight onto\n")
-	n.print(cjp.StyleBanner, "this PCjr, into "+ProgDir+".  Type /help for commands.\n")
+	n.print(cjp.StyleBanner, "Welcome to CodeJr. Ask me anything or let's make a program! /help for commands.\n")
 	if s.ws.Session() != "" {
-		n.print(cjp.StyleNote, "Continuing your last conversation. /new starts a fresh one.\n")
+		n.print(cjp.StyleNote, "Continuing your last conversation.\n")
+		// What CodeJr said last, so the screen picks up where it left off.
+		if chars, last := s.ws.Convo(); last != "" {
+			n.print(cjp.StylePlain, strings.TrimSpace(last)+"\n")
+			n.info(chars)
+		}
 	}
-	n.status("Ready.  Enter sends,  /help for commands,  /exit quits.")
+	n.status("Ready.")
 	n.sync()
 	n.sendPending()
 	n.sendVoiceState()
@@ -293,9 +297,21 @@ func (n *native) send(text string, style byte) {
 	}
 }
 
-// ready tells a ui client that the user can type again.
+// info puts the conversation's size at the right end of the client's
+// header (clients from 1.5; older ones ignore the frame).
+func (n *native) info(chars int) {
+	if n.ui && chars > 0 {
+		n.sendPending()
+		n.link.Send(cjp.Info, []byte(fmt.Sprintf("%d chars", chars)))
+	}
+}
+
+// ready tells a ui client that the user can type again. A blank line
+// first, so the user's next line stands apart from what came before.
 func (n *native) ready() {
 	if n.ui {
+		n.endLine()
+		n.print(n.wrap.style, "\n")
 		n.sendPending()
 		n.link.Send(cjp.Ready, nil)
 	}
@@ -476,6 +492,14 @@ func (n *native) turn(prompt string) {
 		err = n.runClaude("", prompt)
 	}
 	n.flush()
+	if err == nil {
+		// For the next call's welcome: the last reply, and how long the
+		// conversation has grown.
+		chars, _ := s.ws.Convo()
+		chars += len(prompt) + n.reply.Len()
+		s.ws.SetConvo(chars, n.reply.String())
+		n.info(chars)
+	}
 	switch {
 	case err == context.Canceled:
 		n.print(cjp.StyleWarn, "\nStopped.\n")

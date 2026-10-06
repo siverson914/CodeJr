@@ -9,8 +9,9 @@
  *   /D  server to dial (default: DIAL= line of C:\CODEJR\CODEJR.CFG)
  *   /P  BIOS serial port (default 1)
  *   /B  the modem's saved speed (default 9600)
- *   /F  switch the modem and the PCjr to this speed for the call, and back
- *       afterwards (default 37287; /F:9600 stays at the saved speed). The
+ *   /R:1  put the modem back to its saved speed and exit (before MS-Kermit)
+ *   /F  switch the modem and the PCjr to this speed, and leave them there
+ *       (default 37287; /F:9600 stays at the saved speed). The
  *       PCjr's exact speeds are 18643, 37287 and 55930. On the real PCjr,
  *       37287 is fastest: at 55930 it misses bytes.
  *   /L  set by C:\CODEJR.BAT, which runs whatever /run picked and calls
@@ -37,7 +38,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.4"
+#define VERSION "1.5"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -589,7 +590,7 @@ static void handle(const cjp_frame *f)
 			results_ok = 1;
 			start_report();
 		}
-		scr_status("Connected.  Enter sends,  Ctrl-C stops CodeJr,  Alt-X hangs up.");
+		scr_status("Connected.");
 		break;
 	case CJP_READY:
 		if (play_name[0]) {
@@ -633,6 +634,11 @@ static void handle(const cjp_frame *f)
 		break;
 	case CJP_CLEAR:
 		scr_clear_transcript();
+		break;
+	case CJP_INFO: /* the right end of the header: "3274 chars" */
+		memcpy(s, f->payload, f->len);
+		s[f->len] = 0;
+		scr_info(s);
 		break;
 	case CJP_FILEOFFER:
 		file_offer(f);
@@ -1070,7 +1076,6 @@ static void hang_up(void)
 {
 	if (quitting)
 		return;
-	note("Hanging up...");
 	queue(CJP_BYE, NULL, 0);
 	start_quit(); /* first: the input line goes before the goodbye plays */
 	scr_status("Hanging up...");
@@ -1281,13 +1286,14 @@ int main(int argc, char **argv)
 	int port = 0, i, sent_auto = 0;
 	unsigned long spun = 0;
 	long baud = 9600, fast = 37287;
+	int at_fast = 0, restore_only = 0;
 	unsigned long start;
 	char hello[64];
 
 	for (i = 1; i < argc; i++) {
 		char *a = argv[i];
 		if (a[0] != '/' || !a[1] || a[2] != ':') {
-			printf("usage: CODEJR [/D:host:port] [/P:1|2] [/B:9600] [/F:37287] [/L:1] [/T:text] [/X:secs]\n");
+			printf("usage: CODEJR [/D:host:port] [/P:1|2] [/B:9600] [/F:37287] [/L:1] [/R:1] [/T:text] [/X:secs]\n");
 			return 1;
 		}
 		switch (a[1] | 0x20) {
@@ -1295,6 +1301,7 @@ int main(int argc, char **argv)
 		case 'l': loop_mode = 1; break;
 		case 'p': port = atoi(a + 3) - 1; break;
 		case 'b': baud = atol(a + 3); break;
+		case 'r': restore_only = 1; break;
 		case 'f': fast = atol(a + 3); break;
 		case 't': auto_text = a + 3; break;
 		case 'x': exit_after = atol(a + 3); break;
@@ -1314,11 +1321,45 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	ser_open(port, baud); /* RTS stays off: see docs/JOURNAL.md */
-	scr_init("CodeJr " VERSION "  -  Claude Code for the IBM PCjr");
+	/* The modem stays at the fast speed between calls (this is the only
+	 * program that uses it; /R:1 puts it back, for MS-Kermit). So it is
+	 * probably there already: ask at that speed first. */
+	if (fast && fast != baud && !restore_only) {
+		ser_open(port, fast); /* RTS stays off: see docs/JOURNAL.md */
+		settle(1);
+		ser_puts("AT\r");
+		if (expect("OK", TICKS_PER_SEC))
+			at_fast = 1;
+		else {
+			/* once more: the last call may only just have dropped */
+			ser_puts("AT\r");
+			if (expect("OK", TICKS_PER_SEC))
+				at_fast = 1;
+		}
+		if (!at_fast) {
+			ser_set_baud(baud);
+			ser_puts("\r"); /* end whatever the modem made of that */
+			settle(4);
+		}
+	} else
+		ser_open(port, baud);
+	if (restore_only) {
+		/* CODEJR /R:1: the modem back to its saved speed, then out. It may
+		 * be at either speed. */
+		ser_puts("AT\r");
+		if (!expect("OK", TICKS_PER_SEC)) {
+			ser_set_baud(fast);
+			settle(2);
+			change_speed(fast, baud);
+		}
+		ser_close();
+		printf("CODEJR: the modem is at %ld baud.\n", baud);
+		return 0;
+	}
+	scr_init("CodeJr " VERSION);
 	start = ticks();
-	line_baud = baud;
-	if (fast && fast != baud) {
+	line_baud = at_fast ? fast : baud;
+	if (fast && fast != baud && !at_fast) {
 		char s[80];
 		sprintf(s, "Switching the modem to %ld baud...", fast);
 		scr_status(s);
@@ -1330,8 +1371,6 @@ int main(int argc, char **argv)
 		}
 	}
 	if (dial(host) != 0) {
-		if (line_baud != baud)
-			change_speed(line_baud, baud);
 		ser_close();
 		scr_done();
 		printf("CODEJR: no answer from %s\n", host);
@@ -1380,16 +1419,11 @@ int main(int argc, char **argv)
 			break;
 	}
 
-	if (line_baud != baud) {
-		/* The server hangs up after BYE; then the modem takes commands. */
-		scr_status("Putting the modem back to its usual speed...");
-		expect("NO CARRIER", 3 * TICKS_PER_SEC);
-		change_speed(line_baud, baud);
-	}
+	/* The modem keeps the fast speed: the next start finds it there and
+	 * skips the switch. (A power cycle, or CODEJR /R:1, puts it back.) */
 	ser_close();
 	if (shot)
 		scr_save(shot);
 	scr_done();
-	printf("CodeJr: hung up. Programs are in this directory.\n");
 	return 0;
 }

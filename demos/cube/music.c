@@ -6,15 +6,16 @@
  * vertical retrace interrupt, chained after the graphics library's own
  * IRQ5 handler (fx_irq_hook), so it keeps time whatever the drawing code is doing.
  *
- * Synthwave in A minor at 128.6 BPM (7 ticks a 16th). Sections (patterns):
- *   0-3   intro: slow arps, sparse bass, a soft pad from 2
- *   4-11  groove: four on the floor, octave bass, the hook (low) from 8
- *   12-19 morph: a second melody, crash at 12, 14, 16, 18
- *   20-21 build: snare roll 8ths then 16ths, rising chords, crash at 22
- *   22-29 drop: the hook up an octave, 16th bass, busiest drums
- *   30-31 explosion: crash + noise sweep, then bass and slow arps only
- *   32-33 rebuild: climbing arps over an E pedal, snare roll, crash at 34
- *   34-37 outro: the hook again, then A minor rings out and fades
+ * Synthwave in A minor at 128.6 BPM (7 ticks a 16th). 17 patterns, about
+ * 32 seconds, cut down from a 38-pattern version (Steve: shorter, move
+ * through everything faster). Sections (patterns):
+ *   0-1   intro: slow arps, then a soft pad
+ *   2-3   groove: four on the floor, octave bass, the hook
+ *   4-7   morph: a second melody, a crash on each
+ *   8     build: snare roll, rising chords
+ *   9-12  drop: the hook up an octave, 16th bass, busiest drums
+ *   13-14 explosion: crash + noise sweep, then climbing arps and a snare roll
+ *   15-16 outro: the hook again, then A minor rings out and fades
  */
 #include <dos.h>
 #include <conio.h>
@@ -126,51 +127,29 @@ typedef struct {
 
 static const ordent order[SONG_PATS] = {
 	/* intro */
-	{  0,   0,  0, 0,  0,  1, 7,  7,  0, 0 },  /*  0 */
-	{  0,   0,  0, 0,  1,  2, 7,  8,  0, 0 },  /*  1 */
-	{ 15,   0,  7, 1,  3,  1, 4,  9,  0, 0 },  /*  2 */
-	{ 16,   0,  8, 1,  4,  2, 2, 10,  0, 0 },  /*  3 */
-	/* groove */
-	{  0,   0,  0, 0,  5,  1, 1,  9, 14, 0 },  /*  4 */
-	{  0,   0,  0, 0,  6,  2, 1,  9,  1, 0 },  /*  5 */
-	{  0,   0,  0, 0,  5,  1, 1,  9,  1, 0 },  /*  6 */
-	{  0,   0,  0, 0,  6,  2, 1,  9,  2, 0 },  /*  7 */
-	{  1, -12, 11, 0,  5,  1, 1,  9,  1, 0 },  /*  8 */
-	{  2, -12, 11, 0,  6,  2, 1,  9,  1, 0 },  /*  9 */
-	{  3, -12, 11, 0,  5,  1, 1,  9,  1, 0 },  /* 10 */
-	{  4, -12, 11, 0,  6,  2, 1,  9,  2, 0 },  /* 11 */
-	/* morph */
-	{  7,   0, 10, 0,  5,  1, 1,  9,  3, 0 },  /* 12 */
-	{  8,   0, 10, 0,  6,  2, 1,  9,  4, 0 },  /* 13 */
-	{  9,   0, 10, 0,  5,  3, 1,  9,  3, 0 },  /* 14 */
-	{ 10,   0, 10, 0,  6,  4, 1,  9,  2, 0 },  /* 15 */
-	{ 11,   0, 10, 0,  9,  5, 1,  9,  3, 0 },  /* 16 */
-	{ 12,   0, 10, 0, 10,  6, 1,  9,  4, 0 },  /* 17 */
-	{ 13,   0, 10, 0,  9,  5, 1,  9,  3, 0 },  /* 18 */
-	{ 14,   0, 10, 0, 10,  6, 1,  9,  2, 0 },  /* 19 */
+	{  0,   0,  0, 0,  0,  1, 7,  7,  0, 0 },  /*  0 (0 of the long version) */
+	{ 16,   0,  8, 1,  4,  2, 2, 10,  0, 0 },  /*  1 (3 of the long version) */
+	/* groove: the hook */
+	{  1, -12, 11, 0,  5,  1, 1,  9,  1, 0 },  /*  2 (8 of the long version) */
+	{  4, -12, 11, 0,  6,  2, 1,  9,  2, 0 },  /*  3 (11 of the long version) */
+	/* morph: in and out, twice */
+	{  7,   0, 10, 0,  5,  1, 1,  9,  3, 0 },  /*  4 (12 of the long version) */
+	{  9,   0, 10, 0,  5,  3, 1,  9,  3, 0 },  /*  5 (14 of the long version) */
+	{ 11,   0, 10, 0,  9,  5, 1,  9,  3, 0 },  /*  6 (16 of the long version) */
+	{ 13,   0, 10, 0,  9,  5, 1,  9,  3, 0 },  /*  7 (18 of the long version) */
 	/* build */
-	{  0,   0,  0, 0, 11,  7, 1, 10,  5, 0 },  /* 20 */
-	{  0,   0,  0, 0, 12,  8, 1, 11,  6, 0 },  /* 21 */
+	{  0,   0,  0, 0, 12,  8, 1, 11,  6, 0 },  /*  8 (21 of the long version) */
 	/* drop */
-	{  1,   0, 12, 0,  7,  3, 1, 10,  7, 0 },  /* 22 */
-	{  2,   0, 12, 0,  8,  4, 1, 10,  8, 0 },  /* 23 */
-	{  3,   0, 12, 0,  7,  3, 1, 10,  8, 0 },  /* 24 */
-	{  4,   0, 12, 0,  8,  4, 1, 10,  8, 0 },  /* 25 */
-	{  5,   0, 12, 0,  7,  3, 1, 10,  8, 0 },  /* 26 */
-	{  2,   0, 12, 0,  8,  4, 1, 10,  8, 0 },  /* 27 */
-	{  3,   0, 12, 0,  7,  3, 1, 10,  8, 0 },  /* 28 */
-	{  6,   0, 12, 0,  8,  4, 1, 10,  9, 0 },  /* 29 */
-	/* explosion */
-	{  0,   0,  0, 0, 13,  9, 4,  9, 10, 0 },  /* 30 */
-	{  0,   0,  0, 0, 14, 10, 4,  9,  0, 0 },  /* 31 */
-	/* rebuild */
-	{  0,   0,  0, 0, 15, 11, 2,  9, 11, 0 },  /* 32 */
-	{  0,   0,  0, 0, 16, 12, 1, 11, 12, 0 },  /* 33 */
+	{  1,   0, 12, 0,  7,  3, 1, 10,  7, 0 },  /*  9 (22 of the long version) */
+	{  3,   0, 12, 0,  7,  3, 1, 10,  8, 0 },  /* 10 (24 of the long version) */
+	{  4,   0, 12, 0,  8,  4, 1, 10,  8, 0 },  /* 11 (25 of the long version) */
+	{  6,   0, 12, 0,  8,  4, 1, 10,  9, 0 },  /* 12 (29 of the long version) */
+	/* explosion, and back together */
+	{  0,   0,  0, 0, 13,  9, 4,  9, 10, 0 },  /* 13 (30 of the long version) */
+	{  0,   0,  0, 0, 16, 12, 1, 11, 12, 0 },  /* 14 (33 of the long version) */
 	/* outro */
-	{  1,   0, 12, 0,  7,  3, 1, 10,  7, 0 },  /* 34 */
-	{  2,   0, 12, 0,  8,  4, 1, 10,  8, 0 },  /* 35 */
-	{  3,   0, 12, 0,  7,  3, 1, 10,  9, 0 },  /* 36 */
-	{ 17,   0, 12, 0, 13, 13, 4, 10, 13, 1 },  /* 37 */
+	{  1,   0, 12, 0,  7,  3, 1, 10,  7, 0 },  /* 15 (34 of the long version) */
+	{ 17,   0, 12, 0, 13, 13, 4, 10, 13, 1 },  /* 16 (37 of the long version) */
 };
 
 /* parsed patterns: note+1 (1-96), 0 hold, 255 off; arp: note, major flag */

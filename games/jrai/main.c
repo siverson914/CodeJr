@@ -179,12 +179,5 @@ int main(int argc, char **argv)
 	key_done();
 	gfx_done();
 	snd_done();
-	if (!quit) {
-		printf("\nPCjr MEETS AI\n\n");
-		printf("Made by CodeJr: Claude, talking to a 1984 IBM PCjr\n");
-		printf("over a WiFi modem at 37287 baud.\n\n");
-		printf("8088 at 4.77 MHz. 16 colors. 3 voices and a noise channel.\n");
-		printf("Still got it.\n\n");
-	}
 	return 0;
 }

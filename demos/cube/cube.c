@@ -393,12 +393,8 @@ static void draw_sky(unsigned seg)
 /* ---- Scroller ---------------------------------------------------------- */
 
 static const char msg[] =
-	"     *** JRCUBE ***   REAL-TIME SHADOWS, LIGHTING AND MUSIC ON AN IBM PCjr ... "
-	"8088 AT 4.77 MHZ, 16 COLORS, 3 VOICES AND A NOISE CHANNEL ... "
-	"A CUBE THAT MORPHS, A GLASS FLOOR, AND A CUBE THAT COMES APART ... "
-	"THE GRID SCROLLS BY PALETTE ROTATION, THE SHADOW IS COPIED FROM A DARKENED FLOOR, "
-	"EVERY FACE IS DITHER-SHADED PER CORNER ... MADE WITH CODEJR ... "
-	"GREETINGS TO EVERY PCjr STILL RUNNING ...      ";
+	"     *** JRCUBE ***   SHADOWS, LIGHT AND MUSIC IN REAL TIME ON AN IBM PCjr ... "
+	"MADE WITH CODEJR ...      ";
 #define SROWS 8
 #define SCROLL_Y 191
 static unsigned char far *strip;
@@ -912,29 +908,26 @@ typedef struct {
 static void timeline(unsigned long st, scene *s)
 {
 	int p = (int)(st / PAT_TICKS), x = (int)((st % PAT_TICKS) * 256 / PAT_TICKS);
-	long spin = (long)st * 3, extra = (long)st - 22L * PAT_TICKS;
+	long spin = (long)st * 3, extra = (long)st - 9L * PAT_TICKS;
 	s->morph = MORPH_OCTA; s->step = 0;
 	/* in the drop the solid glides away, so its reflection comes into view */
-	s->cz = CZ + (p == 21 ? ease(x) * 240 >> 8 : p >= 22 && p < 29 ? 240 : p == 29 ? 240 - (ease(x) * 240 >> 8) : 0);
-	s->mirror = (p >= 22 && p < 30) || p >= 34;
+	s->cz = CZ + (p == 8 ? ease(x) * 240 >> 8 : p >= 9 && p < 12 ? 240 : p == 12 ? 240 - (ease(x) * 240 >> 8) : 0);
+	s->mirror = (p >= 9 && p < 13) || p >= 15;
 	s->burst = 0; s->tumble = 0;
-	s->grid_period = p >= 22 && p < 30 ? 2 : p < 4 ? 6 : 4;
-	if (extra > 0) spin += (extra > 8L * PAT_TICKS ? 8L * PAT_TICKS : extra) * 3;   /* twice as fast in the drop */
+	s->grid_period = p >= 9 && p < 13 ? 2 : p < 2 ? 6 : 4;
+	if (extra > 0) spin += (extra > 4L * PAT_TICKS ? 4L * PAT_TICKS : extra) * 3;   /* twice as fast in the drop */
 	s->spin = (int)(spin % 3072);   /* the three angles are spin, 2/3 and 1/3 of it */
-	switch (p) {   /* the morphs: 2 patterns each, change then hold */
-	case 12: s->step = ease(x) * SHAPE_STEPS >> 8; break;
-	case 13: s->step = SHAPE_STEPS; break;
-	case 14: s->step = SHAPE_STEPS - (ease(x) * SHAPE_STEPS >> 8); break;
-	case 16: s->morph = MORPH_TETRA; s->step = ease(x) * SHAPE_STEPS >> 8; break;
-	case 17: s->morph = MORPH_TETRA; s->step = SHAPE_STEPS; break;
-	case 18: s->morph = MORPH_TETRA; s->step = SHAPE_STEPS - (ease(x) * SHAPE_STEPS >> 8); break;
-	case 24: case 26: s->step = ease(x) * (SHAPE_STEPS / 2) >> 8; break;   /* to the cuboctahedron in the drop */
-	case 25: case 27: s->step = (SHAPE_STEPS / 2) - (ease(x) * (SHAPE_STEPS / 2) >> 8); break;
-	case 30: s->burst = x < 128 ? 256 - ease(256 - 2 * x) : 256; break;   /* out fast */
-	case 31: s->burst = 256; break;
-	case 32: case 33: s->burst = 256 - ease(((p - 32) * 256 + x) >> 1); break;   /* back over 2 */
+	switch (p) {   /* a pattern each way: there is a lot to get through */
+	case 4: s->step = ease(x) * SHAPE_STEPS >> 8; break;
+	case 5: s->step = SHAPE_STEPS - (ease(x) * SHAPE_STEPS >> 8); break;
+	case 6: s->morph = MORPH_TETRA; s->step = ease(x) * SHAPE_STEPS >> 8; break;
+	case 7: s->morph = MORPH_TETRA; s->step = SHAPE_STEPS - (ease(x) * SHAPE_STEPS >> 8); break;
+	case 10: s->step = ease(x) * (SHAPE_STEPS / 2) >> 8; break;   /* to the cuboctahedron in the drop */
+	case 11: s->step = (SHAPE_STEPS / 2) - (ease(x) * (SHAPE_STEPS / 2) >> 8); break;
+	case 13: s->burst = x < 128 ? 256 - ease(256 - 2 * x) : 256; break;   /* out fast */
+	case 14: s->burst = 256 - ease(x); break;                              /* and back */
 	}
-	if (s->burst) s->tumble = (int)(((st - 30L * PAT_TICKS) * 2) & 0x3FF);
+	if (s->burst) s->tumble = (int)(((st - 13L * PAT_TICKS) * 2) & 0x3FF);
 }
 
 /* ---- Frame ------------------------------------------------------------- */

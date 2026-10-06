@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	"codejr/internal/kermit"
@@ -324,8 +325,27 @@ func (w *Workspace) Session() string {
 	return strings.TrimSpace(string(b))
 }
 
+// Convo is what the welcome shows of a conversation being continued: its
+// size in characters (what the user typed plus what CodeJr said) and
+// CodeJr's last reply. Both are zero for a conversation from before the
+// server kept them.
+func (w *Workspace) Convo() (chars int, last string) {
+	b, err := os.ReadFile(w.state("convo"))
+	if err != nil {
+		return 0, ""
+	}
+	head, rest, _ := strings.Cut(string(b), "\n")
+	chars, _ = strconv.Atoi(strings.TrimSpace(head))
+	return chars, rest
+}
+
+func (w *Workspace) SetConvo(chars int, last string) error {
+	return os.WriteFile(w.state("convo"), []byte(strconv.Itoa(chars)+"\n"+last), 0o644)
+}
+
 func (w *Workspace) SetSession(id string) error {
 	if id == "" {
+		os.Remove(w.state("convo")) // a fresh conversation has no size or last reply
 		err := os.Remove(w.state("session"))
 		if os.IsNotExist(err) {
 			return nil

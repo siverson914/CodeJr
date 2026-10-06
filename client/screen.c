@@ -252,6 +252,15 @@ void scr_mark_input(void)
 		scr_scroll(last); /* back to the end */
 }
 
+/* The right end of the header: how long the conversation is. */
+void scr_info(const char *s)
+{
+	int n = (int)strlen(s);
+	if (n > 30) n = 30;
+	put_text(0, COLS - 31, "", A_HEADER, 30);
+	put_text(0, COLS - 1 - n, s, A_HEADER, n);
+}
+
 void scr_status(const char *s)
 {
 	fill_row(ROW_STATUS, ' ', A_STATUS);

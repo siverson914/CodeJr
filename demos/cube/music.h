@@ -3,8 +3,8 @@
  * The song is SONG_PATS patterns of PAT_ROWS rows, ROW_TICKS ticks a row,
  * and loops to pattern 0. Every pattern is exactly PAT_TICKS long, so the
  * song position is (mus_T / PAT_TICKS) % SONG_PATS. Sections:
- *   0-3 intro, 4-11 groove (lead at 8), 12-19 morph (crash at 12/14/16/18),
- *   20-21 build, 22-29 drop, 30-31 explosion, 32-33 rebuild, 34-37 outro.
+ *   0-1 intro, 2-3 groove, 4-7 morph (a crash on each), 8 build,
+ *   9-12 drop, 13-14 explosion and back, 15-16 outro.
  */
 #ifndef MUSIC_H
 #define MUSIC_H
@@ -12,7 +12,7 @@
 #define ROW_TICKS 7          /* 60 Hz ticks per row (about 128 BPM, 4 rows per beat) */
 #define PAT_ROWS  16
 #define PAT_TICKS (ROW_TICKS * PAT_ROWS)   /* 112 ticks = 1.87 s */
-#define SONG_PATS 38         /* song length in patterns; it loops to 0 */
+#define SONG_PATS 17         /* song length in patterns; it loops to 0 */
 
 extern volatile unsigned long mus_T;     /* 60 Hz ticks since mus_start (counts in lockstep mode too) */
 extern volatile unsigned char mus_kick;  /* set to 1 on every kick drum; the demo clears it */

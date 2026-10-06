@@ -715,3 +715,17 @@ Unproven: that the lockup was only the unreadable screen. Ctrl-Alt-Del working s
 **The fix (client 1.4).** A long line goes as `InputMore` pieces (new frame type 0x14), then `Input` with the last one, and the server joins them (also when they arrive during a file transfer). `queue()` now counts what it drops and Alt-S shows it ("unsent"); with the pieces it should stay 0. A Go test sends a line in three pieces; `just emu-native` passes. Other callers of `queue()` checked: file results, run reports, the hello and keys are all well under 128 bytes; the 8-entry queue can still fill, which the counter would now show.
 
 **One main again.** Three sessions had been working in the same checkout, and JRAI's commits sat unpushed behind GitHub while the client moved to 1.3 there. Committed for the sessions that had ended: the library's IRQ5 stack switch and `fx_irq_hook` (its T1 and T3 pass), JRCUBE, the demo 2 story. Left alone at the quest session's request: `games/quest/` and the `justfile`. The journal conflicted on every commit of the rebase (everyone appends to it), so the rebase took GitHub's and the entries were merged once at the end; the sections are no longer in strict date order. A backup of everything from before is in `~/.local/share/codejr/backup-1006-0950/`.
+
+## Steve's notes after a session at the PCjr (2026-10-06, afternoon)
+
+Client 1.4 worked on the real machine. His list, and what was done:
+
+- **The modem stays at 37287.** "This is the only program that's running on this computer." Client 1.5 asks the modem "AT" at the fast speed first (twice, a second each) and only falls back to 9600 and switches when it gets no answer; on exit it leaves the speed alone. Saves the switch on every start and the switch back on every exit, after the first start following a power cycle. `CODEJR /R:1` puts the modem back to 9600 and exits. **MS-Kermit (`CJKERMIT`) needs that first now**, or a modem power cycle: `CJKERMIT.BAT` was not changed, because its comment says it must stay byte-stable (DOS reads a running batch file by position, and `/setup` rewrites it).
+- **Quieter screen.** Header is "CodeJr 1.5" with no tagline. Footer is "Ready." The exit line "CodeJr: hung up. Programs are in this directory." is gone. `/exit` says "Hanging up..." once, in the footer (it was also added to the transcript).
+- **Welcome.** "Welcome to CodeJr. Ask me anything or let's make a program! /help for commands." (79 characters: with the comma it was 80 and wrapped.) When a conversation continues: "Continuing your last conversation.", then CodeJr's last reply, and the conversation's size right-justified in the header ("3274 chars", new frame `Info` 0x15). The server keeps both in `.codejr/convo` from now on (characters typed plus characters replied), so a conversation from before this shows neither until its next turn. `/new` clears them.
+- **A blank line after every reply** (sent before each `Ready`), so the next yellow line stands apart.
+- **40-column mode:** asked whether it would work. Not done; see the reply to Steve (the client's width is one constant, but the server wraps at 79 and the status lines, `/run` menu and transfer reports assume 80).
+- **JRAI** prints nothing on exit.
+- **JRCUBE** is 17 patterns (about 32 s) instead of 38: one pattern per morph each way, one build, four of drop, burst out and back in one each, two of outro. The scroller is two short phrases.
+
+`just emu-native`: 50 checks pass with 1.5. Not yet on the real PCjr: the speed probe (the emulator has no modem that changes speed).
