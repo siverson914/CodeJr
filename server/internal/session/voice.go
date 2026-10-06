@@ -36,10 +36,10 @@ var cannedClips = map[string]string{
 	"BYE": "Goodbye. See you next time.",
 }
 
-// MakeClip runs the converter: text in, NAME.SND (the "fast" preset:
-// 2-bit ADPCM at 4 kHz, under 1 KB per second of speech, so it arrives
-// much faster than it plays) out in the workspace's VOICE folder. tool is
-// speech/mksnd.py.
+// MakeClip runs the converter: text in, NAME.SND out in the workspace's
+// VOICE folder, at the converter's own default quality, so the speech
+// project picks the quality in one place (medium: 4-bit ADPCM at 8 kHz,
+// about 4 KB per second of speech). tool is speech/mksnd.py.
 func MakeClip(ctx context.Context, tool, wsDir, name, text string) error {
 	if tool == "" {
 		return fmt.Errorf("no speech converter configured")
@@ -52,7 +52,7 @@ func MakeClip(ctx context.Context, tool, wsDir, name, text string) error {
 	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 	out := filepath.Join(tmp, name)
-	cmd := exec.CommandContext(ctx, tool, "--text", text, "--quality", "fast", "-o", out)
+	cmd := exec.CommandContext(ctx, tool, "--text", text, "-o", out)
 	if b, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("%v: %s", err, strings.TrimSpace(string(b)))
 	}

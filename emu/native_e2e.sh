@@ -14,6 +14,7 @@ check() { if eval "$2"; then echo "ok:   $1"; else echo "FAIL: $1"; fail=1; fi; 
 
 (cd server && go build -o codejr ./cmd/codejr) || exit 1
 client/build.sh >/dev/null || exit 1
+speech/build.sh >/dev/null || exit 1 # SAY.EXE, for the /voice runs
 
 run() { # $1 = label, $2 = extra client options
 	tmp=$(mktemp -d)
