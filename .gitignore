@@ -22,3 +22,9 @@
 /speech/__pycache__/
 /games/jrai/voice/out/
 /games/jrai/*.log
+/demos/*/shots/*.mp4
+/demos/*/shots/*.wav
+/games/quest/build/
+/games/quest/.cache/
+/demos/*/shots/*.mp4
+/demos/*/shots/*.wav
