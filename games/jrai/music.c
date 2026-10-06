@@ -279,13 +279,15 @@ void mus_tick(void)
 
 volatile unsigned long T;
 int lockstep;
-static void (__interrupt __far *old_irq5)(void);
 static int hooked;
 static unsigned long poll_ms0, poll_T0;
 
-static void __interrupt __far clock_irq(void)
+/* Every retrace, from the library's IRQ5 handler, on the library's own
+ * stack (fx_irq_hook). Not by chaining INT 0Dh: in the large model C
+ * reaches its statics through SS, and when the interrupt lands inside DOS
+ * on a real PCjr, SS is DOS's. That hung the PCjr at the first spoken line. */
+static void clock_tick(void)
 {
-	old_irq5(); /* the library's handler: page flip, palette, EOI */
 	T++;
 	mus_tick();
 }
@@ -294,8 +296,7 @@ void clock_start(void)
 {
 	snd_init();
 	if (fx_irq && !lockstep) {
-		old_irq5 = _dos_getvect(0x0D);
-		_dos_setvect(0x0D, clock_irq);
+		fx_irq_hook(clock_tick);
 		hooked = 1;
 	}
 	poll_ms0 = tmr_ms();
@@ -305,7 +306,7 @@ void clock_start(void)
 void clock_stop(void)
 {
 	mus_stop();
-	if (hooked) { _dos_setvect(0x0D, old_irq5); hooked = 0; }
+	if (hooked) { fx_irq_hook(0); hooked = 0; }
 }
 
 /* Without IRQ5: T from the PIT, and the music caught up tick by tick. */
