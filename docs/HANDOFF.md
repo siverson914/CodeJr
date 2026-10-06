@@ -158,6 +158,10 @@ just deploy-speech HELLO READY  # queue SAY.EXE and clips (NAME.SNP for a PWM ve
 - **Video:** only 16 KB of video memory is reserved (segment 1C00h). 320x200x16 needs 32 KB and the BIOS would put it over DOS memory; `lib` claims its own block. `INT 9` on the PCjr is a software interrupt with the scan code in AL.
 - Addresses: PCjr modem 192.168.0.119, laptop 192.168.0.178 (docked ethernet), port 4860 (`ufw` allows the LAN).
 
+### Leaving a game (open: fix untested on the real PCjr)
+
+- **After a JRGFX game exits, the DOS prompt can be garbled** (black with lines) until `MODE 80`. Steve saw it with LEMMJR, which uses the page-flipping path, and with earlier programs. DOSBox doesn't show it. `MODE 80` is only a second BIOS mode set, so `gfx_done()` now resets the gate array's latch (a read of 3DAh) and sets mode 3 twice, and palette writes leave the latch expecting an index. No root cause was proven. If it still happens, get a photo and check whether JRCONFIG (the jr-IDE memory driver) hooks INT 10h. Programs must be rebuilt to get the fix.
+
 ### The laptop's network (fixed 2026-10-05)
 
 - **The first message of a call took about 50 seconds** (since day 1, on both paths). A packet capture showed why: the docked laptop is on the LAN twice, ethernet (192.168.0.178, the address the modem dials) and WiFi (192.168.0.156). Linux answers ARP for any of its addresses on any interface, so the modem sometimes sent to the WiFi card while the server answered over ethernet; after a few idle seconds the WiFi side swallowed the modem's packets until the modem asked again about 45 s later. Fix: `net.ipv4.conf.all.arp_ignore=1` and `arp_announce=2` in `/etc/sysctl.d/90-codejr-arp.conf`. Turning the laptop's WiFi off while docked also works. `tcpdump` is now installed for the next time (`sudo tcpdump -i any -n port 4860 -w /tmp/cj.pcap`).

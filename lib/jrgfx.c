@@ -219,6 +219,14 @@ void gfx_done(void)
 {
 	if (!gfx_mode) return;
 	if (jr_done_hook) jr_done_hook();
+	/* Back to text, the way that is known to leave a clean DOS screen on
+	 * the real PCjr. One BIOS mode set after a game that wrote the page
+	 * register directly left the prompt garbled (black with lines) until
+	 * the user typed MODE 80, which is just a second mode set. So: put
+	 * the gate array's index/data latch back in its index state, then
+	 * set the mode twice. Not reproducible in DOSBox. */
+	inp(0x3DA);
+	bios_mode(3);
 	bios_mode(3);
 	if (vram_own) { dos_free(vram_own); vram_own = 0; }
 	if (back_seg) { dos_free(back_seg); back_seg = 0; gfx_back = 0; }
@@ -597,6 +605,7 @@ void gfx_palette(int index, int rgbi)
 	outp(0x3DA, rgbi & 15);
 	inp(0x3DA);
 	outp(0x3DA, 0);                   /* re-enable video (see STATUS.md) */
+	inp(0x3DA);                       /* leave the latch expecting an index */
 	_enable();
 }
 

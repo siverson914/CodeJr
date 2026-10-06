@@ -357,6 +357,7 @@ static void pal_write(const unsigned char *p)
 	}
 	inp(0x3DA);
 	outp(0x3DA, 0); /* index < 10h re-enables video */
+	inp(0x3DA);     /* leave the latch expecting an index */
 }
 
 /* Advances the fx_pal_anim ranges by one retrace; 1 if pal_live changed. */
