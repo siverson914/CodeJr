@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""Generates shapes.c for JRCUBE: the morphing solid at every step.
+
+The solid is the intersection of 14 half-spaces: 6 cube planes
+(|x|, |y|, |z| <= a) and two sets of 4 tetrahedron planes
+(n . p <= b1 for n in A = (1,1,1), (1,-1,-1), (-1,1,-1), (-1,-1,1);
+ n . p <= b2 for n in B = -A). Sliding (a, b1, b2) morphs between a
+cube, a cuboctahedron, an octahedron and a tetrahedron, and every step
+is convex, so the shadow (a convex hull) and back-face culling stay exact.
+Each step's faces and edges are found here, offline, so the PCjr only
+rotates vertices.
+
+    python3 genshape.py > shapes.c
+"""
+import itertools, math
+
+S = 52                       # cube half size
+OCT = 74                     # octahedron: vertices at +-OCT on the axes
+TET = 54                     # tetrahedron: inscribed in a cube of half size TET
+BIG = 1000
+STEPS = 24                   # steps per morph (STEPS + 1 shapes)
+
+A = [(1, 1, 1), (1, -1, -1), (-1, 1, -1), (-1, -1, 1)]
+NORMALS = [(-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)] \
+    + A + [tuple(-c for c in n) for n in A]
+
+
+def planes(a, b1, b2):
+    off = [a] * 6 + [b1] * 4 + [b2] * 4
+    return list(zip(NORMALS, off))
+
+
+def dot(u, v):
+    return sum(x * y for x, y in zip(u, v))
+
+
+def solve3(p):
+    (n1, d1), (n2, d2), (n3, d3) = p
+    m = [list(n1), list(n2), list(n3)]
+    det = (m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
+           - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
+           + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]))
+    if abs(det) < 1e-9:
+        return None
+    r = []
+    for col in range(3):
+        mm = [row[:] for row in m]
+        for i, d in enumerate((d1, d2, d3)):
+            mm[i][col] = d
+        r.append((mm[0][0] * (mm[1][1] * mm[2][2] - mm[1][2] * mm[2][1])
+                  - mm[0][1] * (mm[1][0] * mm[2][2] - mm[1][2] * mm[2][0])
+                  + mm[0][2] * (mm[1][0] * mm[2][1] - mm[1][1] * mm[2][0])) / det)
+    return tuple(r)
+
+
+def solid(a, b1, b2):
+    pl = planes(a, b1, b2)
+    pts = []
+    for tri in itertools.combinations(range(14), 3):
+        p = solve3([pl[i] for i in tri])
+        if p is None or any(dot(n, p) > d + 1e-6 for n, d in pl):
+            continue
+        pts.append(p)
+    verts = []
+    for p in pts:
+        if not any(math.dist(p, v) < 1.5 for v in verts):
+            verts.append(p)
+    faces = []
+    for i, (n, d) in enumerate(pl):
+        on = [k for k, v in enumerate(verts) if abs(dot(n, v) - d) < 1e-4]
+        if len(on) < 3:
+            continue
+        c = [sum(verts[k][j] for k in on) / len(on) for j in range(3)]
+        # in-plane basis, ordered counterclockwise seen from outside
+        nl = math.sqrt(dot(n, n))
+        nn = [x / nl for x in n]
+        t = [1, 0, 0] if abs(nn[0]) < 0.9 else [0, 1, 0]
+        u = [t[1] * nn[2] - t[2] * nn[1], t[2] * nn[0] - t[0] * nn[2], t[0] * nn[1] - t[1] * nn[0]]
+        ul = math.sqrt(dot(u, u)); u = [x / ul for x in u]
+        w = [nn[1] * u[2] - nn[2] * u[1], nn[2] * u[0] - nn[0] * u[2], nn[0] * u[1] - nn[1] * u[0]]
+        on.sort(key=lambda k: math.atan2(dot([verts[k][j] - c[j] for j in range(3)], w),
+                                         dot([verts[k][j] - c[j] for j in range(3)], u)))
+        # area: drop slivers
+        area = 0
+        for m in range(len(on)):
+            p, q = verts[on[m]], verts[on[(m + 1) % len(on)]]
+            pc = [p[j] - c[j] for j in range(3)]; qc = [q[j] - c[j] for j in range(3)]
+            cr = [pc[1] * qc[2] - pc[2] * qc[1], pc[2] * qc[0] - pc[0] * qc[2], pc[0] * qc[1] - pc[1] * qc[0]]
+            area += math.sqrt(dot(cr, cr)) / 2
+        if area < 4:
+            continue
+        faces.append((i, on))
+    edges = {}
+    for fi, (pid, on) in enumerate(faces):
+        for m in range(len(on)):
+            e = tuple(sorted((on[m], on[(m + 1) % len(on)])))
+            edges.setdefault(e, []).append(fi)
+    edges = [(e[0], e[1], f[0], f[1] if len(f) > 1 else f[0]) for e, f in edges.items()]
+    iv = [tuple(int(round(x)) for x in v) for v in verts]
+    return iv, faces, edges
+
+
+def lerp(p, q, t):
+    return tuple(x + (y - x) * t for x, y in zip(p, q))
+
+
+def path(keys):
+    """keys: (a, b1, b2) waypoints, spread evenly over STEPS steps"""
+    out = []
+    for s in range(STEPS + 1):
+        x = s / STEPS * (len(keys) - 1)
+        i = min(int(x), len(keys) - 2)
+        out.append(lerp(keys[i], keys[i + 1], x - i))
+    return out
+
+
+CUBE = (S, 3 * S, 3 * S)
+MORPHS = [
+    ("octa", path([CUBE, (S, 2 * S, 2 * S), (OCT, OCT, OCT)])),
+    ("tetra", path([(S, 3 * S, BIG), (S + 1, 1.6 * S, BIG), (TET, TET, BIG)])),
+]
+
+MAXV, MAXF, MAXE, MAXFV = 0, 0, 0, 0
+shapes = []
+for name, steps in MORPHS:
+    for p in steps:
+        v, f, e = solid(*p)
+        shapes.append((v, f, e))
+        MAXV = max(MAXV, len(v)); MAXF = max(MAXF, len(f)); MAXE = max(MAXE, len(e))
+        MAXFV = max([MAXFV] + [len(on) for _, on in f])
+
+print("/* Generated by genshape.py: the morphing solid, %d steps per morph. */" % STEPS)
+print('#include "shapes.h"')
+print("/* per shape: vertex count, face count, edge count, then vertices (x, y, z),")
+print(" * faces (plane id, vertex count, indexes), edges (v0, v1, face, face) */")
+print("const signed char __far shape_data[] = {")
+offs = []
+pos = 0
+for v, f, e in shapes:
+    row = [len(v), len(f), len(e)]
+    for p in v:
+        row += list(p)
+    for pid, on in f:
+        row += [pid, len(on)] + on
+    for a, b, fa, fb in e:
+        row += [a, b, fa, fb]
+    offs.append(pos)
+    pos += len(row)
+    assert all(-128 <= x <= 127 for x in row), row
+    print("\t" + ", ".join(str(x) for x in row) + ",")
+print("};")
+print("const unsigned shape_off[%d] = { %s };" % (len(offs), ", ".join(map(str, offs))))
+import sys
+print("/* max %d vertices, %d faces, %d edges, %d vertices per face */" % (MAXV, MAXF, MAXE, MAXFV), file=sys.stderr)
