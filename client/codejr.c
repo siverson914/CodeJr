@@ -37,7 +37,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.3"
+#define VERSION "1.4"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -146,11 +146,15 @@ static unsigned long link_now(void *ctx)
 	return ticks();
 }
 
+static unsigned queue_drops; /* messages that could not be queued (Alt-S shows it) */
+
 static void queue(unsigned char type, const void *p, unsigned n)
 {
 	int i;
-	if (outq_n == OUTQ || n > CJP_MAXPAYLOAD)
+	if (outq_n == OUTQ || n > CJP_MAXPAYLOAD) {
+		queue_drops++; /* callers keep within both limits: this counts a bug */
 		return;
+	}
 	i = (outq_head + outq_n) % OUTQ;
 	outq[i].type = type;
 	outq[i].len = n;
@@ -172,8 +176,8 @@ static char last_file[80]; /* details of the last transfer, for Alt-S */
 /* Alt-S: two short lines, so nothing wraps on the 80-column screen. */
 static void counters(char *s)
 {
-	sprintf(s, "Line: %u lost (%u late), %u framing errors, %u bad frames, %u resent",
-	        ser_overruns(), ser_uart_overruns(), ser_framing(), link.bad, link.resent);
+	sprintf(s, "Line: %u lost (%u late), %u framing errors, %u bad frames, %u resent, %u unsent",
+	        ser_overruns(), ser_uart_overruns(), ser_framing(), link.bad, link.resent, queue_drops);
 }
 
 /* Client-side messages go into the chat history (dark gray), so a status
@@ -1121,7 +1125,16 @@ static void key(unsigned k)
 			if (ui)
 				echo_line(input);
 			if (!local_line(input)) {
-				queue(CJP_INPUT, input, input_len);
+				/* A frame carries 128 bytes: a longer line goes as
+				 * INPUT_MORE pieces, then INPUT with the last one.
+				 * (1.3 and earlier queued the whole line as one frame,
+				 * which was dropped silently when it was too long.) */
+				int off = 0;
+				while (input_len - off > CJP_MAXPAYLOAD) {
+					queue(CJP_INPUT_MORE, input + off, CJP_MAXPAYLOAD);
+					off += CJP_MAXPAYLOAD;
+				}
+				queue(CJP_INPUT, input + off, (unsigned)(input_len - off));
 				if (ui)
 					ready = 0;
 			}

@@ -192,6 +192,11 @@ func TestNativeCall(t *testing.T) {
 	c.waitText("Unknown command")
 	c.link.Send(cjp.Input, []byte("/help"))
 	c.waitText("/files")
+	// A line too long for one frame arrives in pieces: InputMore, then Input.
+	c.link.Send(cjp.InputMore, []byte("/no"))
+	c.link.Send(cjp.InputMore, []byte("pe "))
+	c.link.Send(cjp.Input, []byte("again"))
+	c.waitText("Unknown command")
 	c.link.Send(cjp.Input, []byte("/quit"))
 	c.next(cjp.Bye)
 	select {

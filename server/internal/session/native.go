@@ -37,7 +37,8 @@ type native struct {
 	// Messages that arrived while a file was going over (a line typed
 	// early, say); handled once the transfer is done.
 	backlog []cjp.Msg
-	baud    int // the serial speed the client reported
+	long    []byte // the pieces so far of a line too long for one frame (InputMore)
+	baud    int    // the serial speed the client reported
 	// The client echoes typed lines itself and takes Ready and Temp
 	// messages (it said ui=1 in its HELLO).
 	ui       bool
@@ -127,8 +128,12 @@ func (s *session) native() {
 			}
 		}
 		switch m.Type {
+		case cjp.InputMore:
+			n.long = append(n.long, m.Payload...)
 		case cjp.Input:
-			ok := n.submit(strings.TrimSpace(string(m.Payload)))
+			line := string(append(n.long, m.Payload...))
+			n.long = nil
+			ok := n.submit(strings.TrimSpace(line))
 			n.sendPending()
 			if ok {
 				n.ready()
@@ -243,7 +248,7 @@ func (n *native) serve(name string, chunks [][]byte, offerType byte, offer []byt
 					return true, ""
 				}
 				return false, string(m.Payload[1:])
-			case cjp.Input, cjp.Bye, cjp.Result:
+			case cjp.Input, cjp.InputMore, cjp.Bye, cjp.Result:
 				n.backlog = append(n.backlog, m)
 			}
 		case <-n.link.Done():

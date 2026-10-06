@@ -31,6 +31,7 @@
 #define CJP_DELTAOFFER  0x11 /* like FILEOFFER; the chunks are an edit script */
 #define CJP_PLAY        0x12 /* server: play this clip (SAY.EXE) when the reply is done */
 #define CJP_VOICE       0x13 /* server: voice on (1) or off (0) */
+#define CJP_INPUT_MORE  0x14 /* client: the start of a typed line too long for one frame; more follows */
 
 /* Types from CJP_DATAGRAM up carry no sequence number and are never
  * acknowledged. The file pull protocol uses them (pull.h). */
