@@ -31,6 +31,7 @@ void scr_mark_input(void);   /* the user sent a line: count from here */
 
 void scr_status(const char *s);   /* replaces the status bar */
 void scr_input(const char *s, int prompt); /* input line; "> " only if prompt */
+void scr_input_off(void);                  /* no input line, no cursor: typing isn't taken */
 void scr_spin(void); /* busy: advances the spinner where the prompt goes */
 void scr_save(const char *path);  /* writes the screen's text to a file */
 

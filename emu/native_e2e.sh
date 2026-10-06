@@ -192,7 +192,7 @@ voicerun() { # $1 = typed line, $2 = label, $3 = 1 to start with voice on, $4 = 
 voicerun /voice "/voice plays its clip" 0 ON.SND
 voicerun "hi there" "a voiced reply is spoken" 1 REPLY.SND
 pagerun long "a long reply stops at More" "line 20" "!line 21"
-pagerun /exit "/exit answers at once" "Hanging up"
+pagerun /exit "/exit answers at once" "Hanging up" "!^>  *.\{0,1\}$"
 deltarun
 runreport
 runrun "/run 2" 'GWBASIC BETA.BAS' "/run by number: BASIC through GW-BASIC"

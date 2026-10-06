@@ -11,6 +11,8 @@
  *                          way) instead of polling the 8259; DOSBox needs it
  *   SAY /X HELLO           write the decoded samples to SAYDUMP.BIN (tests)
  *   SAY /C HELLO           decode ADPCM with the C decoder (tests)
+ *   SAY /K HELLO           leave the key that stopped it in the keyboard buffer
+ *                          (CodeJr's /voice: the key goes to its input line)
  *
  * A key stops playback. The clip's method (chip or pwm) is in its header;
  * the actual playing is done by player.asm, from a block above 128 KB.
@@ -51,7 +53,7 @@ unsigned get_ss(void);
 #define TABLE_OFF 0x800u
 #define DATA_PARA 0xE0u
 
-static int quiet, info, verbose, speedtest, irqtiming, dump, slowdec;
+static int quiet, info, verbose, speedtest, irqtiming, dump, slowdec, keepkey;
 static int tty; /* stdout is the screen: show progress while loading and decoding */
 static char what[40];
 
@@ -471,9 +473,11 @@ static int play(const char *arg)
 	pit = par[11] | ((unsigned long)par[12] << 16);
 	fix_clock(pit ? pit : done * par[3]);
 	if (par[9]) {
-		union REGS r;
-		r.h.ah = 0;
-		int86(0x16, &r, &r); /* eat the key */
+		if (!keepkey) {
+			union REGS r;
+			r.h.ah = 0;
+			int86(0x16, &r, &r); /* eat the key */
+		}
 		rc = 2;
 	}
 	if (verbose || speedtest)
@@ -511,6 +515,7 @@ int main(int argc, char **argv)
 			else if (c == 'H') irqtiming = 1;
 			else if (c == 'X') dump = 1;
 			else if (c == 'C') slowdec = 1;
+			else if (c == 'K') keepkey = 1;
 			else {
 				printf("SAY: unknown option %s\n", argv[i]);
 				return 1;

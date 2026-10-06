@@ -37,7 +37,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.2"
+#define VERSION "1.3"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -115,11 +115,21 @@ static unsigned long ticks(void)
 	return *(unsigned long far *)MK_FP(0x40, 0x6C);
 }
 
+/* Leaving, by any road (/exit, Alt-X, the server's BYE, /run, a cancelled
+ * transfer). From here no more input is taken, so the input line and its
+ * cursor go away at once: a prompt that still looks live while CodeJr is
+ * on its way out invites typing that goes nowhere. Keys pressed from now
+ * on stay in the BIOS buffer, where DOS finds them. */
 static void start_quit(void)
 {
 	if (!quitting) {
 		quitting = 1;
 		quit_at = ticks();
+		input[0] = 0;
+		input_len = 0;
+		line_waits = 0;
+		cursor_dirty = 0;
+		scr_input_off();
 	}
 }
 
@@ -1005,7 +1015,7 @@ static void speak(const char *clip)
 
 	if (access(clip, 0) != 0 || access("SAY.EXE", 0) != 0)
 		return;
-	scr_status("Speaking...  (a key stops it)");
+	scr_status(quitting ? "Speaking...  (a key stops it)" : "Speaking...  (just type to stop it)");
 	more_shown = 0;
 	nul = open("NUL", O_WRONLY);
 	out = dup(1);
@@ -1017,11 +1027,16 @@ static void speak(const char *clip)
 	{
 		/* Up to two options from SAY= (e.g. /H in DOSBox). */
 		char o[sizeof say_opts], *o2;
-		const char *args[6];
+		const char *args[7];
 		int n = 0;
 		strcpy(o, say_opts);
 		args[n++] = "SAY.EXE";
 		args[n++] = "/Q";
+		/* /K: the key that stops the speech stays in the keyboard buffer,
+		 * so it lands in the input line: typing over the voice just works,
+		 * and no key is lost. Not while leaving: nothing is being typed to. */
+		if (!quitting)
+			args[n++] = "/K";
 		if (o[0]) {
 			args[n++] = o;
 			if ((o2 = strchr(o, ' ')) != NULL) {
@@ -1040,20 +1055,25 @@ static void speak(const char *clip)
 	}
 	close(out);
 	close(err);
-	scr_status(server_status);
-	cursor_dirty = 1;
+	if (!quitting) {
+		scr_status(server_status);
+		cursor_dirty = 1;
+	}
 }
 
 /* Hangs up at once, saying so. */
 static void hang_up(void)
 {
+	if (quitting)
+		return;
 	note("Hanging up...");
+	queue(CJP_BYE, NULL, 0);
+	start_quit(); /* first: the input line goes before the goodbye plays */
 	scr_status("Hanging up...");
 	more_shown = 0;
 	if (voice_on)
 		speak("VOICE\\BYE.SND");
-	queue(CJP_BYE, NULL, 0);
-	start_quit();
+	scr_status("Hanging up...");
 }
 
 static void key(unsigned k)
@@ -1118,7 +1138,8 @@ static void key(unsigned k)
 		input[input_len++] = (char)ch;
 		input[input_len] = 0;
 	}
-	scr_input(input, ready);
+	if (!quitting) /* gone for good once CodeJr is leaving */
+		scr_input(input, ready);
 }
 
 static int read_cfg(char *dial, int size)
@@ -1313,9 +1334,9 @@ int main(int argc, char **argv)
 		poll_serial();
 		if (offer.pending)
 			pull_file();
-		if (key_waiting())
+		if (key_waiting() && !quitting)
 			key(_bios_keybrd(_KEYBRD_READ));
-		if (cursor_dirty && ser_rx_pending() == 0) {
+		if (cursor_dirty && !quitting && ser_rx_pending() == 0) {
 			scr_input(input, ready);
 			cursor_dirty = 0;
 		}

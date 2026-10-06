@@ -564,3 +564,13 @@ Also seen in his photo: the "what are you" reply ran to two paragraphs with voic
 
 - **"DOS" was said wrong.** `Speakable` now always sends it as "doss" (and "M S doss", "P C doss"), read here as "say it as a word". Whisper hears "DOS" for both the plain spelling and "doss" from Brian, so it couldn't show which way the voice had been getting it wrong; Steve's ear is the test. If he meant the letters, change the one rule.
 - **CodeJr should know how it works.** The prompt has a new section, "How CodeJr itself works": the server and client, the link, and the whole speech chain (no DAC, three SN76496 voices at 111 kHz as one volume DAC, about 800 levels, the PWM alternative and why it lost, the shaping, 4-bit ADPCM with the beam-search and perceptual encoder and pause records, the high-memory player, why speech follows the text, the settings tried, and the 1984 Speech Attachment for contrast). About 45 lines of prompt; with voice on, replies stay short anyway.
+
+**Medium checked on the real PCjr, and the lingering prompt (2026-10-05, 9 pm).** Steve ran the wrap-up tests.
+
+- `SAY /V REPLY_M`: 8,007 Hz played for 8,007 wanted, 596 clocks a sample, late 583 of 74,576 (0.8%, about two per 256-sample housekeeping pass, caught up at once). Decoding 4-bit ADPCM took 3.6 s for the 9.3 s clip, more than the 2.7 s estimated.
+- `SAY /T REPLY_M` (the version that leaves the timer alone): the bare loop runs at 18,498 Hz, 258 clocks a sample, so "clips up to about 13,414 Hz should keep up". No freeze.
+- **A key during playback stops it cleanly.** The worry from the `/T` freeze (that the BIOS keyboard routine might hang at any fast timer rate) didn't come true at 8 kHz.
+
+**His one bug:** after `/exit` the input line still looked live, and typing still showed. Cause: `hang_up()` never touched the input line, and `key()` redrew it on the way out. **Client 1.3:** `start_quit()`, which every way out goes through (`/exit`, Alt-X, the server's BYE, `/run`, a cancelled transfer), now clears the input, blanks its row and parks the cursor off screen (`scr_input_off`), and the main loop stops reading keys, so anything typed stays in the BIOS buffer for DOS. First try still showed the prompt in the emulator's screen dump: `key()` redrew it after `hang_up()` returned. The emulator test now fails if a bare prompt row is on the screen after `/exit`.
+
+**A second case found while looking:** during a spoken reply, the key that stopped the speech was eaten by SAY, a silently dropped key. SAY 1.7 has `/K` (leave that key in the keyboard buffer), and the client passes it, so typing over the voice stops it and the key lands in the input line. Not run on the real PCjr yet.

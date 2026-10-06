@@ -278,6 +278,15 @@ void scr_input(const char *s, int prompt)
 	set_cursor(ROW_INPUT, 2 + (int)strlen(shown));
 }
 
+/* Blanks the input line and parks the cursor off the screen. For when
+ * CodeJr has stopped taking input (hanging up, leaving for a program), so
+ * it doesn't look as if it were still waiting for a line. */
+void scr_input_off(void)
+{
+	fill_row(ROW_INPUT, ' ', A_INPUT);
+	set_cursor(25, 0); /* row 25 is past the last one: not shown */
+}
+
 void scr_save(const char *path)
 {
 	FILE *f = fopen(path, "w");
