@@ -1,6 +1,12 @@
 /* Drawing helpers shared by the parts. */
 #include <string.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <conio.h>
+#include <i86.h>
 #include "jrai.h"
+
+#undef dbg_log
 
 unsigned char pal[16];
 signed char sin8[256];
@@ -74,4 +80,38 @@ unsigned rnd(void)
 {
 	seed = seed * 1103515245UL + 12345UL;
 	return (unsigned)(seed >> 16);
+}
+
+static int dos_depth;
+static unsigned char dos_mask;
+
+void dos_begin(void)
+{
+	if (dos_depth++ == 0) {
+		_disable();
+		dos_mask = (unsigned char)inp(0x21);
+		outp(0x21, dos_mask | 0x20);
+		_enable();
+	}
+}
+
+void dos_end(void)
+{
+	if (--dos_depth == 0) {
+		_disable();
+		outp(0x21, (inp(0x21) & ~0x20) | (dos_mask & 0x20));
+		_enable();
+	}
+}
+
+void jlog(const char *fmt, ...)
+{
+	char buf[160];
+	va_list ap;
+	va_start(ap, fmt);
+	vsprintf(buf, fmt, ap);
+	va_end(ap);
+	dos_begin();
+	dbg_log("%s", buf);
+	dos_end();
 }

@@ -17,6 +17,18 @@ extern unsigned jr_rowoff[200];
 unsigned jr_alloc_high(unsigned paras);
 void jr_dos_free(unsigned seg);
 
+/* ---- DOS calls while the retrace interrupt is live -----------------------
+ * The retrace interrupt runs our music and palette code on whatever stack
+ * is active. Inside DOS that is DOS's own small stack, with the disk BIOS
+ * on top, and PC DOS 3.3 on a PCjr doesn't switch stacks for IRQ5. So every
+ * DOS call made after graphics start goes between dos_begin and dos_end,
+ * which mask IRQ5 at the 8259 (they nest). Never wait for a page flip in
+ * between: it would never come. */
+void dos_begin(void);
+void dos_end(void);
+void jlog(const char *fmt, ...);   /* dbg_log between dos_begin and dos_end */
+#define dbg_log jlog
+
 /* ---- time ---------------------------------------------------------------- */
 extern volatile unsigned long T;   /* 60 Hz ticks since the music started   */
 extern int lockstep;               /* /LOCK: T advances a fixed step a frame */

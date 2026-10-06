@@ -72,7 +72,9 @@ static void video_frame(void)
 	char name[16];
 	fx_begin();
 	sprintf(name, "F%04u.PPM", (unsigned)(T / 4));
+	dos_begin();
 	fx_screenshot(name);
+	dos_end();
 }
 
 /* After each frame: flip, advance lockstep time, screenshots. */
@@ -93,7 +95,9 @@ static void frame_end(void)
 		char name[16];
 		fx_begin();
 		sprintf(name, "SHOT%02d.PPM", shot_i + 1);
+		dos_begin();
 		fx_screenshot(name);
+		dos_end();
 		shot_i++;
 	}
 }

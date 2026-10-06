@@ -39,22 +39,31 @@ static int say_exe(const char *name, const char *fn, void (*mouth)(int level))
 {
 	const char *argv[5];
 	int n = 0, rc, was;
-	if (access(fn, 0) || access("SAY.EXE", 0)) return 0;
+	dos_begin(); /* no retrace interrupt while DOS works (see jrai.h) */
+	if (access(fn, 0) || access("SAY.EXE", 0)) {
+		if (opt_diag) dbg_log("say %s: no clip or no SAY.EXE here", name);
+		dos_end();
+		return 0;
+	}
 	argv[n++] = "SAY.EXE";
 	if (say_h) argv[n++] = "/H";
 	argv[n++] = "/Q";
 	argv[n++] = name;
 	argv[n] = 0;
+	dos_end();
 	if (mouth) mouth(10); /* a talking pose: nothing moves while SAY plays */
 	was = mus_pause();
+	dos_begin();
+	if (opt_diag) dbg_log("say %s: starting SAY", name);
 	rc = spawnv(P_WAIT, "SAY.EXE", argv);
+	if (opt_diag) dbg_log("say %s: SAY returned %d", name, rc);
 	/* SAY leaves the timer in the BIOS's mode 3; the library wants mode 2 */
 	_disable();
 	outp(0x43, 0x34); outp(0x40, 0); outp(0x40, 0);
 	_enable();
+	dos_end();
 	if (mouth) mouth(0);
 	mus_resume(was, 0);
-	if (opt_bench) dbg_log("SAY %s: %d", name, rc);
 	return rc == 0;
 }
 
@@ -81,7 +90,7 @@ int voice_say(const char *name, void (*mouth)(int level))
 	sprintf(fn, "%s.SND", name);
 	if (!lockstep) return say_exe(name, fn, mouth);
 	if (!vbuf) return 0;
-	if (_dos_open(fn, O_RDONLY, &fd)) return 0;
+	if (_dos_open(fn, O_RDONLY, &fd)) return 0; /* (/VIDEO only: DOSBox, no need for dos_begin) */
 	if (_dos_read(fd, h, 16, &got) || got != 16 || memcmp(h, "JRSN", 4) || h[4] != 1 || h[5] != 1) {
 		_dos_close(fd);
 		return 0;
