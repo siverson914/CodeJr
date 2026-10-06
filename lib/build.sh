@@ -18,7 +18,7 @@ wcl $CF -fe=DEMO.EXE demo.c fastdemo.c jrgfx_n.lib
 # gate: install the library only if T1 and T3 pass headless
 t=$(mktemp -d)
 EMU_TIMEOUT=90 ./emu.sh "$t/1" 3000 test/T1.EXE 8 >/dev/null || true
-EMU_TIMEOUT=90 ./emu.sh "$t/3" 3000 test/T3.EXE 0 >/dev/null || true; grep -E "FAIL|restore|poly_rows|T3 done" "$t/3/LOG.TXT" >&2 || true
+EMU_TIMEOUT=90 ./emu.sh "$t/3" 3000 test/T3.EXE 0 >/dev/null || true; grep -E "FAIL|restore|poly_rows|foreign|fx_split|T3 done" "$t/3/LOG.TXT" >&2 || true
 if grep -q "vram mismatches 0" "$t/1/LOG.TXT" 2>/dev/null && grep -q "T3 done: 0 failures" "$t/3/LOG.TXT" 2>/dev/null; then
 	mv -f jrgfx_n.lib jrgfx.lib
 	echo "jrgfx.lib installed (T1, T3 pass)"

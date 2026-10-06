@@ -137,7 +137,15 @@ for (;;) {
   - `fx_pal_set(pal16)` and `fx_pal_cycle(a, b, dir)` are queued and applied in the next retrace.
   - Use them for color cycling of water and sky, or a damage flash: e.g. set palette entry 0 to red for a few frames.
   - Avoid `gfx_palette` per frame: it waits a whole retrace on every call.
+  - `fx_pal_flash(index, rgbi, retraces)`: one entry in another color for a few retraces, then back (beat flashes, damage flashes). Up to 4 at once, IRQ5 only.
+  - `fx_split(row, top16)`: rows above `row` use another palette, for 32 colors on screen. The IRQ writes `top16` in the retrace, waits for the display to reach the row (counting the display-enable bit of 3DAh, with a limit), and rewrites the entries that differ. Costs the CPU from the retrace to that row every frame (JRCUBE: row 18, about a quarter of the frame rate in DOSBox). If the timing never comes, `fx_split_state` becomes -1 and it turns itself off. DOSBox can't show a mid-frame palette change; `fx_screenshot` draws it as intended. **Untried on the real PCjr.**
   - `fx_pal_anim(i, a, b, period, dir)`: up to 4 ranges rotated by the IRQ itself every `period` retraces. The speed doesn't depend on the frame rate. Ranges set together stay in step (JRCUBE rotates the lit and shadowed grid lines this way). A later `fx_pal_set` replaces the whole palette, phase included.
+
+### Code in the retrace interrupt (music, clocks)
+
+- Use `fx_irq_hook(fn)`: fn runs every retrace on the library's own stack, where ordinary C is safe.
+- Do not chain INT 0Dh yourself to call C functions. Inside a DOS call on the real PCjr the interrupt arrives on DOS's stack, and large-model code reaches its statics through SS: it would write into DOS.
+- No DOS or BIOS calls from fn.
 
 ### Timing
 
@@ -190,6 +198,8 @@ for (;;) {
 | fx_poly_rows, fx_poly_src | verified pixel for pixel against gfx_fill_poly coverage (T3, 160 polygons) |
 | fx_track, fx_restore | verified: after 5 frames of polygons, row patterns, source copies, rects, text, lines and psets, restoring gives back the background byte for byte on both pages (T3) |
 | fx_pal_anim | runs in DOSBox (JRCUBE); palette registers are write-only, so not checked on screen. Real PCjr: not tried |
+| fx_pal_flash | runs in DOSBox (JRCUBE). Real PCjr: not tried |
+| fx_split | T3: the wait finds the display timing in DOSBox and keeps polls to spare. Whether the PCjr's 3DAh bit 0 toggles per displayed line, and where the line lands, is untested on the real machine |
 | fx_copy_rect, fx_copy_delta, FX_BUFFER dirty rectangles | verified (T3) |
 | fx_pal_set, fx_pal_cycle | run without errors; the IRQ applies them. Palette registers are write-only, so not checked on screen |
 | tmr_ticks | verified against tmr_ms over 300 ms (T3) |
@@ -306,6 +316,8 @@ Advice:
 
 | Fact | Source |
 |---|---|
+| Port 61h bit 2 is the PCjr's text/graphics select; the BIOS mode set maintains it. Never write a saved copy of the whole port back (snd_done did, after gfx_done: the text screen came up as lines on the real PCjr). Change only the bits you own | found on the real PCjr, 2026-10-05; Tech Ref, 8255 port B |
+| An interrupt can arrive with SS not equal to DGROUP (inside DOS on real PC DOS). In the large model Watcom reaches statics through SS in ordinary functions, so C called from a handler must run on a stack in DGROUP: the library's IRQ5 does, and offers `fx_irq_hook`. DOSBox's DOS never switches stacks, so only T3's foreign-stack test shows it | wdis of jrfast.o; T3 |
 | Mode 8/9 layout, banks, nibble order (above) | IBM PCjr Technical Reference (Nov 1983), "Graphics Storage Organization" pp. 2-56 to 2-61, https://archive.org/details/bitsavers_ibmpcpcjrPceNov83_24513363 ; DOSBox `vga_draw.cpp` (draws `byte>>4` first) |
 | Port 3DFh, page register: bits 0-2 CRT page, bits 3-5 CPU page (16 KB units), bits 7:6 address mode (00 text, 01 16K graphics, 11 32K graphics). Write-only; the BIOS shadow is at 40:8A | Tech Ref p. 2-79; IBM PCjr BIOS listing SET_MODE, https://archive.org/details/pcjr-bios-transcription |
 | BIOS mode set uses pages 6/6 for modes 9/A and 7/7 for 16K modes; B800 reaches only the first 16 KB in 32K modes | BIOS listing (SET_MODE, and the comment "ACCESS THROUGH ... B800H ... ONLY REACHES THE FIRST 16K"); DOSBox `int10_modes.cpp`, `vga_memory.cpp` |

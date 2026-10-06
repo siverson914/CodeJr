@@ -866,7 +866,11 @@ void snd_done(void)
 	int v;
 	if (!snd_on) return;
 	for (v = 0; v < 4; v++) sn_write((unsigned char)(0x9F | (v << 5)));
-	outp(0x61, old61);
+	/* Put back the audio mux bits only. Bit 2 of this port is the PCjr's
+	 * text/graphics select, and snd_init usually ran in graphics mode:
+	 * writing the old byte back after gfx_done turned the text screen
+	 * into lines on the real machine. */
+	outp(0x61, (inp(0x61) & 0x9F) | (old61 & 0x60));
 	snd_on = 0;
 }
 

@@ -46,8 +46,21 @@ static unsigned char pal_q[16];
 /* fx_pal_anim: palette ranges rotated by the IRQ every `period` retraces */
 #define NANIM 4
 static struct { unsigned char a, b, period, cnt; signed char dir; } anim[NANIM];
-static unsigned char pal_live[16];   /* what the IRQ last wrote */
+static unsigned char pal_live[16];   /* the palette with the animation applied */
 static volatile unsigned char anim_on;
+/* fx_pal_flash: up to 4 entries overridden for a number of retraces */
+#define NFLASH 4
+static volatile struct { unsigned char idx, col, cnt; } flash[NFLASH];
+static volatile unsigned char flash_new;
+/* what the IRQ writes: pal_live plus flashes (below the split line) */
+static unsigned char pal_out[16];
+static volatile unsigned char out_valid;
+/* fx_split: rows above split_row use pal_top */
+static unsigned char pal_top[16];
+static volatile unsigned char split_row;
+static void (*irq_hook)(void);  /* fx_irq_hook */
+int fx_split_state;              /* 0 off, 1 running, -1 gave up (no timing found) */
+unsigned fx_split_guard;         /* polls left at the split, last frame (diagnostics) */
 static void (__interrupt __far *old_irq5)(void);
 static unsigned char old_mask;
 
@@ -375,7 +388,35 @@ static int anim_step(void)
 	return ch;
 }
 
-static void __interrupt __far irq5(void)
+/* Waits from the start of vertical retrace until the display has drawn
+ * n lines: first the end of retrace (3DAh bit 3), then 2n changes of
+ * bit 0, which toggles at the start and end of every displayed line and
+ * holds still in the borders. Returns the polls left out of `guard`; 0
+ * means the timing never came (then the split is given up, not hung). */
+extern unsigned split_wait(unsigned n2, unsigned guard);
+#pragma aux split_wait = \
+	"mov dx,3DAh" \
+	"SW1:" "in al,dx" "test al,8" "jz SW2" "dec bx" "jnz SW1" "jmp SWF" \
+	"SW2:" "in al,dx" "and al,1" "mov ah,al" \
+	"SW3:" "in al,dx" "and al,1" "cmp al,ah" "jne SW4" "dec bx" "jnz SW3" "jmp SWF" \
+	"SW4:" "mov ah,al" "loop SW3" "mov ax,bx" "jmp SWE" \
+	"SWF:" "xor ax,ax" \
+	"SWE:" \
+	parm [cx] [bx] value [ax] modify [ax bx cx dx];
+
+/* palette entries that differ from what is showing, mid-screen: as few
+ * writes as possible, since the PCjr blanks the picture while the
+ * gate array's index points at a palette register */
+static void pal_write_diff(const unsigned char *now, const unsigned char *want)
+{
+	int i;
+	inp(0x3DA);
+	for (i = 0; i < 16; i++)
+		if (now[i] != want[i]) { outp(0x3DA, 0x10 + i); outp(0x3DA, want[i]); }
+	outp(0x3DA, 0);
+}
+
+static void irq_body(void)
 {
 	int ch = 0, i;
 	fx_vbl++;
@@ -386,11 +427,48 @@ static void __interrupt __far irq5(void)
 	}
 	if (pal_pend) { for (i = 0; i < 16; i++) pal_live[i] = pal_q[i]; pal_pend = 0; ch = 1; }
 	if (anim_on && anim_step()) ch = 1;
-	if (ch) {
-		pal_write(pal_live);
+	if (flash_new) { flash_new = 0; ch = 1; }
+	for (i = 0; i < NFLASH; i++)
+		if (flash[i].cnt && !--flash[i].cnt) ch = 1;
+	if (ch || !out_valid) {
+		for (i = 0; i < 16; i++) pal_out[i] = pal_live[i];
+		for (i = 0; i < NFLASH; i++)
+			if (flash[i].cnt) pal_out[flash[i].idx] = flash[i].col;
 		if (anim_on) for (i = 0; i < 16; i++) gfx_pal[i] = pal_live[i]; /* screenshots see it */
+		out_valid = 1;
+		if (fx_split_state <= 0) pal_write(pal_out);
 	}
+	if (fx_split_state > 0) {
+		/* top palette in the retrace, the normal one from split_row down */
+		pal_write(pal_top);
+		fx_split_guard = split_wait(split_row * 2, 12000);
+		if (fx_split_guard) pal_write_diff(pal_top, pal_out);
+		else { fx_split_state = -1; pal_write(pal_out); }
+	}
+	if (irq_hook) irq_hook();
 	outp(0x20, 0x20);
+}
+
+/* The handler proper runs on a private stack in DGROUP. Two reasons, both
+ * invisible in DOSBox (its DOS never leaves the program's stack):
+ * - In the large model the compiler reaches DGROUP through SS in ordinary
+ *   functions. An interrupt that lands while DOS or the BIOS is on its own
+ *   stack would read and write that stack's segment instead.
+ * - DOS's stacks are small.
+ * irq5 itself touches statics only through DS (an __interrupt function
+ * reloads it) and has no locals, so nothing here depends on SS. */
+static unsigned char __near irq_stack[1024];
+static unsigned long irq_old;
+extern unsigned long stk_enter(unsigned seg, unsigned sp);
+#pragma aux stk_enter = "mov dx,ss" "mov ax,sp" "mov ss,cx" "mov sp,bx" parm [cx] [bx] value [dx ax];
+extern void stk_leave(unsigned long old);
+#pragma aux stk_leave = "mov ss,dx" "mov sp,ax" parm [dx ax];
+
+static void __interrupt __far irq5(void)
+{
+	irq_old = stk_enter(FP_SEG((void far *)irq_stack), FP_OFF(irq_stack) + sizeof irq_stack);
+	irq_body();
+	stk_leave(irq_old);
 }
 
 static void wait_retrace(void)
@@ -591,6 +669,10 @@ int fx_init(int fl)
 	for (i = 0; i < 200; i++) tab[i].off = jr_rowoff[i];
 	track = 0;
 	anim_on = 0;
+	fx_split_state = 0;
+	irq_hook = 0;
+	out_valid = 0;
+	memset((void *)flash, 0, sizeof flash);
 	memset(anim, 0, sizeof anim);
 	memcpy(pal_live, gfx_pal, 16);
 	fx_irq = 0;
@@ -1278,6 +1360,45 @@ void fx_pal_anim(int i, int a, int b, int period, int dir)
 	anim_on = (unsigned char)any;
 }
 
+void fx_irq_hook(void (*fn)(void))
+{
+	_disable();
+	irq_hook = fn;
+	_enable();
+}
+
+void fx_pal_flash(int index, int rgbi, int retraces)
+{
+	int i, k = -1;
+	if (index < 0 || index > 15 || !fx_irq) return;
+	for (i = 0; i < NFLASH; i++)   /* same entry again, else a free slot */
+		if (flash[i].cnt && flash[i].idx == index) { k = i; break; }
+	for (i = 0; k < 0 && i < NFLASH; i++)
+		if (!flash[i].cnt) k = i;
+	if (k < 0) k = 0;
+	_disable();
+	flash[k].idx = (unsigned char)index;
+	flash[k].col = (unsigned char)(rgbi & 15);
+	flash[k].cnt = (unsigned char)(retraces < 1 ? 1 : retraces > 255 ? 255 : retraces);
+	flash_new = 1;
+	_enable();
+}
+
+int fx_split(int row, const unsigned char *top16)
+{
+	if (!fx_irq || row < 1 || row > 199 || !top16) {
+		if (fx_split_state > 0) fx_split_state = 0;
+		out_valid = 0;   /* rewrite the whole palette at the next retrace */
+		return fx_split_state;
+	}
+	_disable();
+	memcpy(pal_top, top16, 16);
+	split_row = (unsigned char)row;
+	if (fx_split_state == 0) fx_split_state = 1;
+	_enable();
+	return fx_split_state;
+}
+
 /* ---- Screenshot of the page on screen ---------------------------------- */
 
 static const unsigned char rgb16[16][3] = {
@@ -1300,9 +1421,13 @@ int fx_screenshot(const char *path)
 	for (y = 0; y < 200; y++) {
 		unsigned char far *p = (unsigned char far *)MK_FP(seg, jr_rowoff[y]);
 		unsigned char *o = row;
+		/* the palette the hardware shows on this row: the split's top
+		 * palette above its line, else the IRQ's (animation, flashes) */
+		const unsigned char *pal = fx_split_state > 0 && y < split_row ? pal_top
+		                         : fx_irq && out_valid ? pal_out : gfx_pal;
 		for (x = 0; x < 160; x++) {
 			int px = x & 1 ? p[x >> 1] & 15 : p[x >> 1] >> 4, k;
-			const unsigned char *c = rgb16[gfx_pal[px]];
+			const unsigned char *c = rgb16[pal[px] & 15];
 			for (k = 0; k < 2; k++) { o[0] = c[0]; o[1] = c[1]; o[2] = c[2]; o += 3; }
 		}
 		if (fwrite(row, 1, sizeof row, f) != sizeof row) { fclose(f); return -1; }

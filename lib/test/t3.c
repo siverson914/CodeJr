@@ -11,6 +11,19 @@
 extern unsigned jr_rowoff[200];
 
 static int fails;
+
+/* Waits n vertical retraces with SS:SP in another segment and interrupts
+ * on: what the retrace interrupt meets when it lands inside a DOS call on
+ * real PC DOS (DOSBox's DOS never leaves the program's stack). */
+extern void on_foreign_stack(unsigned seg, unsigned n);
+#pragma aux on_foreign_stack = \
+	"mov bx,ss" "mov cx,sp" "cli" "mov ss,ax" "mov sp,0FFF0h" "sti" \
+	"push bx" "push cx" "mov bx,dx" "mov dx,3DAh" \
+	"FS1:" "in al,dx" "test al,8" "jnz FS1" \
+	"FS2:" "in al,dx" "test al,8" "jz FS2" \
+	"dec bx" "jnz FS1" \
+	"pop cx" "pop bx" "cli" "mov ss,bx" "mov sp,cx" "sti" \
+	parm [ax] [dx] modify [ax bx cx dx];
 static int px(unsigned seg, int x, int y)
 {
 	unsigned char b = *(unsigned char far *)MK_FP(seg, jr_rowoff[y] + (x >> 1));
@@ -282,6 +295,40 @@ int main(int argc, char **argv)
 			dbg_log("%s fx_copy_rect: %ld", bad ? "FAIL" : "PASS", bad);
 			if (bad) fails++;
 		}
+	}
+	if (fx_irq) { /* the retrace interrupt must not touch the interrupted stack's segment */
+		unsigned seg = 0;
+		long bad = 0;
+		unsigned k, v0 = fx_vbl;
+		if (_dos_allocmem(0x1000, &seg)) { dbg_log("FAIL foreign stack: no 64 KB"); fails++; }
+		else {
+			unsigned char far *q = (unsigned char far *)MK_FP(seg, 0);
+			_fmemset(q, 0xA5, 0x8000u); _fmemset(q + 0x8000u, 0xA5, 0x8000u);
+			fx_pal_anim(0, 2, 5, 1, 1);          /* palette rotation every retrace */
+			fx_pal_flash(7, 15, 3);
+			on_foreign_stack(seg, 8);
+			fx_pal_anim(0, 0, 0, 0, 0);
+			for (k = 0; k < 0xFE00u; k++) if (q[k] != 0xA5) bad++;   /* below the stack's own top */
+			for (k = 0xFE00u; k < 0xFFB0u; k++) if (q[k] != 0xA5) bad++;  /* and it used under 64 bytes */
+			dbg_log("%s IRQ5 on a foreign stack: %ld bytes of its segment changed, %u retraces", bad ? "FAIL" : "PASS", bad, fx_vbl - v0);
+			if (bad) fails++;
+			_dos_freemem(seg);
+		}
+	}
+	if (fx_irq) { /* fx_split finds the display timing (DOSBox), and turns off */
+		static const unsigned char top[16] = { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 };
+		unsigned v0;
+		int st;
+		fx_split(100, top);
+		v0 = fx_vbl;
+		while (fx_vbl - v0 < 10) ;
+		st = fx_split_state;
+		dbg_log("%s fx_split: state %d, %u polls to spare", st == 1 && fx_split_guard ? "PASS" : "FAIL", st, fx_split_guard);
+		if (st != 1 || !fx_split_guard) fails++;
+		fx_split(0, 0);
+		fx_pal_flash(3, 15, 2);
+		v0 = fx_vbl;
+		while (fx_vbl - v0 < 4) ;
 	}
 	{ /* tmr_ticks agrees with tmr_ms */
 		unsigned long m0 = tmr_ms(), k0 = tmr_ticks(), m1, k1;

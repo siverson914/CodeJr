@@ -97,6 +97,14 @@ extern unsigned fx_seg;        /* segment the fx_* functions draw into     */
 extern int fx_pages;           /* 2: page flipping; 1: buffer + copy       */
 extern int fx_irq;             /* 1 if flips happen in the IRQ5 handler    */
 extern volatile unsigned fx_vbl; /* vertical retraces counted by IRQ5 (60 Hz) */
+/* Runs fn in every vertical retrace (60 Hz) when fx_irq is 1, after the
+ * flip and the palette: music, clocks. It runs on the library's own stack
+ * with SS = DGROUP, so ordinary C is safe there even when the interrupt
+ * lands inside DOS. Do NOT chain INT 0Dh yourself to call C: in the large
+ * model the compiler reaches statics through SS, and inside a DOS call on
+ * a real PCjr SS is DOS's. Keep fn short; no DOS or BIOS calls. 0 removes
+ * it; fx_init clears it. */
+void fx_irq_hook(void (*fn)(void));
 void fx_flip(void);            /* show what was drawn; swap pages          */
 void fx_begin(void);           /* wait until the new target is off screen  */
 void fx_sync_rows(int y0, int y1); /* copy rows of fx_seg to the shown page (static HUDs) */
@@ -157,6 +165,21 @@ void fx_pal_cycle(int a, int b, int dir);
  * range i. Setting any range restarts all of them in step. Without IRQ5
  * it steps once per fx_flip instead. */
 void fx_pal_anim(int i, int a, int b, int period, int dir);
+/* Shows entry `index` as hardware color rgbi for `retraces` frames of the
+ * display (60 Hz), then puts it back: beat flashes, damage flashes. Up to
+ * 4 at once; IRQ5 only. */
+void fx_pal_flash(int index, int rgbi, int retraces);
+/* 32 colors: rows 0..row-1 use top16 and the rest the normal palette.
+ * The IRQ writes top16 in the retrace, then waits for the display to
+ * reach `row` and rewrites the entries that differ (the PCjr blanks the
+ * picture for the few microseconds that takes, so put the line where the
+ * picture is black). The wait costs the CPU from the retrace to that row
+ * on every frame. Returns fx_split_state: 1 running, 0 off (no IRQ5),
+ * -1 given up because the display timing never came; fx_split(0, 0)
+ * turns it off. Tried only in DOSBox so far. */
+int fx_split(int row, const unsigned char *top16);
+extern int fx_split_state;
+extern unsigned fx_split_guard;   /* polls to spare at the line, last frame */
 
 /* Moving objects over a static background, without clearing: after
  * fx_track(1), every fx_ drawing call records the bytes it touched, per
