@@ -19,6 +19,7 @@ func TestSpeakable(t *testing.T) {
 		{"Pi is 3.14 and that's well-known.", "Pi is 3.14 and that's well-known."},
 		{"**Done.** Saved `LOG.TXT`.", "Done. Saved log dot text."},
 		{"JRDOOM and JRFLIGHT are games.", "Junior Doom and Junior Flight are games."},
+		{"Back at the DOS prompt, on PC DOS 3.30 or MS-DOS.", "Back at the doss prompt, on P C doss 3.30 or M S doss."},
 		{"Paris.", "Paris."},
 	} {
 		if got := Speakable(c.in); got != c.want {

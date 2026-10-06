@@ -63,8 +63,9 @@ var speakRules = []speakRule{
 	rule(`(?i)\bGW-?BASIC\b`, "G W Basic"),
 	rule(`\bBASICA\b`, "Basic A"),
 	rule(`\bQBASIC\b`, "Q Basic"),
-	rule(`(?i)\bMS-DOS\b`, "M S DOS"),
-	rule(`(?i)\bPC[- ]DOS\b`, "P C DOS"),
+	rule(`(?i)\bMS-DOS\b`, "M S doss"),
+	rule(`(?i)\bPC[- ]DOS\b`, "P C doss"),
+	rule(`\bD[Oo][Ss]\b`, "doss"), // said as a word, never spelled or "dose"
 	rule(`(?i)\bMS-Kermit\b`, "M S Kermit"),
 	rule(`\bSN76496\b`, "S N 7 6 4 9 6"),
 	rule(`\bSN76489\b`, "S N 7 6 4 8 9"),
