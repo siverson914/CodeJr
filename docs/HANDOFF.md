@@ -6,7 +6,8 @@ Written 2026-10-03, at the end of the first working session. Read this first. `d
 
 - **Start sessions in `~/Github/CodeJr`** (the gw workspace root; it has its own `CLAUDE.md`). The repo is `~/Github/CodeJr/CodeJr`. Run `just` from inside the repo.
 - **Live data is outside the repo,** in `~/.local/share/codejr/`: `workspace/` (Claude's folder for the PCjr) and `logs/`. Every checkout and gw worktree shares it. `CODEJR_HOME` overrides the location.
-- **Git:** private repo `github.com/siverson914/CodeJr`, branch `main`. `gw init` hasn't been run in `~/Github/CodeJr` yet (ask first).
+- **Git:** private repo `github.com/siverson914/CodeJr`, branch `main`. The workspace uses gw: every task runs in a session under `~/Github/CodeJr/.worktrees/` and lands with a gate (`just test`). The canonical checkout `~/Github/CodeJr/CodeJr` is read-only for edits and is what the live server runs from: `just live` there pulls, builds, queues the client and restarts.
+- **Layout (2026-10-06):** `server/` and `client/` are CodeJr itself; `lib/` is the graphics library; every program that runs on the PCjr is under `apps/` (one folder each, with its own `build.sh`); `tools/` has the serial test tools; `docs/design/` has the original plans. On the PCjr, `C:\CODEJR\PROGS` holds CodeJr's own files at the top and one folder per app (`JRAI`, `SAY`, `JRDOOM`, `JRFLIGHT`, `JRCUBE`, `BASIC`, `UTILS`, `VOICE`, plus the projects CodeJr made). `session.Layout` (`organize.go`) is the one table behind both `ORGANIZE.BAT` (moves loose files on the PCjr) and `just organize` (moves them in the workspace and renames the sync records, so nothing is sent again).
 
 ## What CodeJr is
 
@@ -52,7 +53,7 @@ There are two ways in from the PCjr, and the server tells them apart by itself:
 - The pull protocol's stall fix (client 0.3). The first real pulls (client 0.2) worked chunk after chunk, then failed when the WiFi link stalled mid-burst. The fix is in `client/pull.c` (`pull_fetch`) and `cjp.Burster`.
 - Client 0.6: `/run`, the `CODEJR.BAT` run-and-call-back loop, local echo, the "thinking" line (see below).
 - Both games and the whole graphics library. Nobody has played them with a real keyboard, heard the sound, or seen the palette on the real monitor.
-- `SAY.EXE` and its speech clips (`speech/`, README there): ElevenLabs speech (voice "Brian") through gipity, one quality for everything: medium (4-bit ADPCM, 8 kHz), played on the SN76496's three voices combined (`.SND`). **SAY 1.0 played on the real PCjr:** the chip version sounded best, PWM (`.SNP`) whined, but the chip loop was late on 72% of samples (playing slow). SAY 1.1 polls the 8259 instead of taking an interrupt per sample and has a stopwatch (`/V`, `/T`); the poll loop can't run in DOSBox and is untested.
+- `SAY.EXE` and its speech clips (`apps/say/`, README there): ElevenLabs speech (voice "Brian") through gipity, one quality for everything: medium (4-bit ADPCM, 8 kHz), played on the SN76496's three voices combined (`.SND`). **SAY 1.0 played on the real PCjr:** the chip version sounded best, PWM (`.SNP`) whined, but the chip loop was late on 72% of samples (playing slow). SAY 1.1 polls the 8259 instead of taking an interrupt per sample and has a stopwatch (`/V`, `/T`); the poll loop can't run in DOSBox and is untested.
 
 **Queued for the PCjr:** `CODEJR.EXE` 0.9 (0.6's setup files went over on day 2), plus the JRAI session's demo files.
 
@@ -76,7 +77,7 @@ There are two ways in from the PCjr, and the server tells them apart by itself:
 
 **Client 1.3:** once CodeJr is leaving (any way out), the input line and cursor are gone and keys are left for DOS; and a key typed during a spoken reply stops the speech and lands in the input line (SAY's `/K`). Not yet run on the real PCjr.
 
-**Client 1.2, `/voice`:** toggles a workspace flag. The voice gets a spelled-out copy of the reply (`Speakable` in `server/internal/session/speakable.go`: "PCjr" as "PC Junior", "=" as "equals", file names, units), while the screen keeps the text as written; add a rule there when the voice says something wrong. While on, Claude is told to answer in a sentence or two, and after each reply the server runs the speech project's converter (`speech/mksnd.py --text ...` at the converter's default quality, which Steve set to medium: gipity's neural voice, 4-bit ADPCM at 8 kHz, about 4 KB per second of speech, so a 5 s reply takes about 8 s to send) into `VOICE/REPLY.SND`, syncs it, and sends `Play`. The client plays it on `READY` (the line is quiet then) by running `SAY.EXE` as a child program with its output sent to NUL, so CodeJr stays connected and keeps its screen; a key stops the speech. Fixed clips `VOICE\ON.SND`, `OFF.SND`, `BYE.SND` are made once in the background at server start; `/exit` plays `BYE` with voice on. Making a 2.4 s clip takes 2 to 4 s. The server also provides the repo's `speech/SAY.EXE`, so the player matches the clips. `SAY=` in `CODEJR.CFG` passes up to two options to SAY (the tests use `/H /X`: DOSBox needs `/H`). SAY's code is not linked into the client on purpose: running SAY.EXE picks up the speech session's improvements with no client change.
+**Client 1.2, `/voice`:** toggles a workspace flag. The voice gets a spelled-out copy of the reply (`Speakable` in `server/internal/session/speakable.go`: "PCjr" as "PC Junior", "=" as "equals", file names, units), while the screen keeps the text as written; add a rule there when the voice says something wrong. While on, Claude is told to answer in a sentence or two, and after each reply the server runs the speech project's converter (`apps/say/mksnd.py --text ...` at the converter's default quality, which Steve set to medium: gipity's neural voice, 4-bit ADPCM at 8 kHz, about 4 KB per second of speech, so a 5 s reply takes about 8 s to send) into `VOICE/REPLY.SND`, syncs it, and sends `Play`. The client plays it on `READY` (the line is quiet then) by running `SAY.EXE` as a child program with its output sent to NUL, so CodeJr stays connected and keeps its screen; a key stops the speech. Fixed clips `VOICE\ON.SND`, `OFF.SND`, `BYE.SND` are made once in the background at server start; `/exit` plays `BYE` with voice on. Making a 2.4 s clip takes 2 to 4 s. The server also provides the repo's `apps/say/SAY.EXE`, so the player matches the clips. `SAY=` in `CODEJR.CFG` passes up to two options to SAY (the tests use `/H /X`: DOSBox needs `/H`). SAY's code is not linked into the client on purpose: running SAY.EXE picks up the speech session's improvements with no client change.
 
 ## First things to test on the real PCjr
 
@@ -94,7 +95,7 @@ Ask Steve to do these in order and send the `[client]` line or a photo each time
 10. **Risky graphics paths:** `JRFLIGHT /LD` (hardware 160x100 mode, never displayed anywhere), and 320x200 mode in `lib/DEMO.EXE` (this PCjr reserves only 16 KB of video memory; the library claims its own block).
 11. **Typing in the native client while text arrives:** do letters get lost? Alt-S prints the client's loss counters into the chat.
 12. **Speech timing.** SAY 1.1-1.4's `/T` froze the PCjr (power-off needed): never run `/T` from those versions. With SAY 1.5: `SAY /T HELLOH` (chipmunk; the line to note is "chip clips up to about N Hz should keep up here"), then `SAY /V HELLO` (9.3 kHz) and `SAY /V HELLO10` (10.65 kHz). Want: late 0 and a speed matching "wanted". Then re-make the clips at the highest rate with some margin below the `/T` figure (`mksnd.py --hz`, then make it the default in `METHODS`). If `SAY` hangs or makes no sound with polling but `SAY /H HELLO` works, the poll command misbehaves on this 8259: say so in the journal.
-13. **Quality presets (SAY 1.3).** `SAY /V HELLOH` (high: raw 10.7 kHz), `SAY /V HELLOM` (medium: 4-bit ADPCM, 8 kHz), `SAY /V HELLOL` (low: 3-bit ADPCM, 6 kHz). Want late 0 on all three, especially high; note each "decoded ADPCM" time. If high is late, lower its rate in `QUALITY` in `speech/mksnd.py`.
+13. **Quality presets (SAY 1.3).** `SAY /V HELLOH` (high: raw 10.7 kHz), `SAY /V HELLOM` (medium: 4-bit ADPCM, 8 kHz), `SAY /V HELLOL` (low: 3-bit ADPCM, 6 kHz). Want late 0 on all three, especially high; note each "decoded ADPCM" time. If high is late, lower its rate in `QUALITY` in `apps/say/mksnd.py`.
 14. **Tighter clips (SAY 1.6).** `REPLYV6`, `REPLYV5`, `REPLYV4`, `REPLYV3` (2-bit at 6/5/4/3 kHz, new pipeline) against the old `REPLY5`/`REPLY4`/`REPLY3`, and `REPLYL6` (3-bit, 6 kHz). Ask for the lowest rate that still sounds acceptable: that sets voice mode's preset.
 
 ## How to work in this repo
@@ -136,12 +137,14 @@ just deploy-speech HELLO READY  # queue SAY.EXE and clips (NAME.SNP for a PWM ve
 | `server/internal/term` | VT100 screen, pacing, ASCII conversion |
 | `server/internal/claude` | runs `claude -p` and parses its stream |
 | `server/internal/pcjr` | the build and run tools (MCP over stdio, `codejr mcp`) |
-| `client/` | `codejr.c`, `cjp.c`, `pull.c`, `lz.c`, `serial.c`, `serisr.asm`, `screen.c`; `cjterm.c` test terminal; `test/` host harnesses |
+| `client/` | `codejr.c`, `cjp.c`, `pull.c`, `lz.c`, `serial.c`, `serisr.asm`, `screen.c`, `scrdump.c`; `test/` host harnesses |
+| `tools/` | serial test tools: `cjterm.c` test terminal, `uartdump.c`, `hello.c` (`tools/build.sh`) |
 | `lib/` | JRGFX graphics library; read `STATUS.md` and `FAST.md` |
-| `games/doom`, `games/flight` | JRDOOM and JRFLIGHT, each with README and NOTES |
-| `speech/` | `SAY.EXE` (`say.c`, `player.asm` with the ADPCM decoder), `mksnd.py` converter (`--quality high/medium/low`, `--codec`), `grid.py` quality grid, `clips/` (gipity mp3 + text), `test.sh` |
+| `apps/jrdoom`, `apps/jrflight` | JRDOOM and JRFLIGHT, each with README and NOTES |
+| `apps/jrai`, `apps/jrai2` | the "PCjr MEETS AI" demo and the story for demo 2 |
+| `apps/say/` | `SAY.EXE` (`say.c`, `player.asm` with the ADPCM decoder), `mksnd.py` converter (`--quality high/medium/low`, `--codec`), `grid.py` quality grid, `clips/` (gipity mp3 + text), `test.sh` |
 | `games/quest` | Jr's Quest, a King's Quest style adventure on our own AGI v2 compatible engine. The whole 16-room game plays in a browser on the JavaScript reference interpreter (no 8088 code yet). Read `DESIGN.md`, `ENGINE.md`, `FORMATS.md`, `GAMEPLAN.md` there. `just quest`, `just quest-test`, `just quest-serve` (AI parser and live ending through `claude -p`), `just quest-shots`, `just quest-lint` |
-| `demos/cube` | JRCUBE, a shaded spinning cube with a moving light and real-time shadow (README there) |
+| `apps/jrcube` | JRCUBE, a shaded spinning cube with a moving light and real-time shadow (README there) |
 | `emu/` | headless emulator scripts |
 | `docs/attic/` | a parked selective-repeat link (didn't pass its tests) |
 | `~/.local/share/codejr/workspace/` | Claude's folder (outside the repo), mirrors `C:\CODEJR\PROGS`; state in its `.codejr/` |

@@ -17,8 +17,8 @@ because they stretch along with the held sound. `--no-check` skips it.
 "Decoding  80%" while it gets a clip ready, so it never sits silent.
 
 ```
-just clip READY "Ready when you are."     # gipity speech -> speech/clips/READY.mp3 + .txt
-just speech                               # every clip -> speech/out/NAME.SND + preview WAV
+just clip READY "Ready when you are."     # gipity speech -> apps/say/clips/READY.mp3 + .txt
+just speech                               # every clip -> apps/say/out/NAME.SND + preview WAV
 just deploy-speech HELLO READY            # queue SAY.EXE and clips for the PCjr
 ```
 
@@ -50,7 +50,7 @@ On the PCjr: `SAY HELLO`, or `SAY HELLO READY FRIENDS`. A key stops it.
 | `/X` | write the decoded samples to `SAYDUMP.BIN` (tests) |
 | `/C` | decode ADPCM with the C decoder instead of the assembly one (tests) |
 
-`speech/out/NAME-chip.wav` is a preview of how the clip should sound on the
+`apps/say/out/NAME-chip.wav` is a preview of how the clip should sound on the
 PCjr, through a rough small-speaker filter, assuming ideal hardware.
 
 ## Two ways to make a PCjr talk
@@ -202,7 +202,7 @@ codes don't line up with bytes, so the decoder takes them 3 bytes (8 codes)
 at a time, each code shifted out of its byte or byte pair by a fixed
 amount. `/V` prints the decode time.
 
-**What the grid measured** (`speech/grid.py`: the 9.6 s REPLY clip, ideal
+**What the grid measured** (`apps/say/grid.py`: the 9.6 s REPLY clip, ideal
 chip, link at 2.6 KB/s, Whisper small.en):
 
 | | 6 kHz | 7 kHz | 8 kHz | 9.3 kHz | 10.7 kHz |

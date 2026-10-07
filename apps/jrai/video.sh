@@ -2,7 +2,7 @@
 # Makes a preview video of the demo (no boot sequence): runs JRAI /VIDEO
 # headless in DOSBox (frame-locked, so emulator speed doesn't matter),
 # renders the logged sound chip writes to audio, and muxes an MP4.
-#   games/jrai/video.sh [out.mp4]     (about 5 minutes)
+#   apps/jrai/video.sh [out.mp4]     (about 5 minutes)
 set -e
 cd "$(dirname "$0")"
 out=${1:-$PWD/jrai-preview.mp4}

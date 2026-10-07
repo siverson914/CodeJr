@@ -9,7 +9,7 @@ a glowing orb circling it and casting a real-time shadow, all timed to a
 
 `shots/jrcube.mp4` (made by `video.sh`, not in git) is the whole show with
 its music: the song is played into a log in the emulator and the log is
-rendered by `games/jrai/render.py`, which emulates the SN76496.
+rendered by `apps/jrai/render.py`, which emulates the SN76496.
 
 ## The show
 
@@ -77,12 +77,12 @@ should look. **Only the real PCjr will tell whether it works.**
 ## Build
 
 ```sh
-demos/cube/build.sh            # JRCUBE.EXE (cube.c, music.c, shapes.c, lib/jrgfx.lib)
-python3 demos/cube/genshape.py > demos/cube/shapes.c   # after changing the shapes
-demos/cube/shots.sh 100        # shots/jrcube.gif (from pattern 4) and shots/frame.png
-demos/cube/video.sh            # shots/jrcube.mp4, the whole show with sound (about 10 min)
-demos/cube/musictest.sh        # shots/song.wav, the song alone
-lib/emu.sh /tmp/out 400 demos/cube/JRCUBE.EXE /BENCH:60 /PROF
+apps/jrcube/build.sh            # JRCUBE.EXE (cube.c, music.c, shapes.c, lib/jrgfx.lib)
+python3 apps/jrcube/genshape.py > apps/jrcube/shapes.c   # after changing the shapes
+apps/jrcube/shots.sh 100        # shots/jrcube.gif (from pattern 4) and shots/frame.png
+apps/jrcube/video.sh            # shots/jrcube.mp4, the whole show with sound (about 10 min)
+apps/jrcube/musictest.sh        # shots/song.wav, the song alone
+lib/emu.sh /tmp/out 400 apps/jrcube/JRCUBE.EXE /BENCH:60 /PROF
 ```
 
 ## How it's done

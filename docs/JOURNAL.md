@@ -731,3 +731,13 @@ Client 1.4 worked on the real machine. His list, and what was done:
 `just emu-native`: 50 checks pass with 1.5. Not yet on the real PCjr: the speed probe (the emulator has no modem that changes speed).
 
 **SWORDS on the real PCjr (2026-10-06).** Steve's 190-character request arrived whole (the client 1.4 fix, on the real machine), and CodeJr built `SWORDS` (two stick-figure swordsmen, C, 50 KB) in about 10 minutes. CodeJr said "a locked 60 frames a second" from its emulator run; on the real PCjr Steve measured **20 fps**. One more data point for "the emulator is not the PCjr": about 3 times optimistic for a program that redraws about 25 short lines a frame.
+
+## Tidying up (2026-10-06)
+
+Steve called the project "basically done for now" and asked for order. The exit fix worked on the real PCjr (every game now leaves a clean prompt), so the rest was housekeeping.
+
+**The repo.** It had grown by accretion: programs for the PCjr under `games/`, `demos/` and `speech/`, test tools inside `client/`, the first plans beside the handoff. Now every PCjr program is under `apps/` (`jrdoom`, `jrflight`, `jrcube`, `jrai`, `jrai2`, `say`), the serial test tools are in `tools/` with their own build script, and the plans are in `docs/design/`. Paths in scripts, the justfile, the Go code and the docs were rewritten; this journal keeps the old paths, as history. `games/quest` stays where it is: the quest session has it uncommitted in the canonical checkout.
+
+**The PCjr's folder.** `C:\CODEJR\PROGS` held everything loose: games, 20 voice clips, test tools, BASIC programs. One table (`session.Layout`) now says which loose file belongs in which app folder. It generates `ORGANIZE.BAT` for the PCjr (DOS 3.3 has no MOVE: copy, then delete if the copy is there) and drives `just organize`, which moves the same files in the workspace and renames the sync records and kept copies, so the server doesn't send anything again. Steve had already made a `UTILS` folder by hand, so that is the name for the test tools. `SAY.EXE` moves into `SAY\`; the client looks there first (1.6). The deploy tasks now put each app in its folder.
+
+**The live server.** It had been running from a worktree made by hand on day 2. `just live` (pull, build, queue the client, restart) is meant to be run in the canonical checkout, which gw keeps read-only for edits.

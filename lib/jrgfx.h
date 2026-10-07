@@ -1,7 +1,7 @@
 /* JRGFX: graphics, input, timing and sound for the IBM PCjr.
  *
  * The shared interface for CodeJr's game library (lib/) and the first two
- * games built on it (games/doom, games/flight). Games code against this
+ * games built on it (apps/jrdoom, apps/jrflight). Games code against this
  * header; the library implements it. Changing a signature here means
  * changing every user, so add rather than change.
  *

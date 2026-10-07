@@ -1,6 +1,6 @@
 #!/bin/sh
 # Renders JRCUBE headless at fixed time steps and makes an animated GIF.
-#   [AT=pattern] demos/cube/shots.sh [frames] [outdir]   (default: pattern 12, demos/cube/shots)
+#   [AT=pattern] apps/jrcube/shots.sh [frames] [outdir]   (default: pattern 12, apps/jrcube/shots)
 # Each frame is 4 retraces (1/15 s) of demo time, so the GIF plays at the
 # demo's real speed. Never opens a window.
 set -e

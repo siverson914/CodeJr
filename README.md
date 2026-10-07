@@ -12,7 +12,7 @@ The server answers the call, keeps the chat going, runs Claude in a workspace fo
 - **`CODEJR.EXE`** (in `client/`): a 25 KB DOS program that draws its own screen and pulls files in compressed bursts.
 - **MS-Kermit 3.14**: needs nothing installed but Kermit. The server draws the screen with VT100 codes and starts Kermit transfers remotely. Slower, and the fallback that always works.
 
-Also here: **JRGFX** (`lib/`), a 16-color graphics, input and sound library for the PCjr, and two games built on it: **JRDOOM** (`games/doom`), a Doom-style raycaster, and **JRFLIGHT** (`games/flight`), a filled-polygon flight simulator.
+Also here: **JRGFX** (`lib/`), a 16-color graphics, input and sound library for the PCjr, and two games built on it: **JRDOOM** (`apps/jrdoom`), a Doom-style raycaster, and **JRFLIGHT** (`apps/jrflight`), a filled-polygon flight simulator.
 
 ## Status
 
@@ -56,6 +56,20 @@ Type a request and press Enter. Commands: `/files`, `/sync`, `/send NAME`, `/new
 
 - `docs/HANDOFF.md`: current state, what to test, what to build next, facts and mistakes.
 - `docs/JOURNAL.md`: how it was built and debugged, step by step.
-- `docs/PLAN.md`, `docs/CLIENT.md`: the original plans, with status notes.
+- `docs/design/PLAN.md`, `docs/design/CLIENT.md`: the original plans, with status notes.
 - `lib/STATUS.md`, `lib/FAST.md`: the graphics library.
-- `games/doom/README.md`, `games/flight/README.md`: the games.
+- `apps/jrdoom/README.md`, `apps/jrflight/README.md`: the games.
+
+## Layout
+
+| Folder | What |
+|---|---|
+| `server/` | the Go server (`just build`, `just restart`, `just live`) |
+| `client/` | `CODEJR.EXE`, the PCjr client |
+| `lib/` | JRGFX, the graphics, input, timing and sound library |
+| `apps/` | programs for the PCjr, one folder each: `jrdoom`, `jrflight`, `jrcube`, `jrai`, `say` |
+| `tools/` | serial test tools for the PCjr |
+| `emu/` | headless emulator tests |
+| `docs/` | handoff, journal, and the original plans in `design/` |
+
+On the PCjr everything lives in `C:\CODEJR\PROGS`: CodeJr's own files at the top, one folder per app. `ORGANIZE` there sorts loose files into folders.

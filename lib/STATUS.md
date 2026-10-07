@@ -14,7 +14,7 @@ Everything in the header is implemented. Phase 1 and Phase 2 are done.
 - See "Fast path" below. Design notes, every trick tried, the cost model and the sources are in `lib/FAST.md`.
 - The old API is unchanged and still works, and you can mix the two.
 
-**New (JRCUBE, `demos/cube`): moving objects over a static scene.**
+**New (JRCUBE, `apps/jrcube`): moving objects over a static scene.**
 - `fx_track` / `fx_restore`: no clears. Every fx_ call records the bytes it drew, per page and per row; `fx_restore(bg)` copies just those back from a background buffer.
 - `fx_poly_rows`: a pattern byte per row, so gradients and 2x2 ordered dithers cost the same as a flat fill.
 - `fx_poly_src`: a polygon filled by copying from another buffer (shadows that darken the floor's own pattern).
@@ -27,7 +27,7 @@ Use the large memory model with 8088 instructions only:
 
 ```sh
 . /home/steve/Github/CodeJr/CodeJr/client/owenv.sh
-cd games/doom
+cd apps/jrdoom
 wcl -q -bt=dos -ml -0 -ox -wx -fe=DOOM.EXE doom.c ../../lib/jrgfx.lib
 ```
 
@@ -103,8 +103,8 @@ gfx_done();            /* also undoes fx_init */
 - Use `fx_poly(n, xy, pat2)` (convex), `fx_tri`, `fx_hspan`, `fx_fill_rect`. Whole bytes are written with REP STOSW, and dithering is free.
 - `fx_clip(y0, y1)` limits polygons and spans to the 3D view rows.
 - Draw back to front straight into the hidden page. Per-row setup dominates, so many small polygons cost more than a few big ones.
-- If you keep your own packed buffer (like games/flight), you can also just copy it to `gfx_vseg` between fx_begin and fx_flip.
-- Shaded faces: `fx_poly_rows(n, xy, rowpat200)` fills row y with `rowpat200[y]` (only the polygon's rows are read). Alternate the two bytes of a dither by row parity for a checkerboard or 2x2 ordered dither. `demos/cube` interpolates a light value down the rows and turns it into patterns with an XLAT loop.
+- If you keep your own packed buffer (like apps/jrflight), you can also just copy it to `gfx_vseg` between fx_begin and fx_flip.
+- Shaded faces: `fx_poly_rows(n, xy, rowpat200)` fills row y with `rowpat200[y]` (only the polygon's rows are read). Alternate the two bytes of a dither by row parity for a checkerboard or 2x2 ordered dither. `apps/jrcube` interpolates a light value down the rows and turns it into patterns with an XLAT loop.
 - Shadows and reveals: `fx_poly_src(n, xy, seg)` copies the polygon's pixels from `seg` (page layout, e.g. `fx_alloc_buffer`). Pre-draw a darkened copy of the floor and the shadow keeps the floor's pattern.
 
 ### Moving objects over a static background (fx_track, fx_restore)
@@ -155,13 +155,13 @@ for (;;) {
 
 ### For the two current games (no rewrite needed)
 
-**games/doom:**
+**apps/jrdoom:**
 1. Replace `gfx_init(GFX_160x200)` with `fx_init(0)`.
 2. Call `fx_begin()` before `view_to_screen()` and `fx_flip()` after it. B800 now maps to the hidden page, so that copy goes there.
 3. After drawing the HUD with gfx_present_rows, call `fx_sync_rows(HUD_Y, 199)`. Otherwise the two pages show different HUDs and it flickers.
 4. Bigger win: point draw_runs at `fx_seg` with BANK = 0x2000 (the page has the same 80-byte rows, odd rows 0x2000 later) and drop the 11.5 KB copy entirely (~45 ms per frame on a real PCjr).
 
-**games/flight:**
+**apps/jrflight:**
 1. Replace `gfx_init` with `fx_init(0)`.
 2. Wrap `r_present_view` with `fx_begin()` and `fx_flip()`, and call `fx_sync_rows` after panel updates.
 3. This gives tear-free frames for free. Rendering directly into `fx_seg` would save the 23 ms copy.

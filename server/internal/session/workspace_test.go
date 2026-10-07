@@ -81,3 +81,44 @@ func TestProjectFolders(t *testing.T) {
 		t.Fatal("ValidPath")
 	}
 }
+
+func TestOrganize(t *testing.T) {
+	w := &Workspace{Dir: t.TempDir()}
+	w.Init()
+	for _, n := range []string{"JM1.SND", "JRAI.EXE", "HELLO.BAS", "SAY.EXE", "CODEJR.EXE", "CJTERM.EXE", "JUNIOR_M.SND"} {
+		os.WriteFile(filepath.Join(w.Dir, n), []byte(n), 0o644)
+	}
+	// The PCjr has them all, loose.
+	_, hashes, _, _ := w.Pending()
+	w.MarkSynced(hashes)
+	w.SeedHave()
+
+	moved, err := w.Organize()
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `BASIC\HELLO.BAS JRAI\JM1.SND JRAI\JRAI.EXE SAY\JUNIOR_M.SND SAY\SAY.EXE UTILS\CJTERM.EXE`
+	if strings.Join(moved, " ") != want {
+		t.Fatalf("moved %v", moved)
+	}
+	if _, err := os.Stat(filepath.Join(w.Dir, "CODEJR.EXE")); err != nil {
+		t.Fatal("CODEJR.EXE must stay at the top")
+	}
+	// Nothing is sent again: the records moved with the files.
+	if files, _, _, _ := w.Pending(); len(files) != 0 {
+		t.Fatalf("would resend %+v", files)
+	}
+	if w.Have(`JRAI\JM1.SND`) == nil || w.Have("JM1.SND") != nil {
+		t.Fatal("the kept copy didn't move")
+	}
+	// Running it again moves nothing.
+	if moved, _ := w.Organize(); len(moved) != 0 {
+		t.Fatalf("second run moved %v", moved)
+	}
+	bat := OrganizeBat()
+	for _, line := range []string{`IF NOT EXIST JRAI\NUL MD JRAI`, `IF EXIST JM?.SND COPY JM?.SND JRAI >NUL`, `IF EXIST JRAI\JM?.SND IF EXIST JM?.SND DEL JM?.SND`} {
+		if !strings.Contains(bat, line) {
+			t.Fatalf("ORGANIZE.BAT lacks %q", line)
+		}
+	}
+}

@@ -1,8 +1,8 @@
 #!/bin/sh
 # Builds MUSTEST.EXE, logs the whole JRCUBE song headless in DOSBox
 # (lockstep, so emulator speed doesn't matter) and renders it to
-# shots/song.wav with games/jrai/render.py.
-#   demos/cube/musictest.sh [ticks]     (default: the whole song, 38*112)
+# shots/song.wav with apps/jrai/render.py.
+#   apps/jrcube/musictest.sh [ticks]     (default: the whole song, 38*112)
 set -e
 cd "$(dirname "$0")"
 . ../../client/owenv.sh
@@ -15,4 +15,4 @@ trap 'rm -rf "$tmp"' EXIT
 ../../lib/emu.sh "$tmp/run" 30000 MUSTEST.EXE /LOG:$ticks || true
 cat "$tmp/run/OUT.TXT"
 mkdir -p shots
-python3 ../../games/jrai/render.py "$tmp/run/SND.BIN" shots/song.wav
+python3 ../../apps/jrai/render.py "$tmp/run/SND.BIN" shots/song.wav

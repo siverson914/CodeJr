@@ -24,7 +24,7 @@ Still open, nice to have:
 ## No TEMP code
 
 The library existed (and worked) before JRDOOM needed it, so nothing in
-games/doom is a stand-in for library code.
+apps/jrdoom is a stand-in for library code.
 
 ## Cost model (DOSBox, cycles=fixed 400)
 

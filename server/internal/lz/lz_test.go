@@ -45,7 +45,7 @@ func TestRoundTrip(t *testing.T) {
 
 // Real programs, in the 4 KB chunks the transfer uses.
 func TestRatioOnRealFiles(t *testing.T) {
-	for _, path := range []string{"../../../games/doom/JRDOOM.EXE", "../../../client/CODEJR.EXE", "../../../workspace/MATH.BAS"} {
+	for _, path := range []string{"../../../apps/jrdoom/JRDOOM.EXE", "../../../client/CODEJR.EXE", "../../../workspace/MATH.BAS"} {
 		src, err := os.ReadFile(path)
 		if err != nil {
 			t.Logf("skip %s: %v", path, err)

@@ -65,9 +65,9 @@ vertical speed bar (green up, red down; digits below in feet per minute).
 ## Building and testing
 
 ```sh
-games/flight/build.sh          # JRFLIGHT.EXE with Open Watcom, -0 (8088), -wx
-games/flight/build.sh src      # same, compiling lib/ sources instead of jrgfx.lib
-games/flight/shots.sh          # regenerate shots/*.png headless
+apps/jrflight/build.sh          # JRFLIGHT.EXE with Open Watcom, -0 (8088), -wx
+apps/jrflight/build.sh src      # same, compiling lib/ sources instead of jrgfx.lib
+apps/jrflight/shots.sh          # regenerate shots/*.png headless
 ```
 
 Command-line options for testing (all headless-friendly):
@@ -93,7 +93,7 @@ The demo is frame-locked (each frame is 1/4 second of flight), so a run
 produces the same pictures at any emulator speed. Example, headless:
 
 ```sh
-lib/emu.sh /tmp/out 400 games/flight/JRFLIGHT.EXE /DEMO:120 /SCENE:0
+lib/emu.sh /tmp/out 400 apps/jrflight/JRFLIGHT.EXE /DEMO:120 /SCENE:0
 ```
 
 `LOG.TXT` gets the frame rate every two seconds and a summary at the end.

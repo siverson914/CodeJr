@@ -1,7 +1,7 @@
 /* Spoken lines: NAME.SND clips (made by mkvoice.sh), loaded into memory at
  * startup and played by SAY's player, built into JRAI.
  *
- * The player is speech/player.asm, the one proven on the real PCjr: the
+ * The player is apps/say/player.asm, the one proven on the real PCjr: the
  * three SN76496 tone voices at period 1 as one DAC, paced by the timer
  * with every other interrupt off. As in SAY.EXE, its code is copied into
  * its own DOS block at the top of memory and called there. While it plays,
@@ -17,7 +17,7 @@
  * (voice_more); a clip that still doesn't fit is skipped, and its line
  * just shows as text.
  *
- * Clips are SAY's format at SAY's default quality (speech/README.md):
+ * Clips are SAY's format at SAY's default quality (apps/say/README.md):
  * 8 kHz, 4-bit ADPCM, about 4 KB per second on disk and over the link.
  * They are decoded once, at load, into one byte per sample. The decoder,
  * the built-in level table and the format rules are SAY's own: say.c is
@@ -33,7 +33,7 @@
 #pragma off (check_stack)
 
 #define main say_main           /* SAY.EXE's source: decoder, tables, helpers */
-#include "../../speech/say.c"
+#include "../../apps/say/say.c"
 #undef main
 
 #define TABLE_PARAS 0x30u       /* 768 bytes of tables before a clip's samples */

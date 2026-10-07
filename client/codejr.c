@@ -38,7 +38,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.5"
+#define VERSION "1.6"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -1022,8 +1022,10 @@ static void show_more(void)
 static void speak(const char *clip)
 {
 	int nul, out, err;
+	/* SAY lives in its own folder; older installs have it beside us. */
+	const char *say = access("SAY\\SAY.EXE", 0) == 0 ? "SAY\\SAY.EXE" : "SAY.EXE";
 
-	if (access(clip, 0) != 0 || access("SAY.EXE", 0) != 0)
+	if (access(clip, 0) != 0 || access(say, 0) != 0)
 		return;
 	scr_status(quitting ? "Speaking...  (a key stops it)" : "Speaking...  (just type to stop it)");
 	more_shown = 0;
@@ -1040,7 +1042,7 @@ static void speak(const char *clip)
 		const char *args[7];
 		int n = 0;
 		strcpy(o, say_opts);
-		args[n++] = "SAY.EXE";
+		args[n++] = say;
 		args[n++] = "/Q";
 		/* /K: the key that stops the speech stays in the keyboard buffer,
 		 * so it lands in the input line: typing over the voice just works,
@@ -1056,7 +1058,7 @@ static void speak(const char *clip)
 		}
 		args[n++] = clip;
 		args[n] = NULL;
-		spawnv(P_WAIT, "SAY.EXE", args);
+		spawnv(P_WAIT, say, args);
 	}
 	if (nul >= 0) {
 		dup2(out, 1);

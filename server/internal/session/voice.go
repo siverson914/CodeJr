@@ -12,7 +12,7 @@ import (
 
 // Voice: with /voice on, every reply is also spoken on the PCjr. The
 // server turns the reply into a speech clip with the speech project's
-// converter (speech/mksnd.py: a neural voice through gipity, reshaped for
+// converter (apps/say/mksnd.py: a neural voice through gipity, reshaped for
 // the PCjr's sound chip), sends it like any file, and tells the client to
 // play it with SAY.EXE once the reply is done. Clips go in the workspace's
 // VOICE folder (VOICE\REPLY.SND on the PCjr); short fixed ones (voice on,
@@ -41,7 +41,7 @@ var cannedClips = map[string]string{
 // MakeClip runs the converter: text in, NAME.SND out in the workspace's
 // VOICE folder, at the converter's own default quality, so the speech
 // project picks the quality in one place (medium: 4-bit ADPCM at 8 kHz,
-// about 4 KB per second of speech). tool is speech/mksnd.py.
+// about 4 KB per second of speech). tool is apps/say/mksnd.py.
 func MakeClip(ctx context.Context, tool, wsDir, name, text string) error {
 	if tool == "" {
 		return fmt.Errorf("no speech converter configured")

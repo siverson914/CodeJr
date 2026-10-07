@@ -134,6 +134,7 @@ To leave: type /quit, or press Ctrl-] then C and type EXIT.
 // holds the server's address: the client reads C:\CODEJR\CODEJR.CFG.
 func ProgFiles() map[string][]byte {
 	return map[string][]byte{
+		"ORGANIZE.BAT": []byte(OrganizeBat()),
 		"RUN.BAT": []byte(`@ECHO OFF
 REM Runs a GW-BASIC program, then resets the screen: GW-BASIC leaves the
 REM PCjr color palette scrambled (blue on tan).

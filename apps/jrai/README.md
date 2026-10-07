@@ -32,7 +32,7 @@ just shows as text. Esc quits, Space skips to the next part.
 
 `music.c` is a small tracker: lead (voice 0, with vibrato), bass (voice 1), chord arpeggios at 60 Hz (voice 2, the classic chip sound), and drums on the noise voice. It runs inside the retrace interrupt, chained after the library's handler, so it keeps time whatever the drawing does. Every part starts on its pattern's downbeat. The demo clock T comes from the same interrupt.
 
-**The voices** are ElevenLabs voices through gipity, turned into PCjr clips by SAY's converter (`speech/mksnd.py`, see `speech/README.md`) at its default quality, the one Steve picked on the real PCjr: 8 kHz, 4-bit ADPCM, about 4 KB a second. `voice/lines.txt` lists every line (name, speaker, text). `mkvoice.sh` (`just jrai-voice`) makes `voice/NAME.mp3` once through gipity and keeps it in the repo, then makes `voice/out/NAME.SND`. The speakers:
+**The voices** are ElevenLabs voices through gipity, turned into PCjr clips by SAY's converter (`apps/say/mksnd.py`, see `apps/say/README.md`) at its default quality, the one Steve picked on the real PCjr: 8 kHz, 4-bit ADPCM, about 4 KB a second. `voice/lines.txt` lists every line (name, speaker, text). `mkvoice.sh` (`just jrai-voice`) makes `voice/NAME.mp3` once through gipity and keeps it in the repo, then makes `voice/out/NAME.SND`. The speakers:
 
 | Speaker | ElevenLabs voice |
 |---|---|
@@ -42,7 +42,7 @@ just shows as text. Esc quits, Space skips to the next part.
 
 To change a line, edit `voice/lines.txt` and run `mkvoice.sh NAME`. Whisper (small.en) heard all 13 lines word for word in the preview video's soundtrack. "Meets" in the title needed a rewrite: as "P.C. junior... meets... A.I.!" it was heard as "miss".
 
-**Playing them** (`voice.c`). SAY's player and decoder are built into JRAI: `build.sh` assembles `speech/player.asm`, and `voice.c` compiles `speech/say.c` in (its `main` renamed) for the decoder, the built-in level table and the clip format. So JRAI plays exactly what SAY plays, with no copy of SAY's code to keep in step.
+**Playing them** (`voice.c`). SAY's player and decoder are built into JRAI: `build.sh` assembles `apps/say/player.asm`, and `voice.c` compiles `apps/say/say.c` in (its `main` renamed) for the decoder, the built-in level table and the clip format. So JRAI plays exactly what SAY plays, with no copy of SAY's code to keep in step.
 
 - **Loaded once, at startup.** While "CodeJr is thinking", every clip is read from disk into its own DOS block and decoded to one byte per sample (tables first, then samples). After that a line starts at once, and nothing touches DOS or the disk mid-demo.
 - **Memory.** The decoded clips are about 275 KB. At startup JRAI keeps 96 KB free for the graphics library. Once graphics have started it gives the library's unused 64 KB back buffer to DOS and loads whatever didn't fit (a "LOADING VOICES" screen), and tries once more when the tunnel frees its 192 KB. In DOSBox's 640 KB, 11 clips fit before the first scene and the last 2 after the tunnel. A clip that never fits is skipped: its line shows as text.
@@ -55,8 +55,8 @@ In `/VIDEO` mode JRAI logs the writes the player would make and moves T on, so t
 ## Building and testing
 
 ```sh
-games/jrai/build.sh          # or: just jrai
-just jrai-video              # games/jrai/jrai-preview.mp4, with sound, no window
+apps/jrai/build.sh          # or: just jrai
+just jrai-video              # apps/jrai/jrai-preview.mp4, with sound, no window
 ```
 
 The clips must be next to `JRAI.EXE`: `just deploy-jrai` queues both. For DOSBox, `lib/emu.sh` takes `EMU_FILES="..."` to put them there.

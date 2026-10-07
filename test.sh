@@ -25,6 +25,6 @@ echo "== Emulator: native client path"
 emu/native_e2e.sh
 
 echo "== Emulator: SAY speech player"
-speech/test.sh | grep -E '^(PASS|FAIL)'
+apps/say/test.sh | grep -E '^(PASS|FAIL)'
 
 echo "== All tests passed"

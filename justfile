@@ -101,17 +101,39 @@ queue:
     except FileNotFoundError:
         synced = {}
     waiting = 0
+    names = []
     for name in sorted(os.listdir(ws)):
         path = os.path.join(ws, name)
-        if name.startswith(".") or not os.path.isfile(path):
+        if name.startswith("."):
             continue
-        data = open(path, "rb").read()
-        if synced.get(name.upper()) != hashlib.sha256(data).hexdigest()[:16]:
-            print(f"{name:14} {len(data):7} bytes")
+        if os.path.isdir(path): # an app folder: one level down
+            names += [f"{name}/{f}" for f in sorted(os.listdir(path)) if os.path.isfile(os.path.join(path, f))]
+        elif os.path.isfile(path):
+            names.append(name)
+    for name in names:
+        data = open(os.path.join(ws, name), "rb").read()
+        key = name.upper().replace("/", "\\")
+        if synced.get(key) != hashlib.sha256(data).hexdigest()[:16]:
+            print(f"{key:22} {len(data):7} bytes")
             waiting += len(data)
     print(f"{waiting} bytes waiting" if waiting else "nothing waiting: the PCjr has everything")
 
-# Build the PCjr client (CODEJR.EXE, CJTERM.EXE)
+# Put the latest main live from this checkout: pull, build, queue the client, restart (refuses during a call)
+live:
+    git pull --ff-only
+    just deploy-client
+    apps/say/build.sh
+    just restart
+
+# Sort the workspace's loose files into app folders (then run ORGANIZE on the PCjr)
+organize: build
+    server/codejr organize -workspace "{{ws}}"
+
+# Build the serial test tools (tools/: CJTERM.EXE, UARTDUMP.EXE)
+tools:
+    tools/build.sh
+
+# Build the PCjr client (CODEJR.EXE, SCRDUMP.EXE)
 client:
     client/build.sh
 
@@ -132,41 +154,46 @@ lib:
 
 # Build JRDOOM
 doom:
-    games/doom/build.sh
+    apps/jrdoom/build.sh
 
 # Build JRFLIGHT
 flight:
-    games/flight/build.sh
+    apps/jrflight/build.sh
 
 # Build both games
 games: doom flight
 
-# Build JRCUBE (demos/cube) and render its GIF headless
+# Build JRCUBE (apps/jrcube) and render its GIF headless
 cube:
-    demos/cube/build.sh
-    demos/cube/shots.sh 100
+    apps/jrcube/build.sh
+    apps/jrcube/shots.sh 100
 
-# Build both games and queue them for the PCjr
+# Build the games and JRCUBE and queue them for the PCjr, each in its own folder
 deploy-games: games
-    cp games/doom/JRDOOM.EXE games/flight/JRFLIGHT.EXE "{{ws}}/"
+    apps/jrcube/build.sh
+    mkdir -p "{{ws}}/JRDOOM" "{{ws}}/JRFLIGHT" "{{ws}}/JRCUBE"
+    cp apps/jrdoom/JRDOOM.EXE "{{ws}}/JRDOOM/"
+    cp apps/jrflight/JRFLIGHT.EXE "{{ws}}/JRFLIGHT/"
+    cp apps/jrcube/JRCUBE.EXE "{{ws}}/JRCUBE/"
     @echo "queued: sent on the PCjr's next connection"
 
 # Build JRAI, the "PCjr MEETS AI" demo
 jrai:
-    games/jrai/build.sh
+    apps/jrai/build.sh
 
 # Preview video of JRAI with its sound, made headless (about 2 minutes)
-jrai-video out="games/jrai/jrai-preview.mp4": jrai
-    games/jrai/video.sh "$PWD/{{out}}"
+jrai-video out="apps/jrai/jrai-preview.mp4": jrai
+    apps/jrai/video.sh "$PWD/{{out}}"
 
-# JRAI's voice clips (ElevenLabs via gipity, made once; then speech/mksnd.py)
+# JRAI's voice clips (ElevenLabs via gipity, made once; then apps/say/mksnd.py)
 jrai-voice:
-    games/jrai/mkvoice.sh
+    apps/jrai/mkvoice.sh
 
 # Build JRAI and queue it with its voice clips for the PCjr
 deploy-jrai: jrai jrai-voice
-    cp games/jrai/JRAI.EXE games/jrai/voice/out/*.SND "{{ws}}/"
-    @echo "queued: JRAI.EXE and $(ls games/jrai/voice/out/*.SND | wc -l) clips, sent on the PCjr's next connection"
+    mkdir -p "{{ws}}/JRAI"
+    cp apps/jrai/JRAI.EXE apps/jrai/voice/out/*.SND "{{ws}}/JRAI/"
+    @echo "queued: JRAI.EXE and $(ls apps/jrai/voice/out/*.SND | wc -l) clips, sent on the PCjr's next connection"
 
 # ---- speech ---------------------------------------------------------------
 # Speech quality for the tasks below. Medium (4-bit ADPCM, 8 kHz) is the one
@@ -176,34 +203,35 @@ speech_quality := env_var_or_default("SPEECH_QUALITY", "medium")
 
 # Build SAY.EXE, the PCjr speech player
 say:
-    speech/build.sh
+    apps/say/build.sh
 
-# Convert every clip in speech/clips/ into speech/out/ (.SND and a preview WAV)
+# Convert every clip in apps/say/clips/ into apps/say/out/ (.SND and a preview WAV)
 speech:
     #!/bin/sh
     set -e
-    for f in speech/clips/*.mp3; do speech/mksnd.py "$f" --quality {{speech_quality}} -o "speech/out/$(basename "$f" .mp3)"; done
+    for f in apps/say/clips/*.mp3; do apps/say/mksnd.py "$f" --quality {{speech_quality}} -o "apps/say/out/$(basename "$f" .mp3)"; done
 
 # New clip from text via gipity (voice: brian, george, daniel, rachel, openai:sage, gemini:Charon)
 clip name text voice="brian":
     #!/bin/sh
     set -e
     n=$(echo "{{name}}" | tr a-z A-Z)
-    speech/mksnd.py --text "{{text}}" --voice "{{voice}}" --quality {{speech_quality}} --keep -o "speech/out/$n"
-    mv "speech/out/$n.mp3" "speech/clips/$n.mp3"
-    printf '%s\n' "{{text}}" > "speech/clips/$n.txt"
+    apps/say/mksnd.py --text "{{text}}" --voice "{{voice}}" --quality {{speech_quality}} --keep -o "apps/say/out/$n"
+    mv "apps/say/out/$n.mp3" "apps/say/clips/$n.mp3"
+    printf '%s\n' "{{text}}" > "apps/say/clips/$n.txt"
 
 # Queue SAY.EXE and clips for the PCjr: just deploy-speech HELLO READY (NAME.SNP for PWM)
 deploy-speech +clips: say
     #!/bin/sh
     set -e
-    cp speech/SAY.EXE "{{ws}}/"
-    total=$(stat -c %s speech/SAY.EXE)
+    mkdir -p "{{ws}}/SAY"
+    cp apps/say/SAY.EXE "{{ws}}/SAY/"
+    total=$(stat -c %s apps/say/SAY.EXE)
     for c in {{clips}}; do
         c=$(echo "$c" | tr a-z A-Z); case "$c" in *.*) ;; *) c="$c.SND";; esac
         if [ "${c##*.}" = SNP ]; then o="--method pwm"; else o="--quality {{speech_quality}}"; fi
-        speech/mksnd.py "speech/clips/${c%.*}.mp3" $o -o "speech/out/${c%.*}"
-        cp "speech/out/$c" "{{ws}}/"; total=$((total + $(stat -c %s "speech/out/$c")))
+        apps/say/mksnd.py "apps/say/clips/${c%.*}.mp3" $o -o "apps/say/out/${c%.*}"
+        cp "apps/say/out/$c" "{{ws}}/SAY/"; total=$((total + $(stat -c %s "apps/say/out/$c")))
     done
     echo "queued $((total / 1024)) KB ({{speech_quality}} quality): about $((total / 2600 + 1)) s at 37287 baud; sent on the PCjr's next connection"
 

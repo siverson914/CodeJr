@@ -26,7 +26,7 @@ The fast path removes passes 1 and 3:
   - Test flag 16 forces the claim path, which got 1000:0 in DOSBox. Test flag 8 forces the fallback. Both pass T3.
 - **Port 3DFh:** `modebits | cpu_page << 3 | crt_page`.
   - The CRT page is the one shown. The CPU page is the one B800 maps to.
-  - fx_init and every flip set the CPU page to the hidden page. Code that writes B800 (games/doom's `view_to_screen`) or `gfx_vseg` (games/flight) therefore draws into the hidden page with no change. T3 verifies this through B800 and through the physical segment.
+  - fx_init and every flip set the CPU page to the hidden page. Code that writes B800 (apps/jrdoom's `view_to_screen`) or `gfx_vseg` (apps/jrflight) therefore draws into the hidden page with no change. T3 verifies this through B800 and through the physical segment.
   - The BIOS shadow at 40:8Ah is kept in step.
   - Sources: PCjr Tech Ref p. 2-79; PCJR.TXT (https://pdos.csail.mit.edu/6.828/2014/readings/hardware/vgadoc/PCJR.TXT).
 - **IRQ5 flips:**
@@ -128,9 +128,9 @@ These are estimates from the cost model above, not measurements: there is no rea
 | 160x100 line-doubled mode (Trixter, 2013): BIOS mode 8, then port 3DFh with address-mode bits 7:6 = 00; rows become linear, each shown twice | **documented, not implemented** | cannot be tested: DOSBox 0.74 forces graphics row addressing in `TandyCheckLineMask` | halves every fill and wall cost and makes rows linear. See "Next steps" |
 | Racing the beam / retrace-aware partial copies | **not needed** | | with page flipping nothing is ever copied to the visible page. Only the one-page fallback copies to the visible page, and a 16 KB copy (~45 ms) is slower than one frame (16.7 ms) anyway |
 
-## JRCUBE (demos/cube) measurements
+## JRCUBE (apps/jrcube) measurements
 
-DOSBox `cycles=fixed 400`, emulator only. A shaded, edged cube, its shadow, an orb with a trail and a pool of light, a scroller, over a static grid: **10.2 fps** (12.7 without the edges), up from 5.2 for the first version. Per frame: restore 11 ms, shadow and pool 14 ms, faces 26 ms, edges 15 ms, orb and scroller 5 ms, math 26 ms. DOSBox charges a MUL or DIV like an add, and JRCUBE does about 150 of them per frame, so on the real 8088 add roughly 5 ms. See `demos/cube/README.md`.
+DOSBox `cycles=fixed 400`, emulator only. A shaded, edged cube, its shadow, an orb with a trail and a pool of light, a scroller, over a static grid: **10.2 fps** (12.7 without the edges), up from 5.2 for the first version. Per frame: restore 11 ms, shadow and pool 14 ms, faces 26 ms, edges 15 ms, orb and scroller 5 ms, math 26 ms. DOSBox charges a MUL or DIV like an add, and JRCUBE does about 150 of them per frame, so on the real 8088 add roughly 5 ms. See `apps/jrcube/README.md`.
 
 ## Demoscene sources used
 

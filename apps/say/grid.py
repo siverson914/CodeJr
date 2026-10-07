@@ -4,7 +4,7 @@
 # ///
 """Quality grid for voice mode: sample rate x codec x chip voices.
 
-  speech/grid.py [clip ...]        default: REPLY HELLO from clips/
+  apps/say/grid.py [clip ...]        default: REPLY HELLO from clips/
 
 For each setting it encodes the clips, decodes them exactly as SAY would,
 and reports bytes per second of speech, link time at 2.6 KB/s (37287 baud,

@@ -14,7 +14,7 @@ check() { if eval "$2"; then echo "ok:   $1"; else echo "FAIL: $1"; fail=1; fi; 
 
 (cd server && go build -o codejr ./cmd/codejr) || exit 1
 client/build.sh >/dev/null || exit 1
-speech/build.sh >/dev/null || exit 1 # SAY.EXE, for the /voice runs
+apps/say/build.sh >/dev/null || exit 1 # SAY.EXE, for the /voice runs
 
 run() { # $1 = label, $2 = extra client options
 	tmp=$(mktemp -d)
@@ -113,7 +113,7 @@ deltarun() {
 	mkdir -p "$tmp/c/CODEJR/PROGS" "$tmp/ws"
 	cp client/CODEJR.EXE "$tmp/c/CODEJR/PROGS/"
 	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG"
-	cp client/CJTERM.EXE "$tmp/ws/BIG.BIN"
+	cp client/SCRDUMP.EXE "$tmp/ws/BIG.BIN"
 	call() { # one call that types a line, so the sync runs
 		server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "" >> "$tmp/server.log" 2>&1 &
 		sp=$!
@@ -124,7 +124,7 @@ deltarun() {
 	}
 	call # the first copy goes whole
 	# Change it the way a rebuild does: insert bytes, so the rest shifts.
-	{ head -c 3000 client/CJTERM.EXE; printf 'NEW CODE HERE'; tail -c +3001 client/CJTERM.EXE; } > "$tmp/ws/BIG.BIN"
+	{ head -c 3000 client/SCRDUMP.EXE; printf 'NEW CODE HERE'; tail -c +3001 client/SCRDUMP.EXE; } > "$tmp/ws/BIG.BIN"
 	call
 	echo "== changes only"
 	check "the second copy went as changes" "grep -q 'BIG.BIN: sending changes' '$tmp/server.log'"
@@ -172,7 +172,7 @@ pagerun() { # $1 = typed line, $2 = label, then grep patterns that must match SC
 voicerun() { # $1 = typed line, $2 = label, $3 = 1 to start with voice on, $4 = the clip that must play
 	tmp=$(mktemp -d)
 	mkdir -p "$tmp/c/CODEJR/PROGS" "$tmp/ws/.codejr"
-	cp client/CODEJR.EXE speech/SAY.EXE "$tmp/c/CODEJR/PROGS/"
+	cp client/CODEJR.EXE apps/say/SAY.EXE "$tmp/c/CODEJR/PROGS/"
 	[ "$3" = 1 ] && touch "$tmp/ws/.codejr/voice"
 	printf "DIAL=x:1\r\nSAY=/H /X\r\n" > "$tmp/c/CODEJR.CFG"
 	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "$PWD/server/internal/session/testdata/fakemksnd.sh" > "$tmp/server.log" 2>&1 &

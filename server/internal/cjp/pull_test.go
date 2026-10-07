@@ -16,7 +16,7 @@ import (
 )
 
 func testFile(t *testing.T) []byte {
-	if b, err := os.ReadFile("../../../games/doom/JRDOOM.EXE"); err == nil {
+	if b, err := os.ReadFile("../../../apps/jrdoom/JRDOOM.EXE"); err == nil {
 		return b
 	}
 	// No game built: a mix of text, runs and random bytes.

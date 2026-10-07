@@ -25,6 +25,23 @@ import (
 func main() {
 	// codejr mcp -workspace DIR -repo DIR: the PCjr's build and run tools,
 	// started by Claude Code over stdio (see internal/pcjr).
+	// codejr organize -workspace DIR: sort the workspace's loose files into
+	// app folders, the same way ORGANIZE.BAT does on the PCjr.
+	if len(os.Args) > 1 && os.Args[1] == "organize" {
+		fs := flag.NewFlagSet("organize", flag.ExitOnError)
+		wsDir := fs.String("workspace", "", "Claude's folder for the PCjr")
+		fs.Parse(os.Args[2:])
+		w := &session.Workspace{Dir: *wsDir}
+		moved, err := w.Organize()
+		for _, m := range moved {
+			fmt.Println(m)
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("%d files moved. Run ORGANIZE on the PCjr to match.\n", len(moved))
+		return
+	}
 	if len(os.Args) > 1 && os.Args[1] == "mcp" {
 		fs := flag.NewFlagSet("mcp", flag.ExitOnError)
 		ws := fs.String("workspace", "", "Claude's folder for the PCjr")
@@ -51,7 +68,7 @@ func main() {
 	location := flag.String("location", "", `where the PCjr is, told to Claude (e.g. "Encinitas, CA 92024")`)
 	linkLog := flag.String("linklog", "", "append a timeline of native protocol frames to this file (diagnostics)")
 	trace := flag.String("trace", "", "append everything sent to callers to this file (for debugging the screen)")
-	speech := flag.String("speech", "auto", `speech converter for /voice (speech/mksnd.py); "auto" finds it in the repo, "" turns voice off`)
+	speech := flag.String("speech", "auto", `speech converter for /voice (apps/say/mksnd.py); "auto" finds it in the repo, "" turns voice off`)
 	flag.Parse()
 
 	_, portStr, err := net.SplitHostPort(*listen)
@@ -119,14 +136,14 @@ func main() {
 		},
 	}
 	scrdump, _ := os.ReadFile(filepath.Join(repoDir(), "client", "SCRDUMP.EXE"))
-	sayExe, _ := os.ReadFile(filepath.Join(repoDir(), "speech", "SAY.EXE"))
+	sayExe, _ := os.ReadFile(filepath.Join(repoDir(), "apps", "say", "SAY.EXE"))
 	if err := ws.Provide(map[string][]byte{
 		"JRGFX/JRGFX.H": jrgfxHeader(),
 		// /run captures the screen with it after a program ends.
 		"SCRDUMP.EXE": scrdump,
 		// /voice plays clips with it; the repo's build matches the clips
 		// the converter makes (nil, and skipped, if it isn't built).
-		"SAY.EXE": sayExe,
+		"SAY/SAY.EXE": sayExe,
 	}); err != nil {
 		log.Print(err)
 	}
@@ -249,7 +266,7 @@ func speechTool(f string) string {
 	if f != "auto" {
 		return f
 	}
-	p := filepath.Join(repoDir(), "speech", "mksnd.py")
+	p := filepath.Join(repoDir(), "apps", "say", "mksnd.py")
 	if _, err := os.Stat(p); err != nil {
 		return ""
 	}
