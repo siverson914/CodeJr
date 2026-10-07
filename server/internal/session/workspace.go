@@ -233,22 +233,39 @@ func (w *Workspace) Forget(name string) error {
 // SaveFromPCjr stores a file that came from the PCjr and records it as
 // already synced, so it isn't sent straight back.
 func (w *Workspace) SaveFromPCjr(name string, data []byte) error {
-	name = strings.ToUpper(filepath.Base(name))
-	if !ValidName(name) {
+	name = strings.ToUpper(strings.ReplaceAll(name, "/", `\`))
+	if !ValidPath(name) {
 		return fmt.Errorf("%q is not a DOS name", name)
 	}
 	if isText(name) {
 		data = fromDOS(data)
 	}
+	// NAME.EXT, or FOLDER\NAME.EXT in a project folder; reuse a folder
+	// that exists under another case.
+	dir, file := w.Dir, name
+	if d, f, ok := strings.Cut(name, `\`); ok {
+		file = f
+		dir = filepath.Join(w.Dir, d)
+		if des, err := os.ReadDir(w.Dir); err == nil {
+			for _, de := range des {
+				if de.IsDir() && strings.EqualFold(de.Name(), d) {
+					dir = filepath.Join(w.Dir, de.Name())
+				}
+			}
+		}
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return err
+		}
+	}
 	// Replace any existing file regardless of case.
-	if des, err := os.ReadDir(w.Dir); err == nil {
+	if des, err := os.ReadDir(dir); err == nil {
 		for _, de := range des {
-			if strings.EqualFold(de.Name(), name) && de.Name() != name {
-				os.Remove(filepath.Join(w.Dir, de.Name()))
+			if strings.EqualFold(de.Name(), file) && de.Name() != file {
+				os.Remove(filepath.Join(dir, de.Name()))
 			}
 		}
 	}
-	if err := os.WriteFile(filepath.Join(w.Dir, name), data, 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, file), data, 0o644); err != nil {
 		return err
 	}
 	return w.MarkSynced(map[string]string{name: hash(data)})

@@ -42,6 +42,27 @@ func main() {
 		fmt.Printf("%d files moved. Run ORGANIZE on the PCjr to match.\n", len(moved))
 		return
 	}
+	// codejr ctl -workspace DIR dos|fetch ARG...: ask the PCjr that is
+	// connected to the running server (see pcjr.CtlCall).
+	if len(os.Args) > 1 && os.Args[1] == "ctl" {
+		fs := flag.NewFlagSet("ctl", flag.ExitOnError)
+		wsDir := fs.String("workspace", "", "Claude's folder for the PCjr")
+		fs.Parse(os.Args[2:])
+		if fs.NArg() < 2 {
+			log.Fatal("usage: codejr ctl -workspace DIR dos COMMAND...  |  fetch NAME")
+		}
+		w, _ := filepath.Abs(*wsDir)
+		out, err := pcjr.CtlCall(w, fs.Arg(0), strings.Join(fs.Args()[1:], " "))
+		fmt.Print(out)
+		if out != "" && !strings.HasSuffix(out, "\n") {
+			fmt.Println()
+		}
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "codejr:", err)
+			os.Exit(1)
+		}
+		return
+	}
 	if len(os.Args) > 1 && os.Args[1] == "mcp" {
 		fs := flag.NewFlagSet("mcp", flag.ExitOnError)
 		ws := fs.String("workspace", "", "Claude's folder for the PCjr")
@@ -132,7 +153,7 @@ func main() {
 			Model:        *model,
 			Tools:        []string{"Read", "Write", "Edit", "Glob", "Grep", "WebSearch", "WebFetch"},
 			MCPConfig:    mcpConfig(dir),
-			Allow:        []string{"mcp__pcjr__build", "mcp__pcjr__run"},
+			Allow:        []string{"mcp__pcjr__build", "mcp__pcjr__run", "mcp__pcjr__dos", "mcp__pcjr__fetch"},
 		},
 	}
 	scrdump, _ := os.ReadFile(filepath.Join(repoDir(), "client", "SCRDUMP.EXE"))
@@ -147,6 +168,12 @@ func main() {
 	}); err != nil {
 		log.Print(err)
 	}
+
+	go func() {
+		if err := pcjr.CtlServe(dir, session.Control); err != nil {
+			log.Printf("control socket: %v", err)
+		}
+	}()
 
 	ln, err := net.Listen("tcp", *listen)
 	if err != nil {

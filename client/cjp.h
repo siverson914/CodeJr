@@ -33,6 +33,9 @@
 #define CJP_VOICE       0x13 /* server: voice on (1) or off (0) */
 #define CJP_INPUT_MORE  0x14 /* client: the start of a typed line too long for one frame; more follows */
 #define CJP_INFO        0x15 /* server: short text for the right end of the header */
+#define CJP_EXEC        0x16 /* server: run this DOS command, upload what it printed */
+#define CJP_FETCH       0x17 /* server: upload this file */
+#define CJP_UPLOAD      0x18 /* client: 'X' or 'B'+name, 'D'+bytes..., 'E'; or 'F'+reason */
 
 /* Types from CJP_DATAGRAM up carry no sequence number and are never
  * acknowledged. The file pull protocol uses them (pull.h). */

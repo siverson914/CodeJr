@@ -167,8 +167,8 @@ func TestNativeCall(t *testing.T) {
 		t.Fatal("HELLO.BAS still marked unsynced")
 	}
 
-	// /send NAME sends it again.
-	c.link.Send(cjp.Input, []byte("/send hello.bas"))
+	// /get NAME brings it over again.
+	c.link.Send(cjp.Input, []byte("/get hello.bas"))
 	if name, _ := c.receiveFile(); name != "HELLO.BAS" {
 		t.Fatalf("resent %s", name)
 	}

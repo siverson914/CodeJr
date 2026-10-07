@@ -68,19 +68,25 @@ static void put_text(int r, int c, const char *s, unsigned char attr, int width)
 		p[i] = (unsigned short)(attr << 8 | (unsigned char)(*s ? *s++ : ' '));
 }
 
-void scr_init(const char *title)
+static const char *header; /* the title, kept for scr_refresh */
+
+/* Sets 80x25 color text (which clears the screen) and draws the frame. */
+static void frame(void)
 {
 	union REGS x;
-	int r;
 
-	x.h.ah = 0; x.h.al = 3; /* 80x25 color text; also clears the screen */
+	x.h.ah = 0; x.h.al = 3;
 	int86(0x10, &x, &x);
 	vid = (unsigned short far *)MK_FP(0xB800, 0);
 	fill_row(0, ' ', A_HEADER);
-	put_text(0, 1, title, A_HEADER, COLS - 1);
-	for (r = TOP; r <= BOTTOM; r++)
-		fill_row(r, ' ', 0x07);
+	put_text(0, 1, header, A_HEADER, COLS - 1);
 	fill_row(ROW_DIV, 0xC4, A_DIV); /* CP437 horizontal line */
+}
+
+void scr_init(const char *title)
+{
+	header = title;
+	frame();
 	scr_input("", 0);
 	scr_status("");
 	if (!ring)
@@ -259,6 +265,14 @@ void scr_info(const char *s)
 	if (n > 30) n = 30;
 	put_text(0, COLS - 31, "", A_HEADER, 30);
 	put_text(0, COLS - 1 - n, s, A_HEADER, n);
+}
+
+void scr_refresh(void)
+{
+	frame();
+	redraw();
+	scr_input("", 0);
+	scr_status("");
 }
 
 void scr_status(const char *s)

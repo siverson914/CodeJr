@@ -57,6 +57,9 @@ const (
 	Voice      byte = 0x13 // server: 1 voice on, 0 off, so the client can say goodbye (voice=1)
 	InputMore  byte = 0x14 // client: the start of a typed line too long for one frame; InputMore or Input follows
 	Info       byte = 0x15 // server: short text for the right end of the client's header ("3274 chars")
+	Exec       byte = 0x16 // server: run this DOS command and upload what it printed (remote=1)
+	Fetch      byte = 0x17 // server: upload this file (remote=1)
+	Upload     byte = 0x18 // client: 'X' or 'B'+name, then 'D'+bytes..., then 'E'; or 'F'+reason
 
 	// Types from DatagramBase up are datagrams: no sequence number, no
 	// ack, delivered as they arrive. The file pull protocol uses them

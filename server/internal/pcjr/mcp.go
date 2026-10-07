@@ -52,6 +52,36 @@ var toolList = []map[string]any{
 	},
 }
 
+func init() {
+	toolList = append(toolList,
+		map[string]any{
+			"name": "dos",
+			"description": "Run one DOS command on the user's real PCjr, which must be connected, and return what it printed " +
+				"(the command's output is captured to a file and sent back; the user sees the command on their screen). " +
+				"For looking around: DIR, TREE C:\\CODEJR /F, TYPE NAME.TXT, MEM, VER, CHKDSK. It runs in C:\\CODEJR\\PROGS with no keyboard: " +
+				"a command that waits for a key gets none. Ask the user before any command that deletes, renames or overwrites files.",
+			"inputSchema": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"command": map[string]any{"type": "string", "description": "one DOS command line, up to 100 characters"},
+				},
+				"required": []string{"command"},
+			},
+		},
+		map[string]any{
+			"name": "fetch",
+			"description": "Copy a file from the user's real PCjr (C:\\CODEJR\\PROGS) into your folder so you can read it: " +
+				"a LOG.TXT a program wrote there, a file the user made. About 1.5 KB a second.",
+			"inputSchema": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"path": map[string]any{"type": "string", "description": "NAME.EXT or FOLDER\\NAME.EXT"},
+				},
+				"required": []string{"path"},
+			},
+		})
+}
+
 // Serve answers MCP requests on in/out until in closes.
 func Serve(ctx context.Context, e Env, in io.Reader, out io.Writer) error {
 	sc := bufio.NewScanner(in)
@@ -93,6 +123,8 @@ func Serve(ctx context.Context, e Env, in io.Reader, out io.Writer) error {
 			var p struct {
 				Name      string `json:"name"`
 				Arguments struct {
+					Command string `json:"command"`
+					Path    string `json:"path"`
 					Project string `json:"project"`
 					Program string `json:"program"`
 					Args    string `json:"args"`
@@ -103,7 +135,20 @@ func Serve(ctx context.Context, e Env, in io.Reader, out io.Writer) error {
 				fail(m.ID, -32602, err.Error())
 				continue
 			}
-			reply(m.ID, e.call(ctx, p.Name, p.Arguments.Project, p.Arguments.Program, p.Arguments.Args, p.Arguments.Seconds))
+			switch p.Name {
+			case "dos", "fetch":
+				arg := p.Arguments.Command
+				if p.Name == "fetch" {
+					arg = p.Arguments.Path
+				}
+				out, err := CtlCall(e.Workspace, p.Name, arg)
+				if err != nil {
+					out = err.Error()
+				}
+				reply(m.ID, map[string]any{"content": []any{map[string]any{"type": "text", "text": out}}, "isError": err != nil})
+			default:
+				reply(m.ID, e.call(ctx, p.Name, p.Arguments.Project, p.Arguments.Program, p.Arguments.Args, p.Arguments.Seconds))
+			}
 		default:
 			fail(m.ID, -32601, "no method "+m.Method)
 		}

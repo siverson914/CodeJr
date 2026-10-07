@@ -11,6 +11,9 @@
 
 void scr_init(const char *title);
 void scr_done(void);
+/* Repaints everything after another program had the screen (and maybe
+ * changed the video mode): header, transcript from the buffer, divider. */
+void scr_refresh(void);
 
 /* Transcript: appends one character in a color attribute. '\n' starts a
  * new line; long lines wrap. */

@@ -280,8 +280,8 @@ func (s *session) submit(line string) bool {
 const help = `Commands:
   /files       list your programs (* = not on the PCjr yet)
   /sync        send files the PCjr doesn't have yet
-  /send NAME   send a file again
-  /get NAME    copy a file from the PCjr to Claude (e.g. a LOG.TXT)
+  /send NAME   send a file from the PCjr to Claude (e.g. a LOG.TXT)
+  /get NAME    get a file from Claude again
   /setup       install or update the CODEJR launcher on the PCjr
   /echo off    stop echoing typing (if letters appear twice)
   /new         start a fresh conversation
@@ -306,15 +306,17 @@ func (s *session) command(line string) bool {
 		s.listFiles()
 	case "/sync":
 		s.sync()
-	case "/send":
+	case "/get":
+		// Names read from the PCjr's seat: /get brings Claude's copy here
+		// again, /send sends the PCjr's file to Claude.
 		if !ValidName(arg) {
-			s.scr.Println(term.Warn, "Usage: /send NAME.EXT")
+			s.scr.Println(term.Warn, "Usage: /get NAME.EXT")
 			break
 		}
 		s.ws.Forget(arg)
 		s.forceSend = arg
 		s.sync()
-	case "/get":
+	case "/send":
 		s.get(arg)
 	case "/setup":
 		s.setup(arg)
@@ -491,6 +493,13 @@ func describeTool(e claude.Event) (string, string) {
 		return "", "Reading " + file
 	case "Glob", "Grep":
 		return "", "Looking through files"
+	case "mcp__pcjr__dos":
+		c, _ := e.Input["command"].(string)
+		return "[runs on this PCjr: " + c + "]", "Running " + c + " on the PCjr"
+	case "mcp__pcjr__fetch":
+		p, _ := e.Input["path"].(string)
+		p = strings.ToUpper(p)
+		return "[takes " + p + " from this PCjr]", "Getting " + p + " from the PCjr"
 	case "mcp__pcjr__build":
 		p, _ := e.Input["project"].(string)
 		p = strings.ToUpper(p)
@@ -555,7 +564,7 @@ func (s *session) sync() {
 			continue
 		}
 		if len(f.Data) > kermitMax && f.Name != s.forceSend {
-			s.scr.Println(term.Note, fmt.Sprintf("%s (%s) is too big for Kermit; type CODEJR at DOS to get it (or /send %s).", f.Name, size(len(f.Data)), f.Name))
+			s.scr.Println(term.Note, fmt.Sprintf("%s (%s) is too big for Kermit; type CODEJR at DOS to get it (or /get %s).", f.Name, size(len(f.Data)), f.Name))
 			delete(hashes, f.Name) // still waiting for the native client
 			continue
 		}
@@ -598,7 +607,7 @@ func (s *session) sync() {
 // get copies a file from the PCjr into the workspace.
 func (s *session) get(name string) {
 	if !ValidName(name) {
-		s.scr.Println(term.Warn, "Usage: /get NAME.EXT  (a file in "+ProgDir+" on the PCjr)")
+		s.scr.Println(term.Warn, "Usage: /send NAME.EXT  (a file in "+ProgDir+" on the PCjr)")
 		return
 	}
 	s.scr.Println(term.Note, "Fetching "+name+" from the PCjr...")

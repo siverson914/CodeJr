@@ -1,0 +1,172 @@
+package session
+
+import (
+	"errors"
+	"fmt"
+	"strings"
+	"sync"
+	"time"
+
+	"codejr/internal/cjp"
+)
+
+// Remote work on the PCjr: the server can ask a client that said
+// remote=1 to run a DOS command and send back what it printed (Exec), or
+// to send a file (Fetch). The answer comes as Upload messages over the
+// acknowledged link, which is the PCjr's clean direction: 'X' (a
+// command's output follows) or 'B' + name, then 'D' + bytes..., then 'E';
+// or 'F' + a reason.
+//
+// Three callers: the user (/dos, /send), the PCjr's Claude (the dos and
+// fetch tools, through the control socket) and whoever is at the laptop
+// (`just pcjr`, the same socket).
+
+const maxUpload = 512 << 10
+
+// collect waits for one upload to finish.
+func (n *native) collect(timeout time.Duration) ([]byte, error) {
+	var data []byte
+	idle := time.NewTimer(timeout)
+	defer idle.Stop()
+	for {
+		select {
+		case m := <-n.link.Recv():
+			if m.Type != cjp.Upload {
+				switch m.Type {
+				case cjp.Input, cjp.InputMore, cjp.Bye, cjp.Result:
+					n.backlog = append(n.backlog, m)
+				}
+				continue
+			}
+			if len(m.Payload) == 0 {
+				continue
+			}
+			idle.Reset(timeout)
+			switch m.Payload[0] {
+			case 'D':
+				if len(data) < maxUpload {
+					data = append(data, m.Payload[1:]...)
+				}
+			case 'E':
+				return data, nil
+			case 'F':
+				return nil, errors.New(string(m.Payload[1:]))
+			}
+		case <-n.link.Done():
+			return nil, errors.New("the PCjr hung up")
+		case <-idle.C:
+			return nil, errors.New("no answer from the PCjr")
+		}
+	}
+}
+
+// exec runs a DOS command on the PCjr and returns what it printed.
+func (n *native) exec(cmd string) (string, error) {
+	cmd = strings.TrimSpace(cmd)
+	if !n.remote {
+		return "", errors.New("this CODEJR.EXE can't run commands yet; it updates itself on the next call")
+	}
+	if cmd == "" || len(cmd) > 100 || strings.ContainsAny(cmd, "\r\n") {
+		return "", errors.New("give one DOS command line, up to 100 characters")
+	}
+	n.sendPending()
+	n.s.logf("native: running on the PCjr: %s", cmd)
+	if err := n.link.Send(cjp.Exec, []byte(cmd)); err != nil {
+		return "", errors.New("the PCjr hung up")
+	}
+	b, err := n.collect(5 * time.Minute)
+	if err != nil {
+		return "", err
+	}
+	return string(fromDOS(b)), nil
+}
+
+// fetch copies a file from the PCjr into the workspace.
+func (n *native) fetch(name string) (int, error) {
+	name = strings.ToUpper(strings.ReplaceAll(strings.TrimSpace(name), "/", `\`))
+	if !n.remote {
+		return 0, errors.New("this CODEJR.EXE can't send files yet; it updates itself on the next call")
+	}
+	if !ValidPath(name) {
+		return 0, errors.New("give a file name: NAME.EXT or FOLDER\\NAME.EXT")
+	}
+	n.sendPending()
+	if err := n.link.Send(cjp.Fetch, []byte(name)); err != nil {
+		return 0, errors.New("the PCjr hung up")
+	}
+	b, err := n.collect(2 * time.Minute)
+	if err != nil {
+		return 0, err
+	}
+	if err := n.s.ws.SaveFromPCjr(name, b); err != nil {
+		return 0, err
+	}
+	n.s.logf("native: got %s from the PCjr (%d bytes)", name, len(b))
+	return len(b), nil
+}
+
+// ---- the control socket's side ----
+
+type ctlReq struct {
+	op, arg string
+	reply   chan ctlResp
+}
+
+type ctlResp struct {
+	out string
+	err error
+}
+
+var (
+	activeMu sync.Mutex
+	active   *native // the native call in progress, if any
+)
+
+func setActive(n *native) {
+	activeMu.Lock()
+	active = n
+	activeMu.Unlock()
+}
+
+// Control runs op ("dos" or "fetch") with arg on the PCjr that is connected
+// now. It waits its turn: the call's own loop does the work between other
+// messages.
+func Control(op, arg string) (string, error) {
+	activeMu.Lock()
+	n := active
+	activeMu.Unlock()
+	if n == nil {
+		return "", errors.New("the PCjr isn't connected (run CODEJR on it)")
+	}
+	r := ctlReq{op: op, arg: arg, reply: make(chan ctlResp, 1)}
+	select {
+	case n.ctl <- r:
+	case <-n.link.Done():
+		return "", errors.New("the PCjr hung up")
+	case <-time.After(30 * time.Second):
+		return "", errors.New("the PCjr is busy (a file transfer?); try again")
+	}
+	select {
+	case resp := <-r.reply:
+		return resp.out, resp.err
+	case <-n.link.Done():
+		return "", errors.New("the PCjr hung up")
+	}
+}
+
+func (n *native) handleCtl(r ctlReq) {
+	var resp ctlResp
+	switch r.op {
+	case "dos":
+		resp.out, resp.err = n.exec(r.arg)
+	case "fetch":
+		var size int
+		size, resp.err = n.fetch(r.arg)
+		if resp.err == nil {
+			resp.out = fmt.Sprintf("Saved %s in the workspace (%d bytes).", strings.ToUpper(r.arg), size)
+		}
+	default:
+		resp.err = fmt.Errorf("no operation %q", r.op)
+	}
+	r.reply <- resp
+}

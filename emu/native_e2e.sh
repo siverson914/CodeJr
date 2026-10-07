@@ -191,6 +191,44 @@ voicerun() { # $1 = typed line, $2 = label, $3 = 1 to start with voice on, $4 = 
 
 voicerun /voice "/voice plays its clip" 0 ON.SND
 voicerun "hi there" "a voiced reply is spoken" 1 REPLY.SND
+# Remote work: /dos runs a command on the PCjr and shows what it printed,
+# /send uploads a file, and the laptop can ask for both through the
+# control socket while a call is up (what Claude's dos and fetch tools use).
+remoterun() {
+	tmp=$(mktemp -d)
+	mkdir -p "$tmp/c/CODEJR/PROGS/GAME" "$tmp/ws"
+	cp client/CODEJR.EXE "$tmp/c/CODEJR/PROGS/"
+	printf 'a note from the PCjr\r\n' > "$tmp/c/CODEJR/PROGS/NOTE.TXT"
+	printf 'score 42\r\n' > "$tmp/c/CODEJR/PROGS/GAME/LOG.TXT"
+	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG"
+	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "" > "$tmp/server.log" 2>&1 &
+	sp=$!
+	sleep 0.5
+	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 3000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:37287 "/T:%s" /X:50 /S:SCREEN.TXT\nexit\n' $port "$tmp" "$1" > "$tmp/dosbox.conf"
+	SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 200 dosbox -conf "$tmp/dosbox.conf" >/dev/null 2>&1 &
+	dp=$!
+	# From the laptop, while the call is up.
+	sleep 25
+	server/codejr ctl -workspace "$tmp/ws" dos VER > "$tmp/ctl-dos.txt" 2>&1
+	server/codejr ctl -workspace "$tmp/ws" fetch 'GAME\LOG.TXT' > "$tmp/ctl-fetch.txt" 2>&1
+	wait $dp
+	kill $sp 2>/dev/null; wait $sp 2>/dev/null
+	echo "== $2"
+	shift 2
+	for c in "$@"; do eval "$c"; done
+	[ $fail = 1 ] && { echo "--- server log"; cat "$tmp/server.log"; echo "--- screen"; cat "$tmp/c/CODEJR/PROGS/SCREEN.TXT"; echo "--- ctl"; cat "$tmp/ctl-dos.txt" "$tmp/ctl-fetch.txt"; ls -R "$tmp/ws"; }
+	rm -rf "$tmp"
+}
+
+remoterun "/dos VER" "/dos, and the laptop's control socket" \
+	'check "the screen shows what VER printed" "grep -qi dosbox $tmp/c/CODEJR/PROGS/SCREEN.TXT"' \
+	'check "the screen was repainted" "grep -q \"CodeJr 1\" $tmp/c/CODEJR/PROGS/SCREEN.TXT"' \
+	'check "the laptop ran a command on the PCjr" "grep -qi dosbox $tmp/ctl-dos.txt"' \
+	'check "the laptop fetched a file from a folder" "printf \"score 42\n\" | cmp -s - $tmp/ws/GAME/LOG.TXT"'
+remoterun "/send note.txt" "/send uploads a file" \
+	'check "the file reached the workspace" "printf \"a note from the PCjr\n\" | cmp -s - $tmp/ws/NOTE.TXT"' \
+	'check "the screen says so" "grep -q \"CodeJr has NOTE.TXT now\" $tmp/c/CODEJR/PROGS/SCREEN.TXT"'
+
 pagerun long "a long reply stops at More" "line 20" "!line 21"
 pagerun /exit "/exit answers at once" "Hanging up" "!^>  *.\{0,1\}$"
 deltarun

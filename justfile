@@ -125,6 +125,14 @@ live:
     apps/say/build.sh
     just restart
 
+# Run a DOS command on the PCjr that is connected now: just pcjr "TREE C:\CODEJR /F"
+pcjr +command:
+    @server/codejr ctl -workspace "{{ws}}" dos {{command}}
+
+# Copy a file from the connected PCjr into the workspace: just pcjr-fetch LOG.TXT
+pcjr-fetch name:
+    @server/codejr ctl -workspace "{{ws}}" fetch {{name}}
+
 # Sort the workspace's loose files into app folders (then run ORGANIZE on the PCjr)
 organize: build
     server/codejr organize -workspace "{{ws}}"

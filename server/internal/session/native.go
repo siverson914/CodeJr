@@ -23,7 +23,11 @@ const nativeNote = `
 
 Client: the user is running CodeJr's own PCjr program (CODEJR.EXE), not
 MS-Kermit. It draws its own screen, so ignore the MS-Kermit details above:
-files arrive with an on-screen progress bar, and to run a program the user
+files arrive with an on-screen progress bar. You have two tools for the
+real machine: dos runs a DOS command there and gives you what it printed
+(look with DIR, TREE, TYPE, MEM; ask before anything that deletes or
+changes files), and fetch copies a file from it into your folder. The user
+has the same as /dos COMMAND and /send NAME. To run a program the user
 types /run (a numbered list of programs, including those in project
 folders; a number runs one, and CodeJr calls back when it ends). End BASIC programs with SYSTEM rather than END,
 so they return to DOS and CodeJr comes back by itself. You cannot see the PCjr's screen; if the user reports a
@@ -46,6 +50,8 @@ type native struct {
 	dirs     bool            // the client makes project folders (dirs=1)
 	delta    bool            // the client applies edit scripts (delta=1)
 	voice    bool            // the client plays clips (voice=1)
+	remote   bool            // the client runs commands and sends files (remote=1)
+	ctl      chan ctlReq     // requests from the control socket (see remote.go)
 	reply    strings.Builder // this turn's reply text, to speak
 	playNext string          // a clip to play once this turn's files are over
 	// A run report arriving from the client (Result messages).
@@ -82,7 +88,9 @@ func (s *session) native() {
 	}
 	defer link.Close()
 	defer func() { s.logf("native: call ended; %s", link.Stats()) }()
-	n := &native{s: s, link: link}
+	n := &native{s: s, link: link, ctl: make(chan ctlReq)}
+	setActive(n)
+	defer setActive(nil)
 
 	// The client speaks first.
 	select {
@@ -127,6 +135,9 @@ func (s *session) native() {
 		} else {
 			select {
 			case m = <-link.Recv():
+			case r := <-n.ctl:
+				n.handleCtl(r)
+				continue
 			case <-link.Done():
 				return
 			}
@@ -174,6 +185,9 @@ func (n *native) hello(h string) {
 		}
 		if f == "delta=1" {
 			n.delta = true
+		}
+		if f == "remote=1" {
+			n.remote = true
 		}
 		if f == "voice=1" {
 			n.voice = true
@@ -381,7 +395,9 @@ func (n *native) submit(line string) bool {
 const nativeHelp = `Commands:
   /files       list your programs (* = not on the PCjr yet)
   /sync        send files the PCjr doesn't have yet
-  /send NAME   send a file again
+  /send NAME   send a file from this PCjr to CodeJr
+  /get NAME    get a file from CodeJr again
+  /dos CMD     run a DOS command; CodeJr sees what it printed
   /new         start a fresh conversation
   /run         number your programs; type a number to run one
   /voice       speak replies aloud (on/off); replies get short
@@ -428,13 +444,40 @@ func (n *native) command(line string) bool {
 		}
 	case "/sync":
 		n.sync()
-	case "/send":
+	case "/get":
+		// Names read from the PCjr's seat: /get brings CodeJr's copy
+		// here again, /send sends this PCjr's file to CodeJr.
 		if !ValidPath(arg) {
-			n.print(cjp.StyleWarn, "Usage: /send NAME.EXT  (or FOLDER\\NAME.EXT)\n")
+			n.print(cjp.StyleWarn, "Usage: /get NAME.EXT  (or FOLDER\\NAME.EXT)\n")
 			break
 		}
 		s.ws.Forget(arg)
 		n.sync()
+	case "/send":
+		raw := strings.TrimSpace(line[len(f[0]):])
+		n.status("Sending " + strings.ToUpper(raw) + " to CodeJr...")
+		size, err := n.fetch(raw)
+		if err != nil {
+			n.print(cjp.StyleWarn, "Couldn't send it: "+err.Error()+"\n")
+			break
+		}
+		n.print(cjp.StyleNote, fmt.Sprintf("CodeJr has %s now (%d bytes).\n", strings.ToUpper(raw), size))
+	case "/dos":
+		raw := strings.TrimSpace(line[len(f[0]):])
+		out, err := n.exec(raw)
+		if err != nil {
+			n.print(cjp.StyleWarn, "Couldn't run it: "+err.Error()+"\n")
+			break
+		}
+		if strings.TrimSpace(out) == "" {
+			out = "(it printed nothing)\n"
+		}
+		n.print(cjp.StylePlain, strings.TrimRight(out, "\n")+"\n")
+		// CodeJr sees it with the next message.
+		if len(out) > 6000 {
+			out = out[:6000] + "\n... (cut)"
+		}
+		s.ws.SetLastRun("DOS command the user ran with /dos: " + raw + "\nWhat it printed:\n" + out)
 	case "/voice":
 		n.toggleVoice()
 	case "/quit", "/bye", "/exit":
@@ -575,6 +618,9 @@ func (n *native) runClaude(session, prompt string) error {
 			status()
 		case <-textTick.C:
 			n.sendPending()
+		case r := <-n.ctl:
+			// One of Claude's tools wants something from the PCjr.
+			n.handleCtl(r)
 		case m := <-n.link.Recv():
 			if m.Type == cjp.Key && len(m.Payload) > 0 && m.Payload[0] == cjp.KeyCtrlC {
 				cancel()

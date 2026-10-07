@@ -38,7 +38,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.6"
+#define VERSION "1.7"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -106,6 +106,15 @@ static int menu; /* the last line was /run: a bare number picks a program */
 #define LASTSCR "C:\\CODEJR\\LASTSCR.TXT"
 #define LASTREP "C:\\CODEJR\\LASTREP.TXT"
 static FILE *report;   /* being sent, a piece at a time */
+/* Remote work for the server: a DOS command to run (its output goes to
+ * CMDOUT and is uploaded), a file to upload, and the upload in progress. */
+#define CMDOUT "C:\\CODEJR\\CMDOUT.TXT"
+static char pend_cmd[CJP_MAXPAYLOAD + 1];
+static char pend_get[24];
+static FILE *up;
+static int up_temp;           /* delete the uploaded file afterwards */
+static unsigned long up_sent;
+static char up_name[24];
 static int results_ok; /* the server takes run reports */
 static void start_report(void);
 static int cursor_dirty;
@@ -611,6 +620,16 @@ static void handle(const cjp_frame *f)
 			play_name[f->len] = 0;
 		}
 		break;
+	case CJP_EXEC:
+		memcpy(pend_cmd, f->payload, f->len);
+		pend_cmd[f->len] = 0;
+		break;
+	case CJP_FETCH:
+		if (f->len && f->len < sizeof pend_get) {
+			memcpy(pend_get, f->payload, f->len);
+			pend_get[f->len] = 0;
+		}
+		break;
 	case CJP_VOICE:
 		voice_on = f->len && f->payload[0];
 		break;
@@ -920,6 +939,93 @@ static void pump_report(void)
 		b[0] = 'D';
 		queue(CJP_RESULT, b, (unsigned)n + 1);
 	}
+}
+
+/* ---- remote work: commands and uploads for the server ---------------- */
+
+static void upload_fail(const char *why)
+{
+	unsigned char b[1 + 60];
+	size_t n = strlen(why);
+	b[0] = 'F';
+	memcpy(b + 1, why, n);
+	queue(CJP_UPLOAD, b, (unsigned)n + 1);
+}
+
+/* Starts sending a file to the server: kind 'B' (a file, with its name)
+ * or 'X' (the output of a command). The main loop sends the pieces. */
+static void start_upload(const char *path, const char *name, int kind, int temp)
+{
+	unsigned char b[1 + 24];
+	size_t n = kind == 'B' ? strlen(name) : 0;
+
+	if ((up = fopen(path, "rb")) == NULL) {
+		upload_fail(kind == 'B' ? "no such file on the PCjr" : "the command made no output file");
+		return;
+	}
+	b[0] = (unsigned char)kind;
+	memcpy(b + 1, name, n);
+	queue(CJP_UPLOAD, b, (unsigned)n + 1);
+	up_temp = temp;
+	up_sent = 0;
+	strncpy(up_name, name, sizeof up_name - 1);
+}
+
+static void pump_upload(void)
+{
+	unsigned char b[1 + 120];
+	char s[60];
+	size_t n;
+
+	while (up && outq_n < OUTQ - 2) {
+		n = fread(b + 1, 1, 120, up);
+		if (n == 0) {
+			b[0] = 'E';
+			queue(CJP_UPLOAD, b, 1);
+			fclose(up);
+			up = NULL;
+			if (up_temp)
+				remove(CMDOUT);
+			if (!more_shown)
+				scr_status(server_status);
+			break;
+		}
+		b[0] = 'D';
+		queue(CJP_UPLOAD, b, (unsigned)n + 1);
+		up_sent += n;
+		if (!more_shown) {
+			sprintf(s, "Sending %s to CodeJr: %lu bytes", up_name, up_sent);
+			scr_status(s);
+		}
+	}
+}
+
+/* Runs a DOS command for the server. Its output goes to a file, which is
+ * then uploaded; the keyboard is NUL, so nothing can sit waiting for a
+ * key. The screen is repainted afterwards: the command (or DOS's own
+ * error messages) may have written on it. */
+static void run_command(void)
+{
+	static char line[CJP_MAXPAYLOAD + 40];
+	char s[100];
+
+	sprintf(s, "Running on this PCjr: %.60s", pend_cmd);
+	note(s);
+	scr_status("Running a DOS command for CodeJr...");
+	remove(CMDOUT);
+	sprintf(line, "%s <NUL >" CMDOUT, pend_cmd);
+	pend_cmd[0] = 0;
+	if (system(line) == -1) {
+		scr_refresh();
+		upload_fail("couldn't start COMMAND.COM (memory?)");
+	} else {
+		scr_refresh();
+		start_upload(CMDOUT, "the output", 'X', 1);
+	}
+	scr_status(server_status);
+	more_shown = 0;
+	more_lines = -1;
+	cursor_dirty = 1;
 }
 
 /* Handles a line meant for the client. Returns 1 if it was. */
@@ -1290,7 +1396,7 @@ int main(int argc, char **argv)
 	long baud = 9600, fast = 37287;
 	int at_fast = 0, restore_only = 0;
 	unsigned long start;
-	char hello[64];
+	char hello[80];
 
 	for (i = 1; i < argc; i++) {
 		char *a = argv[i];
@@ -1380,7 +1486,7 @@ int main(int argc, char **argv)
 	}
 
 	cjp_init(&link, link_write, link_now, NULL, 2 * TICKS_PER_SEC);
-	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1 dirs=1 delta=1 voice=1", line_baud);
+	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1 dirs=1 delta=1 voice=1 remote=1", line_baud);
 	queue(CJP_HELLO, hello, (unsigned)strlen(hello));
 	scr_status("Connecting...");
 
@@ -1409,6 +1515,16 @@ int main(int argc, char **argv)
 		}
 		show_more();
 		pump_report();
+		/* Remote work waits until nothing else is going out. */
+		if (!up && !report && !offer.pending && outq_n == 0) {
+			if (pend_cmd[0]) {
+				run_command();
+			} else if (pend_get[0]) {
+				start_upload(pend_get, pend_get, 'B', 0);
+				pend_get[0] = 0;
+			}
+		}
+		pump_upload();
 		flush_queue();
 		cjp_tick(&link);
 		if (exit_after >= 0 && (long)(ticks() - start) > exit_after * 182 / 10) {

@@ -50,7 +50,7 @@ The settings above are for one particular PCjr and Zimodem WiFi modem. The reaso
 
 ## In a session
 
-Type a request and press Enter. Commands: `/files`, `/sync`, `/send NAME`, `/new`, `/run`, `/quit`, `/help` (Kermit sessions also have `/get NAME`, `/setup` and `/echo`). `/run` numbers the programs on the PCjr; type a number to run one, and CodeJr calls back when it ends. Alt-S shows the line's error counters.
+Type a request and press Enter. Commands: `/files`, `/sync`, `/run`, `/send NAME` (send a file from the PCjr to CodeJr), `/get NAME` (get a file from CodeJr again), `/dos COMMAND` (run a DOS command and show CodeJr what it printed), `/voice`, `/new`, `/exit`, `/help`. `/run` numbers the programs on the PCjr; type a number to run one, and CodeJr calls back when it ends. Alt-S shows the line's error counters. From the laptop, while the PCjr is connected: `just pcjr "DIR"` and `just pcjr-fetch NAME`.
 
 ## Docs
 

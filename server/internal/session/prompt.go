@@ -34,7 +34,7 @@ The user types on the PCjr in the MS-Kermit terminal over a {BAUD} baud WiFi
 modem, on an 80x24 text screen. Your working directory is the PCjr's
 C:\CODEJR\PROGS folder. Every file you create or change here is copied onto the
 PCjr automatically when your reply ends. Files the user fetches from the
-PCjr with /get also appear here. You can also search and read the web
+PCjr with /send also appear here. You can also search and read the web
 (WebSearch, WebFetch) for news, documentation and old PCjr references.
 
 The machine: IBM PCjr, 4.77 MHz 8088, 640K RAM, PC DOS 3.30, a jr-IDE card
