@@ -32,6 +32,7 @@
 #include <io.h>
 #include <direct.h>
 #include <errno.h>
+#include <signal.h>
 #include <process.h>
 #include <fcntl.h>
 #include "serial.h"
@@ -39,7 +40,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.0.20"
+#define VERSION "1.0.21"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 #define PULL_OLD "CJPULL.OLD" /* the copy being replaced, until the new one is in */
@@ -1589,6 +1590,21 @@ static int change_speed(long from, long to)
 	return 0;
 }
 
+/* Ends a call the modem is still on: a second of silence, "+++", a second
+ * of silence (the modem's rule), then AT must answer. Returns 1 if it
+ * does, at the speed the port is set to. */
+static int escape_call(void)
+{
+	settle(22);
+	ser_puts("+++");
+	settle(24);
+	ser_puts("AT\r");
+	if (expect("OK", TICKS_PER_SEC))
+		return 1;
+	ser_puts("AT\r");
+	return expect("OK", TICKS_PER_SEC);
+}
+
 /* Dials and waits for the server's READY banner. Returns 0 on success. */
 static int dial(const char *host)
 {
@@ -1689,9 +1705,32 @@ int main(int argc, char **argv)
 			ser_set_baud(baud);
 			ser_puts("\r"); /* end whatever the modem made of that */
 			settle(4);
+			ser_puts("AT\r");
+			if (!expect("OK", TICKS_PER_SEC)) {
+				/* Silent at both speeds: the last run probably ended
+				 * without hanging up (a crash, Ctrl-Break), and the
+				 * modem is still on that call, passing what we type to
+				 * the server. Zimodem's README: "+++" followed by a
+				 * second of silence disconnects. Try it at each speed. */
+				printf("CODEJR: waking the modem (it may still be on a call)...\n");
+				ser_set_baud(fast);
+				at_fast = escape_call();
+				if (!at_fast) {
+					ser_set_baud(baud);
+					escape_call();
+				}
+			}
 		}
 	} else
 		ser_open(port, baud);
+	/* Whatever ends this program, the serial interrupt goes back first: a
+	 * vector left pointing into freed memory crashes the next program. */
+	atexit(ser_close);
+	/* Ctrl-C and Ctrl-Break must not end CodeJr: it would leave the modem
+	 * on the call. They still stop a DOS command we started, which is how
+	 * a stuck one gets unstuck. (Ctrl-C at the prompt is read as a key.) */
+	signal(SIGINT, SIG_IGN);
+	signal(SIGBREAK, SIG_IGN);
 	if (restore_only) {
 		/* CODEJR /R:1: the modem back to its saved speed, then out. It may
 		 * be at either speed. */

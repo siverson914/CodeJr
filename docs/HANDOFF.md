@@ -173,6 +173,7 @@ just deploy-speech HELLO READY  # queue SAY.EXE and clips (NAME.SNP for a PWM ve
 ### Running commands on the PCjr from here (learned 2026-10-07)
 
 - **A command that waits for typing hangs the PCjr,** and nothing on the laptop can stop it: DOS runs one program at a time. A bare `DATE` did it on the first day of remote commands (Steve had to press Ctrl-Break). `session.Prompting` now refuses commands known to prompt (`DATE` and `TIME` alone, `PAUSE`, `MORE`, `COMP`, `DEL *.*`, `DIR /P`, `FORMAT`, editors, BASIC), trust or not, and the client feeds commands a file of Enter presses instead of NUL (with NUL, `DATE` loops on end-of-file forever). Before running anything new, ask: could it prompt?
+- **After a run that ended without hanging up** (Ctrl-Break, a crash), the modem is still on the call and passes "AT" to the server as data, so the next `CODEJR` got no answer and Steve had to reboot. Zimodem's README: `+++` followed by a second with no other characters disconnects. From 1.0.21 the client does that at startup when the modem is silent at both speeds (untested on the real modem), ignores Ctrl-C and Ctrl-Break itself (they still stop a DOS command it started), and always releases the serial interrupt on exit.
 - `TREE` isn't on this PCjr. Use `DIR` per folder.
 - Pass commands with backslashes straight to `codejr ctl` or through the `just pcjr` recipes as fixed in 1.0.20 (they once dropped the backslashes: `DIR C:CODEJRPROGS`).
 - The disk: 24.6 MB, 4.8 MB free on 2026-10-07. Files written before client 1.8 are all dated 1-01-80.
