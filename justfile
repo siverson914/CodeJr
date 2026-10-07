@@ -129,6 +129,15 @@ live:
 pcjr +command:
     @server/codejr ctl -workspace "{{ws}}" dos {{command}}
 
+# Send pending files, then run a program in its folder on the connected PCjr and show
+# its output, exit code, screen and LOG.TXT: just pcjr-run LEMMJR LEMMJR.EXE /TEST
+pcjr-run folder +command:
+    @server/codejr ctl -workspace "{{ws}}" run {{folder}} {{command}}
+
+# Send pending files to the connected PCjr now
+pcjr-sync:
+    @server/codejr ctl -workspace "{{ws}}" sync now
+
 # Copy a file from the connected PCjr into the workspace: just pcjr-fetch LOG.TXT
 pcjr-fetch name:
     @server/codejr ctl -workspace "{{ws}}" fetch {{name}}

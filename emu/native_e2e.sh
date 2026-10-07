@@ -237,6 +237,47 @@ remoterun "/send note.txt" "/send uploads a file" \
 	'check "the file reached the workspace" "printf \"a note from the PCjr\n\" | cmp -s - $tmp/ws/NOTE.TXT"' \
 	'check "the screen says so" "grep -q \"CodeJr has NOTE.TXT now\" $tmp/c/CODEJR/PROGS/SCREEN.TXT"'
 
+# The iteration loop from the laptop: a program built during a call is
+# pushed, run in its folder on the PCjr, and its output, exit code and
+# LOG.TXT come back in one step. $1 = 1 for /trust on (no question).
+looprun() {
+	tmp=$(mktemp -d)
+	mkdir -p "$tmp/c/CODEJR/PROGS" "$tmp/ws/.codejr"
+	cp client/CODEJR.EXE "$tmp/c/CODEJR/PROGS/"
+	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG"
+	[ "$1" = 1 ] && touch "$tmp/ws/.codejr/trust"
+	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "" > "$tmp/server.log" 2>&1 &
+	sp=$!
+	sleep 0.5
+	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 3000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:37287 %s /X:70 /S:SCREEN.TXT\nexit\n' $port "$tmp" "$2" > "$tmp/dosbox.conf"
+	SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 200 dosbox -conf "$tmp/dosbox.conf" >/dev/null 2>&1 &
+	dp=$!
+	sleep 25
+	# "Build" a program now, as an edit-compile-run loop would.
+	mkdir -p "$tmp/ws/GAME"
+	printf '#include <stdio.h>\nint main(int argc, char **argv)\n{\n\tFILE *f = fopen("LOG.TXT", "w");\n\tprintf("GAME OVER %%s\\n", argc > 1 ? argv[1] : "");\n\tif (f) { fprintf(f, "score 42\\n"); fclose(f); }\n\treturn 3;\n}\n' > "$tmp/game.c"
+	(. client/owenv.sh && cd "$tmp" && wcl -q -bt=dos -ms -0 -fe=ws/GAME/GAME.EXE game.c >/dev/null && rm -f ws/GAME/*.o game.o)
+	server/codejr ctl -workspace "$tmp/ws" run GAME GAME.EXE /TEST > "$tmp/run.txt" 2>&1
+	# A CD on the PCjr must not move where later files land.
+	server/codejr ctl -workspace "$tmp/ws" dos CD GAME > /dev/null 2>&1
+	printf 'later\n' > "$tmp/ws/LATER.TXT"
+	server/codejr ctl -workspace "$tmp/ws" sync now > "$tmp/sync.txt" 2>&1
+	wait $dp
+	kill $sp 2>/dev/null; wait $sp 2>/dev/null
+	echo "== $3"
+	check "the new build reached its folder" "[ -s '$tmp/c/CODEJR/PROGS/GAME/GAME.EXE' ]"
+	check "its output came back, with the argument" "grep -q 'GAME OVER /TEST' '$tmp/run.txt'"
+	check "its exit code came back" "grep -q 'exit code 3' '$tmp/run.txt'"
+	check "its LOG.TXT came back" "grep -q 'score 42' '$tmp/run.txt'"
+	check "it ran in its folder" "[ -s '$tmp/c/CODEJR/PROGS/GAME/LOG.TXT' ] && [ ! -e '$tmp/c/CODEJR/PROGS/LOG.TXT' ]"
+	check "a later file still lands in PROGS" "[ -s '$tmp/c/CODEJR/PROGS/LATER.TXT' ]"
+	[ $fail = 1 ] && { echo "--- server log"; cat "$tmp/server.log"; echo "--- run"; cat "$tmp/run.txt" "$tmp/sync.txt"; echo "--- screen"; cat "$tmp/c/CODEJR/PROGS/SCREEN.TXT"; ls -R "$tmp/c/CODEJR"; }
+	rm -rf "$tmp"
+}
+
+looprun 1 "" "the loop from the laptop, with /trust on"
+looprun 0 "/A:Y" "the loop from the laptop, asking first"
+
 pagerun long "a long reply stops at More" "line 20" "!line 21"
 pagerun /exit "/exit answers at once" "Hanging up" "!^>  *.\{0,1\}$"
 deltarun

@@ -9,11 +9,18 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
+#include <stdio.h>
+
 void scr_init(const char *title);
 void scr_done(void);
 /* Repaints everything after another program had the screen (and maybe
  * changed the video mode): header, transcript from the buffer, divider. */
 void scr_refresh(void);
+/* For running another program: scr_blank gives it a clean text screen,
+ * and scr_dump writes what it left there (no trailing blanks; nothing if
+ * the screen is empty). */
+void scr_blank(void);
+void scr_dump(FILE *f);
 
 /* Transcript: appends one character in a color attribute. '\n' starts a
  * new line; long lines wrap. */

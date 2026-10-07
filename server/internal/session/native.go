@@ -28,7 +28,12 @@ real machine: dos runs a DOS command there and gives you what it printed
 (DIR, TREE, TYPE, MEM and other commands that only look or create run at
 once; for anything that could delete or change something, the PCjr asks
 the user to press Y first, so say why you need it), and fetch copies a
-file from it into your folder. The user
+file from it into your folder. run_on_pcjr runs a program from a project
+folder on the real machine and returns what it printed, its exit code,
+the text screen it left and its LOG.TXT: after the emulator passes, use
+it to check real speed and behavior (the user sees it run; nobody presses
+keys, so use the program's /TEST mode and make sure it ends by itself: a
+program that hangs there can only be stopped by the user). The user
 has the same as /dos COMMAND and /send NAME. To run a program the user
 types /run (a numbered list of programs, including those in project
 folders; a number runs one, and CodeJr calls back when it ends). End BASIC programs with SYSTEM rather than END,
@@ -53,6 +58,7 @@ type native struct {
 	delta    bool            // the client applies edit scripts (delta=1)
 	voice    bool            // the client plays clips (voice=1)
 	remote   bool            // the client runs commands and sends files (remote=1)
+	runs     bool            // the client runs programs in their folders (run=1)
 	ctl      chan ctlReq     // requests from the control socket (see remote.go)
 	reply    strings.Builder // this turn's reply text, to speak
 	playNext string          // a clip to play once this turn's files are over
@@ -189,6 +195,9 @@ func (n *native) hello(h string) {
 		}
 		if f == "delta=1" {
 			n.delta = true
+		}
+		if f == "run=1" {
+			n.runs = true
 		}
 		if f == "remote=1" {
 			n.remote = true
@@ -402,6 +411,7 @@ const nativeHelp = `Commands:
   /send NAME   send a file from this PCjr to CodeJr
   /get NAME    get a file from CodeJr again
   /dos CMD     run a DOS command; CodeJr sees what it printed
+  /trust       let CodeJr run programs and change files without asking (on/off)
   /new         start a fresh conversation
   /run         number your programs; type a number to run one
   /voice       speak replies aloud (on/off); replies get short
@@ -482,6 +492,15 @@ func (n *native) command(line string) bool {
 			out = out[:6000] + "\n... (cut)"
 		}
 		s.ws.SetLastRun("DOS command the user ran with /dos: " + raw + "\nWhat it printed:\n" + out)
+	case "/trust":
+		// Only the PCjr's own keyboard can flip this.
+		on := !s.ws.Flag("trust")
+		s.ws.SetFlag("trust", on)
+		if on {
+			n.print(cjp.StyleNote, "Trust on: CodeJr may run programs and change files on this PCjr without\nasking first. /trust turns it off.\n")
+		} else {
+			n.print(cjp.StyleNote, "Trust off: CodeJr asks (Y or N) before anything that runs a program or\ncould delete or change a file. Looking (DIR, TYPE) never asks.\n")
+		}
 	case "/voice":
 		n.toggleVoice()
 	case "/quit", "/bye", "/exit":

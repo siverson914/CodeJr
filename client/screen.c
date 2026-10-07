@@ -267,6 +267,37 @@ void scr_info(const char *s)
 	put_text(0, COLS - 1 - n, s, A_HEADER, n);
 }
 
+void scr_blank(void)
+{
+	union REGS x;
+	x.h.ah = 0; x.h.al = 3;
+	int86(0x10, &x, &x);
+}
+
+void scr_dump(FILE *f)
+{
+	unsigned short far *v = (unsigned short far *)MK_FP(0xB800, 0);
+	char line[COLS + 1];
+	int r, c, last = -1, n;
+
+	/* Find the last row with anything on it. */
+	for (r = 0; r < 25; r++)
+		for (c = 0; c < COLS; c++)
+			if ((unsigned char)v[r * COLS + c] > ' ')
+				last = r;
+	for (r = 0; r <= last; r++) {
+		n = 0;
+		for (c = 0; c < COLS; c++) {
+			unsigned char ch = (unsigned char)v[r * COLS + c];
+			line[c] = (char)(ch >= 32 && ch < 127 ? ch : (ch ? '.' : ' '));
+			if (line[c] != ' ')
+				n = c + 1;
+		}
+		line[n] = 0;
+		fprintf(f, "%s\n", line);
+	}
+}
+
 void scr_refresh(void)
 {
 	frame();

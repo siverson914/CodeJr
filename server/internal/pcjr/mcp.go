@@ -71,6 +71,22 @@ func init() {
 			},
 		},
 		map[string]any{
+			"name": "run_on_pcjr",
+			"description": "Run a program from a project folder on the user's real PCjr (it must be connected). The newest files are sent first. " +
+				"Returns what it printed, its exit code, the text screen it left and its LOG.TXT if it wrote one. " +
+				"Use it after the emulator run passes, to see real speed and hardware behavior. Nobody presses keys: use a /TEST style option " +
+				"that ends by itself (a program that hangs on the PCjr can only be stopped by the user). The user sees the program run. " +
+				"Unless the user turned /trust on, the PCjr asks them to press Y first.",
+			"inputSchema": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"project": map[string]any{"type": "string", "description": "the project folder, e.g. SNAKE"},
+					"command": map[string]any{"type": "string", "description": "the program and its arguments, e.g. SNAKE.EXE /TEST"},
+				},
+				"required": []string{"project", "command"},
+			},
+		},
+		map[string]any{
 			"name": "fetch",
 			"description": "Copy a file from the user's real PCjr (C:\\CODEJR\\PROGS) into your folder so you can read it: " +
 				"a LOG.TXT a program wrote there, a file the user made. About 1.5 KB a second.",
@@ -138,12 +154,15 @@ func Serve(ctx context.Context, e Env, in io.Reader, out io.Writer) error {
 				continue
 			}
 			switch p.Name {
-			case "dos", "fetch":
-				arg := p.Arguments.Command
+			case "dos", "fetch", "run_on_pcjr":
+				op, arg := p.Name, p.Arguments.Command
 				if p.Name == "fetch" {
 					arg = p.Arguments.Path
 				}
-				out, err := CtlCall(e.Workspace, p.Name, arg)
+				if p.Name == "run_on_pcjr" {
+					op, arg = "run", p.Arguments.Project+"\n"+p.Arguments.Command
+				}
+				out, err := CtlCall(e.Workspace, op, arg)
 				if err != nil {
 					out = err.Error()
 				}

@@ -496,6 +496,9 @@ func describeTool(e claude.Event) (string, string) {
 	case "mcp__pcjr__dos":
 		c, _ := e.Input["command"].(string)
 		return "[runs on this PCjr: " + c + "]", "Running " + c + " on the PCjr"
+	case "mcp__pcjr__run_on_pcjr":
+		c, _ := e.Input["command"].(string)
+		return "[runs " + c + " on this PCjr]", "Running " + c + " on the PCjr"
 	case "mcp__pcjr__fetch":
 		p, _ := e.Input["path"].(string)
 		p = strings.ToUpper(p)

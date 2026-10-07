@@ -38,7 +38,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.8"
+#define VERSION "1.9"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -110,6 +110,8 @@ static FILE *report;   /* being sent, a piece at a time */
  * CMDOUT and is uploaded), a file to upload, and the upload in progress. */
 #define CMDOUT "C:\\CODEJR\\CMDOUT.TXT"
 static char pend_cmd[CJP_MAXPAYLOAD + 1];
+static char pend_dir[10];     /* CJP_RUN: the project folder to run it in */
+static int pend_run;          /* pend_cmd is a program to run (CJP_RUN) */
 static char pend_get[24];
 static FILE *up;
 static int up_temp;           /* delete the uploaded file afterwards */
@@ -673,6 +675,7 @@ static void handle(const cjp_frame *f)
 		}
 		break;
 	case CJP_EXEC:
+		pend_run = 0;
 		if (f->len && f->payload[0] == 1) {
 			/* Not a look-only command: the user decides. */
 			memcpy(pend_cmd, f->payload + 1, f->len - 1);
@@ -684,6 +687,27 @@ static void handle(const cjp_frame *f)
 			ask = 0;
 		}
 		break;
+	case CJP_RUN: {
+		/* [1 = ask] FOLDER "\n" COMMAND */
+		const unsigned char *p = f->payload;
+		unsigned n = f->len, i;
+		ask = 0;
+		if (n && p[0] == 1) {
+			ask = 1;
+			p++;
+			n--;
+		}
+		for (i = 0; i < n && p[i] != '\n'; i++)
+			;
+		if (i < n && i < sizeof pend_dir) {
+			memcpy(pend_dir, p, i);
+			pend_dir[i] = 0;
+			memcpy(pend_cmd, p + i + 1, n - i - 1);
+			pend_cmd[n - i - 1] = 0;
+			pend_run = 1;
+		}
+		break;
+	}
 	case CJP_FETCH:
 		if (f->len && f->len < sizeof pend_get) {
 			memcpy(pend_get, f->payload, f->len);
@@ -1081,25 +1105,119 @@ static void pump_upload(void)
 /* Runs a DOS command for the server. Its output goes to a file, which is
  * then uploaded; the keyboard is NUL, so nothing can sit waiting for a
  * key. The screen is repainted afterwards: the command (or DOS's own
- * error messages) may have written on it. */
+ * error messages) may have written on it. The current folder is put
+ * back: in DOS a CD in the child changes ours too, and files we receive
+ * land in the current folder. */
 static void run_command(void)
 {
 	static char line[CJP_MAXPAYLOAD + 40];
-	char s[100];
+	char s[100], home[80];
 
 	sprintf(s, "Running on this PCjr: %.60s", pend_cmd);
 	note(s);
 	scr_status("Running a DOS command for CodeJr...");
 	remove(CMDOUT);
+	getcwd(home, sizeof home);
 	sprintf(line, "%s <NUL >" CMDOUT, pend_cmd);
 	pend_cmd[0] = 0;
 	if (system(line) == -1) {
+		chdir(home);
 		scr_refresh();
 		upload_fail("couldn't start COMMAND.COM (memory?)");
 	} else {
+		chdir(home);
 		scr_refresh();
 		start_upload(CMDOUT, "the output", 'X', 1);
 	}
+	scr_status(server_status);
+	more_shown = 0;
+	more_lines = -1;
+	cursor_dirty = 1;
+}
+
+/* Runs a program in its project folder for the server and uploads the
+ * whole story: what it printed, its exit code, the text screen it left
+ * and its LOG.TXT if it wrote one. A .EXE or .COM is started directly,
+ * which gives the real exit code; anything else goes through COMMAND. */
+static void run_program(void)
+{
+	static char line[CJP_MAXPAYLOAD + 40], cmd[CJP_MAXPAYLOAD + 1];
+	char s[100], home[80], prog[24], *args[10], *p;
+	unsigned long t_out = 0, t_log = 0;
+	int rc = -1, direct = 0, n = 0, i;
+	FILE *f;
+
+	strcpy(cmd, pend_cmd);
+	pend_cmd[0] = 0;
+	pend_run = 0;
+	sprintf(s, "Running %s%s%.50s on this PCjr for CodeJr...", pend_dir, pend_dir[0] ? "\\" : "", cmd);
+	note(s);
+	getcwd(home, sizeof home);
+	if (pend_dir[0] && chdir(pend_dir) != 0) {
+		upload_fail("no such folder on the PCjr");
+		return;
+	}
+	remove(CMDOUT);
+	if ((f = fopen(CMDOUT, "w")) != NULL)
+		fclose(f); /* its time marks the start, to tell a new LOG.TXT */
+
+	/* The first word, with .EXE or .COM added if that file is here. */
+	strcpy(line, cmd);
+	for (p = strtok(line, " "); p && n < 9; p = strtok(NULL, " "))
+		args[n++] = p;
+	args[n] = NULL;
+	if (n) {
+		static const char *ext[] = { "", ".EXE", ".COM" };
+		strupr(args[0]);
+		for (i = 0; i < 3 && !direct; i++) {
+			if (strlen(args[0]) + 4 >= sizeof prog)
+				break;
+			sprintf(prog, "%s%s", args[0], ext[i]);
+			if ((strstr(prog, ".EXE") || strstr(prog, ".COM")) && access(prog, 0) == 0)
+				direct = 1;
+		}
+	}
+	scr_blank(); /* the program gets a clean screen; we dump what it leaves */
+	if (direct) {
+		int nul = open("NUL", O_RDONLY), out = open(CMDOUT, O_WRONLY | O_TRUNC | O_TEXT);
+		int in0 = dup(0), out0 = dup(1);
+		if (nul >= 0)
+			dup2(nul, 0);
+		if (out >= 0)
+			dup2(out, 1);
+		args[0] = prog;
+		rc = spawnv(P_WAIT, prog, (const char **)args);
+		dup2(in0, 0);
+		dup2(out0, 1);
+		close(in0);
+		close(out0);
+		if (nul >= 0)
+			close(nul);
+		if (out >= 0)
+			close(out);
+	} else {
+		sprintf(line, "%s <NUL >" CMDOUT, cmd);
+		if (system(line) == -1)
+			rc = -2;
+	}
+	if ((f = fopen(CMDOUT, "a")) != NULL) {
+		if (direct)
+			fprintf(f, "\n--- exit code %d\n", rc);
+		else if (rc == -2)
+			fprintf(f, "\n--- couldn't start COMMAND.COM\n");
+		else
+			fprintf(f, "\n--- ended (no exit code: it ran through COMMAND)\n");
+		fprintf(f, "--- text screen it left\n");
+		scr_dump(f);
+		if (file_time(CMDOUT, &t_out) && file_time("LOG.TXT", &t_log) && t_log >= t_out) {
+			fprintf(f, "--- LOG.TXT\n");
+			copy_text(f, "LOG.TXT", 6000);
+		}
+		fclose(f);
+	}
+	chdir(home);
+	scr_refresh();
+	start_upload(CMDOUT, "the output", 'X', 1);
 	scr_status(server_status);
 	more_shown = 0;
 	more_lines = -1;
@@ -1578,7 +1696,7 @@ int main(int argc, char **argv)
 	}
 
 	cjp_init(&link, link_write, link_now, NULL, 2 * TICKS_PER_SEC);
-	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1 dirs=1 delta=1 voice=1 remote=1", line_baud);
+	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1 dirs=1 delta=1 voice=1 remote=1 run=1", line_baud);
 	queue(CJP_HELLO, hello, (unsigned)strlen(hello));
 	scr_status("Connecting...");
 
@@ -1622,7 +1740,9 @@ int main(int argc, char **argv)
 			answer(0);
 		}
 		if (!ask && !up && !report && !offer.pending && outq_n == 0) {
-			if (pend_cmd[0]) {
+			if (pend_cmd[0] && pend_run) {
+				run_program();
+			} else if (pend_cmd[0]) {
 				run_command();
 			} else if (pend_get[0]) {
 				start_upload(pend_get, pend_get, 'B', 0);

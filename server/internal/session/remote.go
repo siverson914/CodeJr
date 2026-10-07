@@ -109,13 +109,51 @@ func (n *native) exec(cmd string, trusted bool) (string, error) {
 	n.sendPending()
 	n.s.logf("native: running on the PCjr: %s", cmd)
 	payload := []byte(cmd)
-	if !trusted && !SafeDOS(cmd) {
+	if !trusted && !n.s.ws.Flag("trust") && !SafeDOS(cmd) {
 		payload = append([]byte{cjp.ExecAsk}, payload...)
 	}
 	if err := n.link.Send(cjp.Exec, payload); err != nil {
 		return "", errors.New("the PCjr hung up")
 	}
 	b, err := n.collect(5 * time.Minute)
+	if err != nil {
+		return "", err
+	}
+	return string(fromDOS(b)), nil
+}
+
+// run starts a program in its project folder on the PCjr ("" = PROGS) and
+// returns the whole story: what it printed, its exit code, the text
+// screen it left and its LOG.TXT. Pending files go first, so the PCjr
+// runs the newest build. Running a program can do anything, so it asks
+// the user unless they typed /trust.
+func (n *native) run(folder, cmd string) (string, error) {
+	folder = strings.ToUpper(strings.TrimSpace(folder))
+	cmd = strings.TrimSpace(cmd)
+	if folder == "." {
+		folder = ""
+	}
+	if !n.runs {
+		return "", errors.New("this CODEJR.EXE can't run programs for CodeJr yet; it updates itself on the next call")
+	}
+	if folder != "" && !validDir(folder) {
+		return "", errors.New("the folder must be a project folder name (or . for the top)")
+	}
+	if cmd == "" || len(cmd) > 100 || strings.ContainsAny(cmd, "\r\n<>|") {
+		return "", errors.New("give a program and its arguments, up to 100 characters, with no < > |")
+	}
+	n.sync()
+	n.sendPending()
+	n.link.Flush(10 * time.Second)
+	n.s.logf("native: running on the PCjr in %q: %s", folder, cmd)
+	payload := []byte(folder + "\n" + cmd)
+	if !n.s.ws.Flag("trust") {
+		payload = append([]byte{cjp.ExecAsk}, payload...)
+	}
+	if err := n.link.Send(cjp.Run, payload); err != nil {
+		return "", errors.New("the PCjr hung up")
+	}
+	b, err := n.collect(10 * time.Minute)
 	if err != nil {
 		return "", err
 	}
@@ -200,6 +238,16 @@ func (n *native) handleCtl(r ctlReq) {
 	switch r.op {
 	case "dos":
 		resp.out, resp.err = n.exec(r.arg, false)
+	case "run":
+		// "FOLDER\nCOMMAND"
+		folder, cmd, _ := strings.Cut(r.arg, "\n")
+		resp.out, resp.err = n.run(folder, cmd)
+	case "sync":
+		before, _, _, _ := n.s.ws.Pending()
+		n.sync()
+		n.sendPending()
+		after, _, _, _ := n.s.ws.Pending()
+		resp.out = fmt.Sprintf("%d file(s) sent to the PCjr, %d still waiting.", len(before)-len(after), len(after))
 	case "fetch":
 		var size int
 		size, resp.err = n.fetch(r.arg)

@@ -36,6 +36,7 @@
 #define CJP_EXEC        0x16 /* server: run this DOS command, upload what it printed */
 #define CJP_FETCH       0x17 /* server: upload this file */
 #define CJP_UPLOAD      0x18 /* client: 'X' or 'B'+name, 'D'+bytes..., 'E'; or 'F'+reason */
+#define CJP_RUN         0x19 /* server: [1 = ask] FOLDER "\n" COMMAND: run a program in its folder */
 
 /* Types from CJP_DATAGRAM up carry no sequence number and are never
  * acknowledged. The file pull protocol uses them (pull.h). */
