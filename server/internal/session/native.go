@@ -25,8 +25,10 @@ Client: the user is running CodeJr's own PCjr program (CODEJR.EXE), not
 MS-Kermit. It draws its own screen, so ignore the MS-Kermit details above:
 files arrive with an on-screen progress bar. You have two tools for the
 real machine: dos runs a DOS command there and gives you what it printed
-(look with DIR, TREE, TYPE, MEM; ask before anything that deletes or
-changes files), and fetch copies a file from it into your folder. The user
+(DIR, TREE, TYPE, MEM and other commands that only look or create run at
+once; for anything that could delete or change something, the PCjr asks
+the user to press Y first, so say why you need it), and fetch copies a
+file from it into your folder. The user
 has the same as /dos COMMAND and /send NAME. To run a program the user
 types /run (a numbered list of programs, including those in project
 folders; a number runs one, and CodeJr calls back when it ends). End BASIC programs with SYSTEM rather than END,
@@ -108,7 +110,9 @@ func (s *session) native() {
 		return
 	}
 	if n.ui {
-		link.Send(cjp.Hello, []byte("CODEJR/2 server ui results"))
+		// t= is this laptop's local time: the client sets the PCjr's
+		// clock from it, so files written there get a real date.
+		link.Send(cjp.Hello, []byte("CODEJR/2 server ui results t="+time.Now().Format("20060102150405")))
 	} else {
 		link.Send(cjp.Hello, []byte("CODEJR/2 server"))
 	}
@@ -464,7 +468,7 @@ func (n *native) command(line string) bool {
 		n.print(cjp.StyleNote, fmt.Sprintf("CodeJr has %s now (%d bytes).\n", strings.ToUpper(raw), size))
 	case "/dos":
 		raw := strings.TrimSpace(line[len(f[0]):])
-		out, err := n.exec(raw)
+		out, err := n.exec(raw, true) // the user typed it: no question
 		if err != nil {
 			n.print(cjp.StyleWarn, "Couldn't run it: "+err.Error()+"\n")
 			break

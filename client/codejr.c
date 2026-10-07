@@ -38,7 +38,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.7"
+#define VERSION "1.8"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 
@@ -115,6 +115,11 @@ static FILE *up;
 static int up_temp;           /* delete the uploaded file afterwards */
 static unsigned long up_sent;
 static char up_name[24];
+/* A command the server marked "ask first": 1 = show the question, 2 =
+ * waiting for Y or N (until ask_until), 0 = none. */
+static int ask;
+static unsigned long ask_until;
+static int auto_answer; /* /A:Y or /A:N answers by itself (tests) */
 static int results_ok; /* the server takes run reports */
 static void start_report(void);
 static int cursor_dirty;
@@ -541,6 +546,48 @@ static void pull_file(void)
 	scr_status(err[0] ? err : "Saved.");
 }
 
+/* Sets the PCjr's clock from the server's greeting (YYYYMMDDhhmmss, the
+ * laptop's local time), so files written here get a real date. Says so
+ * only if the clock was off by more than a minute. */
+static void set_clock(const char *t)
+{
+	struct dosdate_t d, od;
+	struct dostime_t tm, ot;
+	static const char *mon[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	                             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+	char s[60];
+	int i, v[14];
+	long was, now;
+
+	for (i = 0; i < 14; i++) {
+		if (t[i] < '0' || t[i] > '9')
+			return;
+		v[i] = t[i] - '0';
+	}
+	d.year = (unsigned)(v[0] * 1000 + v[1] * 100 + v[2] * 10 + v[3]);
+	d.month = (unsigned char)(v[4] * 10 + v[5]);
+	d.day = (unsigned char)(v[6] * 10 + v[7]);
+	tm.hour = (unsigned char)(v[8] * 10 + v[9]);
+	tm.minute = (unsigned char)(v[10] * 10 + v[11]);
+	tm.second = (unsigned char)(v[12] * 10 + v[13]);
+	tm.hsecond = 0;
+	if (d.year < 1980 || d.year > 2099 || d.month < 1 || d.month > 12 || d.day < 1 ||
+	    d.day > 31 || tm.hour > 23 || tm.minute > 59 || tm.second > 59)
+		return;
+	_dos_getdate(&od);
+	_dos_gettime(&ot);
+	if (_dos_setdate(&d) != 0 || _dos_settime(&tm) != 0)
+		return;
+	was = ot.hour * 3600L + ot.minute * 60L + ot.second;
+	now = tm.hour * 3600L + tm.minute * 60L + tm.second;
+	if (od.year == d.year && od.month == d.month && od.day == d.day &&
+	    was - now < 60 && now - was < 60)
+		return;
+	sprintf(s, "PCjr clock set: %s %u, %u:%02u %s", mon[d.month - 1], d.day,
+	        tm.hour % 12 ? tm.hour % 12 : 12, tm.minute, tm.hour < 12 ? "am" : "pm");
+	note(s);
+}
+
 static void file_offer(const cjp_frame *f)
 {
 	unsigned n;
@@ -599,6 +646,11 @@ static void handle(const cjp_frame *f)
 			results_ok = 1;
 			start_report();
 		}
+		{
+			const char *t = strstr(s, " t=");
+			if (t)
+				set_clock(t + 3);
+		}
 		scr_status("Connected.");
 		break;
 	case CJP_READY:
@@ -621,8 +673,16 @@ static void handle(const cjp_frame *f)
 		}
 		break;
 	case CJP_EXEC:
-		memcpy(pend_cmd, f->payload, f->len);
-		pend_cmd[f->len] = 0;
+		if (f->len && f->payload[0] == 1) {
+			/* Not a look-only command: the user decides. */
+			memcpy(pend_cmd, f->payload + 1, f->len - 1);
+			pend_cmd[f->len - 1] = 0;
+			ask = 1;
+		} else {
+			memcpy(pend_cmd, f->payload, f->len);
+			pend_cmd[f->len] = 0;
+			ask = 0;
+		}
 		break;
 	case CJP_FETCH:
 		if (f->len && f->len < sizeof pend_get) {
@@ -943,6 +1003,24 @@ static void pump_report(void)
 
 /* ---- remote work: commands and uploads for the server ---------------- */
 
+static void upload_fail(const char *why);
+
+/* The user's answer to "CodeJr wants to run ...": 1 yes, 0 no. */
+static void answer(int yes)
+{
+	ask = 0;
+	if (yes) {
+		note("Allowed.");
+	} else {
+		note("Not run.");
+		pend_cmd[0] = 0;
+		upload_fail("the user said no (or didn't answer)");
+	}
+	scr_status(server_status);
+	more_shown = 0;
+	more_lines = -1;
+}
+
 static void upload_fail(const char *why)
 {
 	unsigned char b[1 + 60];
@@ -1198,6 +1276,19 @@ static void key(unsigned k)
 	unsigned char ch = (unsigned char)k;
 	unsigned scan = k >> 8;
 
+	if (ask == 2) {
+		/* Only Y or N count while the question is up; Alt-X still leaves. */
+		if ((ch | 0x20) == 'y') {
+			answer(1);
+			return;
+		}
+		if ((ch | 0x20) == 'n' || ch == 27) {
+			answer(0);
+			return;
+		}
+		if (k != 0x2D00)
+			return;
+	}
 	/* Scrolling and paging keys first. */
 	if (ch == 0 || ch == 0xE0) {
 		switch (scan) {
@@ -1407,6 +1498,7 @@ int main(int argc, char **argv)
 		switch (a[1] | 0x20) {
 		case 'd': strncpy(host, a + 3, sizeof host - 1); break;
 		case 'l': loop_mode = 1; break;
+		case 'a': auto_answer = a[3] & 0xDF; break;
 		case 'p': port = atoi(a + 3) - 1; break;
 		case 'b': baud = atol(a + 3); break;
 		case 'r': restore_only = 1; break;
@@ -1516,7 +1608,20 @@ int main(int argc, char **argv)
 		show_more();
 		pump_report();
 		/* Remote work waits until nothing else is going out. */
-		if (!up && !report && !offer.pending && outq_n == 0) {
+		if (ask == 1 && pend_cmd[0]) {
+			char q[100];
+			sprintf(q, "CodeJr wants to run: %.70s", pend_cmd);
+			note(q);
+			scr_status("Allow it?   Y = yes, run it     N = no");
+			more_shown = 1; /* keep the question on the status bar */
+			ask = 2;
+			ask_until = ticks() + 180UL * TICKS_PER_SEC;
+			if (auto_answer)
+				answer(auto_answer == 'Y');
+		} else if (ask == 2 && ticks() > ask_until) {
+			answer(0);
+		}
+		if (!ask && !up && !report && !offer.pending && outq_n == 0) {
 			if (pend_cmd[0]) {
 				run_command();
 			} else if (pend_get[0]) {

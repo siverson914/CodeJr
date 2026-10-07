@@ -122,3 +122,16 @@ func TestOrganize(t *testing.T) {
 		}
 	}
 }
+
+func TestSafeDOS(t *testing.T) {
+	for _, c := range []string{"DIR", "dir /w", "DIR/W", `TREE C:\CODEJR /F`, "TYPE LOG.TXT", "MEM", "CHKDSK", "MD NEW", `CD\`, "DIR | SORT", "TYPE A.TXT | FIND \"x\"", "VER"} {
+		if !SafeDOS(c) {
+			t.Errorf("%q should run without asking", c)
+		}
+	}
+	for _, c := range []string{"DEL OLD.BAS", "ERASE *.*", "REN A B", "COPY A B", "FORMAT C:", "RD X", "DIR > LIST.TXT", "ECHO hi >> A.TXT", "CHKDSK /F", "SNAKE.EXE", "DIR | DEL X", "", "DEBUG"} {
+		if SafeDOS(c) {
+			t.Errorf("%q must ask first", c)
+		}
+	}
+}

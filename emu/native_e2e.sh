@@ -204,12 +204,12 @@ remoterun() {
 	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "" > "$tmp/server.log" 2>&1 &
 	sp=$!
 	sleep 0.5
-	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 3000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:37287 "/T:%s" /X:50 /S:SCREEN.TXT\nexit\n' $port "$tmp" "$1" > "$tmp/dosbox.conf"
+	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 3000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:37287 %s "/T:%s" /X:50 /S:SCREEN.TXT\nexit\n' $port "$tmp" "${COPT:-}" "$1" > "$tmp/dosbox.conf"
 	SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 200 dosbox -conf "$tmp/dosbox.conf" >/dev/null 2>&1 &
 	dp=$!
 	# From the laptop, while the call is up.
 	sleep 25
-	server/codejr ctl -workspace "$tmp/ws" dos VER > "$tmp/ctl-dos.txt" 2>&1
+	server/codejr ctl -workspace "$tmp/ws" dos ${CTLCMD:-VER} > "$tmp/ctl-dos.txt" 2>&1
 	server/codejr ctl -workspace "$tmp/ws" fetch 'GAME\LOG.TXT' > "$tmp/ctl-fetch.txt" 2>&1
 	wait $dp
 	kill $sp 2>/dev/null; wait $sp 2>/dev/null
@@ -225,6 +225,14 @@ remoterun "/dos VER" "/dos, and the laptop's control socket" \
 	'check "the screen was repainted" "grep -q \"CodeJr 1\" $tmp/c/CODEJR/PROGS/SCREEN.TXT"' \
 	'check "the laptop ran a command on the PCjr" "grep -qi dosbox $tmp/ctl-dos.txt"' \
 	'check "the laptop fetched a file from a folder" "printf \"score 42\n\" | cmp -s - $tmp/ws/GAME/LOG.TXT"'
+# A command that could change something runs only if the user presses Y
+# (/A:Y and /A:N answer for the user here).
+COPT=/A:N CTLCMD="DEL NOTE.TXT" remoterun "hi" "a risky command, refused at the PCjr" \
+	'check "the PCjr asked" "grep -q \"CodeJr wants to run: DEL NOTE.TXT\" $tmp/c/CODEJR/PROGS/SCREEN.TXT"' \
+	'check "the laptop was told no" "grep -q \"said no\" $tmp/ctl-dos.txt"' \
+	'check "the file is still there" "[ -e $tmp/c/CODEJR/PROGS/NOTE.TXT ]"'
+COPT=/A:Y CTLCMD="DEL NOTE.TXT" remoterun "hi" "a risky command, allowed at the PCjr" \
+	'check "the file is gone" "[ ! -e $tmp/c/CODEJR/PROGS/NOTE.TXT ]"'
 remoterun "/send note.txt" "/send uploads a file" \
 	'check "the file reached the workspace" "printf \"a note from the PCjr\n\" | cmp -s - $tmp/ws/NOTE.TXT"' \
 	'check "the screen says so" "grep -q \"CodeJr has NOTE.TXT now\" $tmp/c/CODEJR/PROGS/SCREEN.TXT"'

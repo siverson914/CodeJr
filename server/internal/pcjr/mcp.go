@@ -59,7 +59,9 @@ func init() {
 			"description": "Run one DOS command on the user's real PCjr, which must be connected, and return what it printed " +
 				"(the command's output is captured to a file and sent back; the user sees the command on their screen). " +
 				"For looking around: DIR, TREE C:\\CODEJR /F, TYPE NAME.TXT, MEM, VER, CHKDSK. It runs in C:\\CODEJR\\PROGS with no keyboard: " +
-				"a command that waits for a key gets none. Ask the user before any command that deletes, renames or overwrites files.",
+				"a command that waits for a key gets none. Commands that only look or create (DIR, TYPE, TREE, MEM, VER, CHKDSK, MD, FIND) run at once. " +
+				"Anything that could delete or change something (DEL, REN, COPY, a program, output sent to a file with >) is shown to the user, " +
+				"who must press Y on the PCjr; if they press N you get an error saying so. Tell the user why before asking for one of those.",
 			"inputSchema": map[string]any{
 				"type": "object",
 				"properties": map[string]any{

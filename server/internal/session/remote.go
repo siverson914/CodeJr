@@ -60,8 +60,45 @@ func (n *native) collect(timeout time.Duration) ([]byte, error) {
 	}
 }
 
-// exec runs a DOS command on the PCjr and returns what it printed.
-func (n *native) exec(cmd string) (string, error) {
+// safeVerbs are DOS commands that only look or create: they run without
+// asking. Anything else (DEL, REN, COPY, FORMAT, a program, output sent
+// to a file with >) is confirmed by the user at the PCjr first.
+var safeVerbs = map[string]bool{
+	"DIR": true, "TYPE": true, "TREE": true, "MEM": true, "VER": true, "VOL": true,
+	"CHKDSK": true, "PATH": true, "SET": true, "ECHO": true, "FIND": true, "MORE": true,
+	"SORT": true, "MD": true, "MKDIR": true, "CD": true, "CHDIR": true, "DATE": true,
+	"TIME": true, "COMP": true,
+}
+
+// SafeDOS reports whether a command line can run without asking.
+func SafeDOS(cmd string) bool {
+	if strings.ContainsAny(cmd, "><") {
+		return false // redirection can overwrite a file
+	}
+	for _, part := range strings.Split(cmd, "|") {
+		f := strings.Fields(part)
+		if len(f) == 0 {
+			return false
+		}
+		verb := strings.ToUpper(f[0])
+		// DIR/W and CD\ are DIR and CD.
+		if i := strings.IndexAny(verb, `/\.`); i > 0 {
+			verb = verb[:i]
+		}
+		if !safeVerbs[verb] {
+			return false
+		}
+		if verb == "CHKDSK" && strings.Contains(strings.ToUpper(part), "/F") {
+			return false // /F repairs, which changes the disk
+		}
+	}
+	return true
+}
+
+// exec runs a DOS command on the PCjr and returns what it printed. Unless
+// the user typed it (trusted), a command that isn't in the safe list is
+// shown on the PCjr and runs only if the user presses Y.
+func (n *native) exec(cmd string, trusted bool) (string, error) {
 	cmd = strings.TrimSpace(cmd)
 	if !n.remote {
 		return "", errors.New("this CODEJR.EXE can't run commands yet; it updates itself on the next call")
@@ -71,7 +108,11 @@ func (n *native) exec(cmd string) (string, error) {
 	}
 	n.sendPending()
 	n.s.logf("native: running on the PCjr: %s", cmd)
-	if err := n.link.Send(cjp.Exec, []byte(cmd)); err != nil {
+	payload := []byte(cmd)
+	if !trusted && !SafeDOS(cmd) {
+		payload = append([]byte{cjp.ExecAsk}, payload...)
+	}
+	if err := n.link.Send(cjp.Exec, payload); err != nil {
 		return "", errors.New("the PCjr hung up")
 	}
 	b, err := n.collect(5 * time.Minute)
@@ -158,7 +199,7 @@ func (n *native) handleCtl(r ctlReq) {
 	var resp ctlResp
 	switch r.op {
 	case "dos":
-		resp.out, resp.err = n.exec(r.arg)
+		resp.out, resp.err = n.exec(r.arg, false)
 	case "fetch":
 		var size int
 		size, resp.err = n.fetch(r.arg)
