@@ -65,9 +65,43 @@ func (n *native) collect(timeout time.Duration) ([]byte, error) {
 // to a file with >) is confirmed by the user at the PCjr first.
 var safeVerbs = map[string]bool{
 	"DIR": true, "TYPE": true, "TREE": true, "MEM": true, "VER": true, "VOL": true,
-	"CHKDSK": true, "PATH": true, "SET": true, "ECHO": true, "FIND": true, "MORE": true,
-	"SORT": true, "MD": true, "MKDIR": true, "CD": true, "CHDIR": true, "DATE": true,
-	"TIME": true, "COMP": true,
+	"CHKDSK": true, "PATH": true, "SET": true, "ECHO": true, "FIND": true,
+	"SORT": true, "MD": true, "MKDIR": true, "CD": true, "CHDIR": true,
+}
+
+// Prompting says why a command would sit waiting for typing on the PCjr,
+// where nobody can answer and nothing can stop it from here ("" if it
+// won't). Found the hard way: a bare DATE hung the real PCjr until Steve
+// pressed Ctrl-Break. These are refused even with /trust on.
+func Prompting(cmd string) string {
+	for _, part := range strings.Split(cmd, "|") {
+		f := strings.Fields(strings.ToUpper(part))
+		if len(f) == 0 {
+			continue
+		}
+		verb := f[0]
+		if i := strings.IndexAny(verb, `/\.`); i > 0 {
+			verb = verb[:i]
+		}
+		rest := strings.Join(f[1:], " ")
+		switch verb {
+		case "DATE", "TIME":
+			if len(f) == 1 {
+				return verb + " with nothing after it asks for a new value (the clock is set from the laptop at every connect)"
+			}
+		case "PAUSE", "MORE", "COMP", "EDLIN", "DEBUG", "COMMAND", "CTTY", "FORMAT", "LABEL", "DISKCOPY", "DISKCOMP", "GWBASIC", "BASIC", "BASICA":
+			return verb + " waits for typing"
+		case "DEL", "ERASE":
+			if strings.Contains(rest, "*.*") || rest == "." {
+				return verb + " *.* asks \"Are you sure\" (delete the files by name or pattern)"
+			}
+		case "DIR":
+			if strings.Contains(strings.ToUpper(part), "/P") {
+				return "DIR /P pauses at each page"
+			}
+		}
+	}
+	return ""
 }
 
 // SafeDOS reports whether a command line can run without asking.
@@ -105,6 +139,9 @@ func (n *native) exec(cmd string, trusted bool) (string, error) {
 	}
 	if cmd == "" || len(cmd) > 100 || strings.ContainsAny(cmd, "\r\n") {
 		return "", errors.New("give one DOS command line, up to 100 characters")
+	}
+	if why := Prompting(cmd); why != "" {
+		return "", errors.New("not run: " + why + ", which would hang the PCjr")
 	}
 	n.sendPending()
 	n.s.logf("native: running on the PCjr: %s", cmd)

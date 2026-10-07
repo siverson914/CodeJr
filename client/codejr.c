@@ -31,6 +31,7 @@
 #include <bios.h>
 #include <io.h>
 #include <direct.h>
+#include <errno.h>
 #include <process.h>
 #include <fcntl.h>
 #include "serial.h"
@@ -38,9 +39,10 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.9"
+#define VERSION "1.0.20"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
+#define PULL_OLD "CJPULL.OLD" /* the copy being replaced, until the new one is in */
 
 static const unsigned char style_attr[] = {
 	0x07, /* plain: light gray */
@@ -109,6 +111,10 @@ static FILE *report;   /* being sent, a piece at a time */
 /* Remote work for the server: a DOS command to run (its output goes to
  * CMDOUT and is uploaded), a file to upload, and the upload in progress. */
 #define CMDOUT "C:\\CODEJR\\CMDOUT.TXT"
+/* What a command we run gets as its keyboard: a file of Enter presses,
+ * so a prompt that takes Enter ("Strike a key", "Enter new date") goes
+ * on instead of hanging the PCjr. (NUL made DATE loop forever.) */
+#define CMDKEYS "C:\\CODEJR\\CJKEYS.TXT"
 static char pend_cmd[CJP_MAXPAYLOAD + 1];
 static char pend_dir[10];     /* CJP_RUN: the project folder to run it in */
 static int pend_run;          /* pend_cmd is a program to run (CJP_RUN) */
@@ -485,11 +491,22 @@ static void pull_file(void)
 	/* The old copy is replaced only once the new one is whole, so a
 	 * failed pull of CODEJR.EXE leaves the working client in place. */
 	if (!err[0]) {
+		/* Swap it in without ever being left with neither copy: move the
+		 * old one aside, move the new one in, and only then delete the
+		 * old one. If the new one can't be moved in, the old one goes
+		 * back. (A plain delete-then-rename once failed on the real PCjr
+		 * and could have left no CODEJR.EXE at all.) */
+		int had_old = access(offer.name, 0) == 0;
 		make_folder(offer.name);
-		remove(offer.name);
-		if (rename(PULL_TMP, offer.name) != 0) {
-			strcpy(err, "can't rename " PULL_TMP);
-			f = NULL; /* keep the whole copy for a manual RENAME */
+		remove(PULL_OLD);
+		if (had_old && rename(offer.name, PULL_OLD) != 0) {
+			sprintf(err, "can't move the old copy (error %d)", errno);
+		} else if (rename(PULL_TMP, offer.name) != 0) {
+			sprintf(err, "can't move the new copy in (error %d)", errno);
+			if (had_old)
+				rename(PULL_OLD, offer.name);
+		} else {
+			remove(PULL_OLD);
 		}
 	}
 	if (err[0]) {
@@ -1045,6 +1062,18 @@ static void answer(int yes)
 	more_lines = -1;
 }
 
+/* Writes the file of Enter presses, once. */
+static void make_keys(void)
+{
+	FILE *f;
+	int i;
+	if (access(CMDKEYS, 0) == 0 || (f = fopen(CMDKEYS, "w")) == NULL)
+		return;
+	for (i = 0; i < 100; i++)
+		fputc('\n', f);
+	fclose(f);
+}
+
 static void upload_fail(const char *why)
 {
 	unsigned char b[1 + 60];
@@ -1118,7 +1147,8 @@ static void run_command(void)
 	scr_status("Running a DOS command for CodeJr...");
 	remove(CMDOUT);
 	getcwd(home, sizeof home);
-	sprintf(line, "%s <NUL >" CMDOUT, pend_cmd);
+	make_keys();
+	sprintf(line, "%s <" CMDKEYS " >" CMDOUT, pend_cmd);
 	pend_cmd[0] = 0;
 	if (system(line) == -1) {
 		chdir(home);
@@ -1177,9 +1207,10 @@ static void run_program(void)
 				direct = 1;
 		}
 	}
+	make_keys();
 	scr_blank(); /* the program gets a clean screen; we dump what it leaves */
 	if (direct) {
-		int nul = open("NUL", O_RDONLY), out = open(CMDOUT, O_WRONLY | O_TRUNC | O_TEXT);
+		int nul = open(CMDKEYS, O_RDONLY), out = open(CMDOUT, O_WRONLY | O_TRUNC | O_TEXT);
 		int in0 = dup(0), out0 = dup(1);
 		if (nul >= 0)
 			dup2(nul, 0);
@@ -1196,7 +1227,7 @@ static void run_program(void)
 		if (out >= 0)
 			close(out);
 	} else {
-		sprintf(line, "%s <NUL >" CMDOUT, cmd);
+		sprintf(line, "%s <" CMDKEYS " >" CMDOUT, cmd);
 		if (system(line) == -1)
 			rc = -2;
 	}

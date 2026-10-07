@@ -27,7 +27,7 @@ var Layout = []struct {
 	{"JRFLIGHT", []string{"JRFLIGHT.EXE"}},
 	{"JRCUBE", []string{"JRCUBE.EXE"}},
 	{"BASIC", []string{"*.BAS"}},
-	{"UTILS", []string{"CJTERM.EXE", "UARTDUMP.EXE", "CJPOLL.BAT", "CJTEST.BAT", "DIAG.BAT", "RTSTEST.BAT", "SLOW.BAT", "914.TXT", "*.LOG"}},
+	{"UTILS", []string{"CJTERM.EXE", "UARTDUMP.EXE", "CJPOLL.BAT", "CJTEST.BAT", "DIAG.BAT", "RTSTEST.BAT", "SLOW.BAT", "914.TXT", "*.LOG", "UK.TXT", "UC.TXT", "SCREEN.TXT"}},
 }
 
 // obsolete files are deleted on the PCjr by ORGANIZE.BAT.
@@ -52,6 +52,10 @@ func OrganizeBat() string {
 			fmt.Fprintf(&b, "IF EXIST %s\\%s IF EXIST %s DEL %s\n", l.Dir, p, p, p)
 		}
 	}
+	// CodeJr's own screen grabber must stay at the top (/run uses it); it
+	// was once tidied into UTILS by hand.
+	b.WriteString("IF NOT EXIST SCRDUMP.EXE IF EXIST UTILS\\SCRDUMP.EXE COPY UTILS\\SCRDUMP.EXE . >NUL\n")
+	b.WriteString("IF EXIST SCRDUMP.EXE IF EXIST UTILS\\SCRDUMP.EXE DEL UTILS\\SCRDUMP.EXE\n")
 	for _, f := range obsolete {
 		fmt.Fprintf(&b, "IF EXIST %s DEL %s\n", f, f)
 	}

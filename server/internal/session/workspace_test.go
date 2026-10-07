@@ -129,7 +129,17 @@ func TestSafeDOS(t *testing.T) {
 			t.Errorf("%q should run without asking", c)
 		}
 	}
-	for _, c := range []string{"DEL OLD.BAS", "ERASE *.*", "REN A B", "COPY A B", "FORMAT C:", "RD X", "DIR > LIST.TXT", "ECHO hi >> A.TXT", "CHKDSK /F", "SNAKE.EXE", "DIR | DEL X", "", "DEBUG"} {
+	for _, c := range []string{"DATE", "TIME", "PAUSE", "DIR | MORE", "DIR /P", "DEL *.*", "COMP A B", "FORMAT C:", "date"} {
+		if Prompting(c) == "" {
+			t.Errorf("%q would wait for typing and must be refused", c)
+		}
+	}
+	for _, c := range []string{"DIR", "DATE 10-07-2026", "DEL OLD.BAS", "TYPE A.TXT", "CHKDSK"} {
+		if why := Prompting(c); why != "" {
+			t.Errorf("%q refused: %s", c, why)
+		}
+	}
+	for _, c := range []string{"DEL OLD.BAS", "DATE 10-07-2026", "ERASE *.*", "REN A B", "COPY A B", "FORMAT C:", "RD X", "DIR > LIST.TXT", "ECHO hi >> A.TXT", "CHKDSK /F", "SNAKE.EXE", "DIR | DEL X", "", "DEBUG"} {
 		if SafeDOS(c) {
 			t.Errorf("%q must ask first", c)
 		}
