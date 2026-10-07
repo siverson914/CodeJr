@@ -116,7 +116,7 @@ func TestOrganize(t *testing.T) {
 		t.Fatalf("second run moved %v", moved)
 	}
 	bat := OrganizeBat()
-	for _, line := range []string{`IF NOT EXIST JRAI\NUL MD JRAI`, `IF EXIST JM?.SND COPY JM?.SND JRAI >NUL`, `IF EXIST JRAI\JM?.SND IF EXIST JM?.SND DEL JM?.SND`} {
+	for _, line := range []string{`IF NOT EXIST JRAI\JRAI.EXE IF EXIST JRAI.EXE COPY JRAI.EXE JRAI >NUL`, `IF NOT EXIST JRAI\NUL MD JRAI`, `IF EXIST JM?.SND COPY JM?.SND JRAI >NUL`, `IF EXIST JRAI\JM?.SND IF EXIST JM?.SND DEL JM?.SND`} {
 		if !strings.Contains(bat, line) {
 			t.Fatalf("ORGANIZE.BAT lacks %q", line)
 		}

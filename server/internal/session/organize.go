@@ -42,7 +42,13 @@ func OrganizeBat() string {
 	for _, l := range Layout {
 		fmt.Fprintf(&b, "ECHO %s...\nIF NOT EXIST %s\\NUL MD %s\n", l.Dir, l.Dir, l.Dir)
 		for _, p := range l.Patterns {
-			fmt.Fprintf(&b, "IF EXIST %s COPY %s %s >NUL\n", p, p, l.Dir)
+			if strings.ContainsAny(p, "*?") {
+				fmt.Fprintf(&b, "IF EXIST %s COPY %s %s >NUL\n", p, p, l.Dir)
+			} else {
+				// One file: a copy already in the folder is the newer one
+				// (the server sends updates there), so never overwrite it.
+				fmt.Fprintf(&b, "IF NOT EXIST %s\\%s IF EXIST %s COPY %s %s >NUL\n", l.Dir, p, p, p, l.Dir)
+			}
 			fmt.Fprintf(&b, "IF EXIST %s\\%s IF EXIST %s DEL %s\n", l.Dir, p, p, p)
 		}
 	}
