@@ -729,3 +729,5 @@ Client 1.4 worked on the real machine. His list, and what was done:
 - **JRCUBE** is 17 patterns (about 32 s) instead of 38: one pattern per morph each way, one build, four of drop, burst out and back in one each, two of outro. The scroller is two short phrases.
 
 `just emu-native`: 50 checks pass with 1.5. Not yet on the real PCjr: the speed probe (the emulator has no modem that changes speed).
+
+**SWORDS on the real PCjr (2026-10-06).** Steve's 190-character request arrived whole (the client 1.4 fix, on the real machine), and CodeJr built `SWORDS` (two stick-figure swordsmen, C, 50 KB) in about 10 minutes. CodeJr said "a locked 60 frames a second" from its emulator run; on the real PCjr Steve measured **20 fps**. One more data point for "the emulator is not the PCjr": about 3 times optimistic for a program that redraws about 25 short lines a frame.
