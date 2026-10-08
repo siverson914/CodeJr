@@ -67,7 +67,7 @@ Type a request and press Enter. Commands: `/files`, `/sync`, `/run`, `/send NAME
 | `server/` | the Go server (`just build`, `just restart`, `just live`) |
 | `client/` | `CODEJR.EXE`, the PCjr client |
 | `lib/` | JRGFX, the graphics, input, timing and sound library |
-| `apps/` | programs for the PCjr, one folder each: `jrdoom`, `jrflight`, `jrcube`, `jrai`, `say` |
+| `apps/` | programs for the PCjr, one folder each: `jrdoom`, `jrflight`, `jrcube`, `jrai`, `say`, `sopwith`, and the ones CodeJr wrote on the PCjr itself (`lemmjr`, `jumpjr`, `swords`, `mandel`, `basic`) |
 | `tools/` | serial test tools for the PCjr |
 | `emu/` | headless emulator tests |
 | `docs/` | handoff, journal, and the original plans in `design/` |

@@ -229,6 +229,14 @@ deploy-jrai: jrai jrai-voice
     cp apps/jrai/JRAI.EXE apps/jrai/voice/out/*.SND "{{ws}}/JRAI/"
     @echo "queued: JRAI.EXE and $(ls apps/jrai/voice/out/*.SND | wc -l) clips, sent on the PCjr's next connection"
 
+# Copy the sources of programs CodeJr wrote on the PCjr from the workspace into apps/ (then commit them)
+save-projects:
+    apps/save-projects.sh "{{ws}}"
+
+# Build one of those from its repo copy: just project lemmjr
+project name:
+    apps/build.sh {{name}}
+
 # ---- speech ---------------------------------------------------------------
 # Speech quality for the tasks below. Medium (4-bit ADPCM, 8 kHz) is the one
 # setting for everything; SPEECH_QUALITY=high|low|fast is for experiments.

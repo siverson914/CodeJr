@@ -155,6 +155,7 @@ just deploy-speech HELLO READY  # queue SAY.EXE and clips (NAME.SNP for a PWM ve
 | `tools/` | serial test tools: `cjterm.c` test terminal, `uartdump.c`, `hello.c` (`tools/build.sh`) |
 | `lib/` | JRGFX graphics library; read `STATUS.md` and `FAST.md` |
 | `apps/jrdoom`, `apps/jrflight` | JRDOOM and JRFLIGHT, each with README and NOTES |
+| `apps/lemmjr`, `jumpjr`, `swords`, `mandel`, `basic` | programs CodeJr wrote on the PCjr. The working copies are the folders of the live workspace; `just save-projects` copies their sources here (run it and commit after a session that changed one), `just project NAME` builds one the way CodeJr's build tool does |
 | `apps/jrai`, `apps/jrai2` | the "PCjr MEETS AI" demo and the story for demo 2 |
 | `apps/say/` | `SAY.EXE` (`say.c`, `player.asm` with the ADPCM decoder), `mksnd.py` converter (`--quality high/medium/low`, `--codec`), `grid.py` quality grid, `clips/` (gipity mp3 + text), `test.sh` |
 | `apps/jrquest` | Jr's Quest, a King's Quest style adventure on our own AGI v2 compatible engine. The whole 16-room game plays in a browser on the JavaScript reference interpreter (no 8088 code yet). Read `DESIGN.md`, `ENGINE.md`, `FORMATS.md`, `GAMEPLAN.md` there. `just quest`, `just quest-test`, `just quest-serve` (AI parser and live ending through `claude -p`), `just quest-shots`, `just quest-lint` |
