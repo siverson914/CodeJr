@@ -5,6 +5,7 @@
 set -eu
 cd "$(dirname "$0")"
 out=$1; frames=${2:-60}; cyc=${3:-3000}; free=${4:-}; exe=${5:-SOPWITH2.EXE}
+rm -f "$out" "${out%.png}.bin"   # never leave an old result to be mistaken for this run's
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 mkdir "$tmp/c"

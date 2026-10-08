@@ -159,6 +159,7 @@ just deploy-speech HELLO READY  # queue SAY.EXE and clips (NAME.SNP for a PWM ve
 | `apps/jrai`, `apps/jrai2` | the "PCjr MEETS AI" demo and the story for demo 2 |
 | `apps/say/` | `SAY.EXE` (`say.c`, `player.asm` with the ADPCM decoder), `mksnd.py` converter (`--quality high/medium/low`, `--codec`), `grid.py` quality grid, `clips/` (gipity mp3 + text), `test.sh` |
 | `apps/jrquest` | Jr's Quest, a King's Quest style adventure on our own AGI v2 compatible engine. The whole 16-room game plays in a browser on the JavaScript reference interpreter (no 8088 code yet). Read `DESIGN.md`, `ENGINE.md`, `FORMATS.md`, `GAMEPLAN.md` there. `just quest`, `just quest-test`, `just quest-serve` (AI parser and live ending through `claude -p`), `just quest-shots`, `just quest-lint` |
+| `apps/sopwith` | Sopwith 2 (1984) built from its released source with Open Watcom, faithful to the original, drawing in assembly. Runs on the real PCjr at 13.3 fps unlimited (the game wants 9.1). README there has the test mode (`@1000FP`), the real-machine numbers and the licence terms |
 | `apps/jrcube` | JRCUBE, a shaded spinning cube with a moving light and real-time shadow (README there) |
 | `emu/` | headless emulator scripts |
 | `docs/attic/` | a parked selective-repeat link (didn't pass its tests) |

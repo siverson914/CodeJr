@@ -777,4 +777,36 @@ Steve asked whether CodeJr belongs in `PROGS` at all. It doesn't: the client onl
 **Jr's Quest lands as `apps/jrquest` (2026-10-08).** It had sat uncommitted in the main checkout for two days while the repo was reorganized around it. Steve said commit, and gave two notes from playing. The opening was twelve message boxes before the first command: it is four now (2026, the garage, the favor, the three treasures, north), and what was cut (every home, Scottsdale and the washing machine, the gate) is in TALK TO STEVE, a piece each time. The bridge troll stopped JR on every crossing even with the Chest: he now waves the Chest through once and never stops him again, and the same for an empty pocket; a crossing that costs tokens still stops, because something happens. Changing the opening broke two room scripts that no test ran, so `test/rooms.test.js` now runs all 21. The AI show run was regenerated (37.3 minutes). 104 tests.
 
 **The games CodeJr wrote were in no repository (2026-10-08).** Steve asked whether everything was on GitHub and whether the repo could go public. Checking turned up something more urgent: LEMMJR, JUMPJR, SWORDS and MANDEL, all written through CodeJr on the PCjr, existed only in the live workspace folder, on the PCjr's disk and in two backup archives. They are now in `apps/` with the BASIC programs, each building from its repo copy to the same size as the PCjr's. `just save-projects` repeats the copy: the workspace stays the working copy, because that is where CodeJr edits.
-||||||| e9f6915 P914, a 20-line assembly test that printed "914", was dropped at Steve's request instead.
+P914, a 20-line assembly test that printed "914", was dropped at Steve's request instead.
+
+## Sopwith 2 on the real PCjr, and a test that passed on stale files (2026-10-07, evening)
+
+Steve: "Can't you run it on the PC in a test debug mode to optimize and test fps?" Yes, since client 1.9: `just pcjr-run` sends pending files, runs a program on the connected PCjr and brings back its output and `LOG.TXT`. The game's test mode needed a DOS variable, which that can't set, so it also takes `@n[F][P]` as an argument.
+
+**First real numbers** (scripted battle, 1000 frames, limiter off): 10.5 frames a second, with 18.1 ms of game logic, 49.6 ms of screen and 24.9 ms of collisions a frame. DOSBox at 400 cycles had said 14.4 fps (12.7, 36.5, 18.6). The saved screen came back with `just pcjr-fetch` and matched the emulator's byte for byte at frame 300: the port is right on real hardware, including the timer path.
+
+**The mistake.** The next step moved the whole sprite and the whole ground line into an assembly file. The emulator check said "identical" at three frames, and the build went to the PCjr, where it never came back: it hung the machine. The check had lied. `shot.sh` left its output files in place when the game failed to finish, and the comparison ran against the previous build's files. Nothing had run correctly at all. `shot.sh` now deletes its outputs first.
+
+**The bug behind the hang.** `#pragma aux cj_blit parm [es] [di] ...` on an external (not inline) routine: Watcom quietly drops ES from the list and moves every later argument along one register, with no warning. Found by reading the call in `wdis` output. The segment now travels in AX or a variable. (ES in a parm list is fine for inline `#pragma aux` code, which is why the row routines had worked.)
+
+With that fixed and properly checked: 17.4 fps in DOSBox, screen 26.2 ms, frames identical at 330, 1000 and 2500 and at 400 cycles. Not yet measured on the real PCjr, which was left hung by the bad build and needed a reboot.
+
+**Lessons.** A test harness must fail loudly, not leave yesterday's answer lying around. And never send a build to the real machine that hasn't been seen to finish in the emulator at the same options.
+
+## Sopwith 2: the assembly build on the real PCjr, and a score that changed between runs (2026-10-08)
+
+Steve, the next morning: "that last run and it locked up. I think an optimization or something. can you fix it?" The lockup was the 7:05 pm run described above (ES in the parm list of an external routine). The fixed build had been sent to the PCjr at 8:11 pm but never run there.
+
+Checked first in DOSBox with the exact command line the PCjr gets (`@1000FP -s -i -k -q`, not `SET SOPTEST`): it finishes, and frame 1000 matches the committed C build. Then on the PCjr: 300 frames finished at 13.8 fps and the screen matched the emulator. The lockup is gone.
+
+**A second bug, found by comparing.** Frame 1000 from the PCjr did not match the emulator: same scene, different score (-750 against -1950). DOSBox gave the same screen at 250, 300, 330, 400 and 3000 cycles, so it wasn't speed. Three runs on the PCjr gave three results, one of them the emulator's. The score moved in steps of 200, which is what debris scores in `docollision`, and that branch reads `obj->inverted`. `createexplosion` never sets it, `newobject` doesn't clear a slot, and the table comes from `malloc`: on the real machine it holds whatever the last program left, in DOSBox zeros. It is in the 1984 source too. The table is now cleared at startup; two PCjr runs after that were identical and matched the emulator.
+
+**Wrong turns.** The first reference run hung for five minutes a time: the committed build doesn't know the `@` argument, so it sat in the game waiting for a player. Then some time went on the timer interrupt (its stack, what it shares with the game) before the size of the score steps pointed at the collision code.
+
+**Real PCjr, 1000 frames, limiter off:** 13.3 fps (was 10.5): logic 18.2 ms, screen 31.5 (was 49.6), collisions 22.7 (was 24.9). The game wants 9.1.
+
+Not tested: playing it by hand on the PCjr keyboard. Every real run so far is the scripted pilot.
+
+**Played by hand, and the slowdowns.** Steve played it on the PCjr: the keys work in IBM keyboard mode (hold `X` to take off). He noticed the game slows in explosions and runs faster in quiet scenes. The limiter is the original's (wait for two timer ticks, 9.1 fps) and can only cap the speed: a frame over 110 ms just runs late. To see how often, the test log now counts frames by time. DOSBox at 400 cycles: 946 of 1000 under 110 ms, 43 under 165, 11 over; the slow frames spend 70 ms in collisions against 16 on average, and the slowest (182 ms) spent 113 there. Not yet measured on the PCjr (it had hung up); the build is queued.
+
+**Decided:** `apps/sopwith` stays the faithful Sopwith 2 (original menus, look and logic), and a copy, Sopwith26, takes the changes: one-key start, no dead multiplayer entries, more speed, later 16 colors. Speed work that keeps the game identical goes into both.

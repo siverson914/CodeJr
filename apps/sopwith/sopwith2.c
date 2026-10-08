@@ -398,6 +398,11 @@ int inkey(void);
    count runs down once per tick, so the low word can be trusted. */
 static int cj_prof;
 static unsigned long cj_phase[4];
+static unsigned long cj_cnt[6],cj_tc; static unsigned long cj_now(void); /* profiling counters */
+/* The slow frames: a frame over two timer ticks (131072 PIT counts, 110 ms)
+   is one the player sees as a slowdown. */
+static unsigned cj_fn,cj_hist[4],cj_worstn;
+static unsigned long cj_worst,cj_wph[3],cj_overph[3];
 
 static unsigned long cj_now(void)
 {
@@ -447,6 +452,20 @@ static void cj_frame(void)
       fprintf(f,"  ms a frame: objects %lu.%lu, screen %lu.%lu, collisions %lu.%lu, sound %lu.%lu\n",
               cj_phase[0]/1193/n,cj_phase[0]/119/n%10,cj_phase[1]/1193/n,cj_phase[1]/119/n%10,
               cj_phase[2]/1193/n,cj_phase[2]/119/n%10,cj_phase[3]/1193/n,cj_phase[3]/119/n%10);
+    if (cj_prof)
+      fprintf(f,"  a frame: %lu.%lu pair tests, %lu.%lu crash tests, %lu.%lu bitblt, %lu.%lu putimage (%lu.%lu single pixels), docollision %lu.%lu ms\n",
+        cj_cnt[0]/n,cj_cnt[0]*10/n%10,cj_cnt[1]/n,cj_cnt[1]*10/n%10,cj_cnt[2]/n,cj_cnt[2]*10/n%10,
+        cj_cnt[3]/n,cj_cnt[3]*10/n%10,cj_cnt[4]/n,cj_cnt[4]*10/n%10,cj_tc/1193/n,cj_tc/119/n%10);
+    if (cj_prof) {
+      unsigned o=cj_hist[2]+cj_hist[3];
+      fprintf(f,"  frames by time: %u under 55 ms, %u under 110, %u under 165, %u over (full speed is 110)\n",
+              cj_hist[0],cj_hist[1],cj_hist[2],cj_hist[3]);
+      if (o)
+        fprintf(f,"  the %u slow frames average: objects %lu, screen %lu, collisions %lu ms\n",
+                o,cj_overph[0]/1193/o,cj_overph[1]/1193/o,cj_overph[2]/1193/o);
+      fprintf(f,"  slowest: frame %u, %lu ms (objects %lu, screen %lu, collisions %lu)\n",
+              cj_worstn,cj_worst/1193,cj_wph[0]/1193,cj_wph[1]/1193,cj_wph[2]/1193);
+    }
     fclose(f);
   }
   finish(NULL,FALSE);
@@ -457,6 +476,17 @@ void main(int argc,char *argv[])
   cj_tables(); /* CodeJr */
   { /* CodeJr */
     char *e=getenv("SOPTEST");
+    int i;
+    /* the same from the command line, as @n[F][P], for tools that can't
+       set a variable (just pcjr-run on the real PCjr): SOPWITH2 @1000FP */
+    for (i=1;i<argc;i++)
+      if (argv[i][0]=='@') {
+        e=argv[i]+1;
+        for (;i<argc-1;i++)
+          argv[i]=argv[i+1];
+        argc--;
+        break;
+      }
     if (e!=NULL) {
       cj_limit=atol(e);
       cj_free=strchr(e,'F')!=NULL;
@@ -469,6 +499,11 @@ void main(int argc,char *argv[])
     printf("Cannot allocate memory for object list.\n");
     exit(1);
   }
+  /* CodeJr: start from zeros. newobject() doesn't clear a slot, and debris
+     never sets "inverted", which docollision reads to decide whether debris
+     scores: with whatever the last program left in memory, the same battle
+     scored differently from run to run on the real PCjr. */
+  memset(objects,0,100*sizeof(object));
   delay(0);
   init(argc,argv);
   setjmp(startjbuf);
@@ -483,6 +518,12 @@ void main(int argc,char *argv[])
       checkcollisions(); t3=cj_now();
       updatesound();
       cj_phase[0]+=t1-t0; cj_phase[1]+=t2-t1; cj_phase[2]+=t3-t2; cj_phase[3]+=cj_now()-t3;
+      { unsigned long ft=cj_now()-t0;
+        cj_fn++;
+        cj_hist[ft<65536UL ? 0 : ft<131072UL ? 1 : ft<196608UL ? 2 : 3]++;
+        if (ft>=131072UL) { cj_overph[0]+=t1-t0; cj_overph[1]+=t2-t1; cj_overph[2]+=t3-t2; }
+        if (ft>cj_worst) { cj_worst=ft; cj_worstn=cj_fn; cj_wph[0]=t1-t0; cj_wph[1]=t2-t1; cj_wph[2]=t3-t2; }
+      }
       cj_frame();
       continue;
     }
@@ -540,7 +581,6 @@ void keybint(void)
    bytes of v shifted left by 8, 6, 4 or 2 bits (s = x&3). */
 static unsigned rowtab[2][200];
 static unsigned *currow=rowtab[0];
-static const unsigned char pixmask[4]={0xc0,0x30,0x0c,0x03};
 #define ROWOFF(y) ((unsigned)(y)<200 ? currow[y] : \
                    (unsigned)(((199-(y))>>1)*80+(((y)&1)==0 ? interlacediff : 0)))
 
@@ -607,6 +647,17 @@ unsigned long cj_bltrow(unsigned seg,unsigned dst,unsigned char *src,unsigned ta
   "mov al,[bx]" "or al,dl" "mov dl,[bx+256]" \
   "xor es:[di],al" "inc di" "loop BR1" \
   parm [es] [di] [si] [bx] [cx] value [dx ax] modify [ax bx cx dx si di];
+
+/* The whole sprite and the whole ground line, in sopgfx.asm. */
+/* (For a routine that isn't inline, Watcom quietly ignores ES in a parm
+   list and moves every later argument along one register, so the segment
+   travels in AX or in a variable instead.) */
+extern int cj_bskip;
+extern unsigned cj_bseg;
+void cj_blit(unsigned off,unsigned char *src,unsigned tab,unsigned width,unsigned height,unsigned linediff);
+#pragma aux cj_blit parm [di] [si] [bx] [cx] [dx] [ax] modify [ax bx cx dx si di es];
+void cj_ground(unsigned seg,unsigned base,unsigned char *heights,unsigned *rows);
+#pragma aux cj_ground parm [ax] [dx] [si] [di] modify [ax bx cx dx si di es];
 
 /* CodeJr: the test pilot (SOPTEST). Full throttle, take off, then climb
    and dive in a slow wave while shooting and bombing, so a test run has
@@ -761,40 +812,16 @@ void updateground(void)
 /* CodeJr: the ground line is drawn by flipping pixels (colour 131 = flip
    all bits). The original called putpixel for each of about 350 pixels,
    twice a frame while the screen scrolls, with a multiply in each call.
-   This walks the screen byte and the pixel mask along instead, and looks
-   rows up in the table. Ground heights are always on the screen (0-199).
+   cj_ground (sopgfx.asm) walks the screen byte and the pixel mask along
+   instead, and steps through the row table as the line climbs and falls:
+   three instructions a pixel. Ground heights are always on the screen
+   (0-199).
    (Tried and dropped: redrawing only the columns whose heights changed.
    While the plane is moving nearly all of them do, and the test per column
    cost more than it saved: 38.1 ms a frame for the screen against 36.5.) */
-void cj_flip(unsigned seg,unsigned off,unsigned char mask);
-#pragma aux cj_flip = "xor es:[bx],al" parm [es] [bx] [al];
-
 void drawground(unsigned char *scrground)
 {
-  int y=*scrground,y2;
-  int x;
-  unsigned seg=scrseg,xb=scroff;   /* xb: scroff plus the byte column */
-  const unsigned *row=currow;
-  unsigned char mask=0xc0;
-  for (x=0;x<320;x++) {
-    y2=*(scrground++);
-    if (y2==y)
-      cj_flip(seg,xb+row[y],mask);
-    else
-      if (y2>y)
-        do {
-          cj_flip(seg,xb+row[y],mask); y++;
-        } while (y!=y2);
-      else
-        do {
-          cj_flip(seg,xb+row[y],mask); y--;
-        } while (y!=y2);
-    mask>>=2;
-    if (mask==0) {
-      mask=0xc0;
-      xb++;
-    }
-  }
+  cj_ground(scrseg,scroff,scrground,currow);
 }
 
 void updateobjects(void)
@@ -2938,8 +2965,10 @@ void checkcollisions(void)
         (type==OBJ_BOMB && obj->y<workingground[obj->x+4]+12))
       checkcrash(obj);
   }
+  { unsigned long t=cj_prof?cj_now():0;
   for (i=0,obj1=collobj1,obj2=collobj2;i<collc;i++,obj1++,obj2++)
     docollision(*obj1,*obj2);
+  if (cj_prof) cj_tc+=cj_now()-t; }
   for (i=0,obj1=collobjs;i<colln;i++,obj1++) {
     (obj=*obj1)->xv=collxv[i];
     obj->yv=collyv[i];
@@ -2950,6 +2979,7 @@ void checkcollision(object *obj1,object *obj2)
 {
   int type1,type2;
   object *t;
+  cj_cnt[0]++;
   type1=obj1->type;
   type2=obj2->type;
   if ((type1==OBJ_PLANE && obj1->status>=STATUS_ELIMINATED) ||
@@ -2975,6 +3005,7 @@ void checkcrash(object *obj)
 {
   int x,right,h;
   bool f=FALSE;
+  cj_cnt[1]++;
   drawobject(15,15,obj);
   right=obj->x+obj->width-1;
   for (x=obj->x;x<=right;x++) {
@@ -3631,9 +3662,21 @@ void deleteobject(object *obj)
   lastdeleted=obj;
 }
 
+/* CodeJr: the scratch area the collision test draws in (48 by 16 pixels at
+   the top left of the off-screen buffer), cleared after every test. This
+   was cgafbar(0,184,48,16,0): a library call per row on a real PCjr. */
+void cj_fill6(unsigned seg,unsigned off);
+#pragma aux cj_fill6 = "xor ax,ax" "mov cx,6" "rep stosw" parm [es] [di] modify [ax cx di];
+
 void clearscorearea(void)
 {
-  cgafbar(0,184,48,16,0);
+  unsigned off=92*80+scroff,d=interlacediff;
+  int i;
+  for (i=0;i<16;i++) {
+    cj_fill6(scrseg,off);
+    off+=d;
+    d=80-d;
+  }
 }
 
 void drawobject(int x,int y,object *obj)
@@ -3669,6 +3712,7 @@ int bitblt(int x,int y,object *obj)
   int width,height,border;
   unsigned char retval=0;
   unsigned char *p=obj->sprite;
+  cj_cnt[2]++;
   if (obj->height==1 && obj->width==1)
     return pixel(x,y,(int)p);
   tab=(unsigned)sprtab[x&3];
@@ -3709,7 +3753,9 @@ void putimage(int x,int y,unsigned char *p,object *obj)
 {
   unsigned int linediff,off,tab;
   int width,height,border;
+  cj_cnt[3]++;
   if (obj->height==1 && obj->width==1) {
+    cj_cnt[4]++;
     putpixel(x,y,(int)p);
     return;
   }
@@ -3725,21 +3771,14 @@ void putimage(int x,int y,unsigned char *p,object *obj)
   linediff=interlacediff;
   if ((y&1)==0)
     linediff=80-linediff;
-  do {
-    unsigned char bltleft=0;
-    if (width>0) {
-      bltleft=cj_putrow(scrseg,off,p,tab,width);
-      p+=width;
-    }
-    if (border>=0)
-      p+=border;
-    else
-      if (bltleft!=0)
-        *(unsigned char far *)MK_FP(scrseg,off+width)^=bltleft;
-    off+=linediff;
-    linediff=80-linediff;
-    height--;
-  } while (height!=0);
+  /* CodeJr: the rows are drawn by cj_blit (sopgfx.asm). Clipped to nothing
+     at the right edge (or a height of 0 or less, which the original would
+     have looped on): nothing to draw. */
+  if (width<=0 || height<=0)
+    return;
+  cj_bskip=border;
+  cj_bseg=scrseg;
+  cj_blit(off,p,tab,width,height,linediff);
 }
 
 void putpixel(int x,int y,int c)

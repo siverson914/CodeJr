@@ -53,6 +53,7 @@ stand-in for a PCjr; the real machine will differ) on a scripted battle of
 | Row table and shift tables in C | 11.0 | 52.3 ms | 24.3 ms | 12.7 ms |
 | Sprite rows in assembly | 13.6 | 40.2 ms | 18.6 ms | 12.7 ms |
 | Tighter ground loop | 14.4 | 36.5 ms | 18.6 ms | 12.7 ms |
+| Whole sprite and ground line in assembly (`sopgfx.asm`) | 17.4 | 26.2 ms | 16.9 ms | 12.7 ms |
 
 The game aims for 9.1 frames a second (every second timer tick). The
 straight port fell short of that in a busy scene; now there is headroom.
@@ -77,11 +78,33 @@ What was slow, and what replaced it:
 Where the time still goes: the game logic and the collision test's
 bookkeeping are plain C, and each sprite still has C around its rows.
 
+## On the real PCjr
+
+`just pcjr-run SOPWITH SOPWITH2.EXE @1000FP -s -i -k -q` runs the scripted
+battle on the connected PCjr and brings back `LOG.TXT`;
+`just pcjr-fetch 'SOPWITH\SHOT.BIN'` brings back the screen it saved.
+
+| Build | Frames a second | Game logic | Screen | Collisions |
+|---|---|---|---|---|
+| Sprite rows in assembly, tight C ground loop (1000 frames) | 10.5 | 18.1 ms | 49.6 ms | 24.9 ms |
+| Whole sprite and ground line in assembly (`sopgfx.asm`), same 1000 frames | 13.3 | 18.2 ms | 31.5 ms | 22.7 ms |
+
+The screens it saved at frames 300 and 1000 match the emulator's byte for
+byte, and two runs in a row give the same numbers. Next to DOSBox at 400
+cycles the real machine is slower in the C parts (logic 1.4 times,
+collisions 1.3, screen 1.2): DOSBox charges a multiply or a shift the same
+as an add.
+
+The game clears its object table at startup. The original didn't, and
+debris never sets the `inverted` field that the collision code reads to
+decide whether debris scores, so on the real PCjr the same scripted battle
+ended on a different score from run to run (-750, then -1950), depending on
+what the last program left in memory. DOSBox hands out zeroed memory and
+never showed it.
+
 ## Testing
 
-Nothing here has run on the real PCjr yet.
-
-`SET SOPTEST=n` before starting makes the game fly itself (a scripted
+`SET SOPTEST=n` before starting, or `@n` as the first argument (`SOPWITH2 @1000FP -s -i -k -q`), makes the game fly itself (a scripted
 pilot: take off, climb and dive, shoot and bomb) with a fixed random seed,
 and after n frames save the screen (`SHOT.BIN`) and its speed (`LOG.TXT`)
 and exit. `F` after the number turns the frame limiter off, `P` adds the
@@ -96,6 +119,17 @@ cmp /tmp/a.bin /tmp/b.bin
 ```
 
 The optimized build matches the straight port at frames 330, 1000 and 2500.
+
+With `P`, the log also counts the frames that took too long: how many
+finished under 55, 110 and 165 ms and over (110 ms is two timer ticks, the
+game's full speed, so anything above is a slowdown the player sees), where
+the time went in the slow ones, and the slowest frame. In DOSBox at 400
+cycles, 54 of the 1000 frames are slow and collisions take 70 ms of each
+(16 ms on average over all frames): explosion debris is what slows the game.
+
+`shot.sh` deletes its output files before it runs. It didn't at first, and
+a build that hung left the previous build's screen in place, which then
+"matched": a broken build was sent to the real PCjr on the strength of it.
 
 ## Known gaps
 
