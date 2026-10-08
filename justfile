@@ -134,9 +134,11 @@ pcjr +command:
 
 # Send pending files, then run a program in its folder on the connected PCjr and show
 # its output, exit code, screen and LOG.TXT: just pcjr-run LEMMJR LEMMJR.EXE /TEST
+# With keys and a picture: KEYS='{2}{SPACE}{3}q' SHOT=last just pcjr-run LEMMJR LEMMJR.EXE
+# (the picture is saved as .codejr/shot.png in the workspace)
 [positional-arguments]
 pcjr-run folder +command:
-    @server/codejr ctl -workspace "{{ws}}" run "$@"
+    @server/codejr ctl -workspace "{{ws}}" -keys "${KEYS:-}" -shot "${SHOT:-}" run "$@"
 
 # Send pending files to the connected PCjr now
 pcjr-sync:

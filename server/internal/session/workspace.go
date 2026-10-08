@@ -360,6 +360,9 @@ func (w *Workspace) SeedHave() error {
 	return nil
 }
 
+// ShotPath is where the last screenshot from the PCjr is kept (a PNG).
+func (w *Workspace) ShotPath() string { return w.state("shot.png") }
+
 // LastRun is the report of the program the user last ran with /run, if
 // Claude hasn't seen it yet.
 func (w *Workspace) LastRun() string {

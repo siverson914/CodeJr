@@ -31,9 +31,13 @@ the user to press Y first, so say why you need it), and fetch copies a
 file from it into your folder. run_on_pcjr runs a program from a project
 folder on the real machine and returns what it printed, its exit code,
 the text screen it left and its LOG.TXT: after the emulator passes, use
-it to check real speed and behavior (the user sees it run; nobody presses
-keys, so use the program's /TEST mode and make sure it ends by itself: a
-program that hangs there can only be stopped by the user). The user
+it to check real speed and behavior (the user sees it run). It can press
+keys for the program on a schedule (keys: "{2}{SPACE}{3}q" waits 2
+seconds, presses Space, waits 3, presses q) and take a picture of a
+graphics screen (screenshot: seconds after the start, or "last"), which
+you get as an image in the standard 16 colors. Make sure the program
+ends by itself or by a scripted key: one that hangs there can only be
+stopped by the user. The user
 has the same as /dos COMMAND and /send NAME. To run a program the user
 types /run (a numbered list of programs, including those in project
 folders; a number runs one, and CodeJr calls back when it ends). End BASIC programs with SYSTEM rather than END,
@@ -60,6 +64,7 @@ type native struct {
 	remote   bool            // the client runs commands and sends files (remote=1)
 	runs     bool            // the client runs programs in their folders (run=1)
 	sys      bool            // the client keeps CodeJr's own files in C:\CODEJR (sys=1)
+	keys     bool            // the client presses scripted keys and takes screenshots (keys=1)
 	ctl      chan ctlReq     // requests from the control socket (see remote.go)
 	reply    strings.Builder // this turn's reply text, to speak
 	playNext string          // a clip to play once this turn's files are over
@@ -196,6 +201,9 @@ func (n *native) hello(h string) {
 		}
 		if f == "delta=1" {
 			n.delta = true
+		}
+		if f == "keys=1" {
+			n.keys = true
 		}
 		if f == "sys=1" {
 			n.sys = true

@@ -33,6 +33,7 @@
 #include <direct.h>
 #include <errno.h>
 #include <signal.h>
+#include <malloc.h>
 #include <process.h>
 #include <fcntl.h>
 #include "serial.h"
@@ -40,7 +41,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.0.22"
+#define VERSION "1.0.23"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 #define PULL_OLD "CJPULL.OLD" /* the copy being replaced, until the new one is in */
@@ -122,9 +123,24 @@ static char pend_dir[10];     /* CJP_RUN: the project folder to run it in */
 static int pend_run;          /* pend_cmd is a program to run (CJP_RUN) */
 static char pend_get[24];
 static FILE *up;
-static int up_temp;           /* delete the uploaded file afterwards */
+static const char *up_temp;   /* delete this file once it is uploaded */
 static unsigned long up_sent;
 static char up_name[24];
+/* Keys to press and a screenshot to take while a program we run is up
+ * (see tick_hook). */
+#define KQ_MAX 30
+#define CJSHOT "C:\\CODEJR\\CJSHOT.BIN"
+static struct { unsigned char delay, scan, ascii; } kq[KQ_MAX]; /* delay: units of 2 ticks, before the key */
+static volatile unsigned char kq_n, kq_i, kq_break;
+static volatile unsigned kq_wait;
+static unsigned char shot_want;          /* seconds; 0 none, 255 keep the latest */
+static unsigned char far *shot_buf;      /* 32 KB, allocated once */
+static volatile unsigned shot_len;       /* bytes captured; 0 if none */
+static volatile unsigned char shot_mode, shot_pag;
+static volatile unsigned run_ticks;
+static int shot_pending;                 /* CJSHOT.BIN waits to be uploaded */
+static int key_method;                   /* /K:B stuff the BIOS buffer, /K:I call INT 9; 0 = by machine */
+static void (__interrupt __far *old_tick)(void);
 /* A command the server marked "ask first": 1 = show the question, 2 =
  * waiting for Y or N (until ask_until), 0 = none. */
 static int ask;
@@ -744,10 +760,28 @@ static void handle(const cjp_frame *f)
 		for (i = 0; i < n && p[i] != '\n'; i++)
 			;
 		if (i < n && i < sizeof pend_dir) {
+			unsigned c, k;
 			memcpy(pend_dir, p, i);
 			pend_dir[i] = 0;
-			memcpy(pend_cmd, p + i + 1, n - i - 1);
-			pend_cmd[n - i - 1] = 0;
+			/* The command ends at a NUL; after it: when to take a
+			 * screenshot (seconds; 0 none, 255 the last one), a key
+			 * count, and the keys (delay, scan code, ASCII each). */
+			for (c = i + 1; c < n && p[c]; c++)
+				;
+			memcpy(pend_cmd, p + i + 1, c - i - 1);
+			pend_cmd[c - i - 1] = 0;
+			shot_want = 0;
+			kq_n = 0;
+			if (c + 2 < n) {
+				shot_want = p[c + 1];
+				k = p[c + 2];
+				if (k > KQ_MAX)
+					k = KQ_MAX;
+				if (c + 3 + k * 3 <= n) {
+					memcpy(kq, p + c + 3, k * 3);
+					kq_n = (unsigned char)k;
+				}
+			}
 			pend_run = 1;
 		}
 		break;
@@ -1077,6 +1111,138 @@ static void pump_report(void)
 
 static void upload_fail(const char *why);
 
+/* ---- keys and screenshots for a program we run ------------------------
+ * While the program runs we are still in memory. A hook on the timer
+ * tick (INT 1Ch, 18.2 a second) presses scripted keys and copies the
+ * video memory, so a test can drive a program and see its screen. */
+
+/* The PCjr's keyboard path ends in a software INT 9 with the scan code in
+ * AL; issuing one is a key press to the BIOS and to any program that
+ * hooked INT 9 (JRGFX's key_init does). */
+static void int9(unsigned char sc);
+#pragma aux int9 = "int 9" parm [al] modify [ax];
+
+/* On other machines INT 9 reads the keyboard port, so put the key
+ * straight into the BIOS buffer (40:1E to 40:3D, head 40:1A, tail 40:1C). */
+static void stuff_key(unsigned char scan, unsigned char ascii)
+{
+	unsigned far *head = (unsigned far *)MK_FP(0x40, 0x1A);
+	unsigned far *tail = (unsigned far *)MK_FP(0x40, 0x1C);
+	unsigned t = *tail, nx = t + 2;
+	if (nx >= 0x3E)
+		nx = 0x1E;
+	if (nx != *head) {
+		*(unsigned far *)MK_FP(0x40, t) = (unsigned)scan << 8 | ascii;
+		*tail = nx;
+	}
+}
+
+static int use_int9(void)
+{
+	if (key_method)
+		return key_method == 'I';
+	return *(unsigned char far *)MK_FP(0xF000, 0xFFFE) == 0xFD; /* a PCjr */
+}
+
+/* Copies the screen's memory if a graphics mode is up. The mode is the
+ * BIOS's (40:49); on the PCjr the page on screen is in the low 128K at
+ * (page << 10):0, the page number in the BIOS's copy of port 3DFh (40:8A).
+ * 16 KB, or 32 KB for the 16-color 320x200 and 4-color 640x200 modes. */
+static void grab_screen(void)
+{
+	unsigned char mode = *(unsigned char far *)MK_FP(0x40, 0x49);
+	unsigned char pag = *(unsigned char far *)MK_FP(0x40, 0x8A);
+	unsigned seg = 0xB800, len = 16384u;
+
+	if (mode < 4 || mode == 7 || mode > 10)
+		return; /* text: the text dump at the end covers it */
+	if (*(unsigned char far *)MK_FP(0xF000, 0xFFFE) == 0xFD && (pag & 7)) {
+		seg = (unsigned)(pag & 7) << 10;
+		if (mode >= 9)
+			len = 32768u;
+	}
+	_fmemcpy(shot_buf, MK_FP(seg, 0), len);
+	shot_mode = mode;
+	shot_pag = pag;
+	shot_len = len;
+}
+
+static void __interrupt __far tick_hook(void)
+{
+	run_ticks++;
+	if (shot_buf && shot_want) {
+		if (shot_want == 255 ? run_ticks % 18 == 0 : run_ticks == (unsigned)shot_want * 18u)
+			grab_screen();
+	}
+	if (kq_break) {
+		/* let go of the key pressed on the last tick */
+		if (use_int9())
+			int9((unsigned char)(kq_break | 0x80));
+		kq_break = 0;
+	} else if (kq_i < kq_n) {
+		if (kq_wait) {
+			kq_wait--;
+		} else {
+			unsigned char sc = kq[kq_i].scan, as = kq[kq_i].ascii;
+			kq_i++;
+			if (sc) {
+				if (use_int9()) {
+					int9(sc);
+					kq_break = sc;
+				} else {
+					stuff_key(sc, as);
+				}
+			}
+			if (kq_i < kq_n)
+				kq_wait = (unsigned)kq[kq_i].delay * 2u;
+		}
+	}
+	_chain_intr(old_tick);
+}
+
+static void hook_run(void)
+{
+	if (shot_want && !shot_buf)
+		shot_buf = (unsigned char far *)_fmalloc(32768u);
+	shot_len = 0;
+	run_ticks = 0;
+	kq_i = 0;
+	kq_break = 0;
+	kq_wait = kq_n ? (unsigned)kq[0].delay * 2u : 0;
+	old_tick = _dos_getvect(0x1C);
+	_dos_setvect(0x1C, tick_hook);
+}
+
+/* Unhooks, and writes the screenshot (if one was taken) to CJSHOT.BIN:
+ * "JS", the mode, the page byte, the length (2 bytes), then the memory. */
+static void unhook_run(void)
+{
+	FILE *f;
+	unsigned char h[6];
+	unsigned left, k;
+	unsigned char far *p = shot_buf;
+	static unsigned char buf[512];
+
+	_dos_setvect(0x1C, old_tick);
+	kq_n = 0;
+	shot_pending = 0;
+	if (!shot_want)
+		return;
+	shot_pending = 1; /* an answer is owed even if there is no picture */
+	remove(CJSHOT);
+	if (!shot_len || (f = fopen(CJSHOT, "wb")) == NULL)
+		return;
+	h[0] = 'J'; h[1] = 'S'; h[2] = shot_mode; h[3] = shot_pag;
+	h[4] = (unsigned char)shot_len; h[5] = (unsigned char)(shot_len >> 8);
+	fwrite(h, 1, 6, f);
+	for (left = shot_len; left; left -= k, p += k) {
+		k = left > sizeof buf ? sizeof buf : left;
+		_fmemcpy(buf, p, k);
+		fwrite(buf, 1, k, f);
+	}
+	fclose(f);
+}
+
 /* The user's answer to "CodeJr wants to run ...": 1 yes, 0 no. */
 static void answer(int yes)
 {
@@ -1128,7 +1294,7 @@ static void start_upload(const char *path, const char *name, int kind, int temp)
 	b[0] = (unsigned char)kind;
 	memcpy(b + 1, name, n);
 	queue(CJP_UPLOAD, b, (unsigned)n + 1);
-	up_temp = temp;
+	up_temp = temp ? path : NULL;
 	up_sent = 0;
 	strncpy(up_name, name, sizeof up_name - 1);
 	up_name[sizeof up_name - 1] = 0;
@@ -1148,7 +1314,7 @@ static void pump_upload(void)
 			fclose(up);
 			up = NULL;
 			if (up_temp)
-				remove(CMDOUT);
+				remove(up_temp);
 			if (!more_shown)
 				scr_status(server_status);
 			break;
@@ -1244,8 +1410,11 @@ static void run_program(void)
 	}
 	make_keys();
 	scr_blank(); /* the program gets a clean screen; we dump what it leaves */
+	hook_run();
 	if (direct) {
-		int nul = open(CMDKEYS, O_RDONLY), out = open(CMDOUT, O_WRONLY | O_TRUNC | O_TEXT);
+		/* With scripted keys the program reads the real keyboard (where
+		 * they arrive); otherwise a file of Enter presses. */
+		int nul = kq_n ? -1 : open(CMDKEYS, O_RDONLY), out = open(CMDOUT, O_WRONLY | O_TRUNC | O_TEXT);
 		int in0 = dup(0), out0 = dup(1);
 		if (nul >= 0)
 			dup2(nul, 0);
@@ -1262,10 +1431,14 @@ static void run_program(void)
 		if (out >= 0)
 			close(out);
 	} else {
-		sprintf(line, "%s <" CMDKEYS " >" CMDOUT, cmd);
+		if (kq_n)
+			sprintf(line, "%s >" CMDOUT, cmd);
+		else
+			sprintf(line, "%s <" CMDKEYS " >" CMDOUT, cmd);
 		if (system(line) == -1)
 			rc = -2;
 	}
+	unhook_run();
 	if ((f = fopen(CMDOUT, "a")) != NULL) {
 		if (direct)
 			fprintf(f, "\n--- exit code %d\n", rc);
@@ -1708,6 +1881,7 @@ int main(int argc, char **argv)
 		case 'd': strncpy(host, a + 3, sizeof host - 1); host[sizeof host - 1] = 0; break;
 		case 'l': loop_mode = 1; break;
 		case 'a': auto_answer = a[3] & 0xDF; break;
+		case 'k': key_method = a[3] & 0xDF; break;
 		case 'p': port = atoi(a + 3) - 1; break;
 		case 'b': baud = atol(a + 3); break;
 		case 'r': restore_only = 1; break;
@@ -1810,7 +1984,7 @@ int main(int argc, char **argv)
 	}
 
 	cjp_init(&link, link_write, link_now, NULL, 2 * TICKS_PER_SEC);
-	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1 dirs=1 delta=1 voice=1 remote=1 run=1 sys=1", line_baud);
+	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1 dirs=1 delta=1 voice=1 remote=1 run=1 sys=1 keys=1", line_baud);
 	queue(CJP_HELLO, hello, (unsigned)strlen(hello));
 	scr_status("Connecting...");
 
@@ -1865,6 +2039,14 @@ int main(int argc, char **argv)
 			}
 		}
 		pump_upload();
+		if (!up && shot_pending && outq_n == 0) {
+			/* The text went; now the picture, or why there is none. */
+			shot_pending = 0;
+			if (access(CJSHOT, 0) == 0)
+				start_upload(CJSHOT, "the screen", 'S', 1);
+			else
+				upload_fail("no graphics screen was up when the screenshot was due");
+		}
 		flush_queue();
 		cjp_tick(&link);
 		if (exit_after >= 0 && (long)(ticks() - start) > exit_after * 182 / 10) {

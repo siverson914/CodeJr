@@ -7,7 +7,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 )
 
 // A minimal MCP server over stdio (newline-delimited JSON-RPC 2.0): just
@@ -80,8 +83,10 @@ func init() {
 			"inputSchema": map[string]any{
 				"type": "object",
 				"properties": map[string]any{
-					"project": map[string]any{"type": "string", "description": "the project folder, e.g. SNAKE"},
-					"command": map[string]any{"type": "string", "description": "the program and its arguments, e.g. SNAKE.EXE /TEST"},
+					"project":    map[string]any{"type": "string", "description": "the project folder, e.g. SNAKE"},
+					"command":    map[string]any{"type": "string", "description": "the program and its arguments, e.g. SNAKE.EXE /TEST"},
+					"keys":       map[string]any{"type": "string", "description": `keys to press while it runs: plain characters are keys, {2} or {0.5} pauses that many seconds, {ENTER} {ESC} {SPACE} {UP} {DOWN} {LEFT} {RIGHT} {F1} are named keys. E.g. "{2}{SPACE}{3}q". At most 30 keys and pauses.`},
+					"screenshot": map[string]any{"type": "string", "description": `take a picture of the graphics screen: seconds after the start (e.g. "3"), or "last" for the latest one before it ended. Returned as an image in the standard 16 colors.`},
 				},
 				"required": []string{"project", "command"},
 			},
@@ -141,6 +146,8 @@ func Serve(ctx context.Context, e Env, in io.Reader, out io.Writer) error {
 			var p struct {
 				Name      string `json:"name"`
 				Arguments struct {
+					Keys    string `json:"keys"`
+					Shot    string `json:"screenshot"`
 					Command string `json:"command"`
 					Path    string `json:"path"`
 					Project string `json:"project"`
@@ -160,13 +167,20 @@ func Serve(ctx context.Context, e Env, in io.Reader, out io.Writer) error {
 					arg = p.Arguments.Path
 				}
 				if p.Name == "run_on_pcjr" {
-					op, arg = "run", p.Arguments.Project+"\n"+p.Arguments.Command
+					op, arg = "run", p.Arguments.Project+"\n"+p.Arguments.Command+"\n"+p.Arguments.Keys+"\n"+p.Arguments.Shot
 				}
 				out, err := CtlCall(e.Workspace, op, arg)
 				if err != nil {
 					out = err.Error()
 				}
-				reply(m.ID, map[string]any{"content": []any{map[string]any{"type": "text", "text": out}}, "isError": err != nil})
+				content := []any{map[string]any{"type": "text", "text": out}}
+				// The server saves a screenshot beside the control socket.
+				if err == nil && strings.Contains(out, "--- screenshot: ") {
+					if img, rerr := os.ReadFile(filepath.Join(filepath.Dir(CtlPath(e.Workspace)), "shot.png")); rerr == nil {
+						content = append(content, map[string]any{"type": "image", "mimeType": "image/png", "data": base64.StdEncoding.EncodeToString(img)})
+					}
+				}
+				reply(m.ID, map[string]any{"content": content, "isError": err != nil})
 			default:
 				reply(m.ID, e.call(ctx, p.Name, p.Arguments.Project, p.Arguments.Program, p.Arguments.Args, p.Arguments.Seconds))
 			}

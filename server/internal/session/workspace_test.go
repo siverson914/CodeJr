@@ -1,6 +1,10 @@
 package session
 
 import (
+	"bytes"
+	"image"
+	"image/color"
+	"image/png"
 	"os"
 	"path/filepath"
 	"strings"
@@ -143,5 +147,63 @@ func TestSafeDOS(t *testing.T) {
 		if SafeDOS(c) {
 			t.Errorf("%q must ask first", c)
 		}
+	}
+}
+
+func TestKeyScript(t *testing.T) {
+	k, err := parseKeys("{2}q{0.5}{SPACE}ab{ESC}")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 2 s = 36 ticks = 18 units; 0.5 s = 9 ticks = 5 units (rounded).
+	want := []scriptKey{{18, 16, 'q'}, {5, 57, ' '}, {0, 30, 'a'}, {0, 48, 'b'}, {0, 1, 27}}
+	if len(k) != len(want) {
+		t.Fatalf("got %+v", k)
+	}
+	for i := range want {
+		if k[i] != want[i] {
+			t.Fatalf("key %d: got %+v, want %+v", i, k[i], want[i])
+		}
+	}
+	// A pause too long for one byte is split with a key that only waits.
+	if k, _ := parseKeys("{60}x"); len(k) != 3 || k[0].scan != 0 || k[2].scan != 45 {
+		t.Fatalf("long pause: %+v", k)
+	}
+	for _, bad := range []string{"{", "{NOPE}", "\x01", strings.Repeat("a", 31)} {
+		if _, err := parseKeys(bad); err == nil {
+			t.Errorf("%q should be refused", bad)
+		}
+	}
+	for s, want := range map[string]byte{"": 0, "3": 3, "last": 255} {
+		if got, err := parseShot(s); err != nil || got != want {
+			t.Errorf("parseShot(%q) = %d, %v", s, got, err)
+		}
+	}
+	if _, err := parseShot("soon"); err == nil {
+		t.Error(`parseShot("soon") should fail`)
+	}
+}
+
+func TestDecodeShot(t *testing.T) {
+	// Mode 8: pixel (2,0) color 14 is the high nibble of byte 1 in bank 0;
+	// pixel (5,1) color 9 is the low nibble of byte 2 in bank 1.
+	mem := make([]byte, 16384)
+	mem[1] = 0xE0
+	mem[0x2000+2] = 0x09
+	b := append([]byte{'J', 'S', 8, 0x3F, 0x00, 0x40}, mem...)
+	pngData, what, err := DecodeShot(b)
+	if err != nil || !strings.Contains(what, "160x200") {
+		t.Fatalf("%v %q", err, what)
+	}
+	img, err := png.Decode(bytes.NewReader(pngData))
+	if err != nil {
+		t.Fatal(err)
+	}
+	at := func(x, y int) color.RGBA { return img.(*image.RGBA).RGBAAt(x*4+1, y*2) }
+	if at(2, 0) != rgbi[14] || at(5, 1) != rgbi[9] || at(0, 0) != rgbi[0] {
+		t.Fatalf("pixels: %v %v %v", at(2, 0), at(5, 1), at(0, 0))
+	}
+	if _, _, err := DecodeShot([]byte("nope")); err == nil {
+		t.Fatal("junk accepted")
 	}
 }

@@ -3,6 +3,7 @@ package session
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -164,7 +165,11 @@ func (n *native) exec(cmd string, trusted bool) (string, error) {
 // screen it left and its LOG.TXT. Pending files go first, so the PCjr
 // runs the newest build. Running a program can do anything, so it asks
 // the user unless they typed /trust.
-func (n *native) run(folder, cmd string) (string, error) {
+//
+// keys is a key script to press while it runs (see parseKeys) and shot
+// says when to take a picture of a graphics screen ("" none, seconds
+// after the start, or "last"); the picture is saved as ShotPath.
+func (n *native) run(folder, cmd, keys, shot string) (string, error) {
 	folder = strings.ToUpper(strings.TrimSpace(folder))
 	cmd = strings.TrimSpace(cmd)
 	if folder == "." {
@@ -184,9 +189,30 @@ func (n *native) run(folder, cmd string) (string, error) {
 	n.link.Flush(10 * time.Second)
 	n.s.logf("native: running on the PCjr in %q: %s", folder, cmd)
 	payload := []byte(folder + "\n" + cmd)
+	script, err := parseKeys(keys)
+	if err != nil {
+		return "", err
+	}
+	when, err := parseShot(shot)
+	if err != nil {
+		return "", err
+	}
+	if len(script) > 0 || when != 0 {
+		if !n.keys {
+			return "", errors.New("this CODEJR.EXE can't press keys or take screenshots yet; it updates itself on the next call")
+		}
+		payload = append(payload, 0, when, byte(len(script)))
+		for _, k := range script {
+			payload = append(payload, k.delay, k.scan, k.ascii)
+		}
+	}
 	if !n.s.ws.Flag("trust") {
 		payload = append([]byte{cjp.ExecAsk}, payload...)
 	}
+	if len(payload) > cjp.MaxPayload {
+		return "", fmt.Errorf("the command and its keys come to %d bytes; %d is the most (use fewer keys or a shorter command)", len(payload), cjp.MaxPayload)
+	}
+	os.Remove(n.s.ws.ShotPath())
 	if err := n.link.Send(cjp.Run, payload); err != nil {
 		return "", errors.New("the PCjr hung up")
 	}
@@ -194,7 +220,24 @@ func (n *native) run(folder, cmd string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(fromDOS(b)), nil
+	out := string(fromDOS(b))
+	if when == 0 {
+		return out, nil
+	}
+	// The picture follows as a second upload (or the reason there is none).
+	raw, err := n.collect(3 * time.Minute)
+	if err != nil {
+		return out + "\n--- no screenshot: " + err.Error() + "\n", nil
+	}
+	img, what, err := DecodeShot(raw)
+	if err != nil {
+		return out + "\n--- no screenshot: " + err.Error() + "\n", nil
+	}
+	if err := os.WriteFile(n.s.ws.ShotPath(), img, 0o644); err != nil {
+		return out + "\n--- no screenshot: " + err.Error() + "\n", nil
+	}
+	n.s.logf("native: screenshot from the PCjr, %s, %d bytes of video memory", what, len(raw)-6)
+	return out + fmt.Sprintf("\n--- screenshot: %s, saved as %s (standard colors: the PCjr's palette can't be read back)\n", what, n.s.ws.ShotPath()), nil
 }
 
 // fetch copies a file from the PCjr into the workspace.
@@ -284,9 +327,12 @@ func (n *native) handleCtl(r ctlReq) {
 	case "dos":
 		resp.out, resp.err = n.exec(r.arg, false)
 	case "run":
-		// "FOLDER\nCOMMAND"
-		folder, cmd, _ := strings.Cut(r.arg, "\n")
-		resp.out, resp.err = n.run(folder, cmd)
+		// "FOLDER\nCOMMAND", then optionally "\nKEYS\nSHOT"
+		f := strings.SplitN(r.arg, "\n", 4)
+		for len(f) < 4 {
+			f = append(f, "")
+		}
+		resp.out, resp.err = n.run(f[0], f[1], f[2], f[3])
 	case "restart":
 		// The server is about to exit: the client hangs up and calls back.
 		n.sendPending()

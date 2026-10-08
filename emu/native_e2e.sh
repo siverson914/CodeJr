@@ -12,6 +12,25 @@ port=${E2E_PORT:-4872}
 fail=0
 check() { if eval "$2"; then echo "ok:   $1"; else echo "FAIL: $1"; fail=1; fi; }
 
+# The scenarios are independent (own folder, own port), and each mostly
+# waits on an emulated PCjr, so they run several at a time: one after
+# another they took over 20 minutes. job runs one in the background with
+# its output kept apart; leading NAME=value words are set for it alone.
+jobs=$(mktemp -d)
+nj=0
+job() {
+	nj=$((nj + 1))
+	(
+		port=$((port + nj))
+		while :; do
+			case $1 in [A-Z]*=*) export "$1"; shift ;; *) break ;; esac
+		done
+		"$@"
+	) > "$jobs/$(printf %02d $nj).txt" 2>&1 &
+	[ $((nj % ${E2E_JOBS:-6})) = 0 ] && wait
+	return 0
+}
+
 (cd server && go build -o codejr ./cmd/codejr) || exit 1
 client/build.sh >/dev/null || exit 1
 apps/say/build.sh >/dev/null || exit 1 # SAY.EXE, for the /voice runs
@@ -190,8 +209,8 @@ voicerun() { # $1 = typed line, $2 = label, $3 = 1 to start with voice on, $4 = 
 	rm -rf "$tmp"
 }
 
-voicerun /voice "/voice plays its clip" 0 ON.SND
-voicerun "hi there" "a voiced reply is spoken" 1 REPLY.SND
+job voicerun /voice "/voice plays its clip" 0 ON.SND
+job voicerun "hi there" "a voiced reply is spoken" 1 REPLY.SND
 # Remote work: /dos runs a command on the PCjr and shows what it printed,
 # /send uploads a file, and the laptop can ask for both through the
 # control socket while a call is up (what Claude's dos and fetch tools use).
@@ -221,20 +240,20 @@ remoterun() {
 	rm -rf "$tmp"
 }
 
-remoterun "/dos VER" "/dos, and the laptop's control socket" \
+job remoterun "/dos VER" "/dos, and the laptop's control socket" \
 	'check "the screen shows what VER printed" "grep -qi dosbox $tmp/c/CODEJR/PROGS/SCREEN.TXT"' \
 	'check "the screen was repainted" "grep -q \"CodeJr 1\" $tmp/c/CODEJR/PROGS/SCREEN.TXT"' \
 	'check "the laptop ran a command on the PCjr" "grep -qi dosbox $tmp/ctl-dos.txt"' \
 	'check "the laptop fetched a file from a folder" "printf \"score 42\n\" | cmp -s - $tmp/ws/GAME/LOG.TXT"'
 # A command that could change something runs only if the user presses Y
 # (/A:Y and /A:N answer for the user here).
-COPT=/A:N CTLCMD="DEL NOTE.TXT" remoterun "hi" "a risky command, refused at the PCjr" \
+job COPT=/A:N CTLCMD="DEL NOTE.TXT" remoterun "hi" "a risky command, refused at the PCjr" \
 	'check "the PCjr asked" "grep -q \"CodeJr wants to run: DEL NOTE.TXT\" $tmp/c/CODEJR/PROGS/SCREEN.TXT"' \
 	'check "the laptop was told no" "grep -q \"said no\" $tmp/ctl-dos.txt"' \
 	'check "the file is still there" "[ -e $tmp/c/CODEJR/PROGS/NOTE.TXT ]"'
-COPT=/A:Y CTLCMD="DEL NOTE.TXT" remoterun "hi" "a risky command, allowed at the PCjr" \
+job COPT=/A:Y CTLCMD="DEL NOTE.TXT" remoterun "hi" "a risky command, allowed at the PCjr" \
 	'check "the file is gone" "[ ! -e $tmp/c/CODEJR/PROGS/NOTE.TXT ]"'
-remoterun "/send note.txt" "/send uploads a file" \
+job remoterun "/send note.txt" "/send uploads a file" \
 	'check "the file reached the workspace" "printf \"a note from the PCjr\n\" | cmp -s - $tmp/ws/NOTE.TXT"' \
 	'check "the screen says so" "grep -q \"CodeJr has NOTE.TXT now\" $tmp/c/CODEJR/PROGS/SCREEN.TXT"'
 
@@ -276,8 +295,8 @@ looprun() {
 	rm -rf "$tmp"
 }
 
-looprun 1 "" "the loop from the laptop, with /trust on"
-looprun 0 "/A:Y" "the loop from the laptop, asking first"
+job looprun 1 "" "the loop from the laptop, with /trust on"
+job looprun 0 "/A:Y" "the loop from the laptop, asking first"
 
 # The real launcher: C:\CODEJR.BAT (the stub that never changes) swaps in
 # a new CJLOOP.BAT and starts the client from C:\CODEJR. A newer client
@@ -313,14 +332,72 @@ launchrun() {
 	rm -rf "$tmp"
 }
 
-launchrun
+job launchrun
 
-pagerun long "a long reply stops at More" "line 20" "!line 21"
-pagerun /exit "/exit answers at once" "Hanging up" "!^>  *.\{0,1\}$"
-deltarun
-runreport
-runrun "/run 2" 'GWBASIC BETA.BAS' "/run by number: BASIC through GW-BASIC"
-runrun "/run game" 'CD \CODEJR\PROGS\GAME' "/run by folder name"
-run "9600 baud" "/F:9600"
-run "fast: /F:37287" "/F:37287"
+# Scripted keys and a screenshot: a graphics program that waits for a key
+# is run from the laptop with "{3}q" and a picture taken at 2 seconds.
+# (/K:B: in DOSBox a key goes into the BIOS buffer; on the real PCjr the
+# client issues INT 9, which this can't test.)
+keysrun() {
+	tmp=$(mktemp -d)
+	mkdir -p "$tmp/c/CODEJR/PROGS" "$tmp/ws/.codejr" "$tmp/ws/GAME"
+	cp client/CODEJR.EXE "$tmp/c/CODEJR/PROGS/"
+	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG"
+	touch "$tmp/ws/.codejr/trust"
+	cat > "$tmp/game.c" <<'CEOF'
+#include <stdio.h>
+#include <conio.h>
+#include <time.h>
+#include "jrgfx.h"
+int main(void)
+{
+	int c = '?';
+	clock_t t0 = clock();
+	if (gfx_init(GFX_160x200) != 0)
+		return 1;
+	gfx_clear(1);
+	gfx_rect(10, 10, 100, 100, 14);
+	gfx_present();
+	while (!kbhit() && (clock() - t0) / CLOCKS_PER_SEC < 25)
+		;
+	if (kbhit())
+		c = getch();
+	gfx_done();
+	printf("key=%c\n", c);
+	return c == 'q' ? 7 : 1;
+}
+CEOF
+	(. client/owenv.sh && cd "$tmp" && wcl -q -bt=dos -ml -0 -i="$OLDPWD/lib" -fe=ws/GAME/GAME.EXE game.c "$OLDPWD/lib/jrgfx.c" "$OLDPWD/lib/jrtab.c" "$OLDPWD/lib/jrfast.c" >/dev/null 2>&1; rm -f ws/GAME/*.o *.o)
+	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "" > "$tmp/server.log" 2>&1 &
+	sp=$!
+	sleep 0.5
+	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 3000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:37287 /K:B /X:90 /S:SCREEN.TXT\nexit\n' $port "$tmp" > "$tmp/dosbox.conf"
+	SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 240 dosbox -conf "$tmp/dosbox.conf" >/dev/null 2>&1 &
+	dp=$!
+	sleep 45 # the initial files, then GAME.EXE goes with the run
+	server/codejr ctl -workspace "$tmp/ws" -keys '{3}q' -shot 2 run GAME GAME.EXE > "$tmp/run.txt" 2>&1
+	wait $dp
+	kill $sp 2>/dev/null; wait $sp 2>/dev/null
+	echo "== scripted keys and a screenshot"
+	check "the program got the scripted key" "grep -q 'key=q' '$tmp/run.txt' && grep -q 'exit code 7' '$tmp/run.txt'"
+	check "a screenshot came back" "grep -q 'screenshot: mode 8' '$tmp/run.txt' && [ -s '$tmp/ws/.codejr/shot.png' ]"
+	check "it shows what the program drew" "[ \"\$(magick '$tmp/ws/.codejr/shot.png' -format '%[pixel:p{320,300}] %[pixel:p{40,20}]' info:)\" = 'srgb(0,0,170) srgb(255,255,85)' ]"
+	[ $fail = 1 ] && { echo "--- run"; cat "$tmp/run.txt"; echo "--- server log"; tail -15 "$tmp/server.log"; magick "$tmp/ws/.codejr/shot.png" -format '%[pixel:p{320,300}] %[pixel:p{40,20}]\n' info: 2>&1; cp "$tmp/ws/.codejr/shot.png" /tmp/keysrun-shot.png 2>/dev/null; }
+	rm -rf "$tmp"
+}
+
+job keysrun
+
+job pagerun long "a long reply stops at More" "line 20" "!line 21"
+job pagerun /exit "/exit answers at once" "Hanging up" "!^>  *.\{0,1\}$"
+job deltarun
+job runreport
+job runrun "/run 2" 'GWBASIC BETA.BAS' "/run by number: BASIC through GW-BASIC"
+job runrun "/run game" 'CD \CODEJR\PROGS\GAME' "/run by folder name"
+job run "9600 baud" "/F:9600"
+job run "fast: /F:37287" "/F:37287"
+wait
+cat "$jobs"/*.txt
+if grep -q '^FAIL' "$jobs"/*.txt; then fail=1; fi
+rm -rf "$jobs"
 exit $fail
