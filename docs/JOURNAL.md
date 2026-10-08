@@ -864,3 +864,15 @@ Steve: "it seems like debris is the biggest problem?" It was a guess on my side 
 **Wrong turn.** The building theory, written into a code comment as fact before the count came back. The comment was rewritten with the count in it.
 
 Steve also asked for ideas for a different, more impressive way to show debris. Offered, not built: sparks (a few bright pixels per piece plus decorative ones that arc and fade), a one-frame palette flash, and drawing alternate pieces on alternate frames. The game's own fifteen pieces must stay as they are, since they can hit and score.
+
+## Sopwith26: sparks, and a session that landed inside another's commit (2026-10-08, afternoon)
+
+Steve, on debris: "we could even consider simpler debris or just a totally different method of drawing debris that might be even more impressive and faster". Built for Sopwith26: the game's fifteen pieces are shown as small blocks, sparks fly out and fall, and the background flashes red for a frame when a building goes (`apps/sopwith26/sop26fx.c`, `-x` for the original look). Only the screen update's draw call changes; the pieces themselves are untouched. Since the picture differs on purpose, the log now prints a state number, and it matches the faithful build's everywhere tried.
+
+**"Faster" didn't happen.** Real PCjr, screen time in a frame with an explosion: original sprites 39.2 ms, blocks with 16 to 28 sparks 40.4, blocks with 12 to 20 sparks and table masks 37.3. The sparks cost what the blocks saved.
+
+**Wrong turn.** A `static const` table declared after a statement: a compile error, and the script went on to time the previous build on the PCjr. The numbers looked plausible. Caught because the build's own output was in the log; the measuring scripts should stop when a build fails.
+
+**The incident.** While that run was on the PCjr, this session's worktree (WT-034-sopwith-sparks) disappeared. The work had not been discarded: at 1:43 pm it was landed, with the gate, as commit a56750c, "fix(client): scripted keys stay down a quarter second (1.0.24)", which contains only the three Sopwith files and none of the client change it describes. It looks as if another session's `done` was given this session's id with its own message (the commit landed two seconds before the worktree vanished); I did not see it happen. The key-hold work itself is still unlanded in WT-035. Nothing was lost, but main carries unfinished, undocumented Sopwith work under another change's name, landed before it had been measured. This entry and the commit that carries it are the correction; the history was not rewritten, since main is pushed.
+
+Not seen on the real screen by anyone: the sparks and the flash. The flash is a palette register write, the first this game makes, and can't be captured from the emulator.

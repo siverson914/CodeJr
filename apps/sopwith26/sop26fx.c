@@ -11,7 +11,7 @@
  * Everything is XORed onto the screen and taken off by the same XOR, as
  * the game's own sprites are, so it doesn't matter what overlaps what. */
 
-#define CJ_NSPK 64
+#define CJ_NSPK 40
 
 typedef struct {
   int wx,wy;              /* place in the world, in quarter pixels */
@@ -36,8 +36,9 @@ static unsigned cj_fxrand(void)
 /* One pixel, flipped. sx 0 to 319, sy 0 to 199 (0 is the bottom line). */
 static void cj_pxor(int sx,int sy)
 {
+  static const unsigned char bit[4]={0xc0,0x30,0x0c,0x03}; /* an 8088 shifts a bit at a time */
   unsigned char far *d=(unsigned char far *)MK_FP(0xb800,rowtab[0][sy]+((unsigned)sx>>2));
-  *d^=(unsigned char)(0xc0>>((sx&3)<<1));
+  *d^=bit[sx&3];
 }
 
 /* A piece of the game's debris: 4 pixels wide and 3 high, at the middle of
@@ -45,13 +46,14 @@ static void cj_pxor(int sx,int sy)
    where it is, so the same call takes it off again. */
 static void cj_block(int sx,int sy,unsigned char colour)
 {
+  static const unsigned run[4]={0xff00u,0x3fc0u,0x0ff0u,0x03fcu};
   unsigned m,off;
   int r;
   sx+=2;
   sy-=2;
   if (sx<0 || sx>316 || sy<2 || sy>199)
     return;
-  m=(0xff00u>>((sx&3)<<1))&(colour*0x5555u);
+  m=run[sx&3]&(colour*0x5555u);
   off=(unsigned)sx>>2;
   for (r=0;r<3;r++) {
     unsigned char far *d=(unsigned char far *)MK_FP(0xb800,rowtab[0][sy-r]+off);
@@ -100,7 +102,7 @@ static void cj_fxreset(void)
 /* Something has blown up. */
 static void cj_boom(object *obj)
 {
-  int n=(obj->type==OBJ_BUILDING) ? 28 : 16,i;
+  int n=(obj->type==OBJ_BUILDING) ? 20 : 12,i;
   int cx=(obj->x+(obj->width>>1))<<2,cy=(obj->y-(obj->height>>1))<<2;
   if (cj_classic)
     return;

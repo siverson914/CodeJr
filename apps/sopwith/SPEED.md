@@ -282,6 +282,34 @@ a game against the computer, and at 12000 of one on level 5.
 Every score write now takes the direct path from step 10, including the
 ones in the full status redraw after a crash.
 
+### 16. A different way to show debris (Sopwith26; not a speedup, as it turned out)
+
+The idea was that fifteen 8 by 8 sprites could be shown as fifteen small
+blocks (3 screen rows of 1 or 2 bytes, against 8 rows of 3) with single
+pixel sparks added for effect, and come out both prettier and cheaper. The
+game's own debris stays as it is, since it can hit things and score; only
+the screen update's draw call is swapped.
+
+Measured on the real PCjr, a frame with an explosion in it:
+
+| | Screen time |
+|---|---|
+| Original debris sprites | 39.2 ms |
+| Blocks and 16 to 28 sparks an explosion | 40.4 ms |
+| Blocks and 12 to 20 sparks, pixel masks from a table | 37.3 ms |
+
+The sparks cost what the blocks saved. Each spark is a little C: a
+structure, a far pointer, and at first a shift by a variable count, which
+an 8088 does a bit at a time. With fewer sparks and the shift replaced by
+a 4-entry table it comes out slightly ahead. It stays in for its looks,
+not its speed.
+
+Because the picture now differs from the faithful build's on purpose, the
+screen comparison no longer applies. The log gained a state number (a sum
+over every object's position, type, status and score): it is the same
+with the new explosions, with the old, and in the faithful build, at
+frames 1000, 2500 and 6000.
+
 ## Where the PCjr stands now
 
 1000 frames of the scripted battle, limiter off, real PCjr:
