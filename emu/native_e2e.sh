@@ -36,7 +36,8 @@ run() { # $1 = label, $2 = extra client options
 	check "the 25 KB binary arrived byte for byte" "cmp -s '$tmp/ws/BIG.BIN' '$p/BIG.BIN'"
 	check "HELLO.BAS arrived with DOS line endings" "printf '10 PRINT \"HI\"\r\n20 END\r\n' | cmp -s - '$p/HELLO.BAS'"
 	check "server recorded both transfers" "[ \$(grep -cE 'native: sent (BIG.BIN|HELLO.BAS)' '$tmp/server.log') = 2 ]"
-	check "the launchers arrived without an address" "grep -q 'CODEJR.EXE /P:1 /L:1 %1' '$p/CODEJR.BT' && ! grep -q '/D:' '$p/CODEJR.BT' '$p/SETUP.BAT'"
+	check "CodeJr's own files arrived one level up, without an address" "grep -q 'CJEXE% /P:1 /L:1 %1' '$tmp/c/CODEJR/CJLOOP.NEW' && [ -s '$tmp/c/CODEJR/SCRDUMP.EXE' ] && ! grep -q '/D:' '$tmp/c/CODEJR/CJLOOP.NEW' '$tmp/c/CODEJR/SETUP.BAT'"
+	check "none of them landed among the programs" "[ ! -e '$p/SETUP.BAT' ] && [ ! -e '$p/SCRDUMP.EXE' ]"
 	check "screen shows the typed line" "grep -q '> make hello' '$p/SCREEN.TXT'"
 	check "a project folder arrived" "printf 'IN A FOLDER\r\n' | cmp -s - '$p/PROJ/NOTES.TXT'"
 	check "no temporary file left behind" "[ ! -e '$p/CJPULL.\$\$\$' ]"
@@ -277,6 +278,42 @@ looprun() {
 
 looprun 1 "" "the loop from the laptop, with /trust on"
 looprun 0 "/A:Y" "the loop from the laptop, asking first"
+
+# The real launcher: C:\CODEJR.BAT (the stub that never changes) swaps in
+# a new CJLOOP.BAT and starts the client from C:\CODEJR. A newer client
+# then arrives in place, and a polite server stop tells the PCjr to call
+# back.
+launchrun() {
+	tmp=$(mktemp -d)
+	mkdir -p "$tmp/c/CODEJR/PROGS" "$tmp/ws/.system"
+	server/codejr -write-dos "$tmp/dos" >/dev/null 2>&1 || { mkdir -p "$tmp/dos"; server/codejr -write-dos "$tmp/dos" >/dev/null 2>&1; }
+	cp "$tmp/dos/CODEJR.BAT" "$tmp/c/CODEJR.BAT"
+	cp "$tmp/dos/CJKERMIT.BAT" "$tmp/c/CJKERMIT.BAT"
+	cp "$tmp/dos/CJLOOP.NEW" "$tmp/c/CODEJR/CJLOOP.NEW"
+	cp client/CODEJR.EXE "$tmp/c/CODEJR/CODEJR.EXE"
+	# The server has a "newer" client: the same one with a byte appended.
+	{ cat client/CODEJR.EXE; printf 'X'; } > "$tmp/ws/.system/CODEJR.EXE"
+	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR/CODEJR.CFG"
+	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "" > "$tmp/server.log" 2>&1 &
+	sp=$!
+	sleep 0.5
+	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 3000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\nCODEJR /F:37287 /X:45\nexit\n' $port "$tmp" > "$tmp/dosbox.conf"
+	SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 200 dosbox -conf "$tmp/dosbox.conf" >/dev/null 2>&1 &
+	dp=$!
+	sleep 30
+	kill -TERM $sp; wait $sp 2>/dev/null # a polite stop, as `just restart` does
+	wait $dp
+	echo "== the launcher, files one level up, and a polite restart"
+	check "the stub swapped the new launcher in" "cmp -s '$tmp/dos/CJLOOP.NEW' '$tmp/c/CODEJR/CJLOOP.BAT'"
+	check "the launcher started the client from C:\\CODEJR" "grep -q 'started (native client)' '$tmp/server.log'"
+	check "the newer client replaced it in place" "cmp -s '$tmp/ws/.system/CODEJR.EXE' '$tmp/c/CODEJR/CODEJR.EXE'"
+	check "nothing of CodeJr's is among the programs" "[ ! -e '$tmp/c/CODEJR/PROGS/CODEJR.EXE' ] && [ ! -e '$tmp/c/CODEJR/PROGS/SETUP.BAT' ]"
+	check "the stopping server told the PCjr to call back" "grep -q 'told the PCjr to call back' '$tmp/server.log'"
+	[ $fail = 1 ] && { echo "--- server log"; cat "$tmp/server.log"; ls -R "$tmp/c"; cat "$tmp/c/CODEJR.BAT"; }
+	rm -rf "$tmp"
+}
+
+launchrun
 
 pagerun long "a long reply stops at More" "line 20" "!line 21"
 pagerun /exit "/exit answers at once" "Hanging up" "!^>  *.\{0,1\}$"

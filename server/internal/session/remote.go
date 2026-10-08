@@ -259,7 +259,7 @@ func Control(op, arg string) (string, error) {
 	case n.ctl <- r:
 	case <-n.link.Done():
 		return "", errors.New("the PCjr hung up")
-	case <-time.After(30 * time.Second):
+	case <-time.After(ctlWait(op)):
 		return "", errors.New("the PCjr is busy (a file transfer?); try again")
 	}
 	select {
@@ -268,6 +268,14 @@ func Control(op, arg string) (string, error) {
 	case <-n.link.Done():
 		return "", errors.New("the PCjr hung up")
 	}
+}
+
+// ctlWait is how long a request waits for the call's loop to take it.
+func ctlWait(op string) time.Duration {
+	if op == "restart" {
+		return 4 * time.Second // the server is exiting; don't hold it up
+	}
+	return 30 * time.Second
 }
 
 func (n *native) handleCtl(r ctlReq) {
@@ -279,6 +287,12 @@ func (n *native) handleCtl(r ctlReq) {
 		// "FOLDER\nCOMMAND"
 		folder, cmd, _ := strings.Cut(r.arg, "\n")
 		resp.out, resp.err = n.run(folder, cmd)
+	case "restart":
+		// The server is about to exit: the client hangs up and calls back.
+		n.sendPending()
+		n.link.Send(cjp.Redial, []byte("CodeJr's server is restarting. Calling back..."))
+		n.link.Flush(3 * time.Second)
+		resp.out = "told the PCjr to call back"
 	case "sync":
 		before, _, _, _ := n.s.ws.Pending()
 		n.sync()

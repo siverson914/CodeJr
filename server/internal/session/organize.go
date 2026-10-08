@@ -59,6 +59,11 @@ func OrganizeBat() string {
 	for _, f := range obsolete {
 		fmt.Fprintf(&b, "IF EXIST %s DEL %s\n", f, f)
 	}
+	// CodeJr's own files moved up to C:\CODEJR: drop the copies left here,
+	// each only once its new copy is in place.
+	for _, f := range LooseSystem {
+		fmt.Fprintf(&b, "IF EXIST C:\\CODEJR\\%s IF EXIST %s DEL %s\n", f, f, f)
+	}
 	b.WriteString("ECHO Done. /run in CodeJr lists every program in its folder.\n")
 	return b.String()
 }

@@ -59,6 +59,7 @@ type native struct {
 	voice    bool            // the client plays clips (voice=1)
 	remote   bool            // the client runs commands and sends files (remote=1)
 	runs     bool            // the client runs programs in their folders (run=1)
+	sys      bool            // the client keeps CodeJr's own files in C:\CODEJR (sys=1)
 	ctl      chan ctlReq     // requests from the control socket (see remote.go)
 	reply    strings.Builder // this turn's reply text, to speak
 	playNext string          // a clip to play once this turn's files are over
@@ -195,6 +196,9 @@ func (n *native) hello(h string) {
 		}
 		if f == "delta=1" {
 			n.delta = true
+		}
+		if f == "sys=1" {
+			n.sys = true
 		}
 		if f == "run=1" {
 			n.runs = true
@@ -674,6 +678,25 @@ func (n *native) sync() {
 	}
 	n.sendPending()
 	for _, f := range files {
+		if IsSystem(f.Name) && !n.sys {
+			// A client from before CodeJr's files moved to C:\CODEJR: it
+			// can't write there. Give it the new client at the old place
+			// (the top of PROGS); the rest comes once it runs that.
+			old := f.Name[len(SysPrefix):]
+			if old != "CODEJR.EXE" || !n.pull || s.ws.SyncedHash(old) == hashes[f.Name] {
+				continue
+			}
+			n.status("Sending the new CODEJR.EXE...")
+			n.link.Flush(10 * time.Second)
+			if ok, msg := n.sendPull(old, f.Data); ok {
+				s.ws.MarkSynced(map[string]string{old: hashes[f.Name]})
+				s.logf("native: sent %s to an older client (%d bytes)", old, len(f.Data))
+				n.print(cjp.StyleNote, "This CodeJr is out of date. Type /exit, then CODEJR, to start the new one.\n")
+			} else {
+				s.logf("native: %s failed: %s", old, msg)
+			}
+			continue
+		}
 		if InFolder(f.Name) && !n.dirs {
 			n.print(cjp.StyleNote, fmt.Sprintf("%s is in a project folder; it comes once CodeJr is updated.\n", f.Name))
 			continue

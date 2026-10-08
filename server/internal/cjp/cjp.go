@@ -60,6 +60,7 @@ const (
 	Exec       byte = 0x16 // server: run this DOS command and upload what it printed (remote=1); a first byte of ExecAsk means ask the user first
 	Fetch      byte = 0x17 // server: upload this file (remote=1)
 	Run        byte = 0x19 // server: [ExecAsk] FOLDER "\n" COMMAND: run a program in its folder, upload the whole story (run=1)
+	Redial     byte = 0x1A // server: it is restarting; hang up and call back (text: what to show)
 	Upload     byte = 0x18 // client: 'X' or 'B'+name, then 'D'+bytes..., then 'E'; or 'F'+reason
 
 	// ExecAsk in front of an Exec command: the client shows it and runs

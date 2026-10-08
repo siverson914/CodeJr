@@ -25,27 +25,26 @@ start *args: build
     if pgrep -x codejr >/dev/null; then echo "already running (just restart)"; exit 1; fi
     mkdir -p "{{ws}}" "{{logdir}}"
     # A fresh workspace gets the client too, so /setup can install it.
-    [ -f "{{ws}}/CODEJR.EXE" ] || [ ! -f client/CODEJR.EXE ] || cp client/CODEJR.EXE "{{ws}}/"
+    mkdir -p "{{ws}}/.system"
+    [ -f "{{ws}}/.system/CODEJR.EXE" ] || [ ! -f client/CODEJR.EXE ] || cp client/CODEJR.EXE "{{ws}}/.system/"
     setsid server/codejr -workspace "{{ws}}" -location "{{location}}" -linklog "{{logdir}}/link.log" -trace "{{logdir}}/trace.bin" {{args}} >> "{{logdir}}/server.log" 2>&1 &
     sleep 1
     tail -1 "{{logdir}}/server.log"
 
-# Stop the server (hangs up any call)
+# Stop the server (a connected PCjr is told to call back; it retries for a minute)
 stop:
     #!/bin/sh
-    if pkill -x codejr; then sleep 1; echo stopped; else echo "not running"; fi
+    if ! pkill -x codejr; then echo "not running"; exit 0; fi
+    # It tells the PCjr first, which takes a few seconds.
+    for i in $(seq 1 40); do pgrep -x codejr >/dev/null || break; sleep 0.25; done
+    pkill -9 -x codejr 2>/dev/null; echo stopped
 
-# Restart the server, unless the PCjr is on a call
-restart *args:
-    #!/bin/sh
-    if ss -tn | grep -q ':4860 '; then
-        echo "The PCjr is connected. A restart hangs up. Use: just restart-now"; exit 1
-    fi
-    just restart-now {{args}}
-
-# Restart the server even if the PCjr is on a call
-restart-now *args: stop
+# Restart the server. A connected PCjr is told to call back, and does by itself.
+restart *args: stop
     just start {{args}}
+
+# The same (kept for old habits)
+restart-now *args: restart
 
 # Is the server up, and is the PCjr connected?
 status:
@@ -104,6 +103,9 @@ queue:
     names = []
     for name in sorted(os.listdir(ws)):
         path = os.path.join(ws, name)
+        if name == ".system": # CodeJr's own files: C:\\CODEJR on the PCjr
+            names += [f".system/{f}" for f in sorted(os.listdir(path)) if os.path.isfile(os.path.join(path, f))]
+            continue
         if name.startswith("."):
             continue
         if os.path.isdir(path): # an app folder: one level down
@@ -112,13 +114,13 @@ queue:
             names.append(name)
     for name in names:
         data = open(os.path.join(ws, name), "rb").read()
-        key = name.upper().replace("/", "\\")
+        key = name.upper().replace("/", "\\").replace(".SYSTEM\\", "..\\")
         if synced.get(key) != hashlib.sha256(data).hexdigest()[:16]:
             print(f"{key:22} {len(data):7} bytes")
             waiting += len(data)
     print(f"{waiting} bytes waiting" if waiting else "nothing waiting: the PCjr has everything")
 
-# Put the latest main live from this checkout: pull, build, queue the client, restart (refuses during a call)
+# Put the latest main live from this checkout: pull, build, queue the client, restart (the PCjr calls back)
 live:
     git pull --ff-only
     just deploy-client
@@ -159,7 +161,8 @@ client:
 
 # Build the client and queue it for the PCjr
 deploy-client: client
-    cp client/CODEJR.EXE "{{ws}}/CODEJR.EXE"
+    mkdir -p "{{ws}}/.system"
+    cp client/CODEJR.EXE "{{ws}}/.system/CODEJR.EXE"
     @echo "queued: sent on the PCjr's next connection"
 
 # Regenerate the Kermit launcher files in dos/ (what /setup installs)

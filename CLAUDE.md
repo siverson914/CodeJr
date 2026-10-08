@@ -13,6 +13,7 @@ Claude Code for a real IBM PCjr: a Go server on this laptop, a native DOS client
 - The emulator is not the PCjr: its timing is wrong and its serial line never stalls or loses bytes. Say which results are emulator-only.
 - Add a counter on both ends before theorizing about a slow or broken link (`just link`, the client's Alt-S).
 - Every PCjr program (the client, games, demos, tools) answers input at once: show the key, show that Enter was taken, and keep a spinner or progress moving while it waits or works. Queue input that has to wait; never drop it silently.
+- In the PCjr C code, every `sprintf`, `strcpy` or `memcpy` into a fixed buffer needs its worst case counted: cap strings with `%.Ns`, size buffers with room to spare, and treat lengths from the server, the keyboard and the disk as hostile. An audit on 2026-10-07 found five overflows that tests never showed (a long file name in the progress line, a folder named `BACKUP.OLD`, a transfer across midnight).
 - 8088 only (`-0`), no floating point, warnings are errors (`-wx`). NASM isn't installed; use `wasm`.
 - No em dashes anywhere, including comments and docs. No AI attribution in commits. Ask before committing or pushing.
 - `just test` (about 6 minutes) before saying something works; say so when a result is untested.

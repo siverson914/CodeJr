@@ -8,6 +8,8 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -560,6 +562,12 @@ func (s *session) sync() {
 	// the native client, which is many times faster.
 	kept := files[:0]
 	for _, f := range files {
+		if IsSystem(f.Name) {
+			// CodeJr's own files go to C:\CODEJR, which only the native
+			// client (or /setup) can do.
+			delete(hashes, f.Name)
+			continue
+		}
 		if InFolder(f.Name) {
 			// Kermit can't make folders; the native client can.
 			s.scr.Println(term.Note, fmt.Sprintf("%s is in a project folder; type CODEJR at DOS to get it.", f.Name))
@@ -652,6 +660,13 @@ func (s *session) setup(com string) {
 		return
 	}
 	files := DOSFiles(DOSSetup{Host: s.host, Port: s.cfg.Port, COM: com, Baud: s.cfg.Baud})
+	// The client and its screen grabber too: they land in C:\ and the
+	// launcher moves them into C:\CODEJR.
+	for _, n := range []string{"CODEJR.EXE", "SCRDUMP.EXE"} {
+		if b, err := os.ReadFile(filepath.Join(s.ws.Dir, SysDir, n)); err == nil {
+			files = append(files, kermit.File{Name: n, Data: b})
+		}
+	}
 	s.scr.Println(term.Note, fmt.Sprintf(`Installing the CodeJr launcher and settings in C:\ (dials %s:%d on %s)...`, s.host, s.cfg.Port, com))
 	s.scr.Status("Installing the CodeJr launcher...")
 	var failed error

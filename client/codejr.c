@@ -40,7 +40,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.0.21"
+#define VERSION "1.0.22"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 #define PULL_OLD "CJPULL.OLD" /* the copy being replaced, until the new one is in */
@@ -101,6 +101,7 @@ static void key(unsigned k);
 static int loop_mode; /* /L: C:\CODEJR.BAT runs RUNNEXT.BAT, then redials */
 static int menu; /* the last line was /run: a bare number picks a program */
 #define RUNNEXT "C:\\CODEJR\\RUNNEXT.BAT"
+#define REDIAL "C:\\CODEJR\\REDIAL.TXT" /* tells the launcher to start us again */
 #define BOTTOM_ROWS 21 /* transcript rows (screen.h) */
 /* After a /run: what ran, its exit status and screen, and the report put
  * together from them for the server (sent on the next call). */
@@ -195,7 +196,7 @@ static void flush_queue(void)
 	}
 }
 
-static char last_file[80]; /* details of the last transfer, for Alt-S */
+static char last_file[112]; /* details of the last transfer, for Alt-S */
 
 /* Alt-S: two short lines, so nothing wraps on the 80-column screen. */
 static void counters(char *s)
@@ -251,6 +252,10 @@ static int valid_path(const char *s)
 	const char *bs = strchr(s, '\\');
 	unsigned n;
 
+	/* ..\NAME.EXT: one of CodeJr's own files, kept one level up in
+	 * C:\CODEJR so that PROGS holds only the user's programs. */
+	if (s[0] == '.' && s[1] == '.' && s[2] == '\\')
+		return valid_name(s + 3);
 	if (!bs)
 		return valid_name(s);
 	n = (unsigned)(bs - s);
@@ -266,6 +271,8 @@ static void make_folder(const char *path)
 {
 	char dir[10];
 	const char *bs = strchr(path, '\\');
+	if (path[0] == '.')
+		return; /* ..\NAME: the folder above is already there */
 	if (bs && bs - path < (int)sizeof dir) {
 		memcpy(dir, path, (size_t)(bs - path));
 		dir[bs - path] = 0;
@@ -302,7 +309,7 @@ static unsigned io_burst(unsigned char *buf, unsigned max, unsigned fends,
 
 static void progress(unsigned long got)
 {
-	char s[80], bar[21];
+	char s[112], bar[21]; /* worst case 98: a 21-char name and three 10-digit numbers */
 	unsigned long t = ticks() - pull_t0;
 	/* The line's speed: bytes that crossed it (compressed), 10 bits each
 	 * with start and stop bits, over t/18.2 seconds, so it compares
@@ -379,8 +386,10 @@ static int ds_feed(const unsigned char *p, unsigned n)
 			if (ds.hn == 6) {
 				unsigned long off = ds.hdr[0] | (unsigned long)ds.hdr[1] << 8 |
 				                    (unsigned long)ds.hdr[2] << 16 | (unsigned long)ds.hdr[3] << 24;
-				if (ds_copy(off, ds.hdr[4] | (unsigned)ds.hdr[5] << 8) != 0)
+				if (ds_copy(off, ds.hdr[4] | (unsigned)ds.hdr[5] << 8) != 0) {
+					ds.st = 5; /* broken: a further byte must not land in hdr */
 					return -1;
+				}
 				ds.st = 0;
 			}
 			break;
@@ -432,8 +441,8 @@ static void pull_file(void)
 	static pull_chunk pc;
 	static unsigned char raw[9216], out[PULL_RAW];
 	static const pull_io io = { io_send, io_burst, NULL };
-	unsigned char r[1 + 40];
-	char err[40], line[160];
+	unsigned char r[1 + 64];
+	char err[64], line[160];
 	unsigned long got = 0, t0 = ticks(), secs;
 	unsigned k, rounds = 0, n;
 	FILE *f = NULL;
@@ -533,7 +542,7 @@ static void pull_file(void)
 		unsigned long t = ticks() - t0, bps = t ? pull_wire * 182UL / t : 0;
 		unsigned long x10 = pull_wire ? got * 10 / pull_wire : 10;
 		unsigned long spent = t_wait + t_recv + t_tail + t_disk;
-		char sz[16], tw[8], tr[8], tg[8], tu[8], td[8];
+		char sz[16], tw[14], tr[14], tg[14], tu[14], td[14]; /* "429496729.5" if the clock wraps at midnight */
 
 		if (got < 1024)
 			sprintf(sz, "%lu bytes", got);
@@ -575,7 +584,7 @@ static void set_clock(const char *t)
 	struct dostime_t tm, ot;
 	static const char *mon[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	                             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-	char s[60];
+	char s[96];
 	int i, v[14];
 	long was, now;
 
@@ -705,6 +714,23 @@ static void handle(const cjp_frame *f)
 			ask = 0;
 		}
 		break;
+	case CJP_REDIAL: {
+		/* The server is restarting. Leave a note for the launcher, which
+		 * starts us again at once, and hang up. */
+		FILE *rf;
+		memcpy(s, f->payload, f->len);
+		s[f->len] = 0;
+		note(s[0] ? s : "CodeJr's server is restarting. Calling back...");
+		scr_status("Calling back in a moment...");
+		if (loop_mode && (rf = fopen(REDIAL, "w")) != NULL) {
+			fputs("redial\n", rf);
+			fclose(rf);
+		} else {
+			note("Type CODEJR to call again.");
+		}
+		start_quit();
+		break;
+	}
 	case CJP_RUN: {
 		/* [1 = ask] FOLDER "\n" COMMAND */
 		const unsigned char *p = f->payload;
@@ -834,7 +860,7 @@ static void scan_progs(void)
 {
 	static char dirs[20][13];
 	struct find_t ff;
-	char pat[16];
+	char pat[20];
 	int nd = 0, i;
 
 	nprogs = 0;
@@ -842,7 +868,9 @@ static void scan_progs(void)
 	/* Collect the folders first: a search inside one would end this one. */
 	if (_dos_findfirst("*.*", _A_SUBDIR, &ff) == 0) {
 		do {
-			if ((ff.attrib & _A_SUBDIR) && ff.name[0] != '.' && nd < 20)
+			/* A project folder has no extension (8 characters at most):
+			 * BACKUP.OLD would overflow the 22-byte program names. */
+			if ((ff.attrib & _A_SUBDIR) && !strchr(ff.name, '.') && strlen(ff.name) <= 8 && nd < 20)
 				strcpy(dirs[nd++], ff.name);
 		} while (_dos_findnext(&ff) == 0);
 	}
@@ -918,7 +946,9 @@ static void run_prog(const char *name)
 	else
 		fprintf(f, "%s\n", file);
 	fprintf(f, "IF ERRORLEVEL 1 ECHO 1 > " LASTERR "\n");
-	fprintf(f, "C:\\CODEJR\\PROGS\\SCRDUMP > " LASTSCR "\n");
+	/* The screen grabber is in C:\CODEJR (in PROGS before 1.0.22). */
+	fprintf(f, "%s > " LASTSCR "\n", access("C:\\CODEJR\\SCRDUMP.EXE", 0) == 0 ?
+	        "C:\\CODEJR\\SCRDUMP" : "C:\\CODEJR\\PROGS\\SCRDUMP");
 	if (bas)
 		fprintf(f, "MODE CO80\n");
 	fclose(f);
@@ -1011,7 +1041,7 @@ static void start_report(void)
 	if ((report = fopen(LASTREP, "rb")) == NULL)
 		return;
 	{
-		unsigned char b[24];
+		unsigned char b[32];
 		b[0] = 'B';
 		memcpy(b + 1, name, strlen(name));
 		queue(CJP_RESULT, b, (unsigned)strlen(name) + 1);
@@ -1101,12 +1131,13 @@ static void start_upload(const char *path, const char *name, int kind, int temp)
 	up_temp = temp;
 	up_sent = 0;
 	strncpy(up_name, name, sizeof up_name - 1);
+	up_name[sizeof up_name - 1] = 0;
 }
 
 static void pump_upload(void)
 {
 	unsigned char b[1 + 120];
-	char s[60];
+	char s[96];
 	size_t n;
 
 	while (up && outq_n < OUTQ - 2) {
@@ -1140,7 +1171,7 @@ static void pump_upload(void)
  * land in the current folder. */
 static void run_command(void)
 {
-	static char line[CJP_MAXPAYLOAD + 40];
+	static char line[CJP_MAXPAYLOAD + 64]; /* the command, two redirections (44), NUL */
 	char s[100], home[80];
 
 	sprintf(s, "Running on this PCjr: %.60s", pend_cmd);
@@ -1172,8 +1203,8 @@ static void run_command(void)
  * which gives the real exit code; anything else goes through COMMAND. */
 static void run_program(void)
 {
-	static char line[CJP_MAXPAYLOAD + 40], cmd[CJP_MAXPAYLOAD + 1];
-	char s[100], home[80], prog[24], *args[10], *p;
+	static char line[CJP_MAXPAYLOAD + 64], cmd[CJP_MAXPAYLOAD + 1]; /* as in run_command */
+	char s[128], home[80], prog[24], *args[10], *p;
 	unsigned long t_out = 0, t_log = 0;
 	int rc = -1, direct = 0, n = 0, i;
 	FILE *f;
@@ -1191,6 +1222,9 @@ static void run_program(void)
 	remove(CMDOUT);
 	if ((f = fopen(CMDOUT, "w")) != NULL)
 		fclose(f); /* its time marks the start, to tell a new LOG.TXT */
+	/* Read it now: by the end the file holds the output and is newer than
+	 * a LOG.TXT closed moments earlier (seen on the real PCjr). */
+	file_time(CMDOUT, &t_out);
 
 	/* The first word, with .EXE or .COM added if that file is here. */
 	strcpy(line, cmd);
@@ -1241,7 +1275,7 @@ static void run_program(void)
 			fprintf(f, "\n--- ended (no exit code: it ran through COMMAND)\n");
 		fprintf(f, "--- text screen it left\n");
 		scr_dump(f);
-		if (file_time(CMDOUT, &t_out) && file_time("LOG.TXT", &t_log) && t_log >= t_out) {
+		if (t_out && file_time("LOG.TXT", &t_log) && t_log >= t_out) {
 			fprintf(f, "--- LOG.TXT\n");
 			copy_text(f, "LOG.TXT", 6000);
 		}
@@ -1331,7 +1365,7 @@ static void echo_line(const char *s)
 static void show_more(void)
 {
 	long n = scr_following() ? 0 : scr_unread();
-	char s[80];
+	char s[112];
 
 	if (n == more_lines)
 		return;
@@ -1373,7 +1407,7 @@ static void speak(const char *clip)
 	{
 		/* Up to two options from SAY= (e.g. /H in DOSBox). */
 		char o[sizeof say_opts], *o2;
-		const char *args[7];
+		const char *args[10];
 		int n = 0;
 		strcpy(o, say_opts);
 		args[n++] = say;
@@ -1461,7 +1495,7 @@ static void key(unsigned k)
 	}
 
 	if (k == 0x1F00) { /* Alt-S: connection counters, into the history */
-		char c[100];
+		char c[128];
 		counters(c);
 		note(c);
 		if (last_file[0])
@@ -1526,6 +1560,7 @@ static int read_cfg(char *dial, int size)
 			while (e > line && (e[-1] == '\n' || e[-1] == '\r' || e[-1] == ' '))
 				*--e = 0;
 			strncpy(say_opts, line + 4, sizeof say_opts - 1);
+			say_opts[sizeof say_opts - 1] = 0;
 		}
 		if (strncmp(line, "DIAL=", 5) == 0) {
 			char *e = line + strlen(line);
@@ -1609,10 +1644,10 @@ static int escape_call(void)
 static int dial(const char *host)
 {
 	char seen[16] = "";
-	unsigned long start = ticks(), last = 0;
+	unsigned long start = ticks(), last = 0, asked = ticks();
 	char s[80];
 
-	sprintf(s, "Dialing %s ...   (Alt-X gives up)", host);
+	sprintf(s, "Dialing %.40s ...   (Alt-X gives up)", host);
 	scr_status(s);
 	/* ATD, not ATDT: on Zimodem the T means "translate as TELNET", which
 	 * alters binary data (it drops a NUL after a CR). */
@@ -1632,8 +1667,17 @@ static int dial(const char *host)
 			return -1;
 		if (ticks() - start > 60UL * TICKS_PER_SEC)
 			return -1;
+		/* No banner after 8 seconds: the server isn't answering yet (it
+		 * may be restarting). Ask again; the server's banner repeats
+		 * every 2 seconds once we are through. */
+		if (ticks() - asked > 8UL * TICKS_PER_SEC) {
+			ser_puts("\rATD");
+			ser_puts(host);
+			ser_putc('\r');
+			asked = ticks();
+		}
 		if (ticks() - last > TICKS_PER_SEC) {
-			sprintf(s, "Dialing %s ... %lus   (Alt-X gives up)", host,
+			sprintf(s, "Dialing %.40s ... %lus   (Alt-X gives up)", host,
 			        (ticks() - start) / TICKS_PER_SEC);
 			scr_status(s);
 			last = ticks();
@@ -1652,7 +1696,7 @@ int main(int argc, char **argv)
 	long baud = 9600, fast = 37287;
 	int at_fast = 0, restore_only = 0;
 	unsigned long start;
-	char hello[80];
+	char hello[CJP_MAXPAYLOAD + 1];
 
 	for (i = 1; i < argc; i++) {
 		char *a = argv[i];
@@ -1661,7 +1705,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 		switch (a[1] | 0x20) {
-		case 'd': strncpy(host, a + 3, sizeof host - 1); break;
+		case 'd': strncpy(host, a + 3, sizeof host - 1); host[sizeof host - 1] = 0; break;
 		case 'l': loop_mode = 1; break;
 		case 'a': auto_answer = a[3] & 0xDF; break;
 		case 'p': port = atoi(a + 3) - 1; break;
@@ -1766,7 +1810,7 @@ int main(int argc, char **argv)
 	}
 
 	cjp_init(&link, link_write, link_now, NULL, 2 * TICKS_PER_SEC);
-	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1 dirs=1 delta=1 voice=1 remote=1 run=1", line_baud);
+	sprintf(hello, "CODEJR/2 client " VERSION " baud=%ld ui=1 dirs=1 delta=1 voice=1 remote=1 run=1 sys=1", line_baud);
 	queue(CJP_HELLO, hello, (unsigned)strlen(hello));
 	scr_status("Connecting...");
 
@@ -1789,6 +1833,7 @@ int main(int argc, char **argv)
 			/* Typed as if at the keyboard, so tests cover the same path
 			 * (including a line typed before CodeJr is ready). */
 			strncpy(input, auto_text, sizeof input - 1);
+			input[sizeof input - 1] = 0;
 			input_len = (int)strlen(input);
 			key('\r');
 			sent_auto = 1;

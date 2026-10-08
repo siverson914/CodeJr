@@ -18,9 +18,11 @@ static unsigned total_blocks(const pull_chunk *pc)
 
 	if (!(pc->have & 1) || pc->lens[0] < PULL_HDR)
 		return 0;
-	paylen = PULL_HDR + (pc->data[3] | ((unsigned)pc->data[4] << 8));
-	if (paylen > PULL_BLOCKS * PULL_BLOCK)
+	/* Test the length before adding: on a 16-bit int the sum wraps. */
+	paylen = pc->data[3] | ((unsigned)pc->data[4] << 8);
+	if (paylen > PULL_BLOCKS * PULL_BLOCK - PULL_HDR)
 		return 0;
+	paylen += PULL_HDR;
 	return (paylen + PULL_BLOCK - 1) / PULL_BLOCK;
 }
 
@@ -122,6 +124,8 @@ int pull_finish(const pull_chunk *pc, unsigned char *out, unsigned cap)
 	rawlen = pc->data[1] | ((unsigned)pc->data[2] << 8);
 	datalen = pc->data[3] | ((unsigned)pc->data[4] << 8);
 	crc = pc->data[5] | ((unsigned)pc->data[6] << 8);
+	if (datalen > PULL_BLOCKS * PULL_BLOCK - PULL_HDR)
+		return -1; /* before adding: the sum would wrap on a 16-bit int */
 	paylen = PULL_HDR + datalen;
 	if (rawlen > PULL_RAW || rawlen > cap)
 		return -1;

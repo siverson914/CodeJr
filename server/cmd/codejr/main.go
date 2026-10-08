@@ -12,10 +12,12 @@ import (
 	"net"
 	"net/netip"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 
 	"codejr/internal/claude"
 	"codejr/internal/pcjr"
@@ -130,6 +132,15 @@ func main() {
 	if cfg := speechTool(*speech); cfg != "" {
 		go session.EnsureCannedClips(cfg, dir, log.Printf)
 	}
+	// CodeJr's own files live in the system folder now; one left at the
+	// top by an older `just deploy-client` moves there.
+	os.MkdirAll(filepath.Join(dir, session.SysDir), 0o755)
+	if _, err := os.Stat(filepath.Join(dir, session.SysDir, "CODEJR.EXE")); err != nil {
+		os.Rename(filepath.Join(dir, "CODEJR.EXE"), filepath.Join(dir, session.SysDir, "CODEJR.EXE"))
+	}
+	if err := ws.RetireLoose(session.LooseSystem); err != nil {
+		log.Print(err)
+	}
 	if err := ws.Provide(session.ProgFiles()); err != nil {
 		log.Fatal(err)
 	}
@@ -165,13 +176,27 @@ func main() {
 	if err := ws.Provide(map[string][]byte{
 		"JRGFX/JRGFX.H": jrgfxHeader(),
 		// /run captures the screen with it after a program ends.
-		"SCRDUMP.EXE": scrdump,
+		session.SysDir + "/SCRDUMP.EXE": scrdump,
 		// /voice plays clips with it; the repo's build matches the clips
 		// the converter makes (nil, and skipped, if it isn't built).
 		"SAY/SAY.EXE": sayExe,
 	}); err != nil {
 		log.Print(err)
 	}
+
+	// A polite stop (`just restart`): tell a connected PCjr to call back,
+	// then go. Its launcher redials; the new server answers.
+	go func() {
+		ch := make(chan os.Signal, 1)
+		signal.Notify(ch, syscall.SIGTERM, os.Interrupt)
+		<-ch
+		if out, err := session.Control("restart", ""); err == nil {
+			log.Print("stopping: ", out)
+		} else {
+			log.Print("stopping")
+		}
+		os.Exit(0)
+	}()
 
 	go func() {
 		if err := pcjr.CtlServe(dir, session.Control); err != nil {

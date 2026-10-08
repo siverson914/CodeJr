@@ -98,14 +98,16 @@ func (w *Workspace) Scan() ([]Entry, map[string][]byte, error) {
 	add := func(dir, n string) {
 		rel := filepath.Join(dir, n)
 		e := Entry{Name: strings.ToUpper(n)}
-		if dir != "" {
+		if dir == SysDir {
+			e.Name = SysPrefix + e.Name
+		} else if dir != "" {
 			e.Name = strings.ToUpper(dir) + `\` + e.Name
 		}
 		b, err := os.ReadFile(filepath.Join(w.Dir, rel))
 		switch {
 		case err != nil:
 			e.Problem = err.Error()
-		case !ValidName(n) || (dir != "" && !validDir(dir)):
+		case !ValidName(n) || (dir != "" && dir != SysDir && !validDir(dir)):
 			e.Name, e.Problem = rel, "not a DOS 8.3 name"
 		case seen[e.Name]:
 			e.Problem = "same name as another file in a different case"
@@ -144,9 +146,30 @@ func (w *Workspace) Scan() ([]Entry, map[string][]byte, error) {
 			add("", n)
 		}
 	}
+	// CodeJr's own files (see SysDir): `..\NAME` on the PCjr.
+	if sub, err := os.ReadDir(filepath.Join(w.Dir, SysDir)); err == nil {
+		for _, f := range sub {
+			if f.Type().IsRegular() && !strings.HasPrefix(f.Name(), ".") {
+				add(SysDir, f.Name())
+			}
+		}
+	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out, data, nil
 }
+
+// SysDir is the workspace folder for CodeJr's own files: the client, its
+// screen grabber, the launcher. On the PCjr they live one level above the
+// programs, in C:\CODEJR, so C:\CODEJR\PROGS holds only the user's
+// program folders; on the wire their names start with SysPrefix. The
+// folder is hidden, so it stays out of Claude's way.
+const (
+	SysDir    = ".system"
+	SysPrefix = `..\`
+)
+
+// IsSystem reports whether a workspace entry is one of CodeJr's own files.
+func IsSystem(name string) bool { return strings.HasPrefix(name, SysPrefix) }
 
 // validDir reports whether name works as a DOS folder name: up to 8
 // characters, no extension.
@@ -197,6 +220,22 @@ func (w *Workspace) MarkSynced(hashes map[string]string) error {
 	m := w.loadSynced()
 	for k, v := range hashes {
 		m[k] = v
+	}
+	return w.saveSynced(m)
+}
+
+// SyncedHash is the hash of the version of name the PCjr has, or "".
+func (w *Workspace) SyncedHash(name string) string { return w.loadSynced()[strings.ToUpper(name)] }
+
+// RetireLoose removes CodeJr's own files from the top of the workspace,
+// where they lived before SysDir existed, and forgets that the PCjr has
+// them there (ORGANIZE.BAT deletes the PCjr's copies).
+func (w *Workspace) RetireLoose(names []string) error {
+	m := w.loadSynced()
+	for _, n := range names {
+		os.Remove(filepath.Join(w.Dir, n))
+		os.Remove(w.havePath(n))
+		delete(m, strings.ToUpper(n))
 	}
 	return w.saveSynced(m)
 }
@@ -274,7 +313,11 @@ func (w *Workspace) SaveFromPCjr(name string, data []byte) error {
 // The PCjr's copies: what was last sent of each file, exactly as sent,
 // so the next version can go as changes (see cjp.Delta).
 func (w *Workspace) havePath(name string) string {
-	return w.state(filepath.Join("have", filepath.FromSlash(strings.ReplaceAll(strings.ToUpper(name), `\`, "/"))))
+	name = strings.ToUpper(name)
+	if IsSystem(name) {
+		name = `_SYSTEM\` + name[len(SysPrefix):]
+	}
+	return w.state(filepath.Join("have", filepath.FromSlash(strings.ReplaceAll(name, `\`, "/"))))
 }
 
 // Have returns the copy the PCjr has of name, or nil.
