@@ -16,6 +16,7 @@ game is built with Open Watcom 2, 8088 code only, small memory model.
 | Row and shift tables, sprite rows in assembly | 10.5 |
 | Whole sprite and ground line in assembly | 13.3 |
 | Collisions without drawing, score written once a frame and without the BIOS | 15.5 |
+| Unrolled sprite routines, pairs that can't matter left untested | 16.8 |
 
 The game wants 9.1 frames a second (one frame every two ticks of the PC's
 18.2 Hz clock). A frame that takes longer than 110 ms simply runs late, so
@@ -222,6 +223,65 @@ On the real PCjr with the limiter on, 1000 frames should take 2000 ticks:
 | Sopwith 2 (faithful) | 2047 | 0 |
 | Sopwith26 | 2009 | 19 |
 
+### 12. What debris costs, measured (no speedup: a counter)
+
+The player's complaint was that the game slows in explosions. Rather than
+time each piece of debris (timing every object had cost 10 ms a frame),
+each frame's three phase times are added to a bucket chosen by how many
+pieces of debris are alive. No extra clock readings. On the real PCjr:
+
+| Debris alive | Frames | Game logic | Screen | Collisions | Whole frame |
+|---|---|---|---|---|---|
+| none | 447 | 17.2 ms | 27.8 ms | 7.0 ms | 52 ms |
+| 1 to 7 | 406 | 21.2 ms | 31.4 ms | 10.4 ms | 63 ms |
+| 8 to 15 | 147 | 20.7 ms | 46.1 ms | 26.8 ms | 94 ms |
+
+An explosion's worth of debris adds 42 ms: 20 in collisions, 18 in drawing
+and only 3.5 in moving the pieces. Rewriting debris movement in assembly
+had been on the list; this took it off.
+
+### 13. Sprite routines for the two common widths (PCjr: screen 27.8 to 24.4 ms, 46.1 to 38.2 with debris)
+
+Sprites are 8 pixels wide (debris, bombs, birds: 2 bytes a row) or 16
+(planes, buildings: 4 bytes). The general loop from step 5 spent as much
+on its row bookkeeping (a loop counter in memory, saving and restoring the
+screen pointer, a test for clipping) as on a 2-byte row. `cj_blit` now
+branches once to a routine for exactly 2 or 4 bytes a row: no inner loop,
+the spilled pixels carried in AH, the row count in DX, fixed offsets from
+DI. A sprite clipped at the right edge still takes the general loop.
+
+### 14. Pairs that can't matter (PCjr: collisions with debris 26.8 to 19.5 ms)
+
+Counting the collision tests by the two objects' types showed that 1269 of
+the battle's 1770 pair tests were a plane against debris. A plane that is
+shot down falls through its own debris and was tested against every piece,
+every frame, and nothing can come of it: a falling plane reacts only to
+the ground, and debris only scores off a plane that is flying or caught
+fire that same frame.
+
+`cj_noeffect` turns such pairs away before the pixel test: debris against a
+falling plane, a building, a cow or smoke. For each, the collision handler
+was read to confirm that neither side does anything, and that nothing
+earlier in the same pass could change that before the pair's turn came.
+(Debris whose `inverted` field is set is the exception, and is tested as
+before.)
+
+One thing made this less simple than it looks. The original lists at most
+199 collisions a frame and silently drops the rest, so leaving pairs out
+could let a later pair onto the list that the original would have dropped.
+The pass therefore counts the pairs it leaves out as if each had hit, and
+if that count could have filled the list it runs the whole pass again with
+nothing left out. The list is the original's in every case.
+
+Check: a build with the skipping off (`-dCJ_NOSKIP`) gives the same screen
+at frames 330, 1000, 2500 and 6000 of the single-player battle, at 2500 of
+a game against the computer, and at 12000 of one on level 5.
+
+### 15. The fast score at respawn too (PCjr: a respawn frame 100 to about 85 ms)
+
+Every score write now takes the direct path from step 10, including the
+ones in the full status redraw after a crash.
+
 ## Where the PCjr stands now
 
 1000 frames of the scripted battle, limiter off, real PCjr:
@@ -233,10 +293,16 @@ On the real PCjr with the limiter on, 1000 frames should take 2000 ticks:
 | Collisions without drawing (steps 6 to 8) | 14.9 | 18.5 ms | 31.8 ms | 13.6 ms | 98 | 20 |
 | Score once a frame (step 9) | 15.4 | 18.5 ms | 31.8 ms | 11.8 ms | 81 | 4 |
 | Score without the BIOS (step 10) | 15.5 | 18.6 ms | 31.8 ms | 11.2 ms | 67 | 2 |
+| Unrolled sprites, pairs that can't matter (steps 13 to 15) | 16.8 | 18.5 ms | 27.5 ms | 9.8 ms | 38 | 0 |
 
-Of the screen's 31.8 ms, 9.7 ms is the ground line and the rest is about 15
-sprites a frame. Of collisions' 11.2 ms, 4.3 ms is pair tests and 0.9 ms
-crash tests; the rest is walking the object list.
+A frame with 8 to 15 pieces of debris flying went from 94 ms to 78 ms, and
+one with none from 52 ms to 48 ms. With the limiter on, 1000 frames take
+2033 ticks in the faithful build (2047 before these steps) and 2009 in
+Sopwith26, which now leaves out 12 drawings where it left out 19.
+
+Of the screen's time, 9.7 ms is the ground line and the rest is about 15
+sprites a frame. Of collisions', about 4 ms is pair tests and 0.9 ms crash
+tests; the rest is walking the object list.
 
 ### What the test overstates
 
@@ -246,8 +312,9 @@ showed that every update over 10 ms was the player's own plane, at 100 ms,
 28 times in 1000 frames. Those are respawns: after a crash the whole
 status area is rebuilt (16 KB of screen cleared and copied, the map and
 gauges redrawn). The scripted pilot crashes far more often than a person
-does, so about 28 of the 67 slow frames are respawns, where a tenth of a
-second's pause is not noticed.
+does, so about 28 of the slow frames are respawns, where a tenth of a
+second's pause is not noticed. After steps 13 to 15 that is most of them:
+28 of 38.
 
 ## A bug found by measuring
 
@@ -266,10 +333,11 @@ not have.
 
 ## What is left
 
-- **Drawing debris.** In a slow frame the screen takes about 55 ms. The
-  sprite loop is 8 instructions a byte; a sprite that starts on a byte
-  boundary in the first plane's colour could be XORed a word at a time.
-- **The collision test in assembly.** `cj_hit` is C.
+- **Drawing.** Still the largest part of a frame. A sprite that starts on
+  a byte boundary in the first plane's colour could be XORed a word at a
+  time, with no table lookups.
+- **The collision test in assembly.** `cj_hit` is C, and a flying plane
+  among debris still needs it.
 - **Game logic.** 18.6 ms on the PCjr against 12.7 in the emulator points
   at multiplies and 32-bit arithmetic (each object's position is a 32-bit
   fixed-point number; the enemy's aiming looks 10 moves ahead with a

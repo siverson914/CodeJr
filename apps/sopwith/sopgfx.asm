@@ -33,7 +33,75 @@ cj_blit_ proc near
         push    bp
         mov     bp, ax
         mov     es, _cj_bseg
-        mov     rowsleft, dx
+        cmp     _cj_bskip, 0    ; clipped at the right edge: the general loop
+        jge     bgen
+        cmp     cx, 2
+        je      b2row
+        cmp     cx, 4
+        je      b4row
+        jmp     short bgen
+
+; Two bytes a row (8 pixels: debris, bombs, birds) and four (16 pixels:
+; planes, buildings), not clipped, with nothing kept in memory and no inner
+; loop. An explosion is fifteen of the first kind, drawn twice a frame each.
+; AH carries the pixels shifted out of one byte into the next, DX the rows.
+b2row:  lodsb
+        mov     bl, al
+        mov     al, [bx]
+        mov     ah, [bx + 256]
+        xor     es:[di], al
+        lodsb
+        mov     bl, al
+        mov     al, [bx]
+        or      al, ah
+        xor     es:[di + 1], al
+        mov     al, [bx + 256]
+        or      al, al
+        jz      b2n
+        xor     es:[di + 2], al
+b2n:    add     di, bp
+        neg     bp
+        add     bp, 80
+        dec     dx
+        jnz     b2row
+        pop     bp
+        ret
+
+b4row:  lodsb
+        mov     bl, al
+        mov     al, [bx]
+        mov     ah, [bx + 256]
+        xor     es:[di], al
+        lodsb
+        mov     bl, al
+        mov     al, [bx]
+        or      al, ah
+        mov     ah, [bx + 256]
+        xor     es:[di + 1], al
+        lodsb
+        mov     bl, al
+        mov     al, [bx]
+        or      al, ah
+        mov     ah, [bx + 256]
+        xor     es:[di + 2], al
+        lodsb
+        mov     bl, al
+        mov     al, [bx]
+        or      al, ah
+        xor     es:[di + 3], al
+        mov     al, [bx + 256]
+        or      al, al
+        jz      b4n
+        xor     es:[di + 4], al
+b4n:    add     di, bp
+        neg     bp
+        add     bp, 80
+        dec     dx
+        jnz     b4row
+        pop     bp
+        ret
+
+bgen:   mov     rowsleft, dx
         mov     roww, cx
 brow:   mov     cx, roww
         push    di

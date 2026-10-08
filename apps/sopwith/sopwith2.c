@@ -410,13 +410,22 @@ int inkey(void);
    count runs down once per tick, so the low word can be trusted. */
 static int cj_prof;
 static unsigned long cj_phase[4];
-static unsigned long cj_cnt[8],cj_tc,cj_tg,cj_tp,cj_tk,cj_tw;
+static unsigned long cj_cnt[9],cj_tc,cj_tg,cj_tp,cj_tk,cj_tw;
 #ifdef CJ_TYPEPROF
 static unsigned long cj_tt[16],cj_tn[16],cj_tx[16]; /* by object type: time, calls, longest */
 static int cj_ev[40][4],cj_nev;
 #endif
 void cj_scorelater(object *p);
-void cj_scoreflush(void); static unsigned long cj_now(void); /* profiling counters */
+void cj_scoreflush(void);
+static void cj_fastscore(object *p);
+static void cj_biosscore(object *p);
+/* Frame time against how much debris is flying: frames and the three
+   phases' time, for 0, 1 to 7, 8 to 15, 16 to 30 and more pieces. */
+static int cj_ndebris;
+#ifdef CJ_PAIRPROF
+static unsigned long cj_pt[16][16],cj_iter; /* pair tests by the two types; loop steps */
+#endif
+static unsigned long cj_db[5][4]; static unsigned long cj_now(void); /* profiling counters */
 /* The slow frames: a frame over two timer ticks (131072 PIT counts, 110 ms)
    is one the player sees as a slowdown. */
 #ifdef CJ_CHECKHIT
@@ -524,6 +533,25 @@ static void cj_frame(void)
       fprintf(f,"\n");
     }
 #endif
+    if (cj_prof) {
+      static const char *nm[5]={"none","1-7","8-15","16-30","31+"};
+      int i;
+      for (i=0;i<5;i++)
+        if (cj_db[i][0])
+          fprintf(f,"  debris %s: %lu frames, objects %lu.%lu, screen %lu.%lu, collisions %lu.%lu ms\n",nm[i],cj_db[i][0],
+                  cj_db[i][1]/1193/cj_db[i][0],cj_db[i][1]/119/cj_db[i][0]%10,
+                  cj_db[i][2]/1193/cj_db[i][0],cj_db[i][2]/119/cj_db[i][0]%10,
+                  cj_db[i][3]/1193/cj_db[i][0],cj_db[i][3]/119/cj_db[i][0]%10);
+    }
+#ifdef CJ_PAIRPROF
+    { int i,j;
+      fprintf(f,"  pair tests by type (a-b: count):");
+      for (i=0;i<16;i++) for (j=0;j<16;j++) if (cj_pt[i][j]) fprintf(f," %d-%d: %lu;",i,j,cj_pt[i][j]);
+      fprintf(f,"\n  inner loop steps: %lu\n",cj_iter);
+    }
+#endif
+    if (cj_prof)
+      fprintf(f,"  pairs left out because nothing could come of them: %lu.%lu a frame\n",cj_cnt[8]/n,cj_cnt[8]*10/n%10);
     if (cj_prof && cj_cnt[7])
       fprintf(f,"  the score changed %lu times and was written %lu times, %lu.%lu ms each\n",
               cj_cnt[6],cj_cnt[7],cj_tw/1193/cj_cnt[7],cj_tw/119/cj_cnt[7]%10);
@@ -621,6 +649,9 @@ void main(int argc,char *argv[])
       checkcollisions(); cj_scoreflush(); t3=cj_now();
       updatesound();
       cj_phase[0]+=t1-t0; cj_phase[1]+=t2-t1; cj_phase[2]+=t3-t2; cj_phase[3]+=cj_now()-t3;
+      { int b=cj_ndebris==0 ? 0 : cj_ndebris<8 ? 1 : cj_ndebris<16 ? 2 : cj_ndebris<31 ? 3 : 4;
+        cj_db[b][0]++; cj_db[b][1]+=t1-t0; cj_db[b][2]+=t2-t1; cj_db[b][3]+=t3-t2;
+      }
       { unsigned long ft=cj_now()-t0;
         cj_fn++;
         cj_hist[ft<65536UL ? 0 : ft<131072UL ? 1 : ft<196608UL ? 2 : 3]++;
@@ -978,6 +1009,7 @@ void updateobjects(void)
   latencycount++;
   if (latencycount>=latency)
     latencycount=0;
+  cj_ndebris=0;
   current=firstobject;
   while (current!=NULL) {
     next=current->next;
@@ -985,6 +1017,8 @@ void updateobjects(void)
       current->oldonscreen=current->onscreen;
       current->oldsprite=current->sprite;
     }
+    if (current->type==OBJ_SHRAPNEL)
+      cj_ndebris++;
 #ifdef CJ_TYPEPROF
     if (cj_prof) { /* CodeJr: time by kind of object (the timing itself costs
                       10 ms a frame on a PCjr, so only in a build that asks) */
@@ -3192,9 +3226,46 @@ void createcows(void)
   }
 }
 
+/* CodeJr: a pair whose collision would change nothing, so whether the two
+   sprites touch needn't be worked out.
+   - Debris against a building, a cow or smoke: docollision does nothing to
+     either (a building and a cow ignore debris; smoke ignores everything;
+     debris only reacts to a bullet, a bomb or a plane).
+   - Debris against a plane that is already falling: a falling plane
+     ignores everything but the ground, and debris only scores off a plane
+     that is flying or caught fire this very frame (counter 10). Nothing in
+     the collision pass can make a falling plane fly again or set its
+     counter to 10 without also making it dead, which debris ignores too.
+     This is the common case: a plane that is shot down falls through its
+     own debris, and was tested against every piece every frame (1269 of
+     the 1770 pair tests in the 1000-frame battle).
+   Not when the debris's "inverted" is set: then it is used up by touching
+   anything. */
+static int cj_noeffect(object *a,object *b)
+{
+  int t;
+  if (a->type!=OBJ_SHRAPNEL) {
+    object *x=a;
+    a=b;
+    b=x;
+  }
+  if (a->type!=OBJ_SHRAPNEL || a->inverted)
+    return 0;
+  t=b->type;
+  if (t==OBJ_PLANE)
+    return b->status==STATUS_FALLING && b->counter!=10;
+  return t==OBJ_BUILDING || t==OBJ_COW || t==OBJ_SMOKE;
+}
+
+#ifdef CJ_NOSKIP
+#define CJ_NOSKIPDEF 1
+#else
+#define CJ_NOSKIPDEF 0
+#endif
+
 void checkcollisions(void)
 {
-  int right,top,bottom,i,type;
+  int right,top,bottom,i,type,noskip,virt;
   object **obj1,**obj2;
   object *obj,*test;
   colln=collc=0;
@@ -3205,24 +3276,45 @@ void checkcollisions(void)
     collyvr=-collyvr;
   }
   useoffscreenbuf();
+  /* CodeJr: the pass runs once, leaving out pairs that can't matter (see
+     cj_noeffect). The original stops listing collisions at 199 in a frame,
+     so if the pairs left out could have filled the list, the pass is run
+     again with nothing left out: the same list as the original, always. */
+  for (noskip=CJ_NOSKIPDEF;;noskip=1) {
+  collc=0;
+  virt=0;
   for (obj=objleft.nextx;obj!=&objright;obj=obj->nextx) {
     right=obj->x+obj->width-1;
     bottom=obj->y;
     top=bottom+1-obj->height;
     type=obj->type;
-    for (test=obj->nextx;test->x<=right && test!=&objright;test=test->nextx)
-      if (test->y>=top && test->y-test->height+1<=bottom) {
-        /* CodeJr: two pieces of debris never collide (checkcollision's own
-           first test). An explosion makes fifteen in one spot, a hundred
-           pairs a frame, so they are turned away here without the call. */
-        if (type==OBJ_SHRAPNEL && test->type==OBJ_SHRAPNEL) {
+    for (test=obj->nextx;test->x<=right && test!=&objright;test=test->nextx) {
+#ifdef CJ_PAIRPROF
+      cj_iter++;
+#endif
+      /* CodeJr: two pieces of debris never collide (checkcollision's own
+         first test). An explosion makes fifteen in one spot, a hundred
+         pairs a frame, so they are turned away first and without a call. */
+      if (type==OBJ_SHRAPNEL && test->type==OBJ_SHRAPNEL) {
+        if (cj_prof && test->y>=top && test->y-test->height+1<=bottom)
           cj_cnt[0]++;
+        continue;
+      }
+      if (test->y>=top && test->y-test->height+1<=bottom) {
+        if (!noskip && cj_noeffect(obj,test)) {
+          cj_cnt[0]++;
+          cj_cnt[8]++;
+          virt+=2;
           continue;
         }
+#ifdef CJ_PAIRPROF
+        cj_pt[type&15][test->type&15]++;
+#endif
         if (cj_prof) { unsigned long t=cj_now(); checkcollision(obj,test); cj_tp+=cj_now()-t; }
         else
         checkcollision(obj,test);
       }
+    }
     type=obj->type;
     if ((type==OBJ_PLANE && obj->status!=STATUS_ELIMINATED && obj->status!=0 &&
          obj->y<workingground[obj->x+8]+24) ||
@@ -3231,6 +3323,9 @@ void checkcollisions(void)
       else
       checkcrash(obj);
     }
+  }
+  if (noskip || collc+virt<199)
+    break;
   }
   { unsigned long t=cj_prof?cj_now():0;
   for (i=0,obj1=collobj1,obj2=collobj2;i<collc;i++,obj1++,obj2++)
@@ -3578,7 +3673,7 @@ static void cj_fastscore(object *p)
   unsigned char mask=(unsigned char)((p->colour&3)*0x55);
   unsigned char far *font=(unsigned char far *)MK_FP(0xf000,0xfa6e);
   if (hiresflag) {
-    writescore(p);
+    cj_biosscore(p);
     return;
   }
   if (n<0) {
@@ -3633,6 +3728,11 @@ void score50(object *destroyed)
 }
 
 void writescore(object *p)
+{
+  cj_fastscore(p); /* CodeJr: not through the BIOS, see cj_fastscore */
+}
+
+static void cj_biosscore(object *p)
 {
   poscurs(2+7*(p->colour-1),24);
   setcolour(p->colour);

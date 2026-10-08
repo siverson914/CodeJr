@@ -66,6 +66,7 @@ stand-in for a PCjr; the real machine will differ) on a scripted battle of
 | Whole sprite and ground line in assembly (`sopgfx.asm`) | 17.4 | 26.2 ms | 16.9 ms | 12.7 ms |
 | Sprites compared directly for collisions (`cj_hit`) | 19.8 | 26.2 ms | 9.8 ms | 12.7 ms |
 | Crash test without drawing, debris pairs skipped, score once a frame | 20.0 | 26.4 ms | 8.6 ms | 12.7 ms |
+| Sprite routines for 2 and 4 bytes a row, pairs that can't matter left untested | 21.9 | 22.8 ms | 7.3 ms | 12.7 ms |
 
 The game aims for 9.1 frames a second (every second timer tick). The
 straight port fell short of that in a busy scene; now there is headroom.
@@ -102,10 +103,12 @@ battle on the connected PCjr and brings back `LOG.TXT`;
 | Whole sprite and ground line in assembly (`sopgfx.asm`), same 1000 frames | 13.3 | 18.2 ms | 31.5 ms | 22.7 ms |
 | Collisions without drawing (`cj_hit`, `cj_crash`) | 14.9 | 18.5 ms | 31.8 ms | 13.6 ms |
 | Score written once a frame, and not through the BIOS | 15.5 | 18.6 ms | 31.8 ms | 11.2 ms |
+| Sprite routines for 2 and 4 bytes a row, pairs that can't matter left untested | 16.8 | 18.5 ms | 27.5 ms | 9.8 ms |
 
-With the limiter on, 1000 frames take 2047 ticks on the PCjr (2000 would be
+With the limiter on, 1000 frames take 2033 ticks on the PCjr (2000 would be
 full speed); Sopwith26, which leaves out a frame's drawing when it is
-behind, takes 2009.
+behind, takes 2009. A frame with an explosion's debris in it takes 78 ms
+(94 before the last row), one with none 48 ms.
 
 The screens it saved at frames 300 and 1000 match the emulator's byte for
 byte, and two runs in a row give the same numbers. Next to DOSBox at 400
