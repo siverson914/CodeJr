@@ -826,3 +826,25 @@ The assembly build landed as the faithful Sopwith 2 (it needed a merge first: ma
 Emulator-only, all of it: the PCjr had hung up. Both builds are queued for its next call.
 
 **1.0.23: keys and pictures.** After 1.0.22 went onto the real PCjr (the stub launcher swapped the loop in; a server restart had the PCjr back in 3 seconds by itself; `pcjr-run` returned LEMMJR's log within 20 ms of the night before), two gaps were left in the loop: nobody could press a key for a program, and a graphics program's screen came back as nothing. Both needed something running during the program, and the client already is: it stays in memory while its child runs. A hook on the timer tick now presses keys from a small script and copies the video memory. On the PCjr a key press is a software INT 9 with the scan code in AL (the fact that cost time on day 1 now pays for itself); in DOSBox INT 9 reads the keyboard port, so there the key goes into the BIOS buffer, and that is the only path the emulator can test. A test program draws, waits for a key, and reports it: `{3}q` arrived, and the picture taken at 2 seconds decodes to the right pixels.
+
+## Sopwith: pace, pause, top ten, and what the real machine was hiding (2026-10-08, later)
+
+Steve asked for all the speed ideas plus high scores to a file, a pause key ("and an exit key? or exit from the pause menu?"), a starting level and working record and playback, and then: "keep track of all these speed ups so we can publish it to the github with tech details of everything done". That last one is `apps/sopwith/SPEED.md`.
+
+**Frame skipping (Sopwith26).** When the game is two ticks behind the clock it runs a frame's logic and leaves out its drawing. The game erases sprites by XOR at remembered positions, so after an undrawn frame the "old" state must not advance, deleted objects must still be wiped, and the ground's screen copy is marked stale. A test mode skips two drawings in three for 2500 frames: the last screen is identical. It worked first time, which is why there is a test for it.
+
+**Sopwith26's own file.** `apps/sopwith26/sop26.c`, included by `sopwith2.c`: pause (P; Esc pauses and Esc again quits; the notice is XORed on and off), the top ten (`SOP26.HI`, text, parsed with bounded fields and anything odd skipped), the starting level (7 levels: each win adds speed, and from the second the buildings shoot). Screens that need a keyboard are tested by a script of "typed" keys that saves the screen when it runs out.
+
+**Record and playback.** Two real bugs in the released source: the header was written as one word and skipped as two, so playback never reached its end; and the far buffer went to `fread` and `fwrite`, which take near pointers in this model. DOS reads and writes it now. A recorded flight replays to the identical screen.
+
+**More collisions.** The ground-crash test reads the sprite instead of drawing it (2.6 to 0.7 ms a frame in DOSBox); debris pairs are skipped before the call. The checking build: 19,622 tests, none different.
+
+**Then the PCjr came back, and the emulator had been lying.** The slowest real frame spent 189 ms in collisions where DOSBox showed 41. Counter first: the score changed 130 times in the battle, and each write through the BIOS took 22.7 ms on the PCjr (3.3 in DOSBox, where BIOS calls are native code). Fix one: write a changed score once, at the end of the frame (44 writes). Fix two: draw the six characters from the ROM font at F000:FA6E straight into screen memory (6.3 ms). Frames over 165 ms on the PCjr: 20, then 4, then 2.
+
+**The clock was wrong too.** One real frame was "3600110 ms" long: the timer read stepped back 55 ms when a tick was waiting to be counted. Asking the interrupt controller fixed most of it; the rest was a count of exactly 0, which means a full count.
+
+**Wrong turns.** The canonical checkout's `server/codejr` is older than the running server and has no `ctl`: it tried to start a second server (the port was taken, no harm) and my screen comparison then "passed" against this morning's file, the very mistake recorded two entries up. I now delete the fetched file before each real run. A grep for one function's line number kept failing because two lines matched. And timing every object's update to find the slow ones added 10 ms a frame on the PCjr and made the numbers worse than the thing being measured; it found its answer (every long update was the player's respawn, 100 ms to rebuild the status area, 28 times because the scripted pilot can't fly) and is now a separate build option.
+
+**Real PCjr, 1000 frames:** 15.5 fps with the limiter off (13.3 this morning, 10.5 yesterday); collisions 11.2 ms a frame (22.7). With the limiter on, 2047 ticks for the faithful build and 2009 for Sopwith26 (2000 is perfect), with 19 drawings left out.
+
+Not tested on the real machine: pause, the top ten, initials, the starting level, record and playback. Steve has played the earlier build by hand; the keys work in IBM keyboard mode.

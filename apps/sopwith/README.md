@@ -49,6 +49,10 @@ neither of which this project has.
 
 ## Speed
 
+`SPEED.md` is the full account: every change, what it bought on the real
+PCjr, what the emulator got wrong, and how each change was shown to leave
+the game identical. The tables here are the summary.
+
 Measured in DOSBox (`machine=pcjr`, `cycles=fixed 400`, the project's rough
 stand-in for a PCjr; the real machine will differ) on a scripted battle of
 1000 frames with the frame limiter off:
@@ -61,6 +65,7 @@ stand-in for a PCjr; the real machine will differ) on a scripted battle of
 | Tighter ground loop | 14.4 | 36.5 ms | 18.6 ms | 12.7 ms |
 | Whole sprite and ground line in assembly (`sopgfx.asm`) | 17.4 | 26.2 ms | 16.9 ms | 12.7 ms |
 | Sprites compared directly for collisions (`cj_hit`) | 19.8 | 26.2 ms | 9.8 ms | 12.7 ms |
+| Crash test without drawing, debris pairs skipped, score once a frame | 20.0 | 26.4 ms | 8.6 ms | 12.7 ms |
 
 The game aims for 9.1 frames a second (every second timer tick). The
 straight port fell short of that in a busy scene; now there is headroom.
@@ -95,6 +100,12 @@ battle on the connected PCjr and brings back `LOG.TXT`;
 |---|---|---|---|---|
 | Sprite rows in assembly, tight C ground loop (1000 frames) | 10.5 | 18.1 ms | 49.6 ms | 24.9 ms |
 | Whole sprite and ground line in assembly (`sopgfx.asm`), same 1000 frames | 13.3 | 18.2 ms | 31.5 ms | 22.7 ms |
+| Collisions without drawing (`cj_hit`, `cj_crash`) | 14.9 | 18.5 ms | 31.8 ms | 13.6 ms |
+| Score written once a frame, and not through the BIOS | 15.5 | 18.6 ms | 31.8 ms | 11.2 ms |
+
+With the limiter on, 1000 frames take 2047 ticks on the PCjr (2000 would be
+full speed); Sopwith26, which leaves out a frame's drawing when it is
+behind, takes 2009.
 
 The screens it saved at frames 300 and 1000 match the emulator's byte for
 byte, and two runs in a row give the same numbers. Next to DOSBox at 400
@@ -154,9 +165,14 @@ a build that hung left the previous build's screen in place, which then
 
 ## Known gaps
 
-- The record and playback options (`-h`, `-v`) are in the source but don't
-  work in this build: recording only writes when a key changes, and the
-  buffer handling assumed a different memory model. Untouched.
+- The record and playback options work again: `-hNAME` records a game's
+  keys to a file, `-vNAME` flies it back. The released source wrote a
+  one-word header and skipped two on reading, so a recording never played
+  to its end, and it passed far memory to `fread`, which this memory model
+  can't do. The file is now two words (random seed, level), then a frame
+  number and the keys for each change. A 1000-frame flight is 1.3 KB and
+  plays back to the identical screen. A recording holds up to 15,000 key
+  changes. Emulator-tested only.
 - The multiplayer and serial modes are stubs in the released source.
 - The original's compiler warnings (unused parameters and the like) are left
   alone, so this one build doesn't use `-wx -we`.

@@ -38,6 +38,17 @@ static int on_pcjr;
    turns the frame limiter off, to measure how fast the game can go. */
 static long cj_limit;
 static int cj_title;
+/* Sopwith26: when the game is behind the clock it leaves out a frame's
+   drawing (never more than two running) so the game keeps its pace.
+   cj_draw: draw this frame. cj_stale: the last frame wasn't drawn, so the
+   objects' old positions and the screen's copy of the ground still
+   describe what is on the screen and must be kept. */
+static int cj_draw=1,cj_stale,cj_skiptest,cj_groundstale;
+static unsigned long cj_skipped;
+#ifdef SOPWITH26
+static int cj_carry,cj_skips;
+static unsigned long cj_fcount;
+#endif
 static int cj_free;
 static unsigned long cj_t0;
 
@@ -399,7 +410,13 @@ int inkey(void);
    count runs down once per tick, so the low word can be trusted. */
 static int cj_prof;
 static unsigned long cj_phase[4];
-static unsigned long cj_cnt[6],cj_tc; static unsigned long cj_now(void); /* profiling counters */
+static unsigned long cj_cnt[8],cj_tc,cj_tg,cj_tp,cj_tk,cj_tw;
+#ifdef CJ_TYPEPROF
+static unsigned long cj_tt[16],cj_tn[16],cj_tx[16]; /* by object type: time, calls, longest */
+static int cj_ev[40][4],cj_nev;
+#endif
+void cj_scorelater(object *p);
+void cj_scoreflush(void); static unsigned long cj_now(void); /* profiling counters */
 /* The slow frames: a frame over two timer ticks (131072 PIT counts, 110 ms)
    is one the player sees as a slowdown. */
 #ifdef CJ_CHECKHIT
@@ -412,12 +429,21 @@ static unsigned long cj_now(void)
 {
   unsigned long t;
   unsigned c;
+  unsigned char pending;
   _disable();
   t=*(unsigned long far *)MK_FP(0x40,0x6c);
   outportb(0x43,0);
   c=inportb(0x40);
   c|=(unsigned)inportb(0x40)<<8;
+  outportb(0x20,0x0a);            /* the interrupt controller's request register */
+  pending=inportb(0x20)&1;
   _enable();
+  /* The count has just started again but its tick is still waiting to be
+     counted (it arrived while interrupts were off): without this the clock
+     steps back 55 ms now and then, and a frame looks 55 ms longer or
+     shorter than it was. Seen on the real PCjr as a "3600110 ms" frame. */
+  if (pending && (c>0x8000u || c==0)) /* 0 is a full count: it has only just restarted */
+    t++;
   return (t<<16)+(unsigned)(-(int)c);
 }
 
@@ -440,6 +466,11 @@ static void cj_shot(void)
   }
 }
 
+#ifdef SOPWITH26
+static int cj_testpause,cj_testend;
+#include "sop26.c"
+#endif
+
 static void cj_frame(void)
 {
   static long n;
@@ -451,12 +482,23 @@ static void cj_frame(void)
     cj_t0=cj_ticks();
   if (++n<cj_limit)
     return;
+#ifdef SOPWITH26
+  if (cj_testpause)   /* test mode, U: the pause notice, saved */
+    cj_pause();
+  if (cj_testend) {   /* test mode, G: the end of a game with a score, and "CJ" typed */
+    objects[lastplane].score=(int)cj_limit;
+    cj_script="CJ\r";
+    cj_gameend(0);
+  }
+#endif
   t=cj_ticks()-cj_t0;
   cj_shot();
   f=fopen("LOG.TXT","a");
   if (f!=NULL) {
     fprintf(f,"sopwith2: %ld frames in %lu ticks = %lu.%lu fps%s\n",n,t,
             t ? n*182/(t*10) : 0,t ? n*182/t%10 : 0,cj_free ? " (unlimited)" : "");
+    if (cj_skipped)
+      fprintf(f,"  drawing left out on %lu frames\n",cj_skipped);
     if (cj_prof) /* 1193 PIT counts a millisecond */
       fprintf(f,"  ms a frame: objects %lu.%lu, screen %lu.%lu, collisions %lu.%lu, sound %lu.%lu\n",
               cj_phase[0]/1193/n,cj_phase[0]/119/n%10,cj_phase[1]/1193/n,cj_phase[1]/119/n%10,
@@ -465,6 +507,26 @@ static void cj_frame(void)
       fprintf(f,"  a frame: %lu.%lu pair tests, %lu.%lu crash tests, %lu.%lu bitblt, %lu.%lu putimage (%lu.%lu single pixels), docollision %lu.%lu ms\n",
         cj_cnt[0]/n,cj_cnt[0]*10/n%10,cj_cnt[1]/n,cj_cnt[1]*10/n%10,cj_cnt[2]/n,cj_cnt[2]*10/n%10,
         cj_cnt[3]/n,cj_cnt[3]*10/n%10,cj_cnt[4]/n,cj_cnt[4]*10/n%10,cj_tc/1193/n,cj_tc/119/n%10);
+    if (cj_prof)
+      fprintf(f,"  of the screen time, the ground line: %lu.%lu ms a frame; of collisions, pair tests %lu.%lu, crash tests %lu.%lu\n",
+              cj_tg/1193/n,cj_tg/119/n%10,cj_tp/1193/n,cj_tp/119/n%10,cj_tk/1193/n,cj_tk/119/n%10);
+#ifdef CJ_TYPEPROF
+    if (cj_prof) {
+      int i;
+      fprintf(f,"  objects by type (type: updates a frame, ms each, longest ms):");
+      for (i=0;i<16;i++)
+        if (cj_tn[i])
+          fprintf(f," %d: %lu.%lu %lu.%lu %lu;",i,cj_tn[i]/n,cj_tn[i]*10/n%10,
+                  cj_tt[i]/1193/cj_tn[i],cj_tt[i]/119/cj_tn[i]%10,cj_tx[i]/1193);
+      fprintf(f,"\n  long updates (frame type/index/player status ms):");
+      for (i=0;i<cj_nev;i++)
+        fprintf(f," %d %d %d %d;",cj_ev[i][0],cj_ev[i][1],cj_ev[i][2],cj_ev[i][3]);
+      fprintf(f,"\n");
+    }
+#endif
+    if (cj_prof && cj_cnt[7])
+      fprintf(f,"  the score changed %lu times and was written %lu times, %lu.%lu ms each\n",
+              cj_cnt[6],cj_cnt[7],cj_tw/1193/cj_cnt[7],cj_tw/119/cj_cnt[7]%10);
 #ifdef CJ_CHECKHIT
     fprintf(f,"  cj_hit checked against the original on %lu pairs: %lu differ\n",cj_cnt[5],cj_hitbad);
 #endif
@@ -503,6 +565,11 @@ void main(int argc,char *argv[])
       cj_limit=atol(e);
       cj_free=strchr(e,'F')!=NULL;
       cj_title=strchr(e,'T')!=NULL;
+      cj_skiptest=strchr(e,'K')!=NULL; /* leave out two frames' drawing in three */
+#ifdef SOPWITH26
+      cj_testpause=strchr(e,'U')!=NULL;
+      cj_testend=strchr(e,'G')!=NULL;
+#endif
       if (strchr(e,'P')!=NULL) { cj_prof=1; outportb(0x43,0x34); outportb(0x40,0); outportb(0x40,0); }
       randno=1984; /* the same game every time, so two builds can be compared */
     }
@@ -521,14 +588,37 @@ void main(int argc,char *argv[])
   init(argc,argv);
   setjmp(startjbuf);
   while (1) {
+#ifdef SOPWITH26
+    if (cj_pausereq && cj_limit==0)
+      cj_pause();
+    cj_fcount++;
+    if (cj_free)
+      cj_draw=!(cj_skiptest && cj_fcount%3!=0 && cj_fcount<(unsigned long)cj_limit);
+    else {
+      int t;
+      while (speedtick+cj_carry<2);
+      _disable(); t=speedtick; speedtick=0; _enable();
+      cj_carry+=t-2;        /* ticks behind the clock */
+      if (cj_carry>4)
+        cj_carry=4;
+      cj_draw=!(cj_carry>=2 && cj_skips<2);
+    }
+    if (cj_draw)
+      cj_skips=0;
+    else {
+      cj_skips++;
+      cj_skipped++;
+    }
+#else
     while (speedtick<2 && !cj_free);
     speedtick=0;
+#endif
 /*    delay(10000); */
     if (cj_prof) { /* CodeJr: the same frame, timed by phase */
       unsigned long t0=cj_now(),t1,t2,t3;
       updateobjects(); t1=cj_now();
       updatescreen(); t2=cj_now();
-      checkcollisions(); t3=cj_now();
+      checkcollisions(); cj_scoreflush(); t3=cj_now();
       updatesound();
       cj_phase[0]+=t1-t0; cj_phase[1]+=t2-t1; cj_phase[2]+=t3-t2; cj_phase[3]+=cj_now()-t3;
       { unsigned long ft=cj_now()-t0;
@@ -545,6 +635,7 @@ void main(int argc,char *argv[])
     updatescreen();
     updatejoy();
     checkcollisions();
+    cj_scoreflush();
     updatejoy();
     updatesound();
     cj_frame(); /* CodeJr: tests and timing (SOPTEST), does nothing otherwise */
@@ -569,11 +660,25 @@ void keybint(void)
     case SC_H:     k=KEY_HOME;    break;
     case SC_S:     k=KEY_SOUND;   break;
     case SC_BREAK: k=KEY_BREAK;   break;
-#ifdef SOPWITH26
-    case 1:        k=KEY_BREAK;   break; /* Esc quits too */
-#endif
     default: k=0;
   }
+#ifdef SOPWITH26
+  { /* P pauses; Esc pauses too, and Esc again there quits. A key held
+       down repeats, so only the first press counts. */
+    static unsigned char down;
+    int c=scancode&0x7f;
+    if (scancode&0x80) {
+      if (c==down)
+        down=0;
+    }
+    else {
+      cj_pkey=c;
+      if ((c==0x19 || c==1) && down!=c)
+        cj_pausereq=1;
+      down=(unsigned char)c;
+    }
+  }
+#endif
   if (k!=0)
     if (scancode&0x80) {
       if (k&keysacknowledged)
@@ -696,8 +801,8 @@ static int cj_keys(void)
 int inkeys(void)
 {
   int k;
-  if (cj_limit!=0)
-    return cj_keys();
+  if (cj_limit!=0) /* CodeJr: the test pilot's keys can be recorded, and a recording flown */
+    return history(playbackfilename!=NULL ? 0 : cj_keys());
   if (!keynotascii)
     return history(inkey());
   if (ibmkeyboard) {
@@ -786,6 +891,21 @@ void updatescreen(void)
 {
   object *obj;
   useonscreenbuf();
+  if (!cj_draw) { /* CodeJr: a frame left out. The sounds still run, and
+                     objects that are gone are still wiped (their slots
+                     are reused next frame); the rest waits. */
+    for (obj=firstobject;obj!=NULL;obj=obj->next)
+      if (obj->onscreen && obj->x>=scnleft && obj->x<=scnright && obj->soundfunc!=NULL)
+        obj->soundfunc(obj);
+    for (obj=firstdeleted;obj!=NULL;obj=obj->next)
+      if (obj->oldonscreen)
+        putimage(obj->oldx,obj->oldy,obj->oldsprite,obj);
+    if (pixtoscroll!=0)
+      cj_groundstale=1;
+    cj_stale=1;
+    return;
+  }
+  cj_stale=0;
   for (obj=firstobject;obj!=NULL;obj=obj->next)
     if (obj->oldonscreen && obj->onscreen && obj->height!=1 &&
         obj->oldsprite==obj->sprite && obj->y==obj->oldy &&
@@ -809,13 +929,19 @@ void updatescreen(void)
   for (obj=firstdeleted;obj!=NULL;obj=obj->next)
     if (obj->oldonscreen)
       putimage(obj->oldx,obj->oldy,obj->oldsprite,obj);
-  updateground();
+  if (cj_prof) {
+    unsigned long t=cj_now();
+    updateground();
+    cj_tg+=cj_now()-t;
+  }
+  else
+    updateground();
 }
 
 void updateground(void)
 {
   if (!groundnotdrawn) {
-    if (pixtoscroll==0 && !cratertobedrawn)
+    if (pixtoscroll==0 && !cratertobedrawn && !cj_groundstale)
       return;
     drawground(scrground);
   }
@@ -823,6 +949,7 @@ void updateground(void)
   drawground(scrground);
   groundnotdrawn=FALSE;
   cratertobedrawn=FALSE;
+  cj_groundstale=0;
 }
 
 /* CodeJr: the ground line is drawn by flipping pixels (colour 131 = flip
@@ -854,8 +981,28 @@ void updateobjects(void)
   current=firstobject;
   while (current!=NULL) {
     next=current->next;
-    current->oldonscreen=current->onscreen;
-    current->oldsprite=current->sprite;
+    if (!cj_stale) { /* CodeJr: after a frame left out, "old" is still what's on the screen */
+      current->oldonscreen=current->onscreen;
+      current->oldsprite=current->sprite;
+    }
+#ifdef CJ_TYPEPROF
+    if (cj_prof) { /* CodeJr: time by kind of object (the timing itself costs
+                      10 ms a frame on a PCjr, so only in a build that asks) */
+      int ty=current->type&15;
+      unsigned long t=cj_now();
+      current->onscreen=current->updatefunc(current);
+      t=cj_now()-t;
+      cj_tt[ty]+=t;
+      cj_tn[ty]++;
+      if (t>cj_tx[ty])
+        cj_tx[ty]=t;
+      if (t>11930UL && cj_nev<40) { /* over 10 ms: which, when, how long */
+        cj_ev[cj_nev][0]=frametick; cj_ev[cj_nev][1]=ty*100+(current->index&15)*10+(current==firstobject);
+        cj_ev[cj_nev][2]=current->status; cj_ev[cj_nev][3]=(int)(t/1193); cj_nev++;
+      }
+    }
+    else
+#endif
     current->onscreen=current->updatefunc(current);
     current=next;
   }
@@ -875,6 +1022,9 @@ bool updateplayerplane(object *plane)
     if (finaletime<=0) {
       if (gamemode!=GAME_MULTIPLE && !exiting)
         restart();
+#ifdef SOPWITH26
+      cj_gameend(1);
+#endif
       finish(NULL,TRUE);
     }
   }
@@ -2181,6 +2331,9 @@ void init(int argc,char *argv[])
   ibmkeyboard=TRUE;
   if (ncontrols==0)
     ncontrols=1;
+  if (level<0 || level>6)   /* -g: the starting level, 0 to 6 */
+    level=0;
+  cj_startlevel=level;
   if (nmodes>0)
     notitlesflag=TRUE;
 #else
@@ -2267,7 +2420,8 @@ void titles(void)
   poscurs(2,15);
   printstr(". flip    Space fire      B bomb");
   poscurs(2,17);
-  printstr("H home    S sound         Esc quit");
+  printstr("H home    S sound   P pause  Esc quit");
+  cj_titlebest();
   setcolour(3);
 #else
   setcolour(3);
@@ -2309,8 +2463,15 @@ void restart(void)
       level++;
     score=plane->score;
   }
-  else
+  else {
+#ifdef SOPWITH26
+    cj_gameend(0);   /* the score, the top ten, and "play again?" */
+    level=cj_startlevel;
+    score=0;
+#else
     level=score=0;
+#endif
+  }
   initsndlist();
   copyground();
   initlists();
@@ -2367,8 +2528,10 @@ int getgamemode(void)
 #ifdef SOPWITH26
   int k;
   clearwin();
-  printstr("        Press any key to play\r\n\r\n");
-  printstr("    C - play against the computer");
+  cj_at(6,20,3,"Press any key to play");
+  cj_at(6,21,1,"C - against the computer");
+  cj_titlelevel();
+  cj_at(6,23,1,"T - top ten");
   if (cj_limit!=0 && cj_title) { /* test mode, T: save the title screen and leave */
     cj_shot();
     finish(NULL,FALSE);
@@ -2379,6 +2542,21 @@ int getgamemode(void)
     k=inkeys();
     if (k==27)
       finish(NULL,FALSE);
+    if (k>='1' && k<='7') {
+      cj_startlevel=k-'1';
+      cj_titlelevel();
+      continue;
+    }
+    if (k=='T' || k=='t') {
+      setgmode(4);
+      cj_hiload();
+      cj_hishow(4,-1);
+      cj_at(13,22,3,"Press any key");
+      cj_key();
+      titles();
+      return getgamemode();
+    }
+    level=cj_startlevel;
     if (k=='C' || k=='c')
       return GAME_COMPUTER;
     if (k!=0)
@@ -3031,15 +3209,28 @@ void checkcollisions(void)
     right=obj->x+obj->width-1;
     bottom=obj->y;
     top=bottom+1-obj->height;
-    test=obj->nextx;
+    type=obj->type;
     for (test=obj->nextx;test->x<=right && test!=&objright;test=test->nextx)
-      if (test->y>=top && test->y-test->height+1<=bottom)
+      if (test->y>=top && test->y-test->height+1<=bottom) {
+        /* CodeJr: two pieces of debris never collide (checkcollision's own
+           first test). An explosion makes fifteen in one spot, a hundred
+           pairs a frame, so they are turned away here without the call. */
+        if (type==OBJ_SHRAPNEL && test->type==OBJ_SHRAPNEL) {
+          cj_cnt[0]++;
+          continue;
+        }
+        if (cj_prof) { unsigned long t=cj_now(); checkcollision(obj,test); cj_tp+=cj_now()-t; }
+        else
         checkcollision(obj,test);
+      }
     type=obj->type;
     if ((type==OBJ_PLANE && obj->status!=STATUS_ELIMINATED && obj->status!=0 &&
          obj->y<workingground[obj->x+8]+24) ||
-        (type==OBJ_BOMB && obj->y<workingground[obj->x+4]+12))
+        (type==OBJ_BOMB && obj->y<workingground[obj->x+4]+12)) {
+      if (cj_prof) { unsigned long t=cj_now(); checkcrash(obj); cj_tk+=cj_now()-t; }
+      else
       checkcrash(obj);
+    }
   }
   { unsigned long t=cj_prof?cj_now():0;
   for (i=0,obj1=collobj1,obj2=collobj2;i<collc;i++,obj1++,obj2++)
@@ -3137,11 +3328,45 @@ void checkcollision(object *obj1,object *obj2)
   }
 }
 
+/* CodeJr: has a sprite touched the ground? The original drew it in the
+   scratch area and looked at one pixel in each column, at the ground's
+   height. This reads the same pixel from the sprite itself (in its plane's
+   colour, as cj_hit does). */
+static int cj_crash(object *obj)
+{
+  int w=obj->width>>2,hc=obj->height>16 ? 16 : obj->height,cx,h,r;
+  unsigned char *sp=obj->sprite,b;
+  for (cx=0;cx<obj->width;cx++) {
+    h=workingground[obj->x+cx]+15-obj->y;
+    if (h>15)
+      return 1;
+    if (h>=0) {
+      r=15-h;
+      if (r<hc && (cx>>2)<w) {
+        b=(unsigned char)((sp[r*w+(cx>>2)]>>((3-(cx&3))<<1))&3);
+        if (b!=0 && obj->colour!=1)
+          b^=3;
+        if (b!=0)
+          return 1;
+      }
+    }
+  }
+  return 0;
+}
+
 void checkcrash(object *obj)
 {
   int x,right,h;
   bool f=FALSE;
   cj_cnt[1]++;
+  if (obj->height!=1 || obj->width!=1) {
+    f=cj_crash(obj);
+#ifndef CJ_CHECKHIT
+    goto done;
+#endif
+  }
+  { int nf=f;
+  f=FALSE;
   drawobject(15,15,obj);
   right=obj->x+obj->width-1;
   for (x=obj->x;x<=right;x++) {
@@ -3157,6 +3382,19 @@ void checkcrash(object *obj)
     }
   }
   clearscorearea();
+#ifdef CJ_CHECKHIT
+  if (obj->height!=1 || obj->width!=1) {
+    cj_cnt[5]++;
+    if ((nf!=0)!=(f!=0))
+      cj_hitbad++;
+  }
+#else
+  (void)nf;
+#endif
+  }
+#ifndef CJ_CHECKHIT
+done:
+#endif
   if (f && collc<200) {
     collobj1[collc]=obj;
     collobj2[collc++]=NULL;
@@ -3300,15 +3538,93 @@ void addscore(object *destroyed,int score)
 {
   if (multiplayer /* && netinf->maxplayers==1 */) {
     objects[2-destroyed->colour].score+=score;
-    writescore(&objects[2-destroyed->colour]);
+    cj_scorelater(&objects[2-destroyed->colour]);
   }
   else {
     if (destroyed->colour==1)
       objects->score-=score;
     else
       objects->score+=score;
-    writescore(&objects[0]);
+    cj_scorelater(&objects[0]);
   }
+}
+
+/* CodeJr: the score is written through the BIOS, which draws a character
+   in a graphics mode slowly on a real machine (and at no cost at all in
+   DOSBox, which is why this hid). Debris from one explosion can score six
+   times in a frame, and each time the number was written again. Now a
+   changed score is written once, at the end of the frame: the same
+   picture, since the number is padded to the same width each time. */
+static object *cj_scorepend[2];
+
+void cj_scorelater(object *p)
+{
+  cj_cnt[6]++;
+  cj_scorepend[(p->colour-1)&1]=p;
+}
+
+/* The score drawn straight into screen memory from the ROM's 8 by 8
+   characters (F000:FA6E, where every PC and the PCjr keep them): what the
+   BIOS draws, in under a tenth of the time. The cursor is left where the
+   BIOS would have left it. */
+static void cj_fastscore(object *p)
+{
+  static const unsigned char dbl[16]={0x00,0x03,0x0c,0x0f,0x30,0x33,0x3c,0x3f,
+                                      0xc0,0xc3,0xcc,0xcf,0xf0,0xf3,0xfc,0xff};
+  static const unsigned rowo[8]={7680,0x2000+7680,7760,0x2000+7760,7840,0x2000+7840,7920,0x2000+7920};
+  char txt[8];
+  int n=p->score,len=0,i,r,col=2+7*(p->colour-1);
+  unsigned un,e;
+  unsigned char mask=(unsigned char)((p->colour&3)*0x55);
+  unsigned char far *font=(unsigned char far *)MK_FP(0xf000,0xfa6e);
+  if (hiresflag) {
+    writescore(p);
+    return;
+  }
+  if (n<0) {
+    txt[len++]='-';
+    un=(unsigned)(-n);
+  }
+  else
+    un=(unsigned)n;
+  for (e=10000,i=0;e>1;e/=10) {   /* as writenum: no leading zeros */
+    unsigned d=un/e;
+    if (d!=0 || i) {
+      txt[len++]=(char)('0'+d);
+      i=1;
+    }
+    un%=e;
+  }
+  txt[len++]=(char)('0'+un);
+  while (len<6)
+    txt[len++]=' ';
+  for (i=0;i<6;i++) {             /* at most "-32768": six characters */
+    unsigned char far *g=font+((unsigned char)txt[i]<<3);
+    unsigned x=(unsigned)(col+i)<<1;
+    for (r=0;r<8;r++) {
+      /* text row 24 is lines 192 to 199: 96*80 on, even lines first */
+      unsigned char far *d=(unsigned char far *)MK_FP(0xb800,rowo[r]+x);
+      unsigned char b=g[r];
+      d[0]=dbl[b>>4]&mask;
+      d[1]=dbl[b&15]&mask;
+    }
+  }
+  poscurs(col+6,24);
+  setcolour(p->colour);
+}
+
+void cj_scoreflush(void)
+{
+  int i;
+  for (i=0;i<2;i++)
+    if (cj_scorepend[i]!=NULL) {
+      unsigned long t=cj_prof ? cj_now() : 0;
+      cj_fastscore(cj_scorepend[i]);
+      cj_scorepend[i]=NULL;
+      cj_cnt[7]++;
+      if (cj_prof)
+        cj_tw+=cj_now()-t;
+    }
 }
 
 void score50(object *destroyed)
@@ -3335,6 +3651,10 @@ void timerint(void)
 {
   timertick++;
   speedtick++;
+#ifdef SOPWITH26
+  if (cj_paused)
+    return;
+#endif
   updatesoundint();
 }
 
@@ -3483,12 +3803,18 @@ char *finishserial(void)
   return NULL;
 }
 
+static char *cj_recname;
+
 int inithistory(int randno)
 {
   long historybufsize;
   FILE *inputfile;
   if (playbackfilename!=NULL || recordfilename!=NULL) {
     historybuf=(int huge *)farmalloc(historybufsize=farcoreleft());
+    if (historybuf==NULL) { /* CodeJr: was used unchecked */
+      printstr("Insufficient memory for the history buffer");
+      exit(1);
+    }
     historyp=(int huge *)historybuf;
   }
   if (playbackfilename!=NULL) {
@@ -3500,23 +3826,41 @@ int inithistory(int randno)
     if (historybufsize<historyfilelen)
       freeandexit("Insufficient memory to load history file");
     historyspace=historybufsize-historyfilelen;
-    fseek(inputfile,0,0);
-    fread((void *)historybuf,(int)historyfilelen,1,inputfile);
     fclose(inputfile);
+    { /* CodeJr: the buffer is far memory, which this memory model's fread
+         can't reach (it was handed the offset alone): DOS reads it. */
+      int h;
+      unsigned got=0;
+      if (_dos_open(playbackfilename,0,&h)!=0 ||
+          _dos_read(h,(void far *)historybuf,(unsigned)historyfilelen,&got)!=0 ||
+          got!=(unsigned)historyfilelen)
+        freeandexit("Unable to read history input file");
+      _dos_close(h);
+    }
+    /* CodeJr: the file starts with two words, the random seed and the
+       level, then a frame number and the keys for every change. The
+       released source wrote one word and skipped two, so a recording never
+       played back to its end. */
     randno=historyp[0];
-    historyp++;
+    level=historyp[1];
+    if (level<0 || level>6)
+      level=0;
+    historyp+=2;
     historyfilelen-=4;
+    if (historyfilelen<4 || (historyfilelen&3)!=0)
+      freeandexit("Not a history file");
   }
   if (recordfilename!=NULL) {
     outputfile=fopen(recordfilename,"wb");
     if (outputfile==NULL)
       freeandexit("Unable to open history output file");
+    cj_recname=recordfilename; /* CodeJr: recordfilename is cleared when the buffer fills */
     if (playbackfilename==NULL) {
       historyfilelen=historybufsize;
       historyp[0]=randno;
-      historyp[1]=(int)(historybufsize>>4);
-      historyp++;
-      historyfilelen-=2;
+      historyp[1]=level; /* CodeJr: see above */
+      historyp+=2;
+      historyfilelen=(historybufsize&~3L)-4;
     }
   }
   return randno;
@@ -3568,11 +3912,16 @@ int history(int key)
 
 void flushhistory(void)
 {
-  if (recording)
-    fwrite((void *)historybuf,(int)(historyp-historybuf)*sizeof(int),1,
-           outputfile);
   if (outputfile!=NULL) {
     fclose(outputfile);
+    if (recording) { /* CodeJr: written by DOS, for the same reason as the read */
+      int h;
+      unsigned put;
+      if (_dos_creat(cj_recname,_A_NORMAL,&h)==0) {
+        _dos_write(h,(void far *)historybuf,(unsigned)((historyp-historybuf)*sizeof(int)),&put);
+        _dos_close(h);
+      }
+    }
     freehistorybuf();
   }
 }

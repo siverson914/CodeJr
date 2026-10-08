@@ -162,7 +162,7 @@ just deploy-speech HELLO READY  # queue SAY.EXE and clips (NAME.SNP for a PWM ve
 | `apps/say/` | `SAY.EXE` (`say.c`, `player.asm` with the ADPCM decoder), `mksnd.py` converter (`--quality high/medium/low`, `--codec`), `grid.py` quality grid, `clips/` (gipity mp3 + text), `test.sh` |
 | `apps/jrquest` | Jr's Quest, a King's Quest style adventure on our own AGI v2 compatible engine. The whole 16-room game plays in a browser on the JavaScript reference interpreter (no 8088 code yet). Read `DESIGN.md`, `ENGINE.md`, `FORMATS.md`, `GAMEPLAN.md` there. `just quest`, `just quest-test`, `just quest-serve` (AI parser and live ending through `claude -p`), `just quest-shots`, `just quest-lint` |
 | `apps/sopwith` | Sopwith 2 (1984) built from its released source with Open Watcom, faithful to the original, drawing in assembly. Runs on the real PCjr at 13.3 fps unlimited (the game wants 9.1). README there has the test mode (`@1000FP`), the real-machine numbers and the licence terms |
-| `apps/sopwith26` | Sopwith26: the same source as `apps/sopwith` built with `SOPWITH26` defined. Title screen with the keys, any key to play, no dead menu entries, Esc quits. Changes to looks or play go here, inside `#ifdef SOPWITH26`; emulator-tested only |
+| `apps/sopwith26` | Sopwith26: the same source as `apps/sopwith` built with `SOPWITH26` defined. Title screen with the keys, any key to play, no dead menu entries, Esc quits. Changes to looks or play go here, inside `#ifdef SOPWITH26`; pause (P, or Esc then Esc to quit), top ten in `SOP26.HI`, starting level, and frame skipping that holds the game's pace (2009 ticks for 1000 frames on the real PCjr). `apps/sopwith/SPEED.md` is the full record of the speed work, written to be published |
 | `apps/jrcube` | JRCUBE, a shaded spinning cube with a moving light and real-time shadow (README there) |
 | `emu/` | headless emulator scripts |
 | `docs/attic/` | a parked selective-repeat link (didn't pass its tests) |
@@ -226,6 +226,8 @@ Check its README or source before suggesting any AT command: https://github.com/
 
 - DOSBox charges every instruction one cycle. A multiply costs the same as an add, and video memory has no wait states. Frame rates and "which trick wins" from DOSBox are rough. MartyPC (cycle-accurate, supports the PCjr) is the planned fix; nobody has checked that it runs headless here.
 - DOSBox's serial link never stalls and never loses bytes. Three real bugs got through because of that. Timing code needs a test with a line that drops, flips and stalls (`TestPullInteropC` has one).
+- DOSBox runs BIOS calls as native code. Writing six characters through INT 10h in a graphics mode cost 22.7 ms on the real PCjr and 3.3 ms in DOSBox; Sopwith's slowest frames were score writes. And DOSBox hands a program zeroed memory, so a read of something never set gives the same answer every run there and a different one each run on the PCjr.
+- A timer read (PIT count plus BIOS ticks, interrupts off) steps back 55 ms when a tick is waiting to be counted: check the 8259's request register (`out 20h,0Ah`; `in 20h` bit 0), and treat a count of 0 as just restarted.
 - DOSBox's DOS accepts things real DOS doesn't (a doubled backslash in a path).
 - DOSBox 0.74 can't display the PCjr's 160x100 line-doubled mode.
 
