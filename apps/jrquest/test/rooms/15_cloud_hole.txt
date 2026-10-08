@@ -1,0 +1,26 @@
+
+# Room 15: walking into the hole the beanstalk came up through.
+5
+type debug
+5
+type tp
+2
+type 15
+12
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+3
+key up
+3
+key up
+2
+key left
+10
+expect What goes up and to the right
+expect must come down.
+expect Abort, Retry, Fail?

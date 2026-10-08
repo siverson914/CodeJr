@@ -1,0 +1,328 @@
+# Room 5: the Cold Reactor. Two cooling towers and no steam. A fence, a
+# gate with a barrier, a guard booth, and a rock on the right with the
+# cave mouth in it. The lane on the left runs north beside the fence.
+# Outlines first, fills after: a fill only replaces white.
+
+# ---- where the sky changes shade (stops at the towers) ----
+color 9
+line 0 34 49 34
+line 75 34 99 34
+line 117 34 159 34
+
+# ---- horizon ----
+color 8
+line 0 62 48 62
+line 76 62 98 62
+line 118 62 146 62
+
+# ---- tower one (near, big) ----
+color 8
+# rim
+arc 62 11 15 3
+# upper sides, waist at y 38
+arc 47 38 3 27 1
+arc 77 38 3 27 8
+# lower sides
+arc 37 38 13 56 128
+arc 87 38 13 56 16
+# base
+arc 62 92 22 4 240
+# where the shade starts
+line 67 14 67 38 68 60 70 80 72 96
+
+# ---- tower two (far, small) ----
+arc 108 24 10 2
+arc 98 44 2 20 1
+arc 118 44 2 20 8
+arc 91 44 9 40 128
+arc 125 44 9 40 16
+arc 108 83 15 3 240
+line 112 26 112 44 113 62 115 86
+
+# ---- the containment dome, far off between the towers ----
+arc 87 62 9 12 15
+line 87 50 87 46
+# far hills, right of tower two
+color 2
+arc 132 62 14 5 15
+
+# ---- the turbine hall, left of tower one ----
+rect 27 52 45 62
+color 0
+line 30 56 32 56
+line 35 56 37 56
+line 40 56 42 56
+
+# ---- the rock and the cave mouth ----
+color 8
+line 126 123 125 108 128 100 127 92 131 84 130 76 135 70 137 60 142 56 146 62 150 52 155 48 159 50
+line 126 123 159 123
+arc 142 106 10 10 15
+line 132 106 132 122
+line 152 106 152 122
+# the lit face of the rock, and cracks
+line 129 106 131 94 134 86 134 78 139 72 141 62
+line 146 62 148 74 154 80 159 78
+line 152 96 156 90 159 92
+# a flat stone by the lane
+arc 48 138 4 2
+# the notice by the cave: a board on a post
+color 6
+rect 106 132 120 141
+line 112 141 112 150
+line 114 141 114 150
+line 112 150 114 150
+
+# ---- the fence ----
+color 7
+# side fence, running back along the lane
+line 34 100 22 56
+line 22 56 22 62
+# front fence: top rail, posts
+line 34 100 62 100
+line 102 100 128 100
+line 34 100 34 122
+line 62 98 62 122
+line 114 100 114 122
+color 8
+line 34 122 22 62
+line 34 123 131 123
+line 34 122 62 122
+line 102 122 126 122
+
+# ---- the sign on the fence ----
+color 8
+rect 38 103 58 113
+
+# ---- the guard booth ----
+color 8
+rect 88 96 102 122
+poly 86 96 104 96 102 92 88 92
+rect 91 100 99 109
+
+# ---- the lane north and the road to the gate ----
+color 6
+line 34 124 44 167
+line 62 124 50 167
+line 88 124 100 167
+
+# ================= fills =================
+# sky
+color 9
+fill 2 2
+color 11
+pattern 1 9
+fill 2 50
+fill 86 40
+fill 140 40
+pattern 0
+
+# tower one: lit side, shade side, the dark inside of the rim
+color 7
+fill 56 50
+color 8
+pattern 1 7
+fill 74 60
+pattern 0
+color 0
+fill 62 11
+
+# tower two
+color 7
+fill 104 50
+color 8
+pattern 1 7
+fill 116 60
+pattern 0
+color 0
+fill 108 24
+
+# dome and turbine hall
+color 7
+fill 87 58
+fill 36 59
+color 2
+fill 132 60
+color 11
+pattern 1 9
+fill 140 60
+pattern 0
+
+# the yard behind the fence: cold asphalt
+color 7
+pattern 3 8
+fill 30 80
+pattern 0
+
+# fence mesh
+color 7
+pattern 11 8
+fill 28 80
+fill 36 118
+fill 108 110
+fill 120 110
+pattern 0
+
+# booth
+color 14
+pattern 1 7
+fill 90 115
+pattern 0
+color 4
+fill 95 94
+color 9
+pattern 2 11
+fill 95 104
+pattern 0
+
+# rock
+color 8
+pattern 1 6
+fill 140 90
+fill 156 70
+pattern 0
+color 0
+fill 142 110
+# the stone
+color 7
+pattern 1 8
+fill 48 138
+pattern 0
+# the notice
+color 14
+fill 110 136
+color 6
+fill 113 145
+
+# lane and road
+color 14
+pattern 1 6
+fill 10 100
+fill 75 150
+pattern 0
+# grass
+color 2
+pattern 6 10
+fill 47 150
+fill 130 150
+pattern 0
+
+# ================= details over the fills =================
+# SOON, in red on the white board
+color 4
+line 41 106 43 106
+plot 41 107
+line 41 108 43 108
+plot 43 109
+line 41 110 43 110
+rect 45 106 47 110
+rect 49 106 51 110
+line 53 106 53 110
+line 56 106 56 110
+plot 54 107
+plot 55 108
+# the barrier across the gate
+color 12
+line 63 110 87 110
+line 63 111 87 111
+color 15
+line 67 110 70 110
+line 67 111 70 111
+line 75 110 78 110
+line 75 111 78 111
+line 83 110 86 110
+line 83 111 86 111
+# a hazard sign on the fence
+color 14
+line 106 105 110 105
+line 106 106 110 106
+line 106 107 110 107
+line 106 108 110 108
+color 0
+plot 108 106
+plot 107 108
+plot 109 108
+# the ring at the foot of each tower, where the air would go in
+color 8
+arc 62 89 21 4 240
+arc 108 81 14 3 240
+# a pylon on the far hill. The wires go nowhere warm
+color 8
+line 125 57 127 30 129 57
+line 125 57 129 48 125 48 129 40 126 40 128 34
+line 129 57 125 48
+line 125 48 129 48
+line 129 40 126 40
+line 122 36 132 36
+line 123 41 131 41
+color 0
+line 122 36 118 38
+line 132 36 142 41 152 41 159 38
+line 131 41 142 46 152 46 159 43
+plot 146 40 148 40
+# more dry grass, and stones nobody has kicked
+color 2
+line 100 160 99 156
+line 102 160 103 157
+line 146 144 145 141
+line 148 144 149 141
+line 24 158 23 154
+line 26 158 27 155
+color 8
+line 138 160 141 160
+line 139 159 140 159
+line 12 128 15 128
+line 13 127 14 127
+# birds: the only things moving
+color 0
+line 20 20 22 22 24 20
+line 30 26 32 28 34 26
+line 134 16 136 18 138 16
+# the notice: a red warning triangle and two lines nobody reads
+color 4
+line 113 134 110 138 116 138 113 134
+plot 113 136 113 137
+color 8
+line 108 140 118 140
+# dry grass
+color 2
+line 60 150 59 146
+line 62 150 63 147
+line 130 158 129 154
+line 132 158 133 155
+line 20 140 19 137
+# a nest on the rim of tower two
+color 6
+line 113 22 117 22
+line 114 21 116 21
+
+# ================= priority and control =================
+color off
+pri 0
+# the fence and the rock stop you: two rows, so a 2-pixel step can't skip them
+line 34 122 131 122
+line 34 123 131 123
+line 153 122 159 122
+line 153 123 159 123
+# the cave mouth: a solid row behind, two trigger rows in front
+line 132 121 152 121
+line 132 121 132 123
+line 152 121 152 123
+pri 2
+line 133 122 151 122
+line 133 123 151 123
+# the lane: fence on the right, the edge of the map on the left
+pri 0
+line 34 122 22 62
+line 35 122 23 62
+line 0 64 0 116
+# the notice by the cave: walk behind the board, not through the post
+pri 13
+rect 106 132 120 141
+fill 110 136
+line 112 141 112 150
+line 113 141 113 150
+line 114 141 114 150
+pri 0
+line 110 150 116 150
+line 110 151 116 151

@@ -291,6 +291,37 @@ emu-native:
 emu-kermit:
     emu/e2e.sh "make hello" CODEJR/PROGS/HELLO.BAS "$PWD/server/internal/session/testdata/fakeclaude.sh"
 
+# ---- Jr's Quest (apps/jrquest, see its ENGINE.md) ---------------------------
+
+# Build the quest's resources and the one-file browser page (build/jrquest.html)
+quest:
+    cd apps/jrquest && node tools/mkviews.js game/view && node tools/pack.js game build && node tools/bundle.js build build/jrquest.html && node tools/review.js build build/review.html
+
+# Build the review page (build/review.html): every room, sprite and line of text, with comments.
+# Open the file, or run `just quest-serve` and go to http://127.0.0.1:4861/admin so comments land in apps/jrquest/review/
+quest-review:
+    cd apps/jrquest && node tools/mkviews.js game/view && node tools/pack.js game build && node tools/review.js build build/review.html
+
+# Quest tests: tools, interpreter, server, and the whole game played start to finish
+quest-test:
+    cd apps/jrquest && node --test test/
+
+# Play the quest with the AI parser and the live ending (this laptop only, uses your claude login)
+quest-serve *args: quest
+    cd apps/jrquest && node tools/serve.js {{args}}
+
+# Play the whole game headless from the date prompt to the ending, with screenshots
+quest-shots dir="/tmp/jrquest-shots": quest
+    mkdir -p {{dir}} && cd apps/jrquest && node tools/play.js build --script test/walkthrough.txt --png-dir {{dir}}
+
+# Check every quest picture for leaking fills, thin triggers and stray white
+quest-lint:
+    cd apps/jrquest && node tools/lint.js game/pic/*.pic
+
+# Preview one quest picture: just quest-pic 002_castle /tmp/castle.png
+quest-pic name png:
+    cd apps/jrquest && node tools/pic.js game/pic/{{name}}.pic --png {{png}}
+
 # ---- upkeep ---------------------------------------------------------------
 
 # Format the Go code

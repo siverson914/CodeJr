@@ -1,0 +1,10 @@
+desc "The golf ledger"
+loop 0
+cel 5 7 trans=5
+..8..
+11111
+1FFF1
+1F8F1
+1FFF1
+1F8F1
+11111

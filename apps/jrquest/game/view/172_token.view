@@ -1,0 +1,14 @@
+desc "One token"
+loop 0
+cel 5 5 trans=5
+.666.
+6EEE6
+6EFE6
+6EEE6
+.666.
+cel 5 5 trans=5
+..6..
+.6E6.
+.6F6.
+.6E6.
+..6..

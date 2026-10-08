@@ -1,0 +1,11 @@
+# Title fanfare. Our own tune, three voices.
+tempo 132
+voice 1
+vol 15
+c5/8 r/16 c5/16 c5/8 e5/8 | g5/4 e5/8 g5/8 | c6/2
+voice 2
+vol 12
+e4/8 r/16 e4/16 e4/8 g4/8 | c5/4 c5/8 e5/8 | g5/2
+voice 3
+vol 11
+c3/4 g3/4 | c3/4 g3/4 | c3/2

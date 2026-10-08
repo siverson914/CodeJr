@@ -1,0 +1,79 @@
+# Room 3, Token Meadow: tokens grow back, and twelve is all JR can hold
+# before he has the Chest.
+# node tools/play.js build --script test/rooms/03_meadow_cap.txt --png-dir out
+5
+type debug
+5
+type tp
+2
+type 3
+6
+key left
+17
+key left
+2
+type pick tokens
+3
+expect You pick
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+type pick tokens
+3
+expect You pick
+key enter
+2
+key enter
+2
+shot cap-01-picked
+# wait for them to grow back
+160
+shot cap-02-regrown
+type pick tokens
+3
+expect You pick
+key enter
+2
+key enter
+2
+type pick tokens
+3
+expect You pick
+key enter
+2
+key enter
+2
+# wait for them to grow back
+160
+type pick tokens
+3
+expect You pick
+key enter
+2
+key enter
+2
+type pick tokens
+3
+expect You pick
+key enter
+2
+key enter
+2
+# wait for them to grow back
+160
+type count tokens
+3
+expect You have 12 tokens
+key enter
+2
+type pick tokens
+3
+expect twelve is all a 128K knight can carry
+shot cap-03-full
+key enter
+2

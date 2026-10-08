@@ -1,0 +1,27 @@
+# Room 13, the Cathedral (groups 1300 to 1399). Rooms 8 and 11 use some
+# of these too: all three rooms have one author.
+1300: cathedral, church, labs, lab, spires, spire, closed labs
+1301: one, two, hundred, thousand, million, billion, none, many, lots, 42, twelve, infinite, forty two
+1302: sam, altman, sam altman
+1303: dario, amodei, dario amodei
+1304: wizards, wizard, both, them
+1305: price list, prices, price, pricing, subscription, plan, yearly plan, price tag
+1306: rose window, rose
+1307: banner, banners
+1308: graves, grave, graveyard, tombstones, tombstone, headstones, headstone
+1309: steps, step
+1310: hands, handshake
+1311: shake, clasp
+1312: question, riddle
+1313: event horizon, singularity, takeoff
+1314: essay, essays, writing
+1315: homework
+1316: war ministry, ministry, pentagon, weapons
+1317: cypress, cypresses, trees
+1318: keyhole, case lock
+1319: fists, fist
+1320: answer, reply, guess
+1321: portrait, photo, photograph
+1322: spikes, railing
+1323: neighbors, neighbours
+1324: practice yard

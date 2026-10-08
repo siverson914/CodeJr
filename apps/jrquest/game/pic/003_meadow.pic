@@ -1,0 +1,235 @@
+# Room 3: Token Meadow. Tokens grow here like flowers, in beds on the left.
+# DHH's cottage, with tiled windows that never overlap, is on the right.
+# The path runs north to Sand Hill Bridge. Castle Steve is the speck on
+# the western hill.
+# Outlines first, fills after: a fill only replaces white.
+
+# ---- sky ----
+color 9
+line 0 28 159 28
+color 14
+circle 66 12 7
+# clouds (left white)
+color 7
+arc 20 14 13 6 15
+line 7 14 33 14
+arc 112 20 15 7 15
+line 97 20 127 20
+arc 148 9 9 4 15
+line 139 9 157 9
+
+# ---- far hills, and the horizon ----
+color 2
+arc 30 52 34 14 15
+arc 60 52 28 9 15
+line 0 52 90 52
+line 153 52 159 52
+# Castle Steve, a long way west
+color 8
+poly 24 38 24 31 27 31 27 34 33 34 33 31 36 31 36 38
+
+# ---- the cottage ----
+color 6
+poly 83 66 94 44 148 44 159 66
+line 88 66 88 108
+line 154 66 154 108
+line 88 108 154 108
+# thatch ridges
+line 91 51 151 51
+line 87 58 155 58
+# timber
+line 89 70 153 70
+line 115 70 115 108
+# door, arched
+line 100 108 100 86
+line 112 108 112 86
+arc 106 86 6 5 15
+line 106 82 106 107
+color 14
+plot 110 97
+# chimney
+color 8
+line 134 44 134 36 140 36 140 44
+line 133 35 141 35
+# the windows: tiled. One big one and a stack beside it. None overlap.
+color 0
+rect 118 74 134 103
+rect 137 74 151 87
+rect 137 90 143 103
+rect 145 90 151 103
+# what is on them: a prompt, and bars
+color 10
+line 120 77 123 77
+line 120 80 128 80
+line 120 83 125 83
+color 14
+line 139 77 147 77
+line 139 80 144 80
+
+# ---- the path ----
+color 6
+line 44 167 48 120 52 90 56 53
+line 82 167 77 124
+line 75 112 70 90 68 53
+# the branch to the cottage door
+line 77 124 112 109
+line 75 112 100 109
+
+# ---- the gravel pad where the race car is parked ----
+color 8
+arc 132 126 24 7
+
+# ---- a tree ----
+color 2
+arc 18 72 11 12
+color 6
+line 16 84 16 92 20 92 20 84
+color 10
+plot 12 66 20 64 24 72 14 76 19 80 10 72 23 79
+
+# ---- the token beds ----
+color 6
+poly 4 113 42 113 40 119 2 119
+poly 6 135 40 135 38 141 4 141
+poly 2 157 38 157 36 163 0 163
+
+# ---- wild tokens: too small to pick, they are still growing ----
+color 2
+line 46 84 46 87
+line 104 146 104 149
+line 150 142 150 145
+line 126 162 126 165
+line 144 160 144 163
+line 76 62 76 64
+line 34 92 34 94
+line 92 134 92 137
+line 6 100 6 102
+color 12
+line 103 145 105 145
+line 75 61 77 61
+line 5 99 7 99
+color 14
+line 45 83 47 83
+line 149 141 151 141
+color 13
+line 125 161 127 161
+line 91 133 93 133
+color 11
+line 143 159 145 159
+line 33 91 35 91
+# grass tufts
+color 2
+rel 40 104 1 -2 1 2
+rel 12 148 1 -2 1 2
+rel 30 128 1 -2 1 2
+rel 98 160 1 -2 1 2
+rel 134 152 1 -2 1 2
+rel 110 138 1 -2 1 2
+rel 152 118 1 -2 1 2
+rel 86 148 1 -2 1 2
+rel 74 80 1 -2 1 2
+rel 22 58 1 -2 1 2
+rel 78 100 1 -2 1 2
+
+# ================= fills =================
+color 9
+fill 2 2
+color 14
+fill 66 12
+# haze near the horizon
+color 11
+pattern 1 9
+fill 2 30
+pattern 0
+# hills
+color 10
+pattern 1 2
+fill 20 45
+pattern 0
+color 2
+pattern 2 3
+fill 75 48
+pattern 0
+color 2
+pattern 1 3
+fill 50 50
+pattern 0
+# the far castle
+color 7
+fill 30 36
+# meadow
+color 2
+pattern 6 10
+fill 20 150
+fill 130 150
+fill 76 60
+fill 157 60
+pattern 0
+# tree
+color 2
+fill 18 72
+color 6
+fill 18 88
+# path
+color 14
+pattern 1 6
+fill 62 140
+pattern 0
+# thatch
+color 6
+pattern 11 14
+fill 120 47
+fill 120 55
+fill 120 62
+pattern 0
+# chimney
+color 4
+pattern 14 8
+fill 137 40
+pattern 0
+# door
+color 4
+fill 103 97
+fill 109 97
+# windows
+color 1
+fill 126 95
+color 0
+fill 144 83
+color 3
+fill 140 97
+color 9
+pattern 1 11
+fill 148 97
+pattern 0
+# gravel
+color 8
+pattern 1 7
+fill 132 126
+pattern 0
+# soil
+color 4
+pattern 6 6
+fill 20 116
+fill 20 138
+fill 20 160
+pattern 0
+
+# ================= priority and control =================
+color off
+# the cottage is solid from the horizon down to its doorstep
+pri 0
+line 82 53 82 110
+line 82 109 159 109
+line 82 110 159 110
+# the tree hides JR when he is behind it, and its trunk stops him
+pri 8
+arc 18 72 11 12
+fill 18 72
+pri 0
+line 12 84 24 84
+line 12 85 24 85
+line 12 92 24 92
+line 12 93 24 93
+line 12 84 12 93
+line 24 84 24 93

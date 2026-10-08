@@ -1,0 +1,88 @@
+# Room 16 again with a date from the last century and the two steps the
+# other way round: the Chest first, then the date.
+5
+expect Current date is Tue
+type 12-31-1999
+5
+expect The Search for Intelligence
+key enter
+40
+expect You kept me
+key enter
+2
+key enter
+2
+key enter
+2
+expect north of San Diego
+key enter
+2
+3
+type gimme
+2
+type 11
+3
+type gimme
+2
+type 7
+3
+type tp
+2
+type 16
+6
+key right
+34
+key enter
+3
+key right
+18
+key enter
+2
+key enter
+3
+30
+expect an oval mirror
+key enter
+2
+key enter
+3
+type give chest to mirror
+3
+expect You keep the Chest
+key enter
+2
+expect The same day it always is
+key enter
+2
+expect a day long past
+key enter
+2
+1
+type give chest
+3
+expect What it doesn't have is today
+key enter
+2
+1
+type tell it the date
+3
+expect JR: It is 12-31-1999.
+key enter
+2
+expect The dark glass clears
+key enter
+2
+expect MIRROR: ...Hello?
+key enter
+2
+expect JR: Hello. It's 12-31-1999.
+shot 01-1999
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+3
+expect Score:18 of 158

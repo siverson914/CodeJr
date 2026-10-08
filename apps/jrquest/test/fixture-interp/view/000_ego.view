@@ -1,0 +1,9 @@
+desc "The fixture's ego"
+loop 0
+cel 4 6 trans=0
+.CC.
+CCCC
+CCCC
+.CC.
+.CC.
+C..C

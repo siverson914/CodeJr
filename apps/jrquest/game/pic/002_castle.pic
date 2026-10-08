@@ -1,0 +1,252 @@
+# Room 2: Castle Steve, a beach-town house with ideas above its station.
+# The courtyard is between the house and the front wall. The gate in the
+# wall is a cartridge slot.
+
+# ---- horizon, sea, sun ----
+color 1
+line 0 46 30 46
+line 130 46 159 46
+color 14
+circle 138 22 9
+# clouds
+color 7
+arc 30 16 14 4 15
+line 16 16 44 16
+arc 70 10 10 3 15
+line 60 10 80 10
+
+# ---- beach on both sides of the house ----
+color 14
+line 0 72 30 72
+line 130 72 159 72
+# where the sky changes shade
+color 9
+line 0 30 30 30
+line 46 30 53 30
+line 107 30 114 30
+line 130 30 159 30
+
+# ---- the house ----
+color 8
+# towers
+rect 30 26 46 82
+rect 114 26 130 82
+# battlements: left tower
+line 30 26 30 22 34 22 34 26
+line 38 26 38 22 42 22 42 26
+line 46 26 46 22
+# right tower
+line 114 26 114 22 118 22 118 26
+line 122 26 122 22 126 22 126 26
+line 130 26 130 22
+# main block and its tile roof
+line 46 44 114 44
+line 46 82 114 82
+color 4
+poly 44 44 116 44 108 32 52 32
+line 52 36 108 36
+line 50 40 110 40
+# front door (arched) and its step
+color 6
+line 73 82 73 64
+line 87 82 87 64
+arc 80 64 7 6 15
+color 8
+line 70 82 90 82
+# windows
+color 8
+rect 54 52 64 64
+rect 96 52 106 64
+rect 35 34 41 44
+# the guest room window, lit, top of the right tower
+rect 119 34 125 44
+
+# ---- palm tree, left of the house ----
+color 6
+line 13 82 14 66 16 52
+line 15 82 16 66 18 52
+color 2
+line 17 52 8 48 4 52
+line 17 52 12 44 6 44
+line 17 52 20 44 26 45
+line 17 52 26 49 29 54
+line 17 51 17 45
+
+# ---- courtyard edge and the front wall ----
+color 8
+line 0 82 30 82
+line 130 82 159 82
+# wall top and face
+line 0 100 66 100
+line 94 100 159 100
+line 0 104 66 104
+line 94 104 159 104
+line 0 122 66 122
+line 94 122 159 122
+# gateposts
+rect 62 92 68 122
+rect 92 92 98 122
+line 62 92 62 88 68 88 68 92
+line 92 92 92 88 98 88 98 92
+# stones
+color 7
+line 20 104 20 113
+line 44 104 44 113
+line 10 113 10 122
+line 32 113 32 122
+line 54 113 54 122
+line 0 113 61 113
+line 99 113 159 113
+line 116 104 116 113
+line 140 104 140 113
+line 106 113 106 122
+line 128 113 128 122
+line 150 113 150 122
+
+# ---- path from the gate ----
+color 6
+line 69 122 91 122
+line 69 122 58 167
+line 91 122 104 167
+
+# ---- flowers ----
+color 12
+plot 20 140
+color 14
+plot 132 150
+
+# ================= fills =================
+# sky: light blue above, hazier toward the sea
+color 9
+fill 2 2
+fill 80 28
+color 11
+pattern 1 9
+fill 2 40
+fill 157 40
+fill 26 40
+fill 50 31
+fill 110 31
+pattern 0
+color 14
+fill 138 22
+# sea and sand
+color 1
+pattern 4 9
+fill 2 60
+fill 157 60
+fill 24 62
+pattern 0
+color 6
+pattern 3 14
+fill 2 78
+fill 157 78
+fill 24 78
+pattern 0
+# house walls: warm stucco
+color 14
+pattern 1 7
+fill 60 70
+fill 36 60
+fill 120 60
+fill 32 24
+fill 40 24
+fill 116 24
+fill 124 24
+pattern 0
+# roof
+color 12
+fill 80 34
+color 4
+fill 80 38
+color 12
+fill 80 42
+# door
+color 6
+fill 80 70
+# windows
+color 9
+fill 58 58
+fill 100 58
+fill 38 40
+color 14
+fill 122 40
+# courtyard: pale paving
+color 12
+pattern 1 6
+fill 50 92
+fill 140 92
+fill 5 92
+fill 80 95
+pattern 0
+# wall top, wall face
+color 7
+fill 30 102
+fill 120 102
+color 8
+pattern 1 7
+fill 5 108
+fill 30 108
+fill 50 108
+fill 110 108
+fill 130 108
+fill 150 108
+fill 5 118
+fill 20 118
+fill 44 118
+fill 58 118
+fill 102 118
+fill 116 118
+fill 140 118
+fill 155 118
+pattern 0
+# gateposts
+color 7
+fill 65 110
+fill 95 110
+fill 65 90
+fill 95 90
+# lawn and path
+color 2
+pattern 6 10
+fill 20 150
+fill 140 150
+pattern 0
+color 14
+pattern 1 6
+fill 80 140
+pattern 0
+
+# ================= priority and control =================
+color off
+# the wall and gateposts hide whoever stands in the courtyard behind them
+pri 10
+rect 0 100 61 122
+rect 62 88 68 122
+rect 92 88 98 122
+rect 99 100 159 122
+fill 30 110
+fill 65 105
+fill 95 105
+fill 130 110
+# the house front stops you. Row 83 is solid all the way across; row 84
+# is solid except at the front door, where it is a trigger.
+pri 0
+line 0 83 159 83
+line 0 84 72 84
+line 88 84 159 84
+pri 2
+line 73 84 87 84
+line 73 85 87 85
+# the courtyard is walled at both ends
+pri 0
+line 0 84 0 99
+line 159 84 159 99
+# the wall stops you on both sides, except at the gate
+pri 0
+line 0 99 68 99
+line 92 99 159 99
+line 0 123 68 123
+line 92 123 159 123
+line 68 99 68 123
+line 92 99 92 123

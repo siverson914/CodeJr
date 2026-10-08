@@ -1,0 +1,8 @@
+desc "The Technical Reference"
+loop 0
+cel 6 5 trans=5
+888888
+811118
+81FF18
+811118
+888888

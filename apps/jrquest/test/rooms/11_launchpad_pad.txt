@@ -1,0 +1,29 @@
+# Room 11: standing on the pad through the countdown. The death screen ends
+# the script (play.js cannot press R alone).
+5
+type debug
+5
+type tp
+3
+type 11
+6
+# ---- the pad: a countdown he does not walk away from ----
+key up
+19
+key right
+8
+expect Static fire test in ten seconds
+key enter
+2
+expect Walk off the pad
+key enter
+2
+key right
+20
+expect T minus
+shot 11-20-still-there
+50
+expect You were thirty-six months early.
+expect Abort, Retry, Fail?
+shot 11-05-pad-death
+

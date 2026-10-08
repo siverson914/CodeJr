@@ -1,0 +1,19 @@
+# Room 11, the Launch Pad (groups 1100 to 1199)
+1100: rocket, ship, starship, booster, spaceship
+1101: server rack, nose, nose cone
+1102: turbine, turbines, gas turbine, gas turbines, generator, generators, exhaust
+1103: musk, elon, elon musk
+1104: hourglass, sand timer, egg timer
+1105: pad, launch pad, launchpad
+1106: gantry, scaffold, launch tower
+1107: agi
+1108: ladder, paint, paintbrush, brush stroke
+1109: tanks, tank
+1110: mars
+1111: space, orbit, satellites, satellite
+1112: launch, ignite, liftoff, blast off
+1113: permit, permits
+1114: mesa
+1115: lawsuit, jury, court, trial
+1116: countdown, loudspeaker, speaker
+1117: thirty six months, 36 months, months

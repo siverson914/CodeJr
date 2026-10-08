@@ -1,0 +1,312 @@
+# Room 6: the Data Center. A castle with no windows (one, for the meter
+# reader) whose front wall is a server rack: seams, status lights, fans.
+# The moat runs along the south. The power plant is upstream, on the hill.
+# Outlines first, fills after, then small details drawn over the fills.
+
+# ---- sky: where the shade changes, two clouds, and a pennant ----
+color 9
+line 0 18 35 18
+line 55 18 111 18
+line 131 18 159 18
+color 7
+arc 18 9 12 4 15
+line 6 9 30 9
+arc 86 11 12 4 15
+line 74 11 98 11
+color 0
+line 45 7 45 1
+color 4
+poly 46 1 52 3 46 5
+
+# ---- hills and the horizon ----
+color 2
+arc 10 58 24 10 15
+line 0 58 35 58
+arc 150 58 20 14 15
+line 131 58 159 58
+
+# ---- the power plant upstream, on the right hill ----
+color 8
+line 143 45 143 37 157 37 157 45
+rect 146 28 148 37
+rect 152 30 154 37
+# smoke
+color 7
+arc 147 24 2 2
+arc 143 22 2 2
+arc 153 26 2 2
+
+# ---- the castle: two towers and a wall ----
+color 8
+# left tower and its battlements
+ycorner 36 12 8 39 12 43 8 47 12 51 8 54 12
+line 36 12 36 100
+line 54 12 54 100
+# right tower
+ycorner 112 12 8 115 12 119 8 123 12 127 8 130 12
+line 112 12 112 100
+line 130 12 130 100
+# the wall between them, with battlements
+xcorner 54 26 58 30 62 26 66 30 70 26 74 30 78 26 82 30 86 26 90 30 94 26 98 30 102 26 106 30 110 26 112
+line 36 100 130 100
+# the steel door
+color 0
+line 76 100 76 82
+line 90 100 90 82
+arc 83 82 7 5 15
+# the nameplate
+rect 66 62 100 69
+# the one window, and the service port under it
+rect 96 80 106 90
+rect 99 94 103 96
+
+# ---- the tree, right ----
+color 6
+line 144 98 144 85
+line 148 98 148 85
+line 144 98 148 98
+color 2
+arc 146 73 12 12
+
+# ---- the pipe from the castle to the meter ----
+color 8
+line 43 101 43 120
+line 46 101 46 120
+line 43 120 46 120
+# the meter: a dial on a post
+color 0
+arc 45 127 5 6
+color 8
+rect 44 133 46 139
+
+# ---- the path: west to east, and a lane north past the castle ----
+color 6
+line 0 106 6 106 12 59
+line 22 59 28 106 43 106
+line 46 106 159 109
+line 0 118 43 118
+line 46 118 159 121
+
+# ---- the bank and the waterline ----
+color 6
+line 0 141 20 142 40 141 60 143 85 141 110 142 135 141 159 142
+line 0 145 25 146 50 145 75 147 100 145 130 146 159 145
+
+# ================= fills =================
+# sky
+color 9
+fill 2 2
+color 11
+pattern 1 9
+fill 2 22
+fill 80 22
+fill 157 22
+pattern 0
+# hills
+color 12
+fill 48 3
+color 2
+pattern 4 10
+fill 10 54
+fill 150 52
+pattern 0
+# power plant
+color 7
+fill 150 41
+color 8
+fill 147 32
+fill 153 33
+# towers: darker stone
+color 8
+pattern 4 7
+fill 46 60
+fill 120 60
+pattern 0
+# wall: stone
+color 8
+pattern 1 7
+fill 60 50
+pattern 0
+# door, nameplate, window, port
+color 7
+fill 83 90
+color 14
+fill 80 66
+color 0
+fill 100 85
+fill 101 95
+# tree
+color 6
+fill 146 90
+color 2
+pattern 1 10
+fill 146 73
+pattern 0
+# pipe and meter post
+color 7
+fill 44 110
+fill 45 136
+# grass
+color 2
+pattern 6 10
+fill 3 80
+fill 33 80
+fill 60 103
+fill 80 130
+pattern 0
+# path
+color 14
+pattern 1 6
+fill 17 100
+fill 100 113
+pattern 0
+# mud bank
+color 6
+fill 80 144
+# the moat
+color 1
+pattern 4 9
+fill 80 158
+pattern 0
+
+# ================= details over the fills =================
+# rack seams across the wall
+color 8
+line 55 44 111 44
+line 55 58 111 58
+line 55 73 75 73
+line 91 73 111 73
+# status lights, a column at the left of each unit
+color 10
+plot 57 48 58 48 57 51 58 51 61 48 62 48 57 62 58 62 61 66 62 66 57 77 58 77 57 85 58 85
+color 12
+plot 61 51 62 51 57 66 58 66 61 81 62 81
+color 14
+plot 57 54 58 54 61 62 62 62 57 81 58 81 61 77 62 77
+color 10
+plot 107 62 108 62 107 66 108 66 65 89 66 89
+# vent slits
+color 0
+line 68 48 108 48
+line 68 51 108 51
+line 68 54 108 54
+# nameplate lettering
+color 0
+line 69 65 77 65
+line 80 65 84 65
+line 87 65 97 65
+line 69 67 73 67
+# door: seam, rivets, a red light over it
+color 8
+line 83 78 83 99
+plot 79 86 87 86 79 94 87 94
+color 12
+plot 82 75 83 75 84 75
+# window bars
+color 8
+line 99 81 99 89
+line 103 81 103 89
+# tower stones
+color 0
+line 39 24 44 24
+line 46 36 51 36
+line 39 50 44 50
+line 46 64 51 64
+line 39 78 44 78
+line 46 90 51 90
+line 115 30 120 30
+line 122 44 127 44
+line 115 58 120 58
+line 122 72 127 72
+line 115 86 120 86
+# arrow slits that are really drive bays
+line 44 30 46 30
+line 44 31 46 31
+line 120 36 122 36
+line 120 37 122 37
+# the meter's needle and ticks
+color 4
+line 45 127 48 124
+color 0
+plot 42 127 48 127 45 123
+# the plant's window and the river running down from it
+color 14
+plot 147 41 150 41 153 41
+color 11
+line 139 49 137 52 139 54 135 56
+# tufts and flowers in the grass
+color 2
+plot 70 128 71 127 72 128 96 134 97 133 98 134 20 130 21 129 22 130 136 104 137 103 138 104
+color 14
+plot 84 126 26 136 110 124
+color 12
+plot 134 126 60 136
+color 15
+plot 3 90 2 70 156 116
+# ripples
+color 11
+line 12 152 22 152
+line 60 156 74 156
+line 104 151 116 151
+line 130 160 144 160
+line 30 163 40 163
+color 9
+line 84 162 96 162
+line 140 153 150 153
+# lily pads
+color 10
+line 52 150 56 150
+line 53 151 55 151
+line 118 158 122 158
+line 119 159 121 159
+# reeds on the bank
+color 2
+line 8 144 8 136
+line 11 145 12 138
+line 14 144 13 139
+line 150 145 150 137
+line 153 145 154 139
+color 6
+plot 8 135 12 137 150 136
+# a drain into the moat
+color 0
+line 62 143 66 143
+line 62 144 66 144
+color 9
+line 64 145 64 147
+
+# ================= priority and control =================
+color off
+# the castle stops you: sides, and a base two rows thick
+pri 0
+line 36 59 36 102
+line 130 59 130 102
+line 36 101 130 101
+line 36 102 130 102
+# the tree: band 9, and its trunk is solid
+pri 9
+arc 146 73 12 12
+line 144 98 144 85
+line 148 98 148 85
+line 144 98 148 98
+fill 146 73
+fill 146 90
+pri 0
+rect 142 96 150 99
+# the meter: band 12, solid from the top of its band down
+pri 12
+arc 45 127 5 6
+rect 44 133 46 139
+fill 45 127
+fill 45 136
+pri 0
+rect 41 131 49 139
+# the well (a view) stands here
+pri 0
+rect 118 131 141 137
+# the bank: two rows of warning, then water
+pri 2
+line 0 142 159 142
+line 0 143 159 143
+pri 3
+fill 80 155

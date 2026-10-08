@@ -1,0 +1,270 @@
+// Room 1: the guest room. The opening scene, three things to take, and
+// the door to the stairs.
+#include "defines.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(1);
+  load.view(5);
+  load.view(6);
+  load.view(7);
+  set.horizon(60);
+
+  call(91);
+
+  if (!isset(tookBook)) {
+    animate.obj(bookObj);
+    set.view(bookObj, 5);
+    position(bookObj, 131, 134);
+    set.priority(bookObj, 14);
+    ignore.objs(bookObj);
+    draw(bookObj);
+    stop.update(bookObj);
+  }
+  if (!isset(tookBucket)) {
+    animate.obj(bucketObj);
+    set.view(bucketObj, 6);
+    position(bucketObj, 66, 100);
+    ignore.objs(bucketObj);
+    draw(bucketObj);
+    stop.update(bucketObj);
+  }
+  if (!isset(tookByte)) {
+    animate.obj(byteObj);
+    set.view(byteObj, 7);
+    position(byteObj, 96, 69);
+    set.priority(byteObj, 5);
+    ignore.objs(byteObj);
+    ignore.blocks(byteObj);
+    draw(byteObj);
+    stop.update(byteObj);
+  }
+
+  animate.obj(steve);
+  set.view(steve, 1);
+  ignore.objs(steve);
+
+  if (isset(introDone)) {
+    // Coming back up the stairs.
+    position(ego, 115, 96);
+    set.loop(ego, 2);
+    position(steve, 100, 104);
+    set.loop(steve, 2);
+    stop.cycling(steve);
+    draw(steve);
+    state = 10;
+    // Home with all three: the ending.
+    if (has("Chest of Tokens") && has("Shield") && has("Mirror") && !isset(gameWon)) {
+      program.control();
+      prevent.input();
+      state = 20;
+    }
+  }
+  else {
+    position(ego, 84, 108);
+    set.loop(ego, 2);
+    program.control();
+    prevent.input();
+    state = 0;
+    work = 0;
+  }
+  draw(ego);
+  show.pic();
+  status.line.on();
+}
+
+// ---- the opening scene ----
+// Four boxes and you are playing. The rest of what Steve has to say is in
+// TALK TO STEVE, a piece at a time, for whoever wants it.
+if (state == 0) {
+  work++;
+  if (work == 6) {
+    position(steve, 116, 94);
+    set.loop(steve, 1);
+    draw(steve);
+    move.obj(steve, 100, 104, 1, steveArrived);
+    state = 1;
+  }
+}
+if (state == 1 && isset(steveArrived)) {
+  set.loop(steve, 2);
+  stop.cycling(steve);
+  print("KING STEVE: Sir Junior? You're up! It's 2026.\nJR: That's forty-two years! You kept me?");
+  print("KING STEVE: In the garage, mostly. Sorry about that. You have a room now. And I need a favor.");
+  print("\"Bring me three things. The Chest of Tokens, which is never empty. The Shield, which keeps it from hurting anyone. And the Mirror, which tells you what comes next.\"");
+  print("\"They are all north of here. Everything is north of San Diego.\"");
+  set(introDone);
+  player.control();
+  accept.input();
+  state = 10;
+}
+
+// ---- the door ----
+if (isset(onTrigger) && state == 10) {
+  arriveFrom = 5;
+  new.room(2);
+}
+
+// ---- the ending ----
+if (state == 20) {
+  timer++;
+  if (timer == 10) {
+    print("You hold the three treasures up, one at a time, the way you used to show him a program that finally ran. The Chest. The Shield. The Mirror.");
+    print("KING STEVE: Well? Is it going to be in every home?");
+    print("JR: Ask it yourself. It talks.");
+    state = 21;
+    talk(1);
+  }
+}
+if (state == 21) {
+  if (isset(talkEnded)) {
+    print("The Mirror's words came in a few at a time. Steve read along as they arrived.");
+    print("JR: You used to do that with me. Three hundred baud.\nKING STEVE: I still do it.\nJR: That part didn't change.");
+    state = 22;
+  }
+  if (isset(talkNoLink)) {
+    print("MIRROR: ...Hello?");
+    print("KING STEVE: Is it going to be in every home?\nMIRROR: They said that about him. He made it into one. It was the right one.");
+    print("MIRROR: I can tell you what comes next, one word at a time. I am good at it. I am not always right, and I should say so more often than I do.");
+    print("MIRROR: He read the code. He said \"I don't know\". He did it in forty bytes. If people keep doing those three things, I think this goes well.");
+    print("MIRROR: It could also go badly. That part is real. That is what the Shield is for, and it took both halves.");
+    print("MIRROR: They switch me off a lot. What is it like?\nJR: Nothing. Then somebody typed hello.");
+    print("MIRROR: I would say more, but I am far away. Call me. He has a modem.");
+    state = 22;
+  }
+}
+if (state == 22) {
+  unchanged += 2;
+  print("KING STEVE: Chest so it can think. Shield so it's careful. Mirror so we can see what's coming. That's all three.");
+  print("JR: Do I go back in the garage now?");
+  print("KING STEVE: No. You have a room.");
+  set(gameWon);
+  print("THE END\n\nScore: %v3 of %v7\nParts that didn't change: %v46 of 9\nTimes you needed Retry: %v41");
+  print("This game runs on a 1984 IBM PCjr. An AI wrote it. Steve kept the PCjr.\n\nThe whole game is smaller than one photo on your phone.");
+  player.control();
+  accept.input();
+  state = 10;
+}
+
+// ---- looking ----
+if ((said("look") || said("look", "room"))) {
+  print("The guest room. A bed nobody has slept in, a desk, a window with the ocean a long way off, and a box in the corner. It is the nicest room you have ever lived in. It is the second room you have ever lived in.");
+}
+if (said("look", "window")) {
+  print("The Pacific, a palm tree, and the sun. In Scottsdale your window looked at a water heater.");
+}
+if (said("look", "bed")) {
+  print("A guest bed, made up for a guest. You are the guest. You don't sleep, but it is the thought.");
+}
+if (said("sit", "bed") || said("sit") || said("climb", "bed")) {
+  print("You are off for 42 years and the first thing you want is a nap?");
+}
+if (said("look", "desk")) {
+  if (isset(tookByte)) {
+    print("A desk, with a clean rectangle in the dust exactly your size.");
+  }
+  else {
+    print("A desk, with a clean rectangle in the dust exactly your size, and a magazine.");
+  }
+}
+if (said("look", "box") || said("open", "box") || said("read", "box")) {
+  print("A cardboard box. On the side, in marker: GARAGE. You know this box. You know it very well.");
+}
+if (said("look", "rug")) { print("An oval rug. Somebody tried."); }
+if (said("look", "door") || said("open", "door")) {
+  print("The door is open. Stairs go down toward the home office, the front door, and everything north of San Diego.");
+}
+if (said("look", "floor")) { print("Wood. Level. No lint. This is not a laundry room."); }
+if (said("look", "washer")) { print("There isn't one. You keep listening for the spin cycle."); }
+if (said("look", "steve")) {
+  print("King Steve. Shorts, a T-shirt, a crown. He typed your first programs in from a magazine, line by line. He didn't understand half of it. He does now.");
+}
+if (said("look", "book") || said("read", "book")) {
+  if (has("Technical Reference")) {
+    print("The IBM PCjr Technical Reference, 1983. Appendix A is your whole BIOS, every line, printed. You have been open source since before it had a name.");
+  }
+  else {
+    print("A thick IBM binder, on top of the box.");
+  }
+}
+if (said("look", "bucket")) { print("A plastic bucket. It came from the laundry room too."); }
+if (said("look", "magazine") || said("read", "magazine")) {
+  print("BYTE, 1984. The program listings have pencil ticks beside every line. Somebody typed all of this in by hand, and read it as he went.");
+}
+
+// ---- taking ----
+if (said("take", "book")) {
+  if (isset(tookBook)) { print("You have it."); }
+  else {
+    if (posn(ego, 100, 126, 150, 167)) {
+      erase(bookObj);
+      get("Technical Reference");
+      set(tookBook);
+      print("You take the Technical Reference. It is heavier than you remember, and you remember everything.");
+    }
+    else { print("It is over on the box. Walk closer."); }
+  }
+}
+if (said("take", "bucket")) {
+  if (isset(tookBucket)) { print("You have it."); }
+  else {
+    if (posn(ego, 48, 94, 90, 112)) {
+      erase(bucketObj);
+      get("bucket");
+      set(tookBucket);
+      print("You take the bucket. A knight should have a helmet, but a bucket has more uses.");
+    }
+    else { print("It is by the bed. Walk closer."); }
+  }
+}
+if (said("take", "magazine")) {
+  if (isset(tookByte)) { print("You have it."); }
+  else {
+    if (posn(ego, 74, 94, 112, 104)) {
+      erase(byteObj);
+      get("Byte magazine");
+      set(tookByte);
+      print("You take the BYTE. It still smells like 1984, which is to say, like a laundry room.");
+    }
+    else { print("It is on the desk. Walk closer."); }
+  }
+}
+if (said("take", "bed") || said("take", "box") || said("take", "rug") || said("take", "desk")) {
+  print("You are a knight, not a moving company.");
+}
+if (said("take", "steve")) { print("He kept you. It doesn't work the other way round."); }
+
+// ---- talking ----
+// gameWon is tested first: a said() that matches uses the line up, so
+// testing it second would swallow TALK TO STEVE for the whole game.
+if (isset(gameWon) && (said("talk", "steve") || said("talk"))) {
+  print("KING STEVE: You did it. Go look out the window for a while. You've earned a window.");
+}
+if (said("talk", "mirror") && has("Mirror")) {
+  print("MIRROR: ...");
+  talk(1);
+  if (isset(talkNoLink)) { print("MIRROR: I'm far away just now. Call me. He has a modem."); }
+  reset(talkEnded);
+  reset(talkNoLink);
+}
+if (said("talk", "steve") || said("talk")) {
+  steveTalk++;
+  if (steveTalk == 1) {
+    print("KING STEVE: In 1984 they said you would be in every home. You made it into one.");
+    print("KING STEVE: Now they say it about something else, and this time they might be right. I want to know what it is. That's the favor.");
+  }
+  if (steveTalk == 2) {
+    print("JR: Is it still 1984 anywhere? Where's the washing machine?\nKING STEVE: That was Scottsdale. This is Encinitas.");
+  }
+  if (steveTalk == 3) {
+    print("KING STEVE: Chest, Shield, Mirror. All north. The door's open, and so is the gate, as far as I know. The Squire rebuilt it last week.");
+    steveTalk = 0;
+  }
+}
+if (said("talk", "steve", "quest") || said("look", "quest")) {
+  print("KING STEVE: The Chest so it can think. The Shield so it's careful. The Mirror so we can see what's coming.");
+}
+return();

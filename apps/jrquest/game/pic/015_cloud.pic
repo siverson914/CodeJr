@@ -1,0 +1,254 @@
+# Room 15: the Cloud, at the top of the beanstalk. White ground with
+# edges, and on it a mainframe: tape cabinets, a panel of lights, a room
+# of its own, time for rent. Far below, the kingdom.
+# The Cloud is a ring of overlapping puffs. Nothing inside it is filled:
+# white is what a picture starts as. Generated once, then kept by hand.
+
+# ---- sky: three shades, the sun, stars later ----
+color 1
+line 0 24 159 24
+color 9
+line 0 64 33 64
+line 155 64 159 64
+color 14
+circle 16 44 9
+color 7
+arc 132 12 12 3 15
+line 120 12 144 12
+arc 60 16 9 3 15
+line 51 16 69 16
+
+# ---- the kingdom, a long way down ----
+color 2
+arc 80 230 119 70 15
+
+# ---- the mainframe ----
+color 0
+line 34 92 34 40 78 40 78 30 110 30 110 40 154 40 154 92
+line 34 88 154 88
+line 56 40 56 88
+line 78 40 78 88
+line 110 40 110 88
+line 132 40 132 88
+rect 37 44 53 64
+rect 37 68 53 84
+rect 59 44 75 64
+rect 59 68 75 84
+rect 113 44 129 64
+rect 113 68 129 84
+rect 135 44 151 64
+rect 135 68 151 84
+# the processor: a panel of lights, a stripe, a console
+rect 82 34 106 56
+rect 82 60 106 64
+rect 82 69 106 82
+
+# ---- the Cloud: a ring of puffs ----
+color 7
+arc 24 98 12 10
+arc 14 112 9 9
+arc 13 128 8 9
+arc 20 143 12 8
+arc 40 148 13 7
+arc 60 150 13 7
+arc 80 151 13 7
+arc 100 150 13 7
+arc 120 148 13 7
+arc 140 143 12 8
+arc 147 128 8 9
+arc 146 112 9 9
+arc 150 98 7 10
+# the hole the beanstalk came up through
+color 3
+arc 24 122 9 4
+
+# ================= fills =================
+# sky, dark at the top
+color 1
+pattern 1 9
+fill 2 2
+pattern 0
+color 9
+fill 2 30
+fill 157 30
+color 11
+pattern 1 9
+fill 2 70
+fill 157 70
+fill 80 158
+fill 24 122
+pattern 0
+# sun
+color 14
+fill 16 44
+# the kingdom
+color 2
+pattern 1 10
+fill 80 165
+pattern 0
+# cabinets: gray steel, dark windows, blue doors
+color 7
+fill 36 42
+fill 58 42
+fill 80 32
+fill 112 42
+fill 134 42
+color 0
+fill 40 50
+fill 62 50
+fill 116 50
+fill 138 50
+fill 90 40
+color 1
+pattern 1 9
+fill 40 75
+fill 62 75
+fill 116 75
+fill 138 75
+pattern 0
+color 4
+fill 90 62
+color 8
+fill 90 75
+
+# ================= details over the fills =================
+# stars, and a satellite going by with a handful of chips in it
+color 15
+plot 8 5 30 9 47 3 72 7 96 4 110 14 150 6 22 17 84 19 142 20
+color 7
+line 100 9 104 9
+color 11
+line 96 9 99 9
+line 105 9 108 9
+# cabinet tops, door handles, vents
+color 15
+line 35 41 55 41
+line 57 41 77 41
+line 79 31 109 31
+line 111 41 131 41
+line 133 41 153 41
+color 7
+line 51 72 51 78
+color 8
+line 39 86 51 86
+color 7
+line 73 72 73 78
+color 8
+line 61 86 73 86
+color 7
+line 127 72 127 78
+color 8
+line 115 86 127 86
+color 7
+line 149 72 149 78
+color 8
+line 137 86 149 86
+# the console: keys and a little paper tape
+color 7
+line 84 72 104 72
+line 84 75 104 75
+line 84 78 100 78
+color 15
+line 102 78 104 78
+color 14
+line 84 62 88 62
+color 15
+line 92 62 104 62
+# the kingdom below: fields, a road, the top of a castle
+color 6
+line 60 166 74 166
+line 62 164 70 164
+color 14
+line 80 163 86 167
+color 10
+line 96 165 110 165
+color 6
+line 100 167 112 167
+# the beanstalk, under the Cloud and up through the hole
+color 2
+line 33 156 37 161 36 164
+line 34 156 38 161 37 164
+line 23 124 25 118 23 114 27 108
+line 24 124 26 118 24 114 28 108
+color 10
+line 22 124 24 118 22 114 26 108
+# its tip is an arrow, up and to the right
+color 2
+line 27 108 32 101
+line 28 108 33 101
+line 28 101 33 101 33 106
+line 29 102 32 102
+line 32 103 32 105
+color 10
+line 20 117 23 118
+line 27 113 30 112
+# wisps round the mainframe's feet
+color 7
+arc 46 90 8 3 15
+arc 70 91 9 3 15
+arc 96 90 10 3 15
+arc 122 91 9 3 15
+arc 142 90 8 3 15
+color 15
+line 34 89 34 92
+line 154 89 154 92
+# soft shadows on the white
+color 11
+line 44 118 52 118
+line 92 136 104 136
+line 126 120 134 120
+line 60 140 66 140
+color 7
+line 70 100 78 100
+line 110 104 116 104
+line 38 134 44 134
+
+# ================= priority and control =================
+color off
+# Everything that is not Cloud is a long fall: outline the puffs, flood
+# the outside as "water" (3), then put the outlines back to plain ground.
+pri 5
+line 34 92 34 88 154 88 154 92
+arc 24 98 12 10
+arc 14 112 9 9
+arc 13 128 8 9
+arc 20 143 12 8
+arc 40 148 13 7
+arc 60 150 13 7
+arc 80 151 13 7
+arc 100 150 13 7
+arc 120 148 13 7
+arc 140 143 12 8
+arc 147 128 8 9
+arc 146 112 9 9
+arc 150 98 7 10
+pri 3
+fill 2 2
+pri 4
+arc 24 98 12 10
+arc 14 112 9 9
+arc 13 128 8 9
+arc 20 143 12 8
+arc 40 148 13 7
+arc 60 150 13 7
+arc 80 151 13 7
+arc 100 150 13 7
+arc 120 148 13 7
+arc 140 143 12 8
+arc 147 128 8 9
+arc 146 112 9 9
+arc 150 98 7 10
+# the mainframe stops you: two solid rows along its feet
+pri 0
+line 34 89 154 89
+line 34 90 154 90
+# the hole is a trigger: stand on it and down you go
+pri 2
+arc 24 122 6 2
+fill 24 122
+# the beanstalk's tip stands in front of anyone behind it
+pri 11
+line 23 124 25 118 23 114 27 108
+line 24 124 26 118 24 114 28 108
+line 27 108 32 101
+line 28 101 33 101 33 106

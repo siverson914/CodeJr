@@ -1,0 +1,402 @@
+# Room 6, the Data Center: the water puzzle from start to finish, the
+# wrong tries, the moat, and every exit.
+# node tools/play.js build --script test/rooms/06_datacenter.txt
+5
+type debug
+5
+type tp
+2
+type 6
+12
+expect no windows
+shot 01-arrive
+key enter
+2
+expect drinks the river dry
+key enter
+3
+type look
+3
+expect The Data Center
+shot 02-look
+key enter
+2
+expect power plant
+key enter
+2
+
+# ---- wrong tries, before anything is known ----
+type fill bucket
+3
+expect You have no bucket
+key enter
+2
+type gimme
+2
+type 2
+2
+type fill the bucket
+3
+expect Not from my well
+key enter
+2
+type rewrite program
+3
+expect steps between you
+key enter
+2
+expect There's a meter on the pipe
+key enter
+2
+type look at meter
+3
+expect You could READ it
+key enter
+2
+type read meter
+3
+expect Walk closer
+key enter
+2
+type talk to keeper
+3
+expect read it. Nobody ever does
+key enter
+2
+
+# ---- the meter: walk west to it and read it ----
+key left
+8
+key left
+2
+type read meter
+3
+expect All of it
+key enter
+2
+expect 17 BILLION GALLONS
+expect 66 BILLION LITERS
+shot 03-meter
+key enter
+2
+expect another number next to it
+key enter
+2
+type score
+3
+expect You have 4 of 158
+key enter
+2
+
+# ---- the Keeper with one number: not enough ----
+type talk to keeper
+3
+expect Walk closer
+key enter
+2
+key right
+14
+key right
+2
+type talk to keeper
+3
+expect seventeen billion gallons
+key enter
+2
+expect golf course
+key enter
+2
+
+# ---- the Keeper with both numbers (the ledger is in room 12) ----
+type setflag
+2
+type 47
+2
+type tell keeper the numbers
+3
+expect seventeen billion gallons
+key enter
+2
+expect five hundred forty-seven billion
+shot 04-keeper
+key enter
+2
+expect twelve times what that building does
+key enter
+2
+expect more like two and a half
+key enter
+2
+expect My well is
+key enter
+2
+expect whatever they're running in there
+key enter
+2
+type score
+3
+expect You have 10 of 158
+key enter
+2
+type fill bucket
+3
+expect Fix what's running in there
+key enter
+2
+type look at the power plant
+3
+expect drinks twelve
+key enter
+2
+
+# ---- the window, the program, the well ----
+type look in window
+3
+expect Walk up to it
+key enter
+2
+type rewrite program
+3
+expect Walk over to it
+key enter
+2
+key up
+9
+key up
+2
+type look in window
+3
+expect all busy
+key enter
+2
+expect blinking one cursor
+shot 05-window
+key enter
+2
+expect forty bytes
+key enter
+2
+type rewrite the program
+3
+expect read the program
+key enter
+2
+expect the way you were raised
+key enter
+2
+expect It's less than this sentence
+key enter
+2
+expect asks the well for less
+key enter
+2
+30
+expect climbs back up the stones
+shot 06-well-up
+key enter
+2
+expect Fill your bucket
+key enter
+2
+type rewrite program
+3
+expect nothing left to take out
+key enter
+2
+type look in window
+3
+expect most of them resting
+key enter
+2
+type look at well
+3
+expect near the top
+key enter
+2
+
+# ---- the bucket ----
+type fill bucket
+3
+expect Walk closer
+key enter
+2
+key down
+8
+key down
+2
+key right
+6
+key right
+2
+type fill bucket
+3
+expect bring it up full
+shot 07-bucket
+key enter
+2
+expect Don't spill it
+key enter
+2
+type fill bucket
+3
+expect It is full
+key enter
+2
+type score
+3
+expect You have 20 of 158
+key enter
+2
+type talk to keeper
+3
+expect Forty bytes
+key enter
+2
+type drink water
+3
+expect liquids have an understanding
+key enter
+2
+type open door
+3
+expect no handle on this side
+key enter
+2
+type climb wall
+3
+expect no windows to hold on to
+key enter
+2
+type take meter
+3
+expect nobody has adjusted it
+key enter
+2
+type listen
+3
+expect ceiling fan
+key enter
+2
+
+# ---- walls: walk north into the castle; he stops at its foot ----
+key up
+40
+key up
+2
+type read meter
+3
+expect Walk closer
+key enter
+2
+type look in window
+3
+expect most of them resting
+key enter
+2
+
+key left
+10
+key left
+2
+# ---- exits. East: the Sand Hill Bridge ----
+key down
+6
+key down
+2
+key right
+50
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+type look at the keeper
+4
+expect Nothing special
+key enter
+2
+
+# ---- west: the Tavern ----
+type tp
+2
+type 6
+12
+key up
+8
+key up
+2
+key left
+45
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+type look at the keeper
+4
+expect Nothing special
+key enter
+2
+
+# ---- north: the Launch Pad, by the lane left of the castle ----
+type tp
+2
+type 6
+12
+key up
+6
+key up
+2
+key left
+29
+key left
+2
+key up
+45
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+type look at the keeper
+4
+expect Nothing special
+key enter
+2
+
+# ---- last: the moat. One warning, then it means it. (A script cannot
+# ---- press R alone, so the death screen ends the script.)
+type tp
+2
+type 6
+12
+key down
+24
+expect The bank is slick
+shot 08-bank
+key enter
+2
+key down
+6
+expect You are a 1984 computer.
+expect You were not rated for water.
+expect Abort, Retry, Fail?
+shot 09-death

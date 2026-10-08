@@ -1,0 +1,331 @@
+
+# Room 14, the GPU Field: the scarecrow, the seed, the water, the beanstalk,
+# the wrong tries, every exit, and the climb to the Cloud.
+# node tools/play.js build --script test/rooms/14_gpufield.txt
+5
+type debug
+5
+type tp
+2
+type 14
+12
+expect Rows of graphics cards
+shot 01-arrive
+key enter
+3
+type look
+3
+expect The GPU Field
+key enter
+2
+expect axes of a chart
+key enter
+2
+type look at the cards
+3
+expect gold fingers
+key enter
+2
+expect two gaming cards
+key enter
+2
+
+# ---- the scarecrow, and a part that didn't change ----
+type talk to scarecrow
+3
+expect Built for games
+key enter
+2
+expect I was built for games too
+key enter
+2
+expect That part didn't change
+key enter
+2
+type talk to scarecrow
+3
+expect Nothing to climb here
+key enter
+2
+
+# ---- wrong tries ----
+type climb
+3
+expect Nothing to climb
+key enter
+2
+type plant seed
+3
+expect You have no seed
+key enter
+2
+type pour water
+3
+expect Nothing is planted
+key enter
+2
+type take a card
+3
+expect It is rooted
+key enter
+2
+type look at trellis
+3
+expect waiting for a line
+key enter
+2
+type look at beanstalk
+3
+expect There isn't one
+key enter
+2
+type gimme
+2
+type 6
+2
+type plant seed
+3
+expect Walk over to it
+key enter
+2
+
+# ---- plant the Seed at the foot of the trellis ----
+key up
+14
+key up
+2
+type plant seed
+3
+expect push the Seed into the mound
+shot 02-plant
+key enter
+2
+expect A sprout comes up
+key enter
+2
+shot 03-sprout
+type score
+3
+expect You have 4 of 158
+key enter
+2
+type plant seed
+3
+expect It is planted
+key enter
+2
+type climb
+3
+expect It is a sprout
+key enter
+2
+type pour water
+3
+expect nothing to carry water in
+key enter
+2
+type gimme
+2
+type 2
+2
+type pour water
+3
+expect The bucket is empty
+key enter
+2
+type talk to scarecrow
+3
+expect A seed wants water
+key enter
+2
+
+# ---- water it (the bucket is filled in room 6) ----
+type setflag
+2
+type 51
+2
+type pour water
+3
+expect pour the whole bucket
+key enter
+2
+expect Then it goes up
+key enter
+2
+10
+shot 04-growing
+24
+expect up and to the right
+shot 05-grown
+key enter
+2
+expect valuation chart
+key enter
+2
+shot 06-stalk
+type score
+3
+expect You have 10 of 158
+key enter
+2
+type pour water
+3
+expect does not need more
+key enter
+2
+type look at beanstalk
+3
+expect The tip is an arrow
+key enter
+2
+type talk to scarecrow
+3
+expect never seen one go any other way
+key enter
+2
+type listen
+3
+expect a stadium a long way off
+key enter
+2
+type dig
+3
+expect how you kill it
+key enter
+2
+type play a game
+3
+expect You were built for games
+key enter
+2
+
+# ---- exits. South: the Tavern ----
+key down
+22
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+type look at the scarecrow
+4
+expect Nothing special
+key enter
+2
+
+# ---- west: the Cathedral ----
+type tp
+2
+type 14
+12
+key up
+10
+key up
+2
+key left
+45
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+type look at the scarecrow
+4
+expect Nothing special
+key enter
+2
+
+# ---- east: the Launch Pad ----
+type tp
+2
+type 14
+12
+key up
+10
+key up
+2
+key right
+50
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+type look at the scarecrow
+4
+expect Nothing special
+key enter
+2
+
+# ---- north: the Cold Reactor, up the lane ----
+type tp
+2
+type 14
+12
+key up
+10
+key up
+2
+key left
+12
+key left
+2
+key up
+50
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+type look at the scarecrow
+4
+expect Nothing special
+key enter
+2
+
+# ---- the crop is a wall: walk north into it, he stops at the rail,
+# ---- still close enough to the beanstalk to climb it ----
+type tp
+2
+type 14
+12
+key up
+40
+key up
+2
+type climb
+3
+expect Up, and to the right
+key enter
+2
+12
+shot 07-climb
+20
+shot 08-climb
+40
+expect hole in the white
+shot 09-cloud

@@ -1,0 +1,276 @@
+
+# Room 15, the Cloud: the mainframe, the giant, the ring, the Chest, the
+# way down, and one of the two ways to fall (the other is in
+# 15_cloud_hole.txt: a script cannot press R alone, so a death ends it).
+# node tools/play.js build --script test/rooms/15_cloud.txt
+5
+type debug
+5
+type tp
+2
+type 15
+12
+expect hole in the white
+shot 01-arrive
+key enter
+2
+expect we call it the Cloud
+key enter
+2
+expect renting time on it
+key enter
+2
+expect That's a mainframe
+expect That part didn't change
+shot 02-mainframe
+key enter
+3
+type look
+3
+expect The Cloud.
+key enter
+2
+expect a handful of chips
+key enter
+2
+type look at mainframe
+3
+expect tape reels
+key enter
+2
+expect supposed to be the end of these
+key enter
+2
+type look at the giant
+3
+expect Jensen Huang
+key enter
+2
+expect does not look away from it
+key enter
+2
+expect zero percent chance that 2030
+key enter
+2
+type look at jacket
+3
+expect sold them to people who played games
+key enter
+2
+expect I was built for games too
+key enter
+2
+type talk to giant
+3
+expect Fee, fi, fo, fum
+key enter
+2
+expect Adorable
+key enter
+2
+type talk to giant
+3
+expect The giant is counting
+key enter
+2
+
+# ---- wrong tries ----
+type take chest
+3
+expect never looks away from it
+key enter
+2
+type kick giant
+3
+expect forty feet of leather
+key enter
+2
+type give book to giant
+3
+expect It is not a number
+key enter
+2
+type talk to merchants
+3
+expect I invest in him
+key enter
+2
+expect One token would do
+key enter
+2
+type look at merchants
+3
+expect a chip maker
+key enter
+2
+expect something to pass round
+key enter
+2
+type give token to merchant
+3
+expect You have no tokens to give
+key enter
+2
+type look over the edge
+3
+expect The kingdom is very small
+key enter
+2
+expect Walking off the white
+key enter
+2
+type look at hole
+3
+expect Don't walk into the hole
+key enter
+2
+
+# ---- the ring. (The script takes the Chest item so that JR has a token
+# ---- to give: there is no debug command for loose tokens.) ----
+type gimme
+2
+type 7
+2
+type give token to merchant
+3
+expect hand the chip maker one token
+key enter
+2
+expect Revenue!
+key enter
+2
+expect orders chips with it
+key enter
+2
+expect It is the same token
+key enter
+2
+expect cannot look away from the number
+key enter
+2
+8
+shot 03-ring
+type score
+3
+expect You have 8 of 158
+key enter
+2
+type give token to merchant
+3
+expect They have one
+key enter
+2
+type talk to giant
+3
+expect He does not hear you
+key enter
+2
+type talk to merchants
+3
+expect Isn't that the same token
+key enter
+2
+expect The chips are real
+key enter
+2
+type look at token
+3
+expect the only one there is
+key enter
+2
+type take token
+3
+expect It is revenue now
+key enter
+2
+
+# ---- the Chest ----
+type take chest
+3
+expect Walk closer
+key enter
+2
+key right
+25
+key right
+2
+type take chest
+3
+expect pick up the Chest of Tokens
+shot 04-chest
+key enter
+2
+expect first of the three treasures
+key enter
+2
+expect does not notice
+key enter
+2
+type score
+3
+expect You have 18 of 158
+key enter
+2
+type take chest
+3
+expect You have it
+key enter
+2
+type look at chest
+3
+expect still full
+key enter
+2
+type talk to giant
+3
+expect Up and to the right
+key enter
+2
+type fly
+3
+expect Wings would be showing off
+key enter
+2
+
+# ---- the mainframe is a wall: walk north into it, then come back ----
+key up
+30
+key up
+2
+type climb down
+3
+expect Walk over to it
+key enter
+2
+key down
+8
+key down
+2
+key left
+25
+key left
+2
+
+# ---- down the beanstalk to the GPU Field ----
+type climb down
+3
+expect easier in this direction
+key enter
+2
+12
+expect Rows of graphics cards
+shot 05-field
+key enter
+2
+
+# ---- last: walk off the edge of the Cloud ----
+type tp
+2
+type 15
+12
+key left
+30
+expect The Cloud is somebody else's computer.
+expect So is the ground, now.
+expect Abort, Retry, Fail?
+shot 06-death

@@ -1,0 +1,20 @@
+# Room 12, the Golden Palace (groups 1200 to 1299).
+1200: trump, donald, donald trump, president, hoax buster, hoaxbuster, king of the palace
+1201: guards, soldier, soldiers, halberd, helmet
+1202: painter, sign painter, wet paint, overalls
+1203: palace, golden palace, columns, column, pillars
+1204: balcony, curtain
+1205: golf, golf course, course, green, greens, fairway, pin, bunker, sand trap, eighteenth
+1206: shed, groundskeepers shed
+1207: ledger, golf ledger, water ledger, record, records
+1208: groundskeeper, gardener, greenskeeper, greenkeeper, rake
+1209: sprinkler, sprinklers
+1210: artificial
+1211: red carpet
+1212: era
+1213: clubs, club, putt, tee
+1214: penalties, penalty, morally binding, binding
+# Small words that turn up in sentences about the forbidden word. They
+# do nothing: they only let the Palace hear the whole sentence, so that
+# it can refuse to acknowledge it. See 012_palace.lgc.
+1299: excuse, looking, searching, where, what, who, you, your, do, does, have, want, need, find, am, are, there, any, can, could, sir, hey, pardon, sorry, word, called, mean, means, love, like, hate, and, or, not, they, we, im, whats, wheres, its, heard, think, believe, real

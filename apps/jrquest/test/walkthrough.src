@@ -1,0 +1,498 @@
+# Jr's Quest from the date prompt to the ending, the honest way: a real
+# date, every step on foot through the real exits, every puzzle solved,
+# two deaths and two Retries, 158 of 158.
+#   node tools/play.js build --script test/walkthrough.txt --png-dir out
+# Zuckerberg is random but seeded, so this run always meets him in the
+# same places (the Tavern road, where JR turns him down).
+# ---- Leg 0: the date prompt and the opening ----
+5
+expect Current date is Tue
+type 10-05-26
+3
+expect Invalid date
+type 10-05-2026
+5
+expect The Search for Intelligence
+expect Let the AI play
+shot 00-title
+# the menu: P plays
+char p
+waitbox 60
+dismiss
+3
+# ---- Leg 1: room 1, the Guest Room: the bucket and the Technical Reference ----
+shot 01-guestroom
+say look
+say take bucket
+goto 106 140
+say take book
+say read book
+type inventory
+3
+expect Technical Reference
+shot 01-inventory
+key enter
+2
+# out of the door at the back of the room
+goto 118 98
+exit up 20
+# ---- Leg 2: room 2, Castle Steve: read the code, fix the gate ----
+waitbox 20
+shot 02-castle
+dismiss
+say fix code
+say read code
+shot 02-read
+say fix code
+waitbox 30
+shot 02-gate-open
+dismiss
+say score
+# through the gate and out the east edge
+goto 80 140
+goto 146 150
+exit right
+# ---- Leg 3: room 3, Token Meadow: tokens, the signpost, the goat ----
+waitbox 10
+shot 03-meadow
+dismiss
+say look
+say read sign
+say pick tokens
+shot 03-first-pick
+say pick tokens
+goto 10 152
+say pick tokens
+say pick tokens
+goto 16 124
+say pick tokens
+say pick tokens
+say count tokens
+# the signpost: 3 tokens, and the map of the kingdom
+goto 30 110
+say look at sign
+say pay sign
+shot 03-sign-paid
+# the cashmere goat: wool for the Tavern
+goto 40 84
+say look at goat
+say pet goat
+shot 03-goat
+# DHH and the tiled windows (a part that didn't change)
+goto 80 130
+say talk to dhh
+say look at windows
+shot 03-tiling
+say score
+# north to Sand Hill Bridge
+goto 58 60
+exit up
+# ---- Leg 4: room 7, Sand Hill Bridge, west bank (no crossing yet, so no toll) ----
+waitbox 10
+shot 07-bridge
+dismiss
+say look
+say look at bridge
+shot 07-chiclet
+say talk to troll
+say read board
+goto 44 64
+exit up
+# ---- Leg 5: room 12, the Golden Palace: the word is SI, and the golf ledger ----
+waitbox 12
+shot 12-palace
+dismiss
+say look
+goto 50 124
+say talk to the guard
+say excuse me, where is the ai?
+say read the sign
+say where is the si?
+shot 12-si
+say talk to the guard
+goto 130 140
+say read ledger
+shot 12-ledger
+say talk to groundskeeper
+say score
+# back south to the bridge
+goto 53 160
+exit down
+# ---- Leg 6: room 7 again: over the bridge, west to east. The troll takes 15 percent ----
+goto 30 116
+walk right 40
+shot 07-toll
+dismiss
+say count tokens
+goto 146 120
+exit right
+# ---- Leg 7: room 8, the Bazaar: only passing through for now ----
+waitbox 12
+shot 08-bazaar-first
+dismiss
+say look
+goto 60 124
+say talk to stallkeeper
+goto 146 160
+exit right
+# ---- Leg 8: room 9, outside the All-In Tavern: get past the bouncer ----
+waitbox 12
+shot 09-tavern
+dismiss
+say look
+goto 58 134
+walk up 12
+dismiss
+say pay cover
+say talk to bouncer
+shot 09-listener
+exit up 40
+# ---- Leg 9: room 10, inside the Tavern: four signatures and the Seed ----
+waitbox 12
+shot 10-inside
+dismiss
+say look
+goto 40 130
+say talk to chamath
+say give wool to chamath
+waitbox 80
+shot 10-sweater
+dismiss
+waitbox 80
+dismiss
+say talk to jason
+say ask jason about the weather
+say ask jason about uber
+waitbox 60
+shot 10-uber
+dismiss
+say talk to sacks
+say it is a quest for ai
+say it is a quest for si
+say talk to friedberg
+waitbox 120
+shot 10-science-corner
+dismiss
+say listen
+waitbox 30
+dismiss
+waitbox 30
+dismiss
+waitbox 30
+dismiss
+waitbox 30
+dismiss
+waitbox 30
+dismiss
+waitbox 120
+dismiss
+waitbox 30
+shot 10-seed
+dismiss
+say look at seed
+say score
+type inventory
+3
+expect Seed
+key enter
+2
+# out of the door at the bottom of the room
+goto 75 150
+exit down 30
+# ---- Leg 10: room 9 again, then east (round the world) to the Data Center ----
+waitbox 10
+dismiss
+# Zuckerberg has wandered in with his wheelbarrow
+say look at zuckerberg
+say talk to zuckerberg
+say no
+goto 146 150
+exit right
+# ---- Leg 11: room 6, the Data Center: meter, Keeper, forty bytes, the bucket ----
+waitbox 12
+shot 06-datacenter
+dismiss
+say look
+# death 1: the moat. One warning at the bank, then it means it. Retry.
+goto 30 136
+walk down 12
+shot 06-bank-warning
+dismiss
+walk down 20
+4
+expect You were not rated for water
+expect Abort, Retry, Fail?
+shot 06-death-moat
+char f
+2
+expect There are no dead ends
+char r
+6
+shot 06-after-retry
+say fill bucket
+# the meter on the pipe
+goto 40 120
+say read meter
+shot 06-meter
+# both numbers to the Keeper
+goto 90 126
+say talk to keeper
+shot 06-keeper
+# the one window, and the service port under it
+goto 96 112
+say look in window
+say rewrite program
+waitbox 80
+shot 06-well-up
+dismiss
+goto 110 128
+say fill bucket
+shot 06-bucket
+say score
+# north up the lane to the Launch Pad
+goto 12 66
+exit up
+# ---- Leg 12: room 11, the Launch Pad: a look round, then west (round the world) to the GPU Field ----
+waitbox 12
+shot 11-launchpad
+dismiss
+say look
+say talk to musk
+say look at hourglass
+goto 4 162
+exit left
+# ---- Leg 13: room 14, the GPU Field: plant, pour, climb ----
+waitbox 12
+shot 14-gpufield
+dismiss
+say look
+say talk to scarecrow
+goto 90 136
+say climb
+say plant seed
+shot 14-sprout
+say pour water
+waitbox 120
+shot 14-beanstalk
+dismiss
+say score
+say climb
+waitbox 60
+# ---- Leg 14: room 15, the Cloud: one token for the ring, then the Chest ----
+shot 15-cloud
+dismiss
+say look
+say talk to giant
+say take chest
+say talk to merchants
+goto 50 124
+say give token to merchant
+shot 15-ring
+say look at giant
+goto 100 140
+say take chest
+shot 15-chest
+say score
+say count tokens
+goto 44 132
+say climb down
+3
+# ---- Leg 15: room 14 again (foot of the beanstalk), then west to the Cathedral ----
+expect Score:94
+shot 14-back-down
+goto 4 136
+exit left
+# ---- Leg 16: room 13, the Cathedral: the Confident Door, and the wizards' trouble ----
+waitbox 12
+shot 13-cathedral
+dismiss
+say look
+goto 76 140
+walk up 12
+shot 13-door
+dismiss
+say say a million
+say i don't know
+waitbox 80
+shot 13-wizards
+dismiss
+goto 74 124
+say talk to wizards
+say read price list
+say pay tokens
+say score
+# up the lane on the right, north (round the world) to the inn
+goto 141 66
+exit up
+# ---- Leg 17: room 4, the Godfathers' Inn: Sir Tandy, a hint, and the answer key ----
+waitbox 12
+shot 04-inn
+dismiss
+say look
+goto 60 140
+say talk to hinton
+say hint
+goto 100 120
+say talk to tandy
+shot 04-tandy
+goto 100 150
+say talk to marcus
+shot 04-answer-key
+say look at answer key
+# ---- Leg 18: back south to the Cathedral, then west along the top row to the Launch Pad ----
+goto 76 160
+exit down
+waitbox 10
+dismiss
+expect Score:104
+goto 4 152
+exit left
+waitbox 10
+dismiss
+shot 12-passing-west
+goto 4 152
+exit left
+# ---- Leg 19: room 11, the Launch Pad: the agents see the answer key ----
+waitbox 30
+shot 11-agents
+dismiss
+say look at agents
+say talk to agents
+# ---- Leg 20: walk the agents home: east through the Palace to the Cathedral ----
+exit right
+waitbox 10
+dismiss
+shot 12-with-agents
+goto 146 138
+exit right
+waitbox 60
+shot 13-agents-home
+dismiss
+waitbox 120
+dismiss
+# ---- Leg 21: the Lock half: fifty tokens from the Chest, and a hand of each wizard ----
+say talk to wizards
+goto 74 122
+say pay tokens
+waitbox 80
+shot 13-lock-half
+dismiss
+say join shield
+say score
+# ---- Leg 22: south to the Bazaar: the book for the Glass half ----
+goto 76 160
+exit down
+waitbox 12
+dismiss
+shot 08-bazaar
+goto 68 120
+say give book
+shot 08-glass-half
+say look at painting
+say score
+# the two halves are not joined yet: the cave gets to show why
+goto 80 160
+exit down
+# ---- Leg 23: the inn again (from the north), then east to the Cold Reactor ----
+waitbox 10
+dismiss
+expect Score:134
+goto 148 140
+exit right
+# ---- Leg 24: room 5, the Cold Reactor, and the cave mouth behind the far tower ----
+waitbox 12
+shot 05-reactor
+dismiss
+say look
+say talk to guard
+goto 138 130
+say read sign
+exit up 20
+# ---- Leg 25: room 16, the Dragon's Cave. Death 2: the fire, with two halves and no Shield ----
+waitbox 10
+shot 16-cave
+dismiss
+say look
+say look at halves
+walk right 60
+shot 16-warning
+dismiss
+walk right 40
+dismiss
+6
+expect This was the other
+expect Abort, Retry, Fail?
+shot 16-death-fire
+char a
+2
+expect You waited 42 years for this
+char r
+6
+shot 16-after-retry
+# the two halves, joined: the Shield
+say join shield
+shot 16-shield
+say score
+type inventory
+3
+expect Shield
+shot 16-inventory
+key enter
+2
+walk right 60
+dismiss
+walk right 40
+shot 16-through-fire
+dismiss
+# ---- Leg 26: the Mirror: tokens to think with, and somebody to tell it the date ----
+# he is still walking: on to the niche
+waitbox 40
+shot 16-mirror-asleep
+dismiss
+goto 130 136
+say look at mirror
+say talk to mirror
+3
+dismiss
+say take mirror
+say give chest to mirror
+say tell mirror the date
+3
+shot 16-mirror-awake
+dismiss
+say talk to mirror
+say take mirror
+shot 16-mirror-taken
+say score
+# ---- Leg 27: home: back through the fire, out of the cave, east to Castle Steve ----
+goto 20 136 boxok
+exit left
+waitbox 10
+dismiss
+shot 05-out-of-cave
+goto 146 150
+exit right
+waitbox 12
+dismiss
+shot 02-home
+goto 80 130
+goto 75 92
+exit up 20
+# ---- Leg 28: room 1, the Guest Room: the ending ----
+waitbox 40
+shot 01-ending
+dismiss
+shot 01-the-end
+# after the ending: still in the guest room, free to walk about
+expect Score:158 of 158
+say talk to steve
+say score
+type inventory
+3
+expect Chest of Tokens
+expect Shield
+expect Mirror
+shot 01-final-inventory
+key enter
+2
+hash

@@ -1,0 +1,18 @@
+# Room 6, the Data Center.
+600: data center, datacenter, data centre, fortress, warehouse, building
+601: moat, bank, ditch, canal
+602: keeper, moat keeper, woman, lady, her
+603: well, wishing well, winch, rope
+604: meter, water meter, gauge, dial, plate
+605: pipe, pipes, drain
+606: machines, machine, servers, server, racks, rack, hall, computers
+607: cursor, blinking, blink
+608: fans, fan, vents, vent, hum
+609: power plant, upstream, smokestack, smokestacks, chimney, smoke
+610: numbers, number, both numbers, figures, gallons, billions
+611: bytes, forty bytes, 40 bytes
+612: horizon, hillside, upstream hill
+613: port, service port, connector, socket
+614: lights, light, leds, nameplate
+615: reeds, lily, lilies, lily pads
+616: pennant, flag

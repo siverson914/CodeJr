@@ -1,0 +1,378 @@
+# Room 10, inside the All-In Tavern: the four jobs, the wrong tries, a
+# walk-out in the middle of Science Corner, the Seed, and the door.
+# node tools/play.js build --script test/rooms/10_inside.txt
+5
+type debug
+5
+# the bouncer has let him in (flag 152, room 9's)
+type setflag
+2
+type 152
+3
+type tp
+2
+type 10
+10
+expect Four chairs, four hosts
+key enter
+2
+expect (quietly) Don't.
+shot 01-dont
+key enter
+2
+expect four empty lines
+key enter
+2
+type look
+3
+expect One long table
+key enter
+2
+expect From the left: Chamath, Jason, Sacks, Friedberg
+key enter
+2
+type read the chairs
+3
+expect DICTATOR, MODERATOR, RAIN MAN and SULTAN
+key enter
+2
+# too far away to talk
+type talk to chamath
+3
+expect Walk up to the table
+key enter
+2
+key up
+20
+key up
+2
+shot 02-at-table
+
+# ---- wrong tries ----
+type talk to chamath
+3
+expect It is freezing in here
+key enter
+2
+expect Cashmere
+key enter
+2
+type give wool to chamath
+3
+expect you have seen a meadow
+key enter
+2
+type talk to jason
+3
+expect Ask me anything
+key enter
+2
+type ask jason about the weather
+3
+expect You know what people want in the rain
+key enter
+2
+type ask jason about the dragon
+3
+expect Getting into a car with a stranger
+key enter
+2
+type talk to sacks
+3
+expect Two letters
+key enter
+2
+expect the Golden Palace
+key enter
+2
+type i am on an ai quest
+3
+expect I can't put my name under that word
+key enter
+2
+expect There is a newer word
+key enter
+2
+type say si
+3
+expect what comes out is the old word
+key enter
+2
+expect Try the Golden Palace
+key enter
+2
+type talk to david
+3
+expect Which David?
+key enter
+2
+type look at the tequila
+3
+expect $1,200
+key enter
+2
+type drink tequila
+3
+expect not rated for tequila
+key enter
+2
+type sign the term sheet
+3
+expect It isn't yours to sign
+key enter
+2
+type read sign
+3
+expect NOT A SNUGGIE
+key enter
+2
+type sit
+3
+expect none of the names is yours
+key enter
+2
+
+# ---- Jason: the question ----
+type ask jason about uber
+3
+expect Finally. Somebody asked.
+key enter
+2
+expect third investor in Uber. Or the fourth.
+4
+shot 03-mouthing
+30
+expect Which was it? Third or fourth?
+key enter
+2
+expect I was early too. It's worse.
+key enter
+2
+expect Score:5 of
+type ask jason about uber
+3
+expect Ask me again any time
+key enter
+2
+
+# ---- Friedberg: Science Corner, and walking out on it ----
+type talk to friedberg
+3
+expect Time for Science Corner.
+key enter
+2
+5
+shot 04-exodus
+35
+expect Three chairs are suddenly empty.
+shot 05-empty
+key enter
+2
+expect You could LISTEN
+key enter
+2
+type talk to jason
+3
+expect His chair is empty
+key enter
+2
+type listen
+3
+expect I was built to wait
+key enter
+2
+12
+expect part one of five
+key enter
+2
+# walk out in the middle: part two catches him on the way to the door
+key down
+16
+expect Part two
+key enter
+2
+20
+type look
+3
+expect The All-In Tavern
+key enter
+2
+key enter
+2
+key up
+10
+8
+expect You left at nitrogen
+shot 06-came-back
+key enter
+2
+key up
+20
+key up
+2
+
+# ---- Science Corner again, to the end ----
+type ask friedberg about science
+3
+expect Shall we try again?
+key enter
+2
+40
+expect Three chairs are suddenly empty.
+key enter
+2
+key enter
+2
+type stay
+3
+expect Nobody's ever stayed
+key enter
+2
+12
+expect part one of five
+key enter
+2
+16
+expect Part two
+key enter
+2
+16
+expect nitrogen
+shot 07-nitrogen
+key enter
+2
+16
+expect Three faces look in at the door
+key enter
+2
+16
+expect in conclusion
+key enter
+2
+expect I don't know how it ends either
+key enter
+2
+expect a bag of quinoa
+key enter
+2
+10
+shot 08-return
+40
+expect testing the air for nitrogen
+key enter
+2
+expect Score:10 of
+type talk to friedberg
+3
+expect part six
+key enter
+2
+
+# ---- Chamath: the sweater ----
+type gimme
+2
+type 5
+3
+type give wool
+3
+expect Walk closer
+key enter
+2
+key left
+14
+key left
+2
+type give the wool to chamath
+3
+expect No middleman?
+key enter
+2
+expect keeps a tailor
+key enter
+2
+8
+shot 09-tailor
+20
+expect a sign of insecurity
+key enter
+2
+8
+expect It fits
+shot 10-sweater
+key enter
+2
+expect He signs
+key enter
+2
+expect Score:15 of
+type look at chamath
+3
+expect came from the Bazaar
+key enter
+2
+
+# ---- Sacks: the word ----
+type talk to sacks
+3
+expect Two letters
+key enter
+2
+key enter
+2
+type setflag
+2
+type 46
+3
+type tell sacks it is an si quest
+3
+expect Now that I can sign
+key enter
+2
+expect crosses out one letter
+key enter
+2
+expect Four stars
+key enter
+2
+
+# ---- four signatures: the Seed ----
+expect Four signatures
+key enter
+2
+expect Let your winners ride
+shot 11-winners
+key enter
+2
+expect It is the Seed
+key enter
+2
+expect Plant it
+key enter
+2
+expect Score:20 of
+type inventory
+3
+shot 12-inventory
+key enter
+2
+type look at the term sheet
+3
+expect swapped for a bean
+key enter
+2
+type say ai
+3
+expect You knew the right word
+key enter
+2
+
+# ---- the door ----
+key down
+30
+type look
+3
+expect The All-In Tavern
+key enter
+2
+key enter
+2

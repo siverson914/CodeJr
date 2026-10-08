@@ -1,0 +1,30 @@
+# Room 11: walking into the turbines. A warning, then the death screen.
+5
+type debug
+5
+type tp
+3
+type 11
+6
+# ---- the turbines: a warning, then a death ----
+# up the lane, then left toward the row
+key up
+28
+key left
+5
+expect One more step and you will find out
+shot 11-30-turbine-warning
+key enter
+2
+# the warning stops him where he stands: nothing happens until he walks on
+6
+expect Score:0 of 158
+# on along the row, clear of the wall's end, then up into the turbines
+key left
+5
+key up
+8
+expect You did not have a permit to do that
+expect Abort, Retry, Fail?
+shot 11-31-turbine-death
+

@@ -1,0 +1,393 @@
+# Room 3, Token Meadow: pick tokens, pay the signpost, pet the goat, the
+# tiling exchange, the wrong tries, and every exit.
+# node tools/play.js build --script test/rooms/03_meadow.txt --png-dir out
+5
+type debug
+5
+type tp
+2
+type 3
+6
+shot 03-01-arrive
+type look
+3
+expect Tokens grow here in beds
+key enter
+2
+expect A goat is ignoring all of this
+key enter
+2
+
+# ---- wrong tries first ----
+type read sign
+3
+expect INSERT 3 TOKENS TO CONTINUE
+key enter
+2
+expect PICK some
+key enter
+2
+type pay sign
+3
+expect Walk closer
+key enter
+2
+type pick tokens
+3
+expect Walk closer to a token that is in bloom
+key enter
+2
+type pet goat
+3
+expect Walk closer
+key enter
+2
+type take sword
+3
+expect he set it down on purpose
+key enter
+2
+type talk to dhh
+3
+expect Walk closer
+key enter
+2
+
+# ---- pick tokens: the lesson, 3 points ----
+key left
+14
+key left
+2
+#pos by ABLE
+type pick tokens
+3
+expect You pick ABLE
+shot 03-02-pick
+key enter
+2
+expect not a word, a piece of one
+key enter
+2
+expect Answers cost more than questions
+key enter
+2
+expect I never charged by the keystroke
+key enter
+2
+type score
+3
+expect You have 3 of 158
+key enter
+2
+# that one is picked; the next is too far
+type pick tokens
+3
+expect Walk closer to a token that is in bloom
+key enter
+2
+key left
+6
+key left
+2
+type take un
+3
+expect You pick UN
+key enter
+2
+expect You have 4 tokens
+key enter
+2
+
+# ---- the signpost: 3 tokens, 3 points, the map ----
+key up
+22
+key up
+2
+#pos by sign
+type look at sign
+3
+expect 3 TOKENS TO READ
+key enter
+2
+type pay sign
+3
+expect Three tokens go in the slot
+shot 03-03-sign
+key enter
+2
+expect It wraps
+key enter
+2
+expect SOUTH ROW
+key enter
+2
+expect MIDDLE ROW
+key enter
+2
+expect NORTH ROW
+key enter
+2
+expect gives hints
+key enter
+2
+type score
+3
+expect You have 6 of 158
+key enter
+2
+type count tokens
+3
+expect You have 1 tokens
+key enter
+2
+type pay sign
+3
+expect does not charge twice
+key enter
+2
+type read sign
+3
+expect It wraps
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+
+# ---- the goat: wool, once ----
+key right
+16
+key right
+2
+key up
+13
+key up
+2
+#pos by goat
+type talk to goat
+3
+expect Meh
+key enter
+2
+type pet goat
+3
+expect A tuft of cashmere comes away
+shot 03-04-goat
+key enter
+2
+expect You have the wool
+key enter
+2
+type pet goat
+3
+expect One tuft is plenty
+key enter
+2
+type take goat
+3
+expect He is a goat, not an item
+key enter
+2
+
+# ---- DHH and the tiled windows: a part that didn't change ----
+key down
+14
+key down
+2
+key right
+10
+key right
+2
+#pos by dhh
+type talk to dhh
+3
+expect I haven't drawn it since March
+shot 03-05-dhh
+key enter
+2
+key enter
+2
+type talk to dhh
+3
+expect surprisingly tricky
+key enter
+2
+type look at windows
+3
+expect Not one overlaps another
+key enter
+2
+expect It's the future
+key enter
+2
+expect Then you were first
+key enter
+2
+expect That part came back
+expect 1 of 9
+shot 03-06-tiling
+key enter
+2
+type look at windows
+3
+expect Nothing overlaps
+key enter
+2
+type talk to apprentices
+3
+expect Rethatching the roof
+key enter
+2
+type look at car
+3
+expect Le Mans
+key enter
+2
+type open door
+3
+expect the owner is out here
+key enter
+2
+# he cannot walk through the cottage
+key up
+12
+key up
+2
+key right
+8
+key right
+2
+#pos stopped by cottage
+type look at goat
+3
+expect cashmere goat
+key enter
+2
+
+# ---- exits: east to the inn and back ----
+key down
+16
+key down
+2
+key right
+46
+#pos in room 4
+type look
+3
+expect Godfathers' Inn
+key enter
+2
+key enter
+2
+key left
+4
+#pos back in 3 from east
+type look
+3
+expect Token Meadow
+shot 03-07-from-east
+key enter
+2
+key enter
+2
+
+# ---- north to Sand Hill Bridge and back ----
+type tp
+2
+type 3
+6
+key up
+56
+#pos in room 7
+type look
+3
+expect Sand Hill Bridge
+key enter
+2
+key enter
+2
+key down
+6
+#pos back in 3 from north
+type look
+3
+expect Token Meadow
+shot 03-08-from-north
+key enter
+2
+key enter
+2
+
+# ---- west to Castle Steve ----
+key left
+32
+#pos in room 2
+# (the neighbor may greet him: let it, and close whatever it says)
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+type look
+3
+expect Castle Steve
+key enter
+2
+
+# ---- south, round the world, to the Golden Palace ----
+type tp
+2
+type 3
+6
+key down
+6
+#pos in room 12
+# (the neighbor may greet him: let it, and close whatever it says)
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+type tp
+2
+type 3
+6
+
+# ---- picked tokens grow back ----
+key left
+14
+key left
+2
+type pick tokens
+3
+expect You pick ABLE
+key enter
+2
+expect You have 3 tokens
+key enter
+2
+
+# ---- with the Chest there is nothing to count ----
+type gimme
+2
+type 7
+3
+type pick tokens
+3
+expect The Chest is never empty
+key enter
+2
+shot 03-09-end

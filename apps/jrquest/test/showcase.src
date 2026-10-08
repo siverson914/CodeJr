@@ -1,0 +1,522 @@
+# Jr's Quest plays itself: the whole game as a show, from the date prompt
+# to the ending. Every room, every character, all nine parts that didn't
+# change, two deaths, 158 of 158. This file is the source; tools/mkwalk.mjs
+# plays it and writes the two scripts:
+#   node tools/mkwalk.mjs build test/showcase.src test/showcase.txt --demo game/demo/1.txt
+# test/showcase.txt has expect lines and is what the tests run.
+# game/demo/1.txt is the same without them: "Let the AI play" on the title.
+# pace: a box stays up 12 cycles + 1 per 2 characters; one typed character
+# a cycle; 4 cycles of thought before typing.
+pace 12 2 1 4
+# ---- Act 0: the date prompt, the title, the opening ----
+10
+expect Current date is Tue
+slowtype 10-05-26
+12
+expect Invalid date
+slowtype 10-05-2026
+30
+expect Let the AI play
+shot 00-title
+# the menu: P plays
+char p
+waitbox 60
+dismiss
+6
+# ---- Act 1: room 1, the Guest Room ----
+shot 01-guestroom
+say look
+say look at the box
+say take bucket
+say talk to steve
+goto 88 102
+say read magazine
+say take magazine
+goto 106 140
+say take book
+say read book
+say inventory
+30
+expect Byte magazine
+shot 01-inventory
+key enter
+4
+goto 118 98
+exit up 20
+# ---- Act 2: room 2, Castle Steve: the gate nobody read ----
+waitbox 20
+shot 02-castle
+dismiss
+say look
+say fix code
+say talk to squire
+say talk to primeagen
+say look at lute
+say look at vim
+say read code
+say fix code
+waitbox 30
+shot 02-gate-open
+dismiss
+say talk to squire
+say talk to primeagen
+goto 80 140
+goto 146 150
+exit right
+# ---- Act 3: room 3, Token Meadow ----
+waitbox 10
+dismiss
+shot 03-meadow
+zuckchat
+say look
+say read sign
+say pick tokens
+say pick tokens
+goto 10 152
+say pick tokens
+goto 30 110
+say pay sign
+shot 03-sign
+goto 40 84
+say talk to goat
+say pet goat
+goto 80 130
+say talk to dhh
+say talk to dhh
+say talk to apprentices
+say look at windows
+shot 03-tiling
+goto 146 142
+exit right
+# ---- Act 4: room 4, the Godfathers' Inn (first visit) ----
+waitbox 10
+dismiss
+shot 04-inn
+zuckchat
+say look
+say talk to godfathers
+say hint
+goto 100 150
+say talk to marcus
+say talk to marcus
+goto 100 120
+say talk to tandy
+shot 04-tandy
+goto 4 146
+exit left
+# back through the Meadow and north
+waitbox 10
+dismiss
+zuckchat
+goto 58 60
+exit up
+# ---- Act 5: room 7, Sand Hill Bridge (west bank) ----
+waitbox 10
+dismiss
+shot 07-bridge
+zuckchat
+say look
+say look at bridge
+say talk to troll
+say read board
+say take coin
+goto 44 64
+exit up
+# ---- Act 6: room 12, the Golden Palace ----
+waitbox 12
+dismiss
+shot 12-palace
+zuckchat
+say look
+say talk to painter
+goto 50 124
+say talk to the guard
+say excuse me, where is the ai?
+say read the sign
+say where is the si?
+shot 12-si
+say talk to the guard
+say talk to trump
+goto 90 122
+say take scroll
+goto 130 140
+say read ledger
+shot 12-ledger
+say talk to groundskeeper
+goto 53 160
+exit down
+# ---- Act 7: room 7 again: across the bridge, and the toll ----
+zuckchat
+goto 30 116
+walk right 40
+shot 07-toll
+dismiss
+say talk to troll
+goto 146 120
+exit right
+# ---- Act 8: room 8, the Bazaar (first visit) ----
+waitbox 12
+dismiss
+shot 08-bazaar
+zuckchat
+say look
+say talk to deepseek
+say talk to kimi
+say look at painting
+shot 08-painting
+say talk to art seller
+goto 60 124
+say talk to stallkeeper
+goto 146 160
+exit right
+# ---- Act 9: room 9, outside the All-In Tavern ----
+waitbox 12
+dismiss
+shot 09-tavern
+zuckchat
+say look
+say look at carriage
+goto 58 134
+walk up 12
+dismiss
+say pay cover
+say talk to bouncer
+shot 09-listener
+exit up 40
+# ---- Act 10: room 10, inside the Tavern: four signatures ----
+waitbox 12
+shot 10-inside
+dismiss
+say look
+say look at chairs
+goto 40 130
+say talk to chamath
+say give wool to chamath
+waitbox 80
+shot 10-sweater
+dismiss
+waitbox 80
+dismiss
+say talk to chamath
+say talk to jason
+say ask jason about the weather
+say ask jason about uber
+waitbox 60
+shot 10-uber
+dismiss
+say talk to sacks
+say it is a quest for ai
+say it is a quest for si
+say talk to friedberg
+waitbox 120
+shot 10-science-corner
+dismiss
+say listen
+waitbox 30
+dismiss
+waitbox 30
+dismiss
+waitbox 30
+dismiss
+waitbox 30
+dismiss
+waitbox 30
+dismiss
+waitbox 120
+dismiss
+waitbox 30
+shot 10-seed
+dismiss
+say talk to friedberg
+goto 75 150
+exit down 30
+# ---- Act 11: room 9 again, then east, round the world, to the Data Center ----
+waitbox 10
+dismiss
+zuckchat
+say talk to bouncer
+goto 146 150
+exit right
+# ---- Act 12: room 6, the Data Center ----
+waitbox 12
+shot 06-datacenter
+dismiss
+zuckchat
+say look
+goto 90 126
+say talk to keeper
+say fill bucket
+# the bank: one warning, and he takes it
+goto 60 136
+walk down 12
+shot 06-bank-warning
+dismiss
+goto 40 120
+say read meter
+shot 06-meter
+goto 90 126
+say talk to keeper
+goto 96 112
+say look in window
+say rewrite program
+waitbox 80
+shot 06-well-up
+dismiss
+goto 110 128
+say fill bucket
+say talk to keeper
+goto 12 66
+exit up
+# ---- Act 13: room 11, the Launch Pad, and death 1: the static fire test ----
+waitbox 12
+dismiss
+shot 11-launchpad
+zuckchat
+say look
+say talk to musk
+say ask musk about agi
+say ask musk about agi
+say read sign
+say turn hourglass
+goto 100 124 boxok
+shot 11-countdown
+until 150 Abort, Retry, Fail?
+expect You were thirty-six months early.
+shot 11-death
+40
+char f
+40
+expect There are no dead ends
+char r
+10
+shot 11-after-retry
+goto 4 162
+exit left
+# ---- Act 14: room 14, the GPU Field ----
+waitbox 12
+shot 14-gpufield
+dismiss
+zuckchat
+say look
+say talk to scarecrow
+goto 90 136
+say climb
+say plant seed
+say pour water
+waitbox 120
+shot 14-beanstalk
+dismiss
+say talk to scarecrow
+say climb
+waitbox 60
+# ---- Act 15: room 15, the Cloud ----
+shot 15-cloud
+dismiss
+say look
+say look at mainframe
+say talk to giant
+say take chest
+say talk to merchants
+goto 50 124
+say give token to merchant
+shot 15-ring
+say talk to merchants
+say look at giant
+goto 100 140
+say take chest
+shot 15-chest
+goto 44 132
+say climb down
+6
+# ---- Act 16: the GPU Field again, then west to the Cathedral ----
+dismiss
+zuckchat
+goto 4 136
+exit left
+# ---- Act 17: room 13, the Cathedral: the Confident Door ----
+waitbox 12
+dismiss
+shot 13-cathedral
+zuckchat
+say look
+goto 76 140
+walk up 12
+shot 13-door
+dismiss
+say say a million
+say i don't know
+waitbox 80
+shot 13-wizards
+dismiss
+goto 74 124
+say talk to wizards
+say read price list
+say talk to apprentices
+say ask wizards about the bazaar
+goto 141 66
+exit up
+# ---- Act 18: the inn again: this is the emergency ----
+waitbox 12
+dismiss
+zuckchat
+goto 100 150
+say talk to marcus
+shot 04-answer-key
+goto 76 160
+exit down
+# ---- Act 19: west along the top of the kingdom to the Launch Pad ----
+waitbox 10
+dismiss
+zuckchat
+goto 4 152
+exit left
+waitbox 10
+dismiss
+zuckchat
+goto 4 152
+exit left
+waitbox 30
+shot 11-agents
+dismiss
+say talk to agents
+# ---- Act 20: walk the agents home ----
+goto 146 150
+exit right
+waitbox 10
+dismiss
+shot 12-with-agents
+goto 146 138
+exit right
+waitbox 60
+shot 13-agents-home
+dismiss
+waitbox 120
+dismiss
+# ---- Act 21: the Lock half ----
+goto 74 122
+say talk to wizards
+say pay tokens
+waitbox 80
+shot 13-lock-half
+dismiss
+say talk to wizards
+say join shield
+goto 76 160
+exit down
+# ---- Act 22: the Bazaar again: the book for the Glass half ----
+waitbox 12
+dismiss
+zuckchat
+goto 68 120
+say give book
+shot 08-glass-half
+say talk to stallkeeper
+goto 80 160
+exit down
+# ---- Act 23: the inn a third time, passing through ----
+waitbox 10
+dismiss
+zuckchat
+goto 100 150
+say talk to marcus
+goto 148 140
+exit right
+# ---- Act 24: room 5, the Cold Reactor ----
+waitbox 12
+shot 05-reactor
+dismiss
+zuckchat
+say look
+goto 80 140
+say talk to guard
+say talk to guard
+goto 138 130
+say read sign
+exit up 20
+# ---- Act 25: room 16, the Dragon's Cave, and death 2: two halves are not a Shield ----
+waitbox 10
+dismiss
+shot 16-cave
+say look
+say talk to dragon
+say look at halves
+walk right 60
+shot 16-warning
+dismiss
+walk right 40
+dismiss
+6
+expect This was the other
+expect Abort, Retry, Fail?
+shot 16-death
+50
+char a
+40
+expect You waited 42 years for this
+char r
+10
+say join shield
+shot 16-shield
+walk right 60
+dismiss
+walk right 40
+shot 16-through-fire
+dismiss
+# ---- Act 26: the Mirror ----
+waitbox 40
+shot 16-mirror-asleep
+dismiss
+goto 130 136
+say look at mirror
+say talk to mirror
+3
+dismiss
+say take mirror
+say give chest to mirror
+say tell mirror the date
+3
+shot 16-mirror-awake
+dismiss
+say talk to mirror
+say take mirror
+shot 16-mirror-taken
+# ---- Act 27: home ----
+goto 20 136 boxok
+exit left
+waitbox 10
+dismiss
+zuckchat
+goto 96 140
+say talk to guard
+goto 146 150
+exit right
+waitbox 12
+dismiss
+zuckchat
+shot 02-home
+goto 80 130
+goto 75 92
+exit up 20
+# ---- Act 28: the Guest Room: the ending ----
+waitbox 40
+shot 01-ending
+dismiss
+shot 01-the-end
+6
+expect Score:158 of 158
+say talk to steve
+slowtype score
+3
+expect You have 158 of 158 points.
+expect found: 9 of 9.
+shot 01-score
+dismiss
+say inventory
+40
+expect Chest of Tokens
+expect Shield
+expect Mirror
+shot 01-final-inventory
+key enter
+10
+hash

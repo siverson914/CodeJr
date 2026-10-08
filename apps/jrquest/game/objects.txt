@@ -1,0 +1,18 @@
+max: 20
+0: ?
+1: Technical Reference
+1: bucket
+1: Byte magazine
+0: tokens
+0: wool
+0: Seed
+0: Chest of Tokens
+0: answer key
+0: Lock half
+0: Glass half
+0: Shield
+0: Mirror
+0: quinoa
+0: free model scroll
+0: Accord scroll
+0: term sheet

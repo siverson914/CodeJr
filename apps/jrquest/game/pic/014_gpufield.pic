@@ -1,0 +1,393 @@
+# Room 14: the GPU Field. Graphics cards grow in rows like corn, on both
+# sides of a lane. Right of the lane stands a trellis that looks like the
+# axes of a chart with nothing on it. The beanstalk (a view) grows along
+# it, up and to the right, into the Cloud in the top right corner.
+# Generated once from a loop, then kept by hand: edit freely.
+
+# ---- sky: the shade line, the Cloud, a small cloud, the sun ----
+color 9
+line 0 22 159 22
+color 7
+arc 110 7 8 7 12
+arc 110 7 8 7 240
+arc 126 7 8 9 240
+arc 142 7 8 10 240
+arc 158 7 8 8 240
+arc 34 12 12 4 15
+line 22 12 46 12
+color 14
+circle 60 9 6
+
+# ---- horizon, a far hill, the barn and its silo ----
+color 2
+line 0 52 159 52
+arc 112 52 38 9 15
+color 4
+rect 6 42 26 52
+poly 4 42 16 34 28 42
+color 8
+rect 30 37 35 52
+arc 32 37 3 3 15
+
+# ---- the lane north, flaring into the path that runs west to east ----
+color 6
+line 44 53 40 119 34 128 0 128
+line 64 53 68 120 74 128 159 128
+line 0 140 159 141
+# the front edge of each field
+line 0 119 40 119
+line 68 120 159 120
+
+# ---- the mound, where the trellis starts ----
+color 6
+arc 86 126 8 4 15
+line 78 126 94 126
+
+# ---- the far rows: bands that a striped fill turns into cards ----
+color 6
+rect 0 56 41 58
+rect 67 56 159 58
+rect 0 62 40 65
+rect 68 62 159 65
+
+# ---- the near rows: one box a card ----
+color 2
+box 4 69 7 74
+box 11 69 14 74
+box 18 69 21 74
+box 25 69 28 74
+box 32 69 35 74
+box 70 69 73 74
+box 77 69 80 74
+box 84 69 87 74
+box 91 69 94 74
+box 98 69 101 74
+box 105 69 108 74
+box 112 69 115 74
+box 119 69 122 74
+box 126 69 129 74
+box 133 69 136 74
+box 140 69 143 74
+box 147 69 150 74
+box 154 69 157 74
+box 2 77 6 84
+box 11 77 15 84
+box 20 77 24 84
+box 29 77 33 84
+box 71 77 75 84
+box 80 77 84 84
+box 89 77 93 84
+box 98 77 102 84
+box 107 77 111 84
+box 116 77 120 84
+box 125 77 129 84
+box 134 77 138 84
+box 143 77 147 84
+box 152 77 156 84
+box 2 87 7 96
+box 14 87 19 96
+box 26 87 31 96
+box 72 87 77 96
+box 84 87 89 96
+box 96 87 101 96
+box 108 87 113 96
+box 120 87 125 96
+box 132 87 137 96
+box 144 87 149 96
+box 2 99 9 111
+box 17 99 24 111
+box 72 99 79 111
+box 87 99 94 111
+box 102 99 109 111
+box 117 99 124 111
+box 132 99 139 111
+box 147 99 154 111
+
+# ---- two big cards in the front corners ----
+color 0
+rect 2 144 24 163
+arc 13 153 5 6
+rect 136 144 158 163
+arc 147 153 5 6
+color 14
+rect 6 163 20 167
+rect 140 163 154 167
+
+# ================= fills =================
+# sky
+color 9
+fill 2 2
+color 11
+pattern 1 9
+fill 2 30
+pattern 0
+color 14
+fill 60 9
+# hill
+color 2
+pattern 4 10
+fill 112 48
+pattern 0
+# barn and silo
+color 12
+fill 16 47
+color 4
+fill 16 38
+color 7
+fill 32 45
+fill 32 35
+# far rows
+color 2
+pattern 9 6
+fill 10 57
+fill 100 57
+pattern 13 6
+fill 10 63
+fill 100 63
+pattern 0
+# soil
+color 6
+pattern 5 0
+fill 2 54
+fill 2 60
+fill 2 100
+fill 157 54
+fill 157 60
+fill 157 100
+pattern 0
+# the lane and the path
+color 14
+pattern 1 6
+fill 54 80
+pattern 0
+# mound
+color 6
+fill 86 124
+# grass
+color 2
+pattern 6 10
+fill 10 123
+fill 120 124
+fill 80 150
+pattern 0
+# the big cards
+color 2
+
+fill 4 146
+fill 138 146
+color 8
+fill 13 153
+fill 147 153
+color 14
+fill 10 165
+fill 144 165
+
+# ================= details over the fills =================
+# each card: a bright top edge, gold fingers in the soil, a fan
+color 10
+line 4 69 7 69
+line 11 69 14 69
+line 18 69 21 69
+line 25 69 28 69
+line 32 69 35 69
+line 70 69 73 69
+line 77 69 80 69
+line 84 69 87 69
+line 91 69 94 69
+line 98 69 101 69
+line 105 69 108 69
+line 112 69 115 69
+line 119 69 122 69
+line 126 69 129 69
+line 133 69 136 69
+line 140 69 143 69
+line 147 69 150 69
+line 154 69 157 69
+line 2 77 6 77
+line 11 77 15 77
+line 20 77 24 77
+line 29 77 33 77
+line 71 77 75 77
+line 80 77 84 77
+line 89 77 93 77
+line 98 77 102 77
+line 107 77 111 77
+line 116 77 120 77
+line 125 77 129 77
+line 134 77 138 77
+line 143 77 147 77
+line 152 77 156 77
+line 3 88 6 88
+line 15 88 18 88
+line 27 88 30 88
+line 73 88 76 88
+line 85 88 88 88
+line 97 88 100 88
+line 109 88 112 88
+line 121 88 124 88
+line 133 88 136 88
+line 145 88 148 88
+line 3 100 8 100
+line 18 100 23 100
+line 73 100 78 100
+line 88 100 93 100
+line 103 100 108 100
+line 118 100 123 100
+line 133 100 138 100
+line 148 100 153 100
+color 14
+line 5 74 6 74
+line 12 74 13 74
+line 19 74 20 74
+line 26 74 27 74
+line 33 74 34 74
+line 71 74 72 74
+line 78 74 79 74
+line 85 74 86 74
+line 92 74 93 74
+line 99 74 100 74
+line 106 74 107 74
+line 113 74 114 74
+line 120 74 121 74
+line 127 74 128 74
+line 134 74 135 74
+line 141 74 142 74
+line 148 74 149 74
+line 155 74 156 74
+line 3 84 5 84
+line 12 84 14 84
+line 21 84 23 84
+line 30 84 32 84
+line 72 84 74 84
+line 81 84 83 84
+line 90 84 92 84
+line 99 84 101 84
+line 108 84 110 84
+line 117 84 119 84
+line 126 84 128 84
+line 135 84 137 84
+line 144 84 146 84
+line 153 84 155 84
+line 3 96 6 96
+line 15 96 18 96
+line 27 96 30 96
+line 73 96 76 96
+line 85 96 88 96
+line 97 96 100 96
+line 109 96 112 96
+line 121 96 124 96
+line 133 96 136 96
+line 145 96 148 96
+line 3 111 8 111
+line 18 111 23 111
+line 73 111 78 111
+line 88 111 93 111
+line 103 111 108 111
+line 118 111 123 111
+line 133 111 138 111
+line 148 111 153 111
+color 0
+plot 5 72 12 72 19 72 26 72 33 72 71 72 78 72 85 72 92 72 99 72 106 72 113 72 120 72 127 72 134 72 141 72 148 72 155 72 4 80 4 81 13 80 13 81 22 80 22 81 31 80 31 81 73 80 73 81 82 80 82 81 91 80 91 81 100 80 100 81 109 80 109 81 118 80 118 81 127 80 127 81 136 80 136 81 145 80 145 81 154 80 154 81 4 91 5 92 16 91 17 92 28 91 29 92 74 91 75 92 86 91 87 92 98 91 99 92 110 91 111 92 122 91 123 92 134 91 135 92 146 91 147 92 5 103 6 103 4 104 7 104 4 105 7 105 5 106 6 106 20 103 21 103 19 104 22 104 19 105 22 105 20 106 21 106 75 103 76 103 74 104 77 104 74 105 77 105 75 106 76 106 90 103 91 103 89 104 92 104 89 105 92 105 90 106 91 106 105 103 106 103 104 104 107 104 104 105 107 105 105 106 106 106 120 103 121 103 119 104 122 104 119 105 122 105 120 106 121 106 135 103 136 103 134 104 137 104 134 105 137 105 135 106 136 106 150 103 151 103 149 104 152 104 149 105 152 105 150 106 151 106
+# the big cards: fan blades, bracket, chips
+color 7
+line 9 153 17 153
+line 13 148 13 158
+line 143 153 151 153
+line 147 148 147 158
+color 15
+plot 13 153 147 153
+color 10
+line 3 145 23 145
+line 137 145 157 145
+color 0
+line 19 147 22 147
+line 19 149 22 149
+line 153 147 156 147
+line 153 149 156 149
+line 4 160 8 160
+line 138 160 142 160
+color 6
+line 9 164 9 167
+line 13 164 13 167
+line 17 164 17 167
+line 143 164 143 167
+line 147 164 147 167
+line 151 164 151 167
+# the barn door, its loft, and the silo's bands
+color 4
+rect 13 45 19 52
+line 13 45 19 52
+line 19 45 13 52
+color 0
+plot 16 39
+color 8
+line 30 42 35 42
+line 30 47 35 47
+# the Cloud's soft underside
+color 7
+line 106 6 114 6
+line 122 10 130 10
+line 138 9 146 9
+line 152 5 158 5
+color 11
+line 124 13 128 13
+line 140 13 144 13
+# the trellis: a pole and a rail, with ticks. Axes with no chart on them.
+color 6
+line 70 122 70 20
+line 71 122 71 20
+line 70 122 157 122
+line 70 123 157 123
+color 4
+line 67 30 69 30
+line 67 44 69 44
+line 67 58 69 58
+line 67 72 69 72
+line 67 86 69 86
+line 67 100 69 100
+line 67 114 69 114
+line 100 124 100 126
+line 114 124 114 126
+line 128 124 128 126
+line 142 124 142 126
+line 156 124 156 126
+# arrowheads on both axes
+color 6
+line 68 23 70 19
+line 73 23 71 19
+line 154 120 158 122
+line 154 125 158 123
+# the hole in the mound
+color 0
+line 85 124 87 124
+# tufts and stones
+color 2
+plot 20 124 21 123 22 124 110 150 111 149 112 150 60 158 61 157 62 158 126 134
+color 14
+plot 50 150 96 160 30 136
+color 7
+plot 120 136 121 136 44 100 58 90
+
+# ================= priority and control =================
+color off
+# the crop is too thick to walk in: both fields are fenced by solid lines
+pri 0
+line 44 53 40 119
+line 0 119 40 119
+line 0 120 40 120
+line 64 53 68 120
+line 68 120 159 120
+line 68 121 159 121
+# the big cards stand in front of everything, and their feet are solid
+pri 15
+rect 2 144 24 163
+rect 6 163 20 167
+fill 13 153
+fill 10 165
+rect 136 144 158 163
+rect 140 163 154 167
+fill 147 153
+fill 144 165
+pri 0
+rect 0 157 26 167
+rect 134 157 159 167

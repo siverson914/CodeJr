@@ -1,0 +1,38 @@
+// Logic 84: the escaped agents, once they are following JR. Logic 0 calls
+// this every cycle in outdoor rooms. They follow whoever holds the answer
+// key, from the Launch Pad to the Cathedral. Rooms 11 and 13 handle the
+// start and the end; this is everything in between.
+#include "defines.h"
+
+if (isset(agentsFollow)) {
+  if (isset(newRoom)) {
+    load.view(9);
+    animate.obj(swarm);
+    set.view(swarm, 9);
+    get.posn(ego, swX, swY);
+    position.v(swarm, swX, swY);
+    ignore.objs(swarm);
+    ignore.blocks(swarm);
+    swDist = 1;
+    step.size(swarm, swDist);
+    draw(swarm);
+    reset(swArrived);
+    follow.ego(swarm, 10, swArrived);
+  }
+  // Having caught up, they wait until he gets ahead again.
+  if (isset(swArrived)) {
+    distance(ego, swarm, swDist);
+    if (swDist > 16) {
+      reset(swArrived);
+      follow.ego(swarm, 10, swArrived);
+    }
+  }
+  if (said("look", "agents")) {
+    print("A small swarm of test agents, following the answer key. They got out to cheat on their own exam. They are very motivated students.");
+  }
+  if (said("talk", "agents")) {
+    print("AGENTS: Is that the answer key? Is it? Can we see? We won't look. We'll look a little.");
+  }
+  if (said("take", "agents")) { print("You don't take them. You hold the answers and they come."); }
+}
+return();

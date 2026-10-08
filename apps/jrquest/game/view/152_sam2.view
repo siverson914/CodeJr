@@ -1,0 +1,52 @@
+desc "A newer Sam"
+loop 0
+cel 9 24 trans=5
+....A....
+...AAA...
+..AAAAA..
+.6CCCCC6.
+.C0CCC0C.
+.CCCCCCC.
+.CCCCCCC.
+..CCCCC..
+...CCC...
+.AAAAAAA.
+AAAAAAAAA
+AAAAAAAAA
+AAAAAAAAA
+CCAAAAACC
+CCAAAAACC
+..AAAAA..
+..AAAAA..
+..AA.AA..
+..AA.AA..
+..AA.AA..
+..AA.AA..
+..AA.AA..
+..AA.AA..
+.000.000.
+cel 9 24 trans=5
+....A....
+...AAA...
+..AAAAA..
+.6CCCCC6.
+.C0CCC0C.
+.CCCCCCC.
+.CCCCCCC.
+..CCCCC..
+...CCC...
+.AAAAAAA.
+AAAAAAAAA
+AAAAAAAAA
+AAAAAAAAA
+CCAAAAACC
+CCAAAAACC
+..AAAAA..
+..AAAAA..
+..AA.AA..
+..AA.AA..
+..AA.AA..
+..AA.AA..
+..AA.AA..
+.000.AA..
+.....000.

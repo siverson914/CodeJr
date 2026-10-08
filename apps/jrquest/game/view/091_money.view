@@ -1,0 +1,37 @@
+desc "Money in the stream"
+loop 0
+cel 5 5 trans=5
+.EEE.
+EE6EE
+E6EEE
+EE6EE
+.EEE.
+cel 5 5 trans=5
+.EEE.
+EF6EE
+E6EEE
+EE6EE
+.EEE.
+cel 5 5 trans=5
+.E6E.
+.E6E.
+.E6E.
+.E6E.
+.E6E.
+cel 5 5 trans=5
+.EEE.
+EE6FE
+E6EEE
+EE6EE
+.EEE.
+loop 1
+cel 7 4 trans=5
+2222222
+2AAFAA2
+2AFFFA2
+2222222
+cel 7 4 trans=5
+.222222
+2AAFAA2
+2AFFFA2
+222222.

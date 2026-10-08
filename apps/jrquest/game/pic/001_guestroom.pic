@@ -1,0 +1,198 @@
+# Room 1: the guest room, Castle Steve, Encinitas.
+# Outlines first, fills after: a fill only replaces white.
+
+# ---- room shell ----
+color 8
+line 24 14 135 14
+line 24 14 24 92
+line 135 14 135 92
+line 24 92 135 92
+line 0 0 24 14
+line 159 0 135 14
+line 24 92 0 125
+line 135 92 159 125
+
+# baseboard
+color 6
+line 25 89 134 89
+
+# ---- window (back wall, left) ----
+color 8
+rect 38 24 78 58
+rect 40 26 76 56
+line 58 26 58 56
+# horizon and a palm far off
+color 1
+line 41 47 57 47
+line 59 47 75 47
+color 2
+line 66 47 66 40
+line 63 39 69 39
+line 64 38 68 38
+# sun
+color 14
+circle 49 36 4
+
+# ---- door to the stairs (back wall, right) ----
+color 6
+rect 108 34 130 91
+color 8
+line 112 91 112 40 128 40 128 91
+# stairs going down, seen through the door
+color 7
+line 113 84 127 84
+line 113 77 127 77
+line 113 70 127 70
+line 113 63 127 63
+
+# ---- desk (back wall, middle) ----
+color 6
+rect 80 70 104 74
+line 82 74 82 91
+line 85 74 85 91
+line 99 74 99 91
+line 102 74 102 91
+line 82 91 85 91
+line 99 91 102 91
+# the clean rectangle where a computer sat for a while
+color 7
+rect 83 67 93 69
+
+# ---- bed (left) ----
+color 8
+poly 27 94 60 94 54 114 12 114
+line 12 114 12 123 54 123 54 114
+line 60 94 60 102 54 123
+# pillow
+color 7
+poly 30 96 44 96 42 101 27 101
+# blanket fold
+color 4
+line 24 104 57 104
+
+# ---- the GARAGE box (front right) ----
+color 6
+poly 120 130 144 130 148 136 124 136
+line 124 136 124 150 148 150 148 136
+line 120 130 120 144 124 150
+color 0
+line 128 141 144 141
+line 128 144 140 144
+
+# ---- rug ----
+color 4
+arc 78 128 30 9
+color 12
+arc 78 128 24 6
+
+# ================= fills =================
+# ceiling
+color 7
+fill 80 5
+# back wall: soft teal
+color 3
+pattern 1 11
+fill 30 20
+fill 100 30
+fill 133 60
+fill 90 80
+# under the desk between the legs and the baseboard strip
+fill 90 85
+fill 83 80
+fill 100 80
+color 6
+pattern 0
+fill 30 90
+fill 90 90
+fill 133 90
+fill 83 90
+fill 100 90
+fill 106 90
+fill 132 90
+# side walls: a darker teal
+color 3
+fill 10 50
+fill 150 50
+# floor: wood
+color 4
+pattern 12 6
+fill 80 110
+fill 5 150
+fill 150 160
+fill 100 100
+pattern 0
+# window: frame, sky, sea
+color 15
+color 7
+fill 39 25
+color 9
+pattern 2 11
+fill 45 30
+fill 70 30
+pattern 0
+color 14
+fill 49 36
+color 1
+fill 45 52
+fill 70 52
+# door frame, dark stairwell
+color 6
+fill 109 35
+color 0
+fill 120 50
+fill 120 66
+fill 120 73
+fill 120 80
+fill 120 88
+# desk
+color 6
+fill 90 72
+fill 83 80
+fill 100 80
+color 14
+fill 89 68
+# bed
+color 9
+fill 40 108
+color 1
+fill 30 118
+fill 56 110
+fill 58 100
+# rug
+color 4
+fill 52 128
+color 12
+pattern 1 4
+fill 78 128
+pattern 0
+# box
+color 14
+pattern 1 6
+fill 130 133
+pattern 0
+color 6
+fill 136 146
+fill 122 140
+
+# ================= priority and control =================
+color off
+# walls: nothing walks above the floor line. Row 92 is solid all the way
+# across; row 93 is solid except at the door, where it is a trigger.
+pri 0
+line 24 92 135 92
+line 24 93 112 93
+line 128 93 135 93
+line 24 93 0 126
+line 135 93 159 126
+pri 2
+line 113 93 127 93
+line 113 94 127 94
+# the whole bed is solid: nobody walks on the guest bed
+pri 0
+poly 26 93 61 93 55 124 10 124
+# the box hides JR's feet when he stands behind it
+pri 13
+poly 120 130 144 130 148 136 148 150 124 150 120 144
+fill 130 140
+pri 0
+poly 119 137 149 137 149 151 119 151

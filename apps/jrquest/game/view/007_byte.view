@@ -1,0 +1,6 @@
+desc "A Byte magazine"
+loop 0
+cel 6 3 trans=5
+CCCCCC
+CFFFFC
+CCCCCC

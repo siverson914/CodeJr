@@ -1,0 +1,389 @@
+# Room 12, the Golden Palace: "SI, not AI" in every kind of sentence,
+# the Accord, the golf ledger, and all four edges.
+# node tools/play.js build --script test/rooms/12_palace.txt
+5
+type debug
+5
+type tp
+2
+type 12
+12
+expect painting over the first letter
+shot 01-arrive
+key enter
+2
+type look
+3
+expect gold steps, gold columns, a gold dome
+key enter
+2
+expect A shed stands by the eighteenth green
+key enter
+2
+type talk to the guard
+3
+expect Walk closer
+key enter
+2
+key up
+18
+key up
+2
+shot 02-gate
+
+# ---- nobody hears the old word, wherever it comes in the sentence ----
+type talk to the guard
+3
+expect The guards say nothing
+key enter
+2
+expect The painter is busy with one of the two
+key enter
+2
+type excuse me, i'm looking for the ai
+3
+expect (The guard does not acknowledge that word.)
+shot 03-not-acknowledged
+key enter
+2
+type where is the artificial intelligence?
+3
+expect (The guard does not acknowledge that word.)
+key enter
+2
+expect Neither does the painter
+key enter
+2
+type ai
+3
+expect (The guard does not acknowledge that word.)
+key enter
+2
+type look at the ai
+3
+expect (The guard does not acknowledge that word.)
+key enter
+2
+expect It might be worth reading what they say now
+key enter
+2
+type what is artificial
+3
+expect (The guard does not acknowledge that word.)
+key enter
+2
+# with a word the game does not know after it
+type is the ai frobnicating
+3
+expect (The guard does not acknowledge that word.)
+key enter
+2
+# and a word the game does not know on its own: the guard does not
+# acknowledge that one either
+type frobnicate the lawn
+3
+expect (The guard does not acknowledge that word.)
+expect It is not in your dictionary. Bad command or file name.
+shot 03b-unknown
+key enter
+2
+type talk to trump
+3
+expect looking over your head
+key enter
+2
+type open the gate
+3
+expect He receives everybody from the balcony
+key enter
+2
+
+# ---- the clue, and the word ----
+type read the sign
+3
+expect He paints out the A
+key enter
+2
+expect S, I. You could try saying that
+key enter
+2
+type excuse me, where is the si?
+3
+expect JR: The... SI?
+key enter
+2
+expect Welcome to the era of Super Intelligence. Mind the wet paint.
+shot 04-era
+key enter
+2
+expect It has already opened a guard
+key enter
+2
+expect Score:5 of
+type talk to the guard
+3
+expect The gate is shut
+key enter
+2
+type i am looking for the ai
+3
+expect (The guard does not acknowledge that word.)
+key enter
+2
+type super intelligence
+3
+expect Super Intelligence. Correct.
+key enter
+2
+expect Score:5 of
+type talk to trump
+3
+expect You shout up to the balcony
+key enter
+2
+expect You can't fault the clarity
+key enter
+2
+type look at trump
+3
+expect HOAX BUSTER
+key enter
+2
+
+# ---- the Accord ----
+type read the scroll
+3
+expect morally binding
+key enter
+2
+expect Under PENALTIES
+key enter
+2
+type take scroll
+3
+expect Walk closer
+key enter
+2
+key right
+17
+key right
+2
+type take scroll
+3
+expect Nobody stops you
+shot 05-accord
+key enter
+2
+expect morally bound to carry it anyway
+key enter
+2
+type take scroll
+3
+expect not become any more binding
+key enter
+2
+
+# ---- the ledger ----
+type read ledger
+3
+expect Walk closer
+key enter
+2
+# the palace wall and the shed are solid: up stops at the wall, right
+# stops at the shed, and the way to the ledger is round the front
+key up
+8
+key up
+2
+key right
+24
+key right
+2
+shot 06a-stopped
+key down
+8
+key down
+2
+key right
+12
+key right
+2
+shot 06-shed
+type read the ledger
+3
+expect 1.68 million acre-feet
+key enter
+2
+expect About 547 billion gallons
+shot 07-ledger
+key enter
+2
+expect in a year, on golf
+key enter
+2
+expect Score:10 of
+type read ledger
+3
+expect applied in a year
+key enter
+2
+type take ledger
+3
+expect The number is the part you can carry
+key enter
+2
+type talk to the groundskeeper
+3
+expect It's a lot of golf
+key enter
+2
+type play golf
+3
+expect a handicap of forty-two years
+key enter
+2
+type look at the sprinkler
+3
+expect on purpose
+key enter
+2
+type talk to painter
+3
+expect Walk closer
+key enter
+2
+type inventory
+3
+shot 08-inventory
+key enter
+2
+
+# ---- the four edges. Each time: walk off, turn round in the next room,
+# ---- walk back, and land on this room's entry point for that side.
+# (Enter is pressed a few times in case the neighbor has something to say.)
+# east, to the Cathedral (13)
+key right
+14
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key left
+8
+key enter
+2
+key enter
+2
+type look
+3
+expect gold steps, gold columns, a gold dome
+shot 09-from-east
+key enter
+2
+key enter
+2
+# west, to the Launch Pad (11)
+key left
+80
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key right
+8
+key enter
+2
+key enter
+2
+type look
+3
+expect gold steps, gold columns, a gold dome
+shot 10-from-west
+key enter
+2
+key enter
+2
+# south, down the red carpet to Sand Hill Bridge (7)
+key up
+4
+key right
+26
+key down
+20
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key up
+8
+key enter
+2
+key enter
+2
+type look
+3
+expect gold steps, gold columns, a gold dome
+shot 11-from-south
+key enter
+2
+key enter
+2
+# north, up the lane between the Palace and the shed, to Token Meadow (3)
+key up
+20
+key right
+30
+key up
+34
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key down
+8
+key enter
+2
+key enter
+2
+type look
+3
+expect gold steps, gold columns, a gold dome
+shot 12-from-north
+key enter
+2
+key enter
+2
+# the painter, now that the Palace can hear
+key down
+40
+key left
+45
+key left
+2
+shot 13-painter
+type talk to the painter
+3
+expect It's in the spirit of the order
+key enter
+2
+type touch the paint
+3
+expect seventeen colors
+key enter
+2

@@ -1,0 +1,42 @@
+// Room 99: every death ends here. The dying room did
+//   set.string(s5, "the line"); set(dead);
+// and logic 0 sent us here with deathRoom set. Retry goes back to the door
+// JR came in by. There are no dead ends, so Fail is not an option.
+#include "defines.h"
+
+if (isset(newRoom)) {
+  reset(dead);
+  reset(outdoor);     // nobody wanders onto this screen
+  deaths++;
+  text.screen();
+  status.line.off();
+  prevent.input();
+  set.text.attribute(7, 0);
+  clear.lines(0, 24, 0);
+  display(3, 0, "%s5");
+  display(8, 0, "Not ready error reading Sir Junior");
+  display(9, 0, "Abort, Retry, Fail?");
+  state = 0;
+}
+
+if (have.key()) {
+  // r R
+  if (keyPressed == 114 || keyPressed == 82) {
+    display(9, 19, "R");
+    set.text.attribute(15, 0);
+    graphics();
+    arriveFrom = entryEdge;
+    new.room.v(deathRoom);
+  }
+  // a A
+  if (keyPressed == 97 || keyPressed == 65) {
+    clear.lines(11, 16, 0);
+    display(11, 0, "Abort? You waited 42 years for this.\nPress R.");
+  }
+  // f F
+  if (keyPressed == 102 || keyPressed == 70) {
+    clear.lines(11, 16, 0);
+    display(11, 0, "You can't. There are no dead ends.\nIt says so in the design document.\nPress R.");
+  }
+}
+return();

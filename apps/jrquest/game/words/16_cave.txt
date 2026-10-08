@@ -1,0 +1,12 @@
+# Room 16, the Dragon's Cave (groups 1600 to 1699).
+1600: fire, flame, flames, breath, blaze
+1601: lava, magma, embers, ember, glow
+1602: pedestal, plinth, stand, niche, alcove
+1603: stalactites, stalactite, stalagmites, stalagmite
+1604: shelf, ledge
+1605: today, todays, todays date, day, now
+1606: future, next, tomorrow
+1607: daylight, way out
+1608: knights, knight, remains
+1610: wing, wings, tail, teeth, claws, scales, horns, jaws
+1612: reflection, face

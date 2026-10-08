@@ -1,0 +1,59 @@
+desc "A tailor"
+loop 0
+cel 9 27 trans=5
+.........
+..77777..
+.7777777.
+.7CCCCC7.
+.808C808.
+.CCCCCCC.
+.CCCCCCC.
+..CCCCC..
+...CCC...
+.DDEDDDD.
+DDDEDDDDD
+DDDEDDDDD
+DDDDEDDDD
+DDDDEDDDD
+DDDDDEDDD
+CCDDDDDCC
+CCDDDDDCC
+..88888..
+..88888..
+..88.88..
+..88.88..
+..88.88..
+..88.88..
+..88.88..
+..88.88..
+..88.88..
+.000.000.
+cel 9 27 trans=5
+.........
+..77777..
+.7777777.
+.7CCCCC7.
+.808C808.
+.CCCCCCC.
+.CCCCCCC.
+..CCCCC..
+...CCC...
+.DDEDDDD.
+DDDEDDDDD
+DDDEDDDDD
+DDDDEDDDD
+DDDDEDDDD
+DDDDDEDDD
+CCDDDDDCC
+CCDDDDDCC
+..88888..
+..88888..
+..88.88..
+..88.88..
+..88.88..
+..88.88..
+..88.88..
+..88.88..
+.000.88..
+.....000.
+loop 1 mirror 0

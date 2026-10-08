@@ -1,0 +1,345 @@
+// Room 6: the Data Center. A castle with one window, a moat along the
+// south, the town well and its Keeper.
+// Puzzle 5: read the meter, tell the Keeper both numbers (the meter and
+// the Palace's golf ledger), look in the window, rewrite the program in
+// forty bytes, and fill the bucket from the well once it has risen.
+// The rule for this room: the Keeper is right about her town, the indirect
+// figure (twelve times) is said out loud, and nothing here ever says a data
+// center uses "no" or "little" water. It says the numbers and what they
+// are next to.
+#include "defines.h"
+#include "room06.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(vKeeper);
+  load.view(vWell);
+  load.view(vFans);
+  load.view(vCursor);
+  set.horizon(58);
+
+  call(91);
+  set(outdoor);
+
+  // Entry points. South is the moat, so a test teleport and anyone who
+  // somehow came north land on the grass above the bank.
+  position(ego, 70, 132);
+  set.loop(ego, 3);
+  if (arriveFrom == 2) { position(ego, 4, 114); set.loop(ego, 0); }
+  if (arriveFrom == 3) { position(ego, 12, 64); set.loop(ego, 2); }
+  if (arriveFrom == 4) { position(ego, 146, 116); set.loop(ego, 1); }
+
+  animate.obj(well);
+  set.view(well, vWell);
+  set.loop(well, 0);
+  release.priority(well);
+  ignore.objs(well);
+  ignore.blocks(well);
+  position(well, 119, 137);
+  if (isset(programFixed)) { set.cel(well, 2); }
+  else { set.cel(well, 0); }
+  stop.cycling(well);
+  draw(well);
+
+  animate.obj(fans);
+  set.view(fans, vFans);
+  set.loop(fans, 0);
+  set.cel(fans, 0);
+  set.priority(fans, 4);
+  ignore.objs(fans);
+  ignore.blocks(fans);
+  ignore.horizon(fans);
+  position(fans, 60, 41);
+  work = 1;
+  if (isset(programFixed)) { work = 6; }
+  cycle.time(fans, work);
+  normal.cycle(fans);
+  draw(fans);
+
+  animate.obj(cursorObj);
+  set.view(cursorObj, vCursor);
+  set.loop(cursorObj, 0);
+  set.cel(cursorObj, 0);
+  set.priority(cursorObj, 4);
+  ignore.objs(cursorObj);
+  ignore.blocks(cursorObj);
+  position(cursorObj, 100, 87);
+  work = 5;
+  cycle.time(cursorObj, work);
+  normal.cycle(cursorObj);
+  draw(cursorObj);
+
+  animate.obj(keeper);
+  set.view(keeper, vKeeper);
+  set.loop(keeper, 0);
+  set.cel(keeper, 0);
+  release.priority(keeper);
+  observe.objs(keeper);
+  normal.motion(keeper);
+  position(keeper, 104, 136);
+  stop.cycling(keeper);
+  draw(keeper);
+
+  draw(ego);
+  show.pic();
+  state = 0;
+  timer = 0;
+}
+
+// ---- arriving: she has an opinion ----
+if (state == 0) {
+  timer++;
+  if (timer == 8) {
+    state = 1;
+    if (!isset(keeperMet)) {
+      set(keeperMet);
+      print("A building with no windows hums to itself behind a moat. A woman in waders stands guard over a well.");
+      print("KEEPER: That thing drinks the river dry!");
+    }
+  }
+}
+
+// ---- the well comes up ----
+if (state == 2 && isset(tmpC)) {
+  reset(tmpC);
+  state = 1;
+  set(wellUp);
+  print("In the well, the water climbs back up the stones, a course at a time, and stops near the top.");
+  print("KEEPER: ...Huh. First time since they built that thing. Go on, knight. Fill your bucket.");
+}
+
+// ---- Zuckerberg, if he wanders in, keeps out of the moat ----
+if (isset(zuckHere) && !isset(tmpB)) {
+  set(tmpB);
+  object.on.land(zuck);
+  reposition.to(zuck, 60, 128);
+}
+
+// ---- the bank: one warning, then the moat means it ----
+if (isset(onTrigger) && !isset(tmpA)) {
+  set(tmpA);
+  get.posn(ego, tA, tB);
+  tB = 138;
+  reposition.to.v(ego, tA, tB);
+  egoDir = 0;
+  print("The bank is slick and the moat is deep. There is no way across to the south.\n\nOne more step and you find out what you were rated for.");
+}
+if (isset(onWater) && !isset(dead)) {
+  set.string(s6, "You are a 1984 computer.");
+  set.string(s7, "\nYou were not rated for water.");
+  set.string(s5, "%s6%s7");
+  set(dead);
+}
+
+// ---- edges: north to the Launch Pad, east to the bridge, west to the Tavern ----
+if (egoEdge == 1) { arriveFrom = 1; new.room(11); }
+if (egoEdge == 2) { arriveFrom = 2; new.room(7); }
+if (egoEdge == 4) { arriveFrom = 4; new.room(9); }
+
+// ---- looking ----
+if (said("look") || said("look", "room") || said("look", "data center") || said("look", "castle")) {
+  print("The Data Center. A castle with two towers, a steel door, and no windows, except one. The front wall has seams, status lights and fans, like the back of something much bigger than you.");
+  print("A pipe runs from it to a meter. A moat runs along the south. By the well stands the Moat Keeper, and on the hill upstream, a power plant.");
+}
+if (said("look", "moat") || said("look", "water")) {
+  if (isset(bucketFull) && !isset(tmpD)) {
+    set(tmpD);
+    print("The moat is wide, green and deep. The water in your bucket is clearer. It came from the well.");
+  }
+  else { print("A moat along the whole south side, wide, green and deep. The building's pipe drinks from it and the building's drain gives some of it back, warmer."); }
+}
+if (said("look", "well") || said("look", "well", "rol")) {
+  if (isset(programFixed)) { print("The town well. The water is up near the top, with the sky in it."); }
+  else { print("The town well. You can see the bottom. There is a bucket's worth of water down there and a long rope to it."); }
+}
+if (said("look", "keeper")) {
+  print("The Moat Keeper. A straw hat, waders, and the look of someone who has been to a lot of town meetings. She is not a public figure. She is right about her well.");
+}
+if (said("look", "meter") || said("look", "pipe")) {
+  if (isset(meterRead)) { print("The water meter. ALL OF THEM, THE WHOLE COUNTRY, ONE YEAR: 17 BILLION GALLONS (66 BILLION LITERS). The needle under it is this building, today, and it is in the red."); }
+  else { print("A pipe from the building, and on it a dial with a brass plate: a water meter. There is small print on the plate. You could READ it."); }
+}
+if (said("read", "meter") || said("read", "pipe") || said("read", "numbers")) {
+  if (!posn(ego, 20, 104, 64, 141)) { print("The meter is on the pipe, left of the castle. Walk closer."); }
+  else {
+    if (isset(meterRead)) { print("You read it again. ALL OF THEM, THE WHOLE COUNTRY, ONE YEAR: 17 BILLION GALLONS (66 BILLION LITERS). It has not changed. Meters are honest that way."); }
+    else {
+      set(meterRead);
+      score += 4;
+      print("You read the plate. All of it, small print included.");
+      print("WATER DRAWN BY ALL DATA CENTERS, THE WHOLE COUNTRY, ONE YEAR:\n17 BILLION GALLONS\n(66 BILLION LITERS)\n\nUnder it a needle shows this one building, today. It is in the red.");
+      print("Seventeen billion. You have 128K. You have no idea whether seventeen billion of anything is a lot.\n\nA number wants another number next to it.");
+    }
+  }
+}
+if (said("take", "meter") || said("take", "pipe") || said("fix", "meter") || said("turn", "meter")) {
+  print("You leave the meter alone. The point of a meter is that nobody has adjusted it.");
+}
+if (said("look", "window") || said("look", "machines") || said("look", "cursor") || said("look", "window", "rol")) {
+  if (!posn(ego, 78, 103, 116, 118)) { print("The castle has one window, low on the front wall, right of the door. It has bars. Walk up to it."); }
+  else {
+    set(windowSeen);
+    if (isset(programFixed)) {
+      print("A hall of machines, row on row, most of them resting. One of them is blinking a cursor. It takes forty bytes. The rest are waiting for something worth doing.");
+    }
+    else {
+      print("You stand on your toes, which are new. Through the bars: a hall of machines, row on row, all busy, every fan screaming.");
+      print("Together they are blinking one cursor.");
+      if (isset(keeperTold)) { print("JR: I can do that in forty bytes.\n\n(There is a service port under the window. You could REWRITE the PROGRAM.)"); }
+      else { print("You count the machines. You count the cursor. One of those numbers is too big, but nobody here has asked you yet."); }
+    }
+  }
+}
+if (said("fix", "code") || said("fix", "machines") || said("fix", "cursor") || said("fix") || said("use", "port") || said("fix", "data center")) {
+  if (isset(programFixed)) { print("It is forty bytes. There is nothing left to take out. You checked, and then you read it again."); }
+  else {
+    if (!isset(keeperTold)) {
+      print("The Keeper steps between you and the building.");
+      if (isset(meterRead)) { print("KEEPER: Nobody touches that thing until somebody tells me straight how much it drinks. And compared to what."); }
+      else { print("KEEPER: Nobody touches that thing until somebody tells me how much it drinks. There's a meter on the pipe. Nobody reads it."); }
+    }
+    else {
+      if (!posn(ego, 78, 103, 116, 118)) { print("The service port is under the window, right of the steel door. Walk over to it."); }
+      else {
+        set(programFixed);
+        set(windowSeen);
+        score += 6;
+        print("You plug into the service port and read the program. All of it. It is very long, it was written very fast, and what it does is blink a cursor.");
+        print("You write it again the way you were raised: count down, flip one bit, go back to the top.");
+        print("JR: Forty bytes.\nKEEPER: Is that a lot?\nJR: It's less than this sentence.");
+        print("The hall goes quiet a row at a time. The fans slow. The building cools, and asks the well for less.");
+        work = 6;
+        cycle.time(fans, work);
+        work = 8;
+        cycle.time(well, work);
+        end.of.loop(well, tmpC);
+        state = 2;
+      }
+    }
+  }
+}
+if (said("look", "code") || said("read", "code")) {
+  if (isset(programFixed)) { print("Forty bytes. You know every one of them by name."); }
+  else { print("Whatever is running in there, it is inside. The one window is low on the front wall. There is a service port under it."); }
+}
+if (said("look", "bytes") || said("count", "bytes")) {
+  if (isset(programFixed)) { print("Forty. You counted twice. Thrift is the one thing you have always been fast at."); }
+  else { print("You have 131,072 of them and you know where each one is."); }
+}
+if (said("look", "fans") || said("listen") || said("listen", "fans") || said("listen", "data center")) {
+  if (isset(programFixed)) { print("The fans turn over slowly, like a ceiling fan in a laundry room. You can hear the reeds."); }
+  else { print("Three fans in the wall, flat out. The whole building hums one note. It is working very hard at something."); }
+}
+if (said("look", "lights")) { print("Status lights, green, amber and red. The nameplate over the door has been painted over so many times that it only says what the building is not."); }
+if (said("look", "door") || said("open", "door") || said("enter", "castle") || said("enter", "data center") || said("enter", "door") || said("kick", "door")) {
+  print("A steel door with no handle on this side. Nobody goes in. Things go in: power, water and questions. Answers come out, and warm water.");
+}
+if (said("look", "port")) { print("A service port under the window, low enough for a small knight. Your cable just reaches."); }
+if (said("look", "power plant") || said("look", "horizon")) {
+  if (isset(keeperTold)) { print("The power plant, upstream. For every gallon the building drinks, the plant that feeds it drinks twelve. The Keeper told you that. The meter on the pipe did not."); }
+  else { print("A power plant on the hill, upstream. Its smoke goes one way and its wire comes here."); }
+}
+if (said("look", "pennant")) { print("A red pennant on the left tower. No coat of arms. The owners prefer not to say."); }
+if (said("look", "reeds")) { print("Reeds and lily pads. The frogs have left. They said it was the noise."); }
+if (said("look", "tree")) { print("One tree. It is the only thing here that was not delivered on a truck."); }
+if (said("look", "path") || said("look", "ground")) { print("A sand path. North to the Launch Pad, east to the Sand Hill Bridge, west to the Tavern. South is the moat, and no."); }
+if (said("look", "wall") || said("climb", "wall") || said("climb", "castle") || said("climb")) {
+  print("The wall is smooth and has no windows to hold on to. That is most of the idea.");
+}
+if (said("look", "bucket")) {
+  if (!has("bucket")) { print("You don't have one. There was a bucket by the bed in the guest room."); }
+  else {
+    if (isset(bucketFull)) { print("Your bucket, full of well water. You carry it level. You are good at level."); }
+    else { print("Your bucket. Plastic, from the laundry room, and empty."); }
+  }
+}
+
+// ---- the Keeper ----
+if (said("talk", "keeper", "rol") || said("talk") || said("give", "numbers", "rol") || said("say", "numbers") || said("talk", "numbers", "rol")) {
+  if (!posn(ego, 70, 104, 150, 141)) { print("She is over by the well. Walk closer."); }
+  else {
+    if (isset(bucketFull) || isset(bucketPaid)) {
+      print("KEEPER: Forty bytes. I'm going to tell them at the town meeting, and they are not going to believe me.");
+    }
+    else {
+      if (isset(programFixed)) { print("KEEPER: The well's up. It still drinks, mind. Just not like it's angry. Fill your bucket."); }
+      else {
+        if (isset(keeperTold)) { print("KEEPER: It's whatever they're running in there. Look in the window. I've looked. I can't make head or tail of it."); }
+        else {
+          if (!isset(meterRead)) {
+            print("KEEPER: That thing drinks the river dry!\nJR: How much is that?\nKEEPER: All of it! There's a meter on the pipe. Go on, read it. Nobody ever does.");
+          }
+          else {
+            if (!isset(ledgerRead)) {
+              print("JR: The meter says all of them, in the whole country, drank seventeen billion gallons in a year.\nKEEPER: See?");
+              print("You do not see. Seventeen billion is one number, and one number is not a fact yet. Something else in this kingdom must drink, and keep a ledger of it.\n\n(The Golden Palace has a golf course.)");
+            }
+            else {
+              set(keeperTold);
+              score += 6;
+              print("JR: The meter says all of them, in the whole country, drank seventeen billion gallons in a year.\nKEEPER: See?");
+              print("JR: The golf ledger says five hundred forty-seven billion.\nKEEPER: ...Huh.");
+              print("KEEPER: Thirty to one. Fine. Now count it properly. The power plant upstream drinks twelve times what that building does, to feed it.");
+              print("KEEPER: Count the power plant and it's not thirty to one. It's more like two and a half.\nJR: So it's not nothing.");
+              print("KEEPER: It's not nothing, and it's not the river. The country's not dry. My well is. Look at it.");
+              print("KEEPER: It's whatever they're running in there.\n\nShe nods at the one window.");
+            }
+          }
+        }
+      }
+    }
+  }
+}
+if (said("take", "keeper") || said("kick", "keeper") || said("push", "keeper")) {
+  print("She has a town behind her. You have four-pixel legs.");
+}
+if (said("give", "bucket", "rol")) { print("KEEPER: I have a bucket. What I don't have is water to put in it."); }
+if (said("give", "tokens", "rol")) { print("KEEPER: You can't buy a well back up. People have tried."); }
+
+// ---- water ----
+if (said("fill", "bucket", "rol") || said("take", "water", "rol") || said("fill") || said("use", "bucket") || said("use", "well") || said("fill", "bucket", "well")) {
+  if (!has("bucket")) { print("With what? You have no bucket. There was one by the bed in the guest room."); }
+  else {
+    if (isset(bucketFull)) { print("It is full. Water does not compress. You know a lot about what does not compress."); }
+    else {
+      if (!isset(programFixed)) {
+        if (isset(keeperTold)) { print("KEEPER: Not from my well. You can see the bottom. Fix what's running in there and then we'll talk about buckets."); }
+        else { print("KEEPER: Not from my well, and not from the moat. That thing drinks the river dry! You want water, you tell me where it all goes."); }
+      }
+      else {
+        if (!posn(ego, 90, 110, 150, 141)) { print("The well is over by the Keeper. Walk closer."); }
+        else {
+          set(bucketFull);
+          if (isset(bucketPaid)) { print("You lower the bucket and bring it up full again. The well does not seem to mind."); }
+          else {
+            set(bucketPaid);
+            score += 4;
+            print("You lower the bucket and bring it up full. The rope is short now.");
+            print("KEEPER: Don't spill it. That's a town's worth of arguing in there.");
+          }
+        }
+      }
+    }
+  }
+}
+if (said("pour", "water", "rol") || said("pour", "bucket", "rol") || said("pour")) {
+  if (isset(bucketFull)) { print("Not here. You only just got it, and it was not easy."); }
+  else { print("There is nothing in the bucket to pour."); }
+}
+if (said("drink", "water") || said("drink", "moat") || said("drink", "well") || said("drink")) {
+  print("You are a 1984 computer. You and liquids have an understanding: they stay over there.");
+}
+if (said("swim") || said("swim", "moat") || said("enter", "moat") || said("enter", "water") || said("climb", "moat")) {
+  set.string(s6, "You are a 1984 computer.");
+  set.string(s7, "\nYou were not rated for water.");
+  set.string(s5, "%s6%s7");
+  set(dead);
+}
+if (said("smell") || said("smell", "rol")) { print("Warm dust and pond. Your own power supply smells a little like that when you have been on all day."); }
+if (said("take", "reeds") || said("take", "fans") || said("take", "machines") || said("take", "well")) {
+  print("You waste nothing, and that includes room in your inventory.");
+}
+return();

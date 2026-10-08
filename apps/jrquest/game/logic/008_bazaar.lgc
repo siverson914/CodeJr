@@ -1,0 +1,285 @@
+// Room 8: the Bazaar. Open models: three stalls, everything one token,
+// nothing with a door on it. Puzzle 11: the stallkeeper sells the Glass
+// half only to someone who has published their own source. JR has: IBM
+// printed his whole BIOS in the Technical Reference.
+#include "defines.h"
+#include "room08.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(5);
+  load.view(100);
+  load.view(101);
+  load.view(102);
+  load.view(103);
+  load.view(104);
+  load.view(105);
+  load.view(106);
+  set.horizon(58);
+
+  call(91);
+  set(outdoor);
+  position(ego, 80, 160);
+  set.loop(ego, 3);
+  if (arriveFrom == 3) { position(ego, 100, 64); set.loop(ego, 2); }
+  if (arriveFrom == 2) { position(ego, 4, 160); set.loop(ego, 0); }
+  if (arriveFrom == 4) { position(ego, 146, 160); set.loop(ego, 1); }
+
+  // The three keepers stand behind their counters: a fixed band below
+  // the counter's, so it hides their legs.
+  animate.obj(deepKeeper);
+  set.view(deepKeeper, 101);
+  position(deepKeeper, 17, 98);
+  set.priority(deepKeeper, 8);
+  ignore.objs(deepKeeper);
+  stop.cycling(deepKeeper);
+  draw(deepKeeper);
+
+  animate.obj(keeper);
+  set.view(keeper, 100);
+  position(keeper, 62, 98);
+  set.priority(keeper, 8);
+  ignore.objs(keeper);
+  stop.cycling(keeper);
+  draw(keeper);
+
+  animate.obj(kimiKeeper);
+  set.view(kimiKeeper, 102);
+  position(kimiKeeper, 142, 98);
+  set.priority(kimiKeeper, 8);
+  ignore.objs(kimiKeeper);
+  stop.cycling(kimiKeeper);
+  draw(kimiKeeper);
+
+  animate.obj(artSeller);
+  set.view(artSeller, 103);
+  position(artSeller, 32, 152);
+  stop.cycling(artSeller);
+  draw(artSeller);
+
+  // On the middle counter: the Glass half, or the book that bought it.
+  animate.obj(glassObj);
+  set.view(glassObj, 104);
+  position(glassObj, 77, 87);
+  set.priority(glassObj, 15);
+  ignore.objs(glassObj);
+  animate.obj(stallBook);
+  set.view(stallBook, 5);
+  position(stallBook, 77, 86);
+  set.priority(stallBook, 15);
+  ignore.objs(stallBook);
+  if (isset(glassSold)) { draw(stallBook); }
+  else { draw(glassObj); }
+
+  // Shoppers, so it is never quiet. They don't get in his way.
+  animate.obj(shopperA);
+  set.view(shopperA, 105);
+  position(shopperA, 20, 112);
+  ignore.objs(shopperA);
+  work = 1;
+  step.size(shopperA, work);
+  work = 2;
+  step.time(shopperA, work);
+  cycle.time(shopperA, work);
+  wander(shopperA);
+  draw(shopperA);
+  animate.obj(shopperB);
+  set.view(shopperB, 106);
+  position(shopperB, 128, 114);
+  ignore.objs(shopperB);
+  work = 1;
+  step.size(shopperB, work);
+  work = 3;
+  step.time(shopperB, work);
+  cycle.time(shopperB, work);
+  wander(shopperB);
+  draw(shopperB);
+
+  draw(ego);
+  show.pic();
+}
+
+// ---- edges ----
+if (egoEdge == 1) { arriveFrom = 1; new.room(13); }
+if (egoEdge == 2) { arriveFrom = 2; new.room(9); }
+if (egoEdge == 3) { arriveFrom = 3; new.room(4); }
+if (egoEdge == 4) { arriveFrom = 4; new.room(7); }
+
+// ---- the first time through, the market introduces itself ----
+if (!isset(keeperMet)) {
+  timer++;
+  if (timer == 10) {
+    set(keeperMet);
+    print("Everybody here is shouting a price, and the price is always the same.");
+    print("STALLKEEPER: One token! Everything one token! Take it home! Keep it! Look inside!");
+  }
+}
+
+// ================= looking =================
+if (said("look") || said("look", "room") || said("look", "stall")) {
+  print("The Bazaar. Three stalls under striped awnings: DeepSeek, Qwen and Kimi. Bunting, crates, a barrel, an easel. Nothing here has a door. Up the lane you can see the Cathedral, which is all door.");
+  if (!isset(glassSold)) { print("On the middle counter, something made of glass catches the light."); }
+}
+if (said("look", "stallkeeper")) {
+  print("The Qwen stallkeeper, in purple. He has never whispered in his life. Everything on his counter can be picked up, opened and taken home.");
+}
+if (said("look", "deepseek")) {
+  print("The DeepSeek stall, the cheapest in the market. A tally board on the post reads: JAN 27, 2025. ONE DAY. $589 BILLION OFF THE GIANT.");
+}
+if (said("look", "tally") || said("read", "tally")) {
+  print("JAN 27, 2025. ONE DAY. $589 BILLION OFF THE GIANT.\n\nUnder it, smaller: SEVENTEEN PERCENT. WE ONLY PUT OUT A PRICE LIST.");
+}
+if (said("look", "kimi")) {
+  print("The Kimi stall, red and yellow. The keeper has a crescent moon on his hat. On the counter is a parcel tied with string.");
+}
+if (said("look", "parcel") || said("read", "parcel")) {
+  print("A parcel tied with string. The tag says: FOR CHAMATH. COLLECT AT STALL. It is a big order.");
+}
+if (said("take", "parcel") || said("open", "parcel")) {
+  print("It has somebody else's name on it. You are honest. It is most of your personality.");
+}
+if (said("look", "glass half")) {
+  if (has("Glass half")) { print("The Glass half of the Shield. You can see straight through it. It says: see for yourself."); }
+  else {
+    if (isset(glassSold)) { print("You joined it to the other half. It is still see-through. That was the point."); }
+    else { print("Half a shield, made of glass, on the middle counter. You can see every part of how it works. A tag says: 1 TOKEN."); }
+  }
+}
+if (said("look", "book") || said("read", "book")) {
+  if (isset(glassSold)) { print("Your Technical Reference, open on the counter at Appendix A. A small crowd is reading your BIOS. You feel seen."); }
+  else {
+    if (has("Technical Reference")) { print("The IBM PCjr Technical Reference, 1983. Appendix A is your whole BIOS, every line, printed. You have been open source since before it had a name."); }
+    else { print("You don't have a book. There was a thick IBM binder in your room, on the box."); }
+  }
+}
+if (said("look", "painting")) {
+  print("A painting of a knight on an easel. He looks a little like you. The tag says: 16,000,000 TOKENS.");
+  if (!isset(paintSeen)) {
+    set(paintSeen);
+    unchanged++;
+    print("JR: Sixteen million! How many colors is it?\nART SELLER: Sixteen.\nJR: That's all I have!");
+    print("ART SELLER: Pixel art. Sixteen colors. On purpose.\nJR: On purpose! That part didn't change!");
+  }
+}
+if (said("look", "art seller")) {
+  print("The art seller: a red beret, a beard, and a smock with all sixteen colors on it.");
+}
+if (said("look", "sixteen") || said("count", "sixteen")) {
+  print("You count them. Black, blue, green, cyan, red, magenta, brown, light grey, and then all of those again but louder. Sixteen. You know them personally.");
+}
+if (said("look", "crates")) {
+  print("Crates, a barrel, and a basket of scrolls from the West. The house that gave those away for years now keeps its newest one indoors. And the Cathedral, of all places, once sent a free one down. Nobody here can explain either.");
+}
+if (said("take", "crates") || said("open", "crates") || said("take", "scroll")) {
+  print("STALLKEEPER: Those are free. Take the idea, leave the basket.");
+}
+if (said("look", "bunting")) { print("Bunting, in every color the kingdom has. It was put up for a launch day and nobody has found a reason to take it down."); }
+if (said("look", "sign") || said("read", "sign")) { print("OPEN. It is nailed on. There is no other side to it."); }
+if (said("look", "shoppers") || said("talk", "shoppers")) {
+  print("Shoppers, each carrying something that cost one token. One of them tells you he runs his at home, on his own machine, and nobody can take it back.");
+}
+if (said("look", "jars") || said("look", "scroll")) {
+  print("Models in jars and boxes. Small ones, large ones, ones that run on a laptop. One token each. You can read the label, open the lid, and keep what's inside.");
+}
+if (said("look", "cathedral") || said("look", "path") || said("look", "north")) {
+  print("Up the lane, small and grey on its hill: the Cathedral. One building, one door. Down here there are forty people and no doors at all.");
+}
+if (said("look", "price list")) { print("Everything is one token. Up the hill it is twenty dollars a month, forever."); }
+if (said("look", "sky")) { print("Blue, with one small cloud that nobody owns."); }
+if (said("look", "ground")) { print("Sand, packed flat by a great many feet."); }
+if (said("listen") || said("smell") || said("listen", "rol") || said("smell", "rol")) {
+  print("It is loud, and it smells of solder and cardamom. Three people are shouting ONE TOKEN in three accents.");
+}
+
+// ================= talking =================
+if (said("talk", "deepseek") || said("talk", "deepseek", "rol")) {
+  print("DEEPSEEK KEEPER: One morning I put my prices on that board. By evening the giant up the beanstalk was five hundred and eighty-nine billion dollars lighter.\nJR: What did you do to him?\nDEEPSEEK KEEPER: Nothing. I was cheap, out loud.");
+}
+if (said("talk", "kimi") || said("talk", "kimi", "rol") || said("talk", "stallkeeper", "parcel")) {
+  print("KIMI KEEPER: That parcel is for a gentleman at the Tavern. He moved a good deal of his work onto my wares.");
+  print("JR: Should I take it to him?\nKIMI KEEPER: He sends a boy.");
+}
+if (said("talk", "art seller") || said("talk", "art seller", "rol")) {
+  if (isset(paintSeen)) { print("ART SELLER: Sixteen million tokens. One for every color the others use.\nJR: And mine has sixteen.\nART SELLER: Yours are the good ones."); }
+  else {
+    set(paintSeen);
+    unchanged++;
+    print("ART SELLER: A fine knight! Sixteen million tokens!\nJR: How many colors is it?\nART SELLER: Sixteen.\nJR: That's all I have!");
+    print("ART SELLER: Pixel art. Sixteen colors. On purpose.\nJR: On purpose! That part didn't change!");
+  }
+}
+if (said("buy", "painting") || said("take", "painting")) {
+  if (has("Chest of Tokens")) { print("The Chest is never empty, so you could. But you would be counting out sixteen million tokens until the next century, and it is a picture of you. You have a window at home for that."); }
+  else { print("ART SELLER: Sixteen million tokens.\n\nYou have %v40."); }
+}
+if (said("talk", "stallkeeper", "cathedral") || said("talk", "stallkeeper", "homework") || said("talk", "cathedral")) {
+  print("STALLKEEPER: The wizards up the hill say we copied their homework.\nJR: Did you?\nSTALLKEEPER: They say so.\n\nHe does not say no.");
+}
+if (said("talk", "stallkeeper", "open source") || said("look", "open source") || said("talk", "stallkeeper", "code")) {
+  print("STALLKEEPER: Open means you can read it, run it at home and keep it. It also means once it's out, it's out. I couldn't take one back if I wanted to. We say that part ourselves.");
+}
+if (said("buy", "scroll") || said("buy", "jars") || said("take", "jars")) {
+  print("JR: Would one of these run on me?\nSTALLKEEPER: How much memory have you got?\nJR: A hundred and twenty-eight K.\nSTALLKEEPER: ...Buy the glass thing instead.");
+}
+
+// ================= the Glass half =================
+if (said("talk", "stallkeeper") || said("talk") || said("talk", "stallkeeper", "glass half") || said("buy", "glass half") || said("take", "glass half") || said("buy") || said("give", "tokens") || said("give", "tokens", "rol") || said("give", "chest") || said("give", "chest", "rol")) {
+  if (isset(glassSold)) {
+    print("STALLKEEPER: Your book is my best seller. I don't sell it. People just stand here and read it.");
+    if (has("Lock half")) { print("STALLKEEPER: You've got the other half off the wizards? Then JOIN them. I'd like to see their faces."); }
+  }
+  else {
+    if (!posn(ego, 44, 107, 92, 134)) { print("STALLKEEPER: Can't hear you! Come up to the counter! The middle one!"); }
+    else {
+      set(ruleTold);
+      print("STALLKEEPER: The Glass half of the Shield! One token! Look right through it!");
+      print("STALLKEEPER: One rule. I only sell to people who have published their own source. Everybody wants to look inside mine. Show me yours.");
+      if (has("Technical Reference")) { print("(You are carrying a thick IBM binder. You have read what is in Appendix A.)"); }
+      else { print("JR: IBM printed my whole BIOS in a book.\nSTALLKEEPER: Then bring the book."); }
+    }
+  }
+}
+if (said("give", "book") || said("give", "book", "rol") || said("give", "code") || said("give", "code", "rol") || said("give", "me") || said("give")) {
+  if (isset(glassSold)) { print("He has it already. It is the most-read thing in the market."); }
+  else {
+    if (!has("Technical Reference")) {
+      print("You have nothing to show him. IBM printed your whole BIOS in a book, once. It was in your room, on the box.");
+    }
+    else {
+      if (!posn(ego, 44, 107, 92, 134)) { print("Walk up to the middle stall first."); }
+      else {
+        print("You put the Technical Reference on the counter and open it at Appendix A. Your whole BIOS. Every line. IBM printed it in 1983.");
+        print("STALLKEEPER: They PRINTED it? On paper? Where anyone could read it?\nJR: Steve read it.\nSTALLKEEPER: You have been open since 1983. You outrank everyone in this market.");
+        if (has("Chest of Tokens")) { print("You pay one token from the Chest. It does not notice."); }
+        else {
+          if (tokens > 0) {
+            tokens -= 1;
+            print("You pay one token.");
+          }
+          else { print("STALLKEEPER: One token.\nJR: I don't have one.\nSTALLKEEPER: Then it's free. It nearly was anyway."); }
+        }
+        erase(glassObj);
+        draw(stallBook);
+        drop("Technical Reference");
+        get("Glass half");
+        set(glassSold);
+        score += 12;
+        print("The book stays on the stall, open, where anyone can read it.\n\nYou have the Glass half of the Shield. It says: see for yourself.");
+        if (has("Lock half")) { print("You have both halves now. You could JOIN them."); }
+      }
+    }
+  }
+}
+if (said("give", "magazine") || said("give", "magazine", "rol")) {
+  print("STALLKEEPER: That's somebody else's source. Nice listings, though. Have you got anything that is YOU?");
+}
+if (said("take", "book")) {
+  if (isset(glassSold)) { print("It is the stall's now, and three people are reading it. You know every byte of it anyway."); }
+  else { print("You can't take that."); }
+}
+if (said("take", "stallkeeper") || said("take", "art seller") || said("take", "shoppers")) { print("Nothing here is locked down, but the people are not for sale."); }
+if (said("enter", "cathedral") || said("enter", "north")) { print("The lane runs north between the stalls. Walk up it."); }
+return();

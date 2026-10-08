@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jr's Quest</title>
+<style>
+  :root { --page: #e9e9e6; --ink: #222; --key: #fbfbfa; --edge: #b9b9b4; --hot: #d6d6d0; }
+  @media (prefers-color-scheme: dark) {
+    :root { --page: #161616; --ink: #ddd; --key: #2a2a2a; --edge: #484848; --hot: #3a3a3a; }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--page); color: var(--ink);
+    font: 16px/1.3 system-ui, sans-serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; padding: 8px; overflow: hidden;
+    -webkit-user-select: none; user-select: none; touch-action: manipulation;
+  }
+  #screen {
+    display: block; background: #000;
+    image-rendering: crisp-edges; image-rendering: pixelated;
+  }
+  #note { min-height: 1.3em; font-size: 14px; opacity: .8; text-align: center; }
+  #pad { display: none; width: 100%; max-width: 640px; gap: 10px; align-items: center; justify-content: space-between; }
+  body.touch #pad { display: flex; }
+  /* On a phone the soft keyboard covers the bottom: keep the game at the top. */
+  body.touch { justify-content: flex-start; }
+  #dpad { display: grid; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(3, 52px); gap: 4px; flex: none; }
+  #side { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+  #say { display: flex; gap: 6px; }
+  #line {
+    flex: 1; min-width: 0; height: 48px; padding: 0 10px; font: inherit; font-size: 18px;
+    color: var(--ink); background: var(--key); border: 1px solid var(--edge); border-radius: 8px;
+    -webkit-user-select: text; user-select: text;
+  }
+  #keys { display: flex; gap: 6px; }
+  button {
+    font: inherit; font-size: 18px; color: var(--ink); background: var(--key);
+    border: 1px solid var(--edge); border-radius: 8px; min-height: 48px; padding: 0 14px;
+  }
+  button:active { background: var(--hot); }
+  #mic.on { background: var(--hot); border-color: var(--ink); }
+  #keys button { flex: 1; }
+  #dpad button { padding: 0; min-height: 0; }
+  /* While the game plays itself the keys are the script's, not the player's. */
+  body.demo #pad, body.demo #toggle { display: none; }
+  #toggle { position: fixed; right: 8px; top: 8px; min-height: 36px; font-size: 14px; opacity: .6; }
+</style>
+</head>
+<body>
+<canvas id="screen" width="320" height="200"></canvas>
+<div id="note" role="status"></div>
+<div id="pad">
+  <div id="dpad">
+    <span></span><button data-key="UP" aria-label="Up">&#9650;</button><span></span>
+    <button data-key="LEFT" aria-label="Left">&#9664;</button>
+    <button data-key="CENTER" aria-label="Stop">&#9632;</button>
+    <button data-key="RIGHT" aria-label="Right">&#9654;</button>
+    <span></span><button data-key="DOWN" aria-label="Down">&#9660;</button><span></span>
+  </div>
+  <div id="side">
+    <form id="say" autocomplete="off">
+      <input id="line" type="text" maxlength="38" placeholder="Type here" autocapitalize="off"
+             autocorrect="off" spellcheck="false" enterkeyhint="send" aria-label="Command">
+      <button id="mic" type="button" hidden aria-label="Speak a command">Mic</button>
+      <button type="submit">Send</button>
+    </form>
+    <div id="keys">
+      <button data-key="ENTER">Enter</button>
+      <button data-key="ESC">Esc</button>
+    </div>
+  </div>
+</div>
+<button id="toggle" type="button" aria-label="Show or hide the on-screen keys">Keys</button>
+<script type="module" src="./shell.js"></script>
+</body>
+</html>

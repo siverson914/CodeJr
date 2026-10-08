@@ -1,0 +1,216 @@
+# Room 11, the Launch Pad: Musk, the sign, the hourglass, both deaths,
+# the escaped agents noticing the answer key, and all four exits.
+# node tools/play.js build --script test/rooms/11_launchpad.txt --png-dir out
+5
+type debug
+5
+type tp
+3
+type 11
+6
+shot 11-01-arrive
+type look
+3
+expect a server rack where the nose should be
+key enter
+2
+type look at agents
+3
+expect You don't see any
+key enter
+2
+type talk to musk
+3
+expect It's a data center
+key enter
+2
+expect in thirty-six months
+key enter
+2
+expect Until then, those
+key enter
+2
+type talk to musk
+3
+expect I love that one
+key enter
+2
+type ask musk about agi
+3
+expect Next year
+expect 2027
+key enter
+2
+type ask musk about agi
+3
+expect 2028
+expect one more than you said last time
+key enter
+2
+type ask musk about agi
+3
+expect 2029
+key enter
+2
+type read sign
+3
+expect SPACEXAI
+key enter
+2
+expect Two names and a promise
+key enter
+2
+type look at hourglass
+3
+expect he had waited too long
+key enter
+2
+type turn hourglass
+3
+expect Plenty of time
+key enter
+2
+type look at rocket
+3
+expect nobody puts more into orbit
+key enter
+2
+expect other people's satellites
+key enter
+2
+type look at turbines
+3
+expect accused of running these without permits
+key enter
+2
+type touch turbine
+3
+expect You would have to walk right up to them
+key enter
+2
+type climb rocket
+3
+expect four pixels long
+key enter
+2
+type ask musk about mars
+3
+expect further than most computers get
+key enter
+2
+
+# ---- the pad: a countdown he walks away from ----
+key up
+19
+key right
+8
+expect Static fire test in ten seconds
+shot 11-02-warning
+key enter
+2
+expect Walk off the pad
+key enter
+2
+key down
+12
+key down
+expect T minus
+shot 11-03-countdown
+60
+expect Ignition
+shot 11-04-fire
+22
+expect Test complete
+key enter
+2
+
+# ---- the agents: they are here once the wizards have said so ----
+type setflag
+3
+type 72
+3
+type tp
+3
+type 11
+8
+shot 11-08-agents
+type look at agents
+3
+expect milling about by the pad and looking up
+key enter
+2
+type talk to agents
+3
+expect They lose interest in you at once
+key enter
+2
+type take agents
+3
+expect They follow answers
+key enter
+2
+type talk to musk
+3
+expect Not mine. They walked in from the Cathedral
+key enter
+2
+# ---- and they follow whoever holds the answer key ----
+type give answer key to agents
+3
+expect Try the inn
+key enter
+2
+type gimme
+3
+type 8
+3
+expect Every tiny head turns toward the answer key
+key enter
+2
+expect They fall in behind you
+key enter
+2
+type look at agents
+3
+expect Walk them home to the Cathedral
+key enter
+2
+key right
+20
+key right
+shot 11-09-following
+10
+shot 11-10-caught-up
+
+# ---- north exit: up the lane ----
+type tp
+3
+type 11
+3
+key up
+52
+shot 11-11-north-exit
+type tp
+3
+type 11
+3
+# ---- east exit ----
+key right
+44
+shot 11-12-east-exit
+type tp
+3
+type 11
+3
+# ---- west exit ----
+key left
+40
+shot 11-13-west-exit
+type tp
+3
+type 11
+3
+# ---- south exit ----
+key down
+5
+shot 11-14-south-exit

@@ -1,0 +1,29 @@
+# Room 16: the fire without the Shield. A warning first, then the death
+# screen. (play.js cannot press R by itself: "type r" sends r and Enter in
+# one cycle, so Retry is checked in the room report, not here.)
+5
+type debug
+5
+type tp
+2
+type 16
+6
+key right
+34
+expect STOP
+key enter
+2
+expect A few more steps and you are in it
+key enter
+3
+key right
+20
+expect You walk into the fire with nothing in front of you.
+shot 01-into-the-fire
+key enter
+4
+expect The probability of a good outcome was
+expect like eighty percent. This was the other
+expect twenty.
+expect Abort, Retry, Fail?
+shot 02-death

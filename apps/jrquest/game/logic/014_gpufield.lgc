@@ -1,0 +1,270 @@
+// Room 14: the GPU Field. Graphics cards grow in rows like corn.
+// Puzzle 6: plant the Seed at the foot of the trellis, pour the bucket of
+// well water on it, and the beanstalk grows the way a valuation chart
+// does: up and to the right, into the Cloud. Then climb it to room 15.
+#include "defines.h"
+#include "room14.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(vStalk);
+  load.view(vCrow);
+  set.horizon(52);
+
+  call(91);
+  set(outdoor);
+  // in case he came down the beanstalk mid-climb settings and all
+  release.priority(ego);
+  observe.horizon(ego);
+  observe.objs(ego);
+
+  // Entry points: south (also a test teleport), then west, north, east,
+  // and the foot of the beanstalk.
+  position(ego, 76, 160);
+  set.loop(ego, 3);
+  if (arriveFrom == 2) { position(ego, 4, 136); set.loop(ego, 0); }
+  if (arriveFrom == 3) { position(ego, 50, 58); set.loop(ego, 2); }
+  if (arriveFrom == 4) { position(ego, 146, 136); set.loop(ego, 1); }
+  if (arriveFrom == 5) { position(ego, 98, 134); set.loop(ego, 2); }
+
+  animate.obj(crow);
+  set.view(crow, vCrow);
+  set.loop(crow, 0);
+  set.cel(crow, 0);
+  set.priority(crow, 10);
+  ignore.objs(crow);
+  ignore.blocks(crow);
+  position(crow, 16, 112);
+  stop.cycling(crow);
+  draw(crow);
+
+  animate.obj(stalk);
+  set.view(stalk, vStalk);
+  set.loop(stalk, 0);
+  set.cel(stalk, 0);
+  set.priority(stalk, 11);
+  ignore.objs(stalk);
+  ignore.blocks(stalk);
+  ignore.horizon(stalk);
+  position(stalk, 82, 125);
+  stop.cycling(stalk);
+  if (isset(stalkGrown)) { set.cel(stalk, 8); }
+  if (isset(seedPlanted)) { draw(stalk); }
+
+  draw(ego);
+  show.pic();
+  state = 0;
+  timer = 0;
+}
+
+// ---- arriving ----
+if (state == 0) {
+  timer++;
+  if (timer == 8) {
+    state = 1;
+    if (!isset(crowMet)) {
+      set(crowMet);
+      print("Rows of graphics cards, fans up, gold fingers in the soil, as far as the hill. They hum. A scarecrow keeps an eye on them.");
+    }
+  }
+}
+
+// ---- the beanstalk has finished growing ----
+if (state == 2 && isset(tmpA)) {
+  reset(tmpA);
+  state = 1;
+  set(stalkGrown);
+  reset(bucketFull);
+  score += 6;
+  stop.cycling(stalk);
+  print("It dips. It recovers. It dips again and nobody mentions it. Then it goes up and to the right, steeper every time, off the top of the trellis and into the Cloud.");
+  print("It is a beanstalk. It is also a valuation chart. Every leaf on it is a round of funding.\n\nYou could CLIMB it.");
+  player.control();
+}
+
+// ---- climbing: up the chart a leg at a time ----
+if (state == 3 && isset(tmpB)) {
+  reset(tmpB);
+  tA++;
+  if (tA == 1) { move.obj(ego, 89, 118, 3, tmpB); }
+  if (tA == 2) { move.obj(ego, 104, 111, 3, tmpB); }
+  if (tA == 3) { move.obj(ego, 119, 101, 3, tmpB); }
+  if (tA == 4) { move.obj(ego, 133, 81, 3, tmpB); }
+  if (tA == 5) { move.obj(ego, 144, 51, 3, tmpB); }
+  if (tA == 6) { move.obj(ego, 149, 19, 3, tmpB); }
+  if (tA == 7) {
+    release.priority(ego);
+    observe.horizon(ego);
+    observe.objs(ego);
+    player.control();
+    accept.input();
+    arriveFrom = 5;
+    new.room(15);
+  }
+}
+
+// ---- edges: north to the Cold Reactor, east to the Launch Pad,
+// ---- south to the Tavern, west to the Cathedral ----
+if (state != 3) {
+  if (egoEdge == 1) { arriveFrom = 1; new.room(5); }
+  if (egoEdge == 2) { arriveFrom = 2; new.room(11); }
+  if (egoEdge == 3) { arriveFrom = 3; new.room(9); }
+  if (egoEdge == 4) { arriveFrom = 4; new.room(13); }
+}
+
+// ---- looking ----
+if (said("look") || said("look", "room") || said("look", "field")) {
+  print("The GPU Field. Graphics cards planted in rows on both sides of a lane, a red barn, a silo, and a scarecrow.");
+  if (isset(stalkGrown)) { print("By the lane a beanstalk climbs a trellis, up and to the right, and goes on climbing after the trellis stops. Its top is in the Cloud."); }
+  else { print("By the lane stands a trellis: a tall pole and a long rail with tick marks, meeting at a mound of soil. It looks like the axes of a chart with nothing on it yet."); }
+}
+if (said("look", "cards") || said("look", "fans")) {
+  print("Graphics cards, grown like corn. Each has a little fan on top and a row of gold fingers in the dirt.");
+  print("In 2012 somebody trained a thinking machine on two gaming cards. The field has been planted fence to fence ever since.");
+}
+if (said("take", "cards") || said("harvest", "cards") || said("harvest") || said("pull", "cards") || said("steal", "cards")) {
+  print("You pull. It is rooted, and it is spoken for: every card in this field was sold before it came up. Besides, one of these wants more power than you have ever had.");
+}
+if (said("count", "cards")) { print("Fifty that you can see. You stop there. Somebody else is counting them, by the quarter."); }
+if (said("talk", "cards") || said("listen") || said("listen", "cards") || said("listen", "fans")) {
+  print("Every card has a fan and every fan is turning. Together they sound like a stadium a long way off.");
+}
+if (said("look", "scarecrow")) {
+  print("A scarecrow: straw face, red shirt, one leg. He has no brain, he says so himself, and he has been left in charge of the thinking crop.");
+}
+if (said("talk", "scarecrow", "rol") || said("talk")) {
+  if (!isset(gamesTold)) {
+    set(gamesTold);
+    unchanged++;
+    print("SCARECROW: Graphics cards. Fields of them. Built for games. Then somebody tried thinking on them.");
+    print("JR: I was built for games too!\nSCARECROW: Then there's hope for both of us.");
+    print("(That part didn't change.)");
+  }
+  else {
+    if (isset(stalkGrown)) { print("SCARECROW: Up and to the right. I've stood here since 2012 and I've never seen one go any other way. I'm told they can."); }
+    else {
+      if (isset(seedPlanted)) { print("SCARECROW: A seed wants water. The crop gets all of ours, by pipe. There's a well at the Data Center, if the Keeper lets you near it."); }
+      else { print("SCARECROW: Nothing to climb here, if that's what you're after. Only the trellis. The man who built it said all it needs is a seed. They always say that. Ask at the Tavern."); }
+    }
+  }
+}
+if (said("take", "scarecrow") || said("kick", "scarecrow")) { print("He is the only one here who is not for sale. Leave him that."); }
+if (said("look", "trellis")) {
+  if (isset(stalkGrown)) { print("The beanstalk used the trellis for the first few feet and then stopped needing it. The tick marks ran out long before the stalk did."); }
+  else { print("A tall pole and a long rail, with tick marks, and an arrowhead on the end of each. Where they meet there is a mound of soil. It is a chart, waiting for a line."); }
+}
+if (said("look", "mound") || said("look", "ground")) {
+  if (isset(stalkGrown)) { print("The mound, with a beanstalk as thick as your case coming out of it."); }
+  else {
+    if (isset(seedPlanted)) { print("A mound of soil with a small green sprout in it. It looks thirsty."); }
+    else { print("A mound of soft soil at the corner of the trellis, with a hole in the top the size of a seed."); }
+  }
+}
+if (said("look", "beanstalk") || said("look", "arrow")) {
+  if (isset(stalkGrown)) { print("A beanstalk in the shape of a chart. It wobbles near the bottom, where nobody was looking, and then goes up and to the right into the Cloud. The tip is an arrow."); }
+  else {
+    if (isset(seedPlanted)) { print("A sprout, two leaves. Every one of these starts like that. It wants WATER."); }
+    else { print("There isn't one. There is a trellis that expects one."); }
+  }
+}
+if (said("look", "seed")) {
+  if (has("Seed")) { print("The Seed, from the Tavern. Four signatures' worth. It wants to be planted somewhere with room to go up."); }
+  else {
+    if (isset(seedPlanted)) { print("It is in the mound, where a seed should be."); }
+    else { print("You don't have one. Seeds are money here. The people with money are at the Tavern."); }
+  }
+}
+if (said("look", "barn")) { print("A red barn and a silo, on the horizon. The silo is full of last year's cards. Nobody wants last year's."); }
+if (said("look", "sky")) {
+  print("Blue, with one cloud in the top right corner that is bigger than the others. Everything that goes up and to the right ends up there.");
+}
+if (said("look", "path") || said("look", "horizon")) {
+  print("A lane north to the Cold Reactor, a path east to the Launch Pad and west to the Cathedral, and open ground south to the Tavern.");
+}
+if (said("look", "games") || said("play") || said("play", "games")) {
+  print("You were built for games. Nobody has asked you to play one in forty-two years. You try not to bring it up.");
+}
+
+// ---- planting ----
+if (said("plant", "seed") || said("plant") || said("plant", "seed", "rol") || said("drop", "seed") || said("drop", "seed", "rol") || said("use", "seed")) {
+  if (isset(seedPlanted)) { print("It is planted. One seed is a round. You don't get to do the round twice."); }
+  else {
+    if (!has("Seed")) { print("You have no seed. Seeds are money here, and the people with money are at the Tavern."); }
+    else {
+      if (!posn(ego, 58, 122, 112, 146)) { print("Not just anywhere. There is a mound of soft soil at the foot of the trellis, right of the lane. Walk over to it."); }
+      else {
+        drop("Seed");
+        set(seedPlanted);
+        score += 4;
+        set.cel(stalk, 0);
+        draw(stalk);
+        print("You push the Seed into the mound, at the corner where the pole meets the rail, and pat the soil down.");
+        print("A sprout comes up at once. Two leaves. It looks at the trellis, and then at you, and then at your bucket.");
+      }
+    }
+  }
+}
+if (said("dig") || said("dig", "rol")) {
+  if (isset(seedPlanted)) { print("You leave it alone. Digging a seed up to see how it is doing is how you kill it."); }
+  else { print("The mound has a hole in it already, the size of a seed."); }
+}
+if (said("drink", "seed") || said("drink", "water") || said("drink")) { print("You don't eat or drink. You are the cheapest knight in the kingdom to keep."); }
+
+// ---- watering ----
+if (said("pour", "water") || said("pour", "water", "rol") || said("pour") || said("pour", "bucket") || said("pour", "bucket", "rol") || said("use", "bucket") || said("use", "water") || said("give", "water", "rol") || said("fill", "mound")) {
+  if (isset(stalkGrown)) { print("It does not need more. Nothing has ever told it to stop."); }
+  else {
+    if (!isset(seedPlanted)) {
+      if (isset(bucketFull)) { print("On what? Nothing is planted. You are not pouring a town's water onto bare dirt."); }
+      else { print("On what? Nothing is planted, and the bucket would be empty if you had one full."); }
+    }
+    else {
+      if (!has("bucket")) { print("You have nothing to carry water in. There was a bucket by the bed in the guest room."); }
+      else {
+        if (!isset(bucketFull)) { print("The bucket is empty. The cards drink from a pipe and there is no tap on it. The nearest water you could ask for is the well at the Data Center."); }
+        else {
+          if (!posn(ego, 58, 122, 112, 146)) { print("The sprout is in the mound at the foot of the trellis. Walk over to it. Don't spill."); }
+          else {
+            print("You pour the whole bucket on the sprout. Well water, from a well that only just came back.");
+            print("The sprout drinks. Then it goes up.");
+            program.control();
+            work = 3;
+            cycle.time(stalk, work);
+            end.of.loop(stalk, tmpA);
+            state = 2;
+          }
+        }
+      }
+    }
+  }
+}
+if (said("pour", "water", "cards") || said("pour", "cards")) { print("The cards have their own pipe. Your bucket is for something smaller."); }
+
+// ---- climbing ----
+if (said("climb") || said("climb", "beanstalk") || said("climb", "trellis") || said("enter", "sky") || said("climb", "sky")) {
+  if (!isset(stalkGrown)) {
+    if (isset(seedPlanted)) { print("It is a sprout. Your legs are four pixels long, but they are longer than that."); }
+    else { print("Nothing to climb. A pole, a rail, and an empty chart. The pole is greased, in case the cards get ideas."); }
+  }
+  else {
+    if (!posn(ego, 58, 122, 116, 146)) { print("Walk over to the foot of the beanstalk first."); }
+    else {
+      print("You take hold of the chart and climb. Up, and to the right. Don't look at the dips.");
+      program.control();
+      set.priority(ego, 15);
+      ignore.horizon(ego);
+      ignore.objs(ego);
+      tA = 0;
+      set(tmpB);
+      state = 3;
+      load.sound(sClimb);
+      sound(sClimb, tmpC);
+    }
+  }
+}
+if (said("climb", "down")) { print("You are down. This is as down as the kingdom goes, apart from the cave."); }
+if (said("smell") || said("smell", "rol")) { print("Warm solder and turned earth. It smells like the inside of you on a summer afternoon."); }
+return();

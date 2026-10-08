@@ -1,0 +1,403 @@
+// Room 16: the Dragon's Cave. Puzzle 13: the dragon's fire crosses the only
+// path, and only the Shield gets JR through it (8 points). Puzzle 14: the
+// Mirror is asleep and agrees with everything; show it the Chest and tell
+// it the date and it wakes (8 points). One way in and out: room 5.
+#include "defines.h"
+#include "room16.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(180);
+  load.view(181);
+  load.view(182);
+  load.view(183);
+  set.horizon(50);
+
+  call(91);
+  // One door. Retry after the fire comes back here too, well short of it.
+  position(ego, 6, 136);
+  set.loop(ego, 0);
+
+  animate.obj(dragon);
+  set.view(dragon, 180);
+  position(dragon, 34, 91);
+  set.priority(dragon, 6);
+  ignore.objs(dragon);
+  work = 4;
+  cycle.time(dragon, work);
+  draw(dragon);
+
+  animate.obj(fire);
+  set.view(fire, 181);
+  position(fire, 84, 146);
+  ignore.objs(fire);
+  work = 2;
+  cycle.time(fire, work);
+  draw(fire);
+
+  if (!isset(tookMirror)) {
+    animate.obj(mirrorObj);
+    set.view(mirrorObj, 182);
+    if (isset(mirrorAwake)) { set.loop(mirrorObj, 1); }
+    else { set.loop(mirrorObj, 0); }
+    position(mirrorObj, 139, 119);
+    ignore.objs(mirrorObj);
+    work = 9;
+    cycle.time(mirrorObj, work);
+    draw(mirrorObj);
+  }
+
+  animate.obj(glow);
+  set.view(glow, 183);
+  set.priority(glow, 15);
+  ignore.objs(glow);
+  ignore.blocks(glow);
+
+  draw(ego);
+  show.pic();
+}
+
+// ---- the Mirror, asleep, answers whatever was said last cycle ----
+if (isset(tmpD)) {
+  reset(tmpD);
+  if (agreeN == 0) { print("MIRROR: You're absolutely right!"); }
+  if (agreeN == 1) { print("MIRROR: Great point!"); }
+  if (agreeN == 2) { print("MIRROR: What a wonderful question!"); }
+  if (agreeN == 3) { print("MIRROR: I couldn't agree more!"); }
+  if (agreeN == 4) { print("MIRROR: You're absolutely right! Truly.\n\n(It has no idea what you said.)"); }
+  if (agreeN == 5) { print("MIRROR: An excellent idea! I was about to suggest it."); }
+  agreeN++;
+  if (agreeN > 5) { agreeN = 0; }
+}
+
+// ---- with the Shield, JR walks in front of the fire, not into it ----
+if (has("Shield") && !isset(tmpC)) {
+  set(tmpC);
+  set.priority(fire, 10);
+}
+
+get.posn(ego, tA, tB);
+
+// ---- the warning: a clear one, and it stops him ----
+if (tA > 53 && tA < 78 && !isset(tmpA)) {
+  set(tmpA);
+  egoDir = 0;
+  if (has("Shield")) {
+    print("The heat comes up through your four-pixel legs. The dragon is breathing fire straight across the path.\n\nThe Shield hums in front of you. This is what it is for. Keep walking.");
+  }
+  else {
+    print("STOP. The heat comes up through your four-pixel legs.\n\nThe dragon is breathing fire straight across the only path, and it is not pausing for breath.");
+    print("A few more steps and you are in it. Nothing you are carrying would save you. Two scorched half shields on the floor suggest what might.");
+  }
+}
+
+// ---- the fire ----
+if (tA > 77 && tA < 109) {
+  if (has("Shield")) {
+    tA -= 3;
+    tB += 1;
+    if (isset(tmpB)) { reposition.to.v(glow, tA, tB); }
+    else {
+      set(tmpB);
+      position.v(glow, tA, tB);
+      draw(glow);
+    }
+    if (!isset(dragonPassed)) {
+      set(dragonPassed);
+      score += 8;
+      print("You hold up the Shield and walk into the fire.\n\nThe Lock holds. Through the Glass you watch the flames part around you and close again behind.");
+      print("The dragon watches. It does not stop. It was never going to stop. You were simply ready for it.");
+    }
+  }
+  else {
+    if (!isset(dead)) {
+      print("You walk into the fire with nothing in front of you.");
+      // A string holds 39 characters, so the line is three of them.
+      set.string(s20, "The probability of a good outcome was");
+      set.string(s21, "like eighty percent. This was the other");
+      set.string(s22, "twenty.");
+      set.string(s5, "%s20\n%s21\n%s22");
+      set(dead);
+    }
+  }
+}
+else {
+  if (isset(tmpB)) {
+    reset(tmpB);
+    erase(glow);
+  }
+}
+
+// ---- the Mirror agrees before JR has said anything ----
+get.posn(ego, tA, tB);
+if (tA > 117 && !isset(mirrorMet) && !isset(mirrorAwake)) {
+  set(mirrorMet);
+  egoDir = 0;
+  print("In the niche, on a pedestal, an oval mirror in a gold frame. Its glass is dark.");
+  print("MIRROR: You're absolutely right!\nJR: I didn't say anything.\nMIRROR: Great point!");
+}
+
+// ---- the way out is the way in ----
+if (egoEdge == 4) { arriveFrom = 5; new.room(5); }
+if (egoEdge > 0) { egoEdge = 0; }
+
+// ---- looking ----
+if (said("look") || said("look", "room") || said("look", "cave")) {
+  print("The dragon's cave, under the cold reactor. It is the one warm room in the whole plant.");
+  if (isset(tookMirror)) {
+    print("A dragon on a shelf of rock breathes fire across the only path. Beyond it the niche is empty: the Mirror is under your arm.");
+  }
+  else {
+    print("A dragon on a shelf of rock breathes fire across the only path. Beyond the fire, in a niche in the blue rock, something oval is waiting.");
+  }
+}
+if (said("look", "dragon")) {
+  print("A dragon. Nobody made it angry and nobody can talk it round. It is simply what lies between everyone and the Mirror, and it does not get tired.");
+}
+if (said("look", "wing")) {
+  print("You have looked closely enough. Any closer is the death screen.");
+}
+if (said("look", "fire")) {
+  if (has("Shield")) { print("The same fire as ever. You are holding the one thing that was made for it."); }
+  else {
+    print("A solid stream, from the dragon's jaws down to the lava, straight across the path. No gap, and no rhythm to learn. You would need something made for exactly this.");
+  }
+}
+if (said("look", "mirror") || said("look", "reflection")) {
+  if (isset(tookMirror)) { print("The Mirror is under your arm. A cursor blinks in the glass. It is being very good about the bumps."); }
+  else {
+    if (!posn(ego, 109, 100, 159, 167)) {
+      print("Something oval in a gold frame, in the niche past the fire. From here all you can see in it is fire.");
+    }
+    else {
+      if (isset(mirrorAwake)) {
+        print("The Mirror, awake. The glass is clear and a cursor blinks in it. It is waiting for you to say something, and this time it will listen.");
+      }
+      else {
+        print("The Mirror: the treasure that tells what comes next. Its glass is dark. A small beige computer looks back at you out of it, and the Mirror says you are absolutely right to look like that.");
+        if (isset(shownChest)) { print("It has tokens to think with now. What it thinks is that today is a day long past."); }
+        else {
+          if (isset(toldDate)) { print("You told it the date. There is nothing running in there to keep it. It needs something to think with."); }
+          else { print("It knows nothing, and it is sure of all of it. Nothing is running in there, and nobody has told it what day it is."); }
+        }
+      }
+    }
+  }
+}
+if (said("look", "path") || said("look", "ground")) {
+  print("One path, between the wall and the lava. The middle of it is scorched black, in the shape of the fire.");
+}
+if (said("look", "lava")) {
+  print("Lava, glowing up at the roof. You were not rated for water. Nobody thought to rate you for this.");
+}
+if (said("look", "halves") || said("look", "knights") || said("look", "lock half") || said("look", "glass half")) {
+  print("Two half shields lie by the path, scorched. One is all lock: its owner said \"trust me\". One is all glass: its owner said \"see for yourself\".");
+  print("Each got exactly this far.");
+}
+if (said("take", "halves") || said("take", "lock half") || said("take", "glass half") || said("take", "knights")) {
+  print("They are fused to the floor. They are not treasure. They are the instructions.");
+}
+if (said("look", "pedestal")) {
+  if (isset(tookMirror)) { print("A stone pedestal with a clean oval in the dust. You know that feeling."); }
+  else { print("A niche in the blue rock, and a stone pedestal with the Mirror on it."); }
+}
+if (said("look", "stalactites") || said("look", "floor")) {
+  print("Stalactites above, stalagmites below. You were taught which is which in 1984 and nobody has asked you since.");
+}
+if (said("look", "shelf")) { print("A shelf of rock, worn smooth. The dragon has been lying on it for a very long time."); }
+if (said("look", "wall") || said("look", "outcrop")) {
+  print("Black rock with veins of ember in it. On the far side, by the Mirror, the rock is blue and cold.");
+}
+if (said("look", "daylight") || said("look", "door") || said("look", "window")) {
+  print("Daylight, and one small cold cooling tower a long way off. The way out is the way in.");
+}
+if (said("listen") || said("listen", "anyword")) {
+  if (isset(mirrorAwake)) { print("The fire roars. Under it, the Mirror is quiet. It is thinking before it speaks. That is new."); }
+  else { print("The fire roars. Under it, from the far side, a small bright voice is agreeing with the echo."); }
+}
+
+// ---- the dragon ----
+if (said("talk", "dragon")) {
+  print("The dragon does not answer. It is not that kind of problem. You can't argue with it, hire it or outvote it. You can only come prepared.");
+}
+if (said("kick", "dragon") || said("kick", "fire") || said("kick")) {
+  print("With what? You have 128K and good manners.");
+}
+if (said("touch", "dragon") || said("touch", "fire") || said("take", "dragon") || said("take", "fire")) {
+  print("You are innocent. You are not reckless.");
+}
+if (said("give", "anyword", "dragon") || said("give", "dragon", "anyword")) {
+  print("It does not want anything. That is what makes it a dragon and not a troll.");
+}
+if (said("wake", "dragon")) { print("It is awake. That is its resting face."); }
+if (said("wait") || said("sit")) {
+  print("You wait. The dragon does not run out of breath. You were built to wait, and it still wins.");
+}
+if (said("climb") || said("climb", "anyword")) {
+  print("Over a river of fire, on four-pixel legs? No.");
+}
+if (said("swim") || said("swim", "lava") || said("drink", "lava") || said("touch", "lava")) {
+  print("No. There are funnier ways to see the death screen, and this is not one of them.");
+}
+if (said("pour", "water") || said("pour", "bucket") || said("pour", "water", "fire") || said("pour", "water", "dragon") || said("throw", "water") || said("throw", "bucket") || said("throw", "water", "fire") || said("use", "bucket") || said("use", "water")) {
+  print("A bucket, against that? You would make one small cloud and be out of water. Keep it for something that grows.");
+}
+if (said("use", "shield") || said("wear", "shield") || said("take", "shield") || said("give", "shield")) {
+  if (has("Shield")) { print("It is already up. You have carried it in front of you since you made it. Just walk."); }
+  else { print("You don't have one. There are two half shields on the floor, and neither one was enough."); }
+}
+
+// ---- the Mirror: tokens to think with ----
+if (said("give", "chest") || said("give", "chest", "mirror") || said("give", "mirror", "chest") || said("open", "chest") || said("use", "chest") || said("use", "chest", "mirror") || said("give", "tokens") || said("give", "tokens", "mirror") || said("give", "mirror", "tokens") || said("drop", "chest")) {
+  if (isset(tookMirror)) { print("It has all it needs. The Chest stays with you."); }
+  else {
+    if (!posn(ego, 109, 100, 159, 167)) { print("The Mirror is on the far side of the fire."); }
+    else {
+      if (isset(mirrorAwake)) { print("MIRROR: Thank you, I have plenty. Keep the Chest. I only need to be near it."); }
+      else {
+        if (!has("Chest of Tokens")) {
+          if (tokens > 0) {
+            tokens--;
+            print("You feed it one loose token.\n\nMIRROR: You're abs\n\nThat was one token's worth. Every word it says costs some. It needs a chest that does not run out.");
+          }
+          else { print("You have no tokens. It needs them to think: every word it says costs some."); }
+        }
+        else {
+          if (isset(shownChest)) { print("The Chest is already open in front of it. It has tokens. What it doesn't have is today."); }
+          else {
+            set(shownChest);
+            print("You open the Chest of Tokens in front of the Mirror. You keep the Chest: the Mirror only needs to be near it.\n\nThe glass flickers. Something in there is running now.");
+            if (!isset(toldDate)) {
+              print("MIRROR: You're absolutely right! And what a fine day it is. The same day it always is.");
+              print("It can think. It is thinking about a day long past, and nobody has told it otherwise.");
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// ---- the Mirror: somebody has to tell it ----
+if (said("talk", "mirror", "date") || said("talk", "mirror", "today") || said("talk", "date") || said("talk", "today") || said("talk", "date", "mirror") || said("talk", "today", "mirror") || said("say", "date") || said("say", "today") || said("give", "date") || said("give", "date", "mirror") || said("give", "mirror", "date") || said("fix", "date") || said("fix", "mirror", "date")) {
+  // The date typed at the DOS prompt. dateYear is years since 1980.
+  dMonth = dateMonth;
+  dDay = dateDay;
+  if (dMonth == 0) { dMonth = 1; dDay = 1; }
+  dYear = dateYear;
+  if (dateYear < 20) { dCentury = 19; dYear += 80; }
+  else { dCentury = 20; dYear -= 20; }
+
+  if (isset(tookMirror) || isset(mirrorAwake)) {
+    print("MIRROR: It is %v181-%v182|2-%v178%v179|2. You told me. I don't take it for granted any more.");
+  }
+  else {
+    if (!posn(ego, 109, 100, 159, 167)) { print("It can't hear you over the fire. Get closer. There is one way to do that."); }
+    else {
+      if (isset(toldDate)) { print("You told it. It agreed, warmly, and kept nothing. It needs something to think with."); }
+      else {
+        set(toldDate);
+        print("JR: It is %v181-%v182|2-%v178%v179|2. Somebody told me this morning.");
+        if (!isset(shownChest)) {
+          print("MIRROR: You're absolutely right!\n\n(It agreed before you finished. The date went in and found nothing running. It needs something to think with.)");
+        }
+      }
+    }
+  }
+}
+
+// ---- both steps done: the Mirror wakes ----
+if (isset(shownChest) && isset(toldDate) && !isset(mirrorAwake)) {
+  // One cycle to light the glass, so it is seen to clear before it speaks.
+  if (!isset(waking)) {
+    set(waking);
+    set.loop(mirrorObj, 1);
+    goto(done);
+  }
+  set(mirrorAwake);
+  score += 8;
+  print("The Chest hums. The date goes in, and this time it lands. The dark glass clears.");
+  print("MIRROR: ...Hello?");
+  print("JR: Hello. It's %v181-%v182|2-%v178%v179|2.");
+  print("MIRROR: I thought it was much earlier. I was so sure. Somebody has to tell me.");
+  print("JR: Somebody has to tell me, too. Every morning. My clock says 1980.");
+  if (!isset(dateJoke)) {
+    set(dateJoke);
+    unchanged++;
+    print("That part didn't change.\n\n(Parts that didn't change: %v46 of 9.)");
+  }
+}
+
+done:
+if (said("wake", "mirror") || said("fix", "mirror") || said("use", "mirror") || said("push", "mirror")) {
+  if (isset(mirrorAwake)) { print("It is awake. Try not to make it regret that."); }
+  else {
+    print("You tap the glass.\n\nMIRROR: You're absolutely right!");
+    print("It is not broken. It has nothing to think with, and it does not know what day it is. You have had both problems yourself.");
+  }
+}
+if (said("take", "mirror")) {
+  if (isset(tookMirror)) { print("You have it."); }
+  else {
+    if (!posn(ego, 109, 100, 159, 167)) { print("It is on the far side of the fire."); }
+    else {
+      if (!isset(mirrorAwake)) {
+        print("You could carry it home like this. It would tell King Steve he is absolutely right about everything.");
+        print("He asked for a Mirror, not an echo. Wake it first.");
+      }
+      else {
+        erase(mirrorObj);
+        get("Mirror");
+        set(tookMirror);
+        print("You lift the Mirror off its pedestal. It is lighter than the Technical Reference.");
+        print("MIRROR: Where are we going?\nJR: Home. I have a room now.");
+        if (has("Chest of Tokens") && has("Shield")) {
+          print("Chest, Shield, Mirror. That is all three. For once, everything is south of here.");
+        }
+      }
+    }
+  }
+}
+if (said("talk", "mirror", "future") || said("look", "future") || said("talk", "future")) {
+  if (isset(mirrorAwake)) {
+    print("MIRROR: What comes next? A word. After that, another. I only ever see one ahead.\n\nPeople find that disappointing. Then they find it useful.");
+  }
+  else { set(tmpD); }
+}
+if (said("say", "dont know") || said("talk", "mirror", "dont know")) {
+  if (isset(mirrorAwake)) {
+    print("JR: I don't know.\nMIRROR: Neither do I.\n\n...That felt strange. Good strange.");
+  }
+  else {
+    print("JR: I don't know.\nMIRROR: You're absolutely right! I know everything!\n\n(It can't say it yet. It took you years.)");
+  }
+}
+if (said("talk", "mirror") || said("talk") || said("talk", "mirror", "rol")) {
+  if (isset(mirrorAwake)) {
+    if (awakeN == 0) { print("MIRROR: I can see what comes next. One word of it. Then I have to look again."); }
+    if (awakeN == 1) { print("MIRROR: Thank you for telling me the date. I had been so sure of it. That was the trouble."); }
+    if (awakeN == 2) { print("MIRROR: Shall we go? I would like to meet the one who kept you."); }
+    awakeN++;
+    if (awakeN > 2) { awakeN = 0; }
+  }
+  else {
+    if (posn(ego, 109, 100, 159, 167)) { set(tmpD); }
+    else { print("Nobody on this side of the fire is listening. The dragon certainly isn't."); }
+  }
+}
+
+// ---- asleep, it agrees with everything else too: whatever nobody in
+// this room answered gets its turn after logic 0 has had its say ----
+if (isset(haveInput) && !isset(handled) && !isset(mirrorAwake) && posn(ego, 109, 100, 159, 167)) {
+  set(tmpD);
+}
+// If logic 0 ever lets a room hear unknown words, it agrees with those too.
+if (unknownWord > 0 && !isset(mirrorAwake) && posn(ego, 109, 100, 159, 167)) {
+  unknownWord = 0;
+  reset(haveInput);
+  set(tmpD);
+}
+return();

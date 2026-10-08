@@ -1,0 +1,315 @@
+# Room 7: Sand Hill Bridge. A stream of money runs down from Sand Hill, and
+# the bridge over it is made of flat square keys. The venture offices are
+# up the hill. The Toll Troll works the west end.
+# Outlines first, fills after: a fill only replaces white.
+
+# ---- sky ----
+color 9
+line 0 22 159 22
+color 14
+circle 16 12 6
+color 7
+arc 52 12 14 5 15
+line 38 12 66 12
+arc 136 9 12 4 15
+line 124 9 148 9
+
+# ---- the hills and the horizon ----
+color 2
+arc 24 56 40 12 15
+line 0 56 159 56
+# Sand Hill
+color 6
+arc 120 56 52 28 15
+# the offices on it: glass, flat roofs
+color 8
+rect 92 40 106 52
+rect 112 33 130 50
+rect 136 42 150 53
+color 0
+line 91 39 107 39
+line 111 32 131 32
+line 135 41 151 41
+color 9
+line 93 44 105 44
+line 93 48 105 48
+line 113 37 129 37
+line 113 41 129 41
+line 113 45 129 45
+line 137 46 149 46
+line 137 50 149 50
+# scrub on the hill
+color 2
+plot 84 50 100 34 134 36 154 48 108 54 132 53 76 53 110 28
+
+# ---- the stream banks ----
+color 6
+line 72 57 66 90 63 102
+line 82 57 92 90 95 102
+line 58 133 52 167
+line 102 133 110 167
+
+# ---- the bridge: a slab, and its front face ----
+color 8
+rect 48 103 114 128
+color 0
+line 48 129 48 132 114 132 114 129
+
+# ---- the roads ----
+color 6
+line 0 108 30 106 40 57
+line 52 57 46 104 47 104
+line 47 129 36 130 34 167
+line 8 167 12 132 0 134
+line 115 104 159 108
+line 115 129 159 132
+
+# ---- the notice board on the west bank ----
+color 6
+rect 1 62 31 86
+line 4 87 4 96 6 96 6 87
+line 26 87 26 96 28 96 28 87
+
+# ---- a tree on the east bank ----
+color 2
+arc 140 78 12 13
+color 6
+line 138 91 138 100 142 100 142 91
+color 10
+plot 134 72 142 70 146 78 136 82 141 86 131 79 147 85
+
+# ---- rocks and reeds ----
+color 8
+arc 118 150 5 3
+arc 126 153 4 2
+arc 44 150 4 2
+color 2
+rel 60 100 0 -4
+rel 62 101 0 -5
+rel 98 101 0 -5
+rel 100 100 0 -3
+rel 54 140 0 -5
+rel 56 142 0 -4
+rel 106 146 0 -5
+rel 108 148 0 -4
+# grass tufts
+rel 20 144 1 -2 1 2
+rel 132 118 1 -2 1 2
+rel 150 144 1 -2 1 2
+rel 124 136 1 -2 1 2
+rel 60 84 1 -2 1 2
+rel 60 70 1 -2 1 2
+rel 104 76 1 -2 1 2
+rel 120 92 1 -2 1 2
+rel 152 62 1 -2 1 2
+rel 40 160 1 -2 1 2
+rel 140 160 1 -2 1 2
+
+# ================= fills =================
+color 9
+fill 2 2
+color 14
+fill 16 12
+color 11
+pattern 1 9
+fill 2 30
+pattern 0
+# hills
+color 10
+pattern 1 2
+fill 20 50
+pattern 0
+color 6
+pattern 6 14
+fill 120 30
+pattern 0
+# offices
+color 3
+pattern 9 11
+fill 99 42
+fill 99 46
+fill 99 50
+fill 121 35
+fill 121 39
+fill 121 43
+fill 121 48
+fill 143 44
+fill 143 48
+fill 143 52
+pattern 0
+# the stream of money
+color 10
+pattern 2 2
+fill 77 80
+fill 80 150
+pattern 0
+# grass
+color 2
+pattern 6 10
+fill 4 150
+fill 20 100
+fill 60 80
+fill 100 80
+fill 130 150
+fill 50 160
+pattern 0
+# roads
+color 14
+pattern 1 6
+fill 20 120
+fill 150 118
+pattern 0
+# the bridge slab and its face
+color 8
+fill 80 115
+color 7
+pattern 1 8
+fill 80 130
+pattern 0
+# notice board
+color 6
+pattern 12 4
+fill 16 74
+pattern 0
+color 6
+fill 5 90
+fill 27 90
+# tree
+color 2
+fill 140 78
+color 6
+fill 140 95
+# rocks
+color 7
+fill 118 150
+fill 126 153
+fill 44 150
+
+# ================= after the fills: the keys, and what floats =================
+# Thirty-three flat square keys and a space bar.
+color 15
+line 50 105 53 105 53 106 50 106 50 107 53 107 53 108 50 108 50 109 53 109
+line 55 105 58 105 58 106 55 106 55 107 58 107 58 108 55 108 55 109 58 109
+line 60 105 63 105 63 106 60 106 60 107 63 107 63 108 60 108 60 109 63 109
+line 65 105 68 105 68 106 65 106 65 107 68 107 68 108 65 108 65 109 68 109
+line 70 105 73 105 73 106 70 106 70 107 73 107 73 108 70 108 70 109 73 109
+line 75 105 78 105 78 106 75 106 75 107 78 107 78 108 75 108 75 109 78 109
+line 80 105 83 105 83 106 80 106 80 107 83 107 83 108 80 108 80 109 83 109
+line 85 105 88 105 88 106 85 106 85 107 88 107 88 108 85 108 85 109 88 109
+line 90 105 93 105 93 106 90 106 90 107 93 107 93 108 90 108 90 109 93 109
+line 95 105 98 105 98 106 95 106 95 107 98 107 98 108 95 108 95 109 98 109
+line 100 105 103 105 103 106 100 106 100 107 103 107 103 108 100 108 100 109 103 109
+line 105 105 108 105 108 106 105 106 105 107 108 107 108 108 105 108 105 109 108 109
+line 110 105 113 105 113 106 110 106 110 107 113 107 113 108 110 108 110 109 113 109
+line 50 113 53 113 53 114 50 114 50 115 53 115 53 116 50 116 50 117 53 117
+line 55 113 58 113 58 114 55 114 55 115 58 115 58 116 55 116 55 117 58 117
+line 60 113 63 113 63 114 60 114 60 115 63 115 63 116 60 116 60 117 63 117
+line 65 113 68 113 68 114 65 114 65 115 68 115 68 116 65 116 65 117 68 117
+line 70 113 73 113 73 114 70 114 70 115 73 115 73 116 70 116 70 117 73 117
+line 75 113 78 113 78 114 75 114 75 115 78 115 78 116 75 116 75 117 78 117
+line 80 113 83 113 83 114 80 114 80 115 83 115 83 116 80 116 80 117 83 117
+line 85 113 88 113 88 114 85 114 85 115 88 115 88 116 85 116 85 117 88 117
+line 90 113 93 113 93 114 90 114 90 115 93 115 93 116 90 116 90 117 93 117
+line 95 113 98 113 98 114 95 114 95 115 98 115 98 116 95 116 95 117 98 117
+line 100 113 103 113 103 114 100 114 100 115 103 115 103 116 100 116 100 117 103 117
+line 105 113 108 113 108 114 105 114 105 115 108 115 108 116 105 116 105 117 108 117
+line 110 113 113 113 113 114 110 114 110 115 113 115 113 116 110 116 110 117 113 117
+line 50 121 53 121 53 122 50 122 50 123 53 123 53 124 50 124 50 125 53 125
+line 55 121 58 121 58 122 55 122 55 123 58 123 58 124 55 124 55 125 58 125
+line 60 121 63 121 63 122 60 122 60 123 63 123 63 124 60 124 60 125 63 125
+line 65 121 98 121 98 122 65 122 65 123 98 123 98 124 65 124 65 125 98 125
+line 100 121 103 121 103 122 100 122 100 123 103 123 103 124 100 124 100 125 103 125
+line 105 121 108 121 108 122 105 122 105 123 108 123 108 124 105 124 105 125 108 125
+line 110 121 113 121 113 122 110 122 110 123 113 123 113 124 110 124 110 125 113 125
+color 7
+line 50 110 53 110
+line 55 110 58 110
+line 60 110 63 110
+line 65 110 68 110
+line 70 110 73 110
+line 75 110 78 110
+line 80 110 83 110
+line 85 110 88 110
+line 90 110 93 110
+line 95 110 98 110
+line 100 110 103 110
+line 105 110 108 110
+line 110 110 113 110
+line 50 118 53 118
+line 55 118 58 118
+line 60 118 63 118
+line 65 118 68 118
+line 70 118 73 118
+line 75 118 78 118
+line 80 118 83 118
+line 85 118 88 118
+line 90 118 93 118
+line 95 118 98 118
+line 100 118 103 118
+line 105 118 108 118
+line 110 118 113 118
+line 50 126 53 126
+line 55 126 58 126
+line 60 126 63 126
+line 65 126 98 126
+line 100 126 103 126
+line 105 126 108 126
+line 110 126 113 126
+# coins and notes in the stream
+color 14
+line 75 68 77 68
+plot 76 67 76 69
+line 81 92 83 92
+plot 82 91 82 93
+line 70 146 72 146
+plot 71 145 71 147
+line 90 156 92 156
+plot 91 155 91 157
+line 84 139 86 139
+plot 85 138 85 140
+line 73 84 75 84
+plot 74 83 74 85
+color 15
+line 86 74 89 74
+line 86 75 89 75
+line 64 158 67 158
+line 64 159 67 159
+line 94 142 97 142
+line 94 143 97 143
+color 2
+plot 87 74 65 158 95 142
+
+# ================= priority and control =================
+color off
+# the slab is one band above the water, so what floats goes under it
+pri 5
+rect 49 104 113 127
+fill 80 115
+# the banks and the edges of the bridge stop JR, not the coins
+pri 1
+line 72 57 66 90 63 102
+line 82 57 92 90 95 102
+line 58 131 52 167
+line 102 131 110 167
+line 48 102 114 102
+line 48 103 114 103
+line 48 129 114 129
+line 48 130 114 130
+# the notice board
+pri 9
+rect 1 62 31 94
+fill 16 74
+pri 0
+line 1 95 31 95
+line 1 96 31 96
+# the tree
+pri 9
+arc 140 78 12 13
+fill 140 78
+pri 0
+line 134 92 146 92
+line 134 93 146 93
+line 134 100 146 100
+line 134 101 146 101
+line 134 92 134 101
+line 146 92 146 101

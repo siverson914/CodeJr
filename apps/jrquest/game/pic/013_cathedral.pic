@@ -1,0 +1,344 @@
+# Room 13: The Cathedral. The closed labs: one tall grey building, one
+# door, a wall with spikes, and a price list. The Bazaar (room 8) is its
+# opposite on purpose. The rose window is a case fan, the gable has a
+# case lock, and the tower windows are drive bays.
+# Outlines first, fills after: a fill only replaces white.
+
+# ---- sky: where the shade changes ----
+color 9
+line 0 40 35 40
+line 125 40 159 40
+# heavy clouds
+color 8
+arc 17 18 13 4 15
+line 4 18 30 18
+arc 143 15 12 4 15
+line 131 15 155 15
+arc 144 27 8 3 15
+line 136 27 152 27
+
+# ---- far hills, horizon, cypresses (all one green, so they can cross) ----
+color 2
+arc 14 58 21 7 15
+arc 146 58 20 7 15
+line 0 58 35 58
+line 125 58 159 58
+arc 8 64 4 20
+arc 27 66 4 18
+arc 130 76 4 20
+color 6
+line 8 85 8 90
+line 27 85 27 90
+line 130 97 130 100
+
+# ---- the cathedral ----
+color 0
+# towers and spires
+rect 36 30 52 110
+rect 108 30 124 110
+line 36 30 44 6 52 30
+line 108 30 116 6 124 30
+line 36 48 52 48
+line 36 80 52 80
+line 108 48 124 48
+line 108 80 124 80
+# belfry openings
+line 42 44 42 37
+line 46 44 46 37
+line 42 44 46 44
+arc 44 37 2 3 15
+line 114 44 114 37
+line 118 44 118 37
+line 114 44 118 44
+arc 116 37 2 3 15
+# tower windows: tall drive bays
+line 42 74 42 58
+line 46 74 46 58
+line 42 74 46 74
+arc 44 58 2 4 15
+line 114 74 114 58
+line 118 74 118 58
+line 114 74 118 74
+arc 116 58 2 4 15
+# two banners that do not match
+poly 40 85 46 85 46 104 43 101 40 104
+poly 111 85 117 85 117 104 114 101 111 104
+# the shaded side of each tower
+line 49 31 49 47
+line 49 49 49 79
+line 49 81 49 109
+line 121 31 121 47
+line 121 49 121 79
+line 121 81 121 109
+# nave and gable
+line 52 44 108 44
+line 52 44 80 20 108 44
+line 52 76 108 76
+# finial
+color 14
+line 80 13 80 19
+line 79 11 81 11
+line 79 12 81 12
+# the case lock in the gable
+color 14
+arc 80 32 2 3
+line 80 36 80 40
+# the rose window: a fan
+color 0
+arc 80 60 8 12
+line 80 48 80 72
+line 72 60 88 60
+line 75 51 85 69
+line 85 51 75 69
+color 14
+line 79 59 81 59
+line 79 60 81 60
+line 79 61 81 61
+# nave windows
+color 0
+line 58 102 58 86
+line 62 102 62 86
+line 58 102 62 102
+arc 60 86 2 4 15
+line 98 102 98 86
+line 102 102 102 86
+line 98 102 102 102
+arc 100 86 2 4 15
+# the doorway
+line 70 110 70 87
+line 90 110 90 87
+arc 80 87 10 8 15
+
+# ---- the steps ----
+color 0
+line 0 110 126 110
+line 34 110 28 126
+line 126 110 132 126
+line 28 126 134 126
+color 8
+line 34 114 126 114
+line 32 118 128 118
+line 31 122 129 122
+
+# ---- the wall on the closed side, with spikes ----
+color 0
+line 0 100 35 100
+line 2 96 2 99
+line 6 96 6 99
+line 10 96 10 99
+line 14 96 14 99
+line 18 96 18 99
+line 22 96 22 99
+line 26 96 26 99
+line 30 96 30 99
+line 34 96 34 99
+# small stones for retired models
+color 8
+line 14 94 14 89
+line 18 94 18 89
+line 14 94 18 94
+arc 16 89 2 2 15
+line 19 82 19 79
+line 22 82 22 79
+line 19 82 22 82
+line 19 79 22 79
+
+# ---- the price list ----
+color 0
+rect 2 112 22 130
+rect 11 130 13 139
+color 4
+line 6 114 6 114
+line 5 115 8 115
+line 4 116 4 116
+line 6 116 6 116
+line 5 117 7 117
+line 6 118 6 118
+line 8 118 8 118
+line 4 119 7 119
+line 6 120 6 120
+line 11 114 13 114
+line 10 115 10 115
+line 14 115 14 115
+line 14 116 14 116
+line 12 117 13 117
+line 11 118 11 118
+line 10 119 10 119
+line 10 120 14 120
+line 17 114 19 114
+line 16 115 16 115
+line 20 115 20 115
+line 16 116 16 116
+line 20 116 20 116
+line 16 117 16 117
+line 20 117 20 117
+line 16 118 16 118
+line 20 118 20 118
+line 16 119 16 119
+line 20 119 20 119
+line 17 120 19 120
+color 8
+line 5 123 19 123
+line 5 125 16 125
+line 5 127 19 127
+
+# ---- plaza, the path south and the lane north ----
+color 6
+line 29 127 27 140
+line 27 140 68 140
+line 68 140 60 167
+line 100 167 92 140
+line 92 140 156 140
+line 156 140 150 59
+line 141 59 134 126
+
+# ================= fills =================
+# sky
+color 9
+fill 2 2
+color 11
+pattern 1 9
+fill 1 45
+fill 126 45
+pattern 0
+# clouds
+color 7
+fill 17 16
+fill 143 13
+fill 144 26
+# hills
+color 2
+pattern 1 3
+fill 1 55
+fill 17 54
+fill 33 56
+fill 136 53
+pattern 0
+# cypresses
+color 2
+fill 8 48
+fill 8 55
+fill 8 70
+fill 27 50
+fill 27 56
+fill 27 70
+fill 130 76
+# spires and gable: slate
+color 1
+pattern 1 8
+fill 44 20
+fill 116 20
+pattern 0
+color 8
+pattern 4 7
+fill 80 26
+pattern 0
+color 14
+fill 80 32
+# stone
+color 8
+pattern 1 7
+fill 40 34
+fill 40 52
+fill 40 84
+fill 112 34
+fill 112 52
+fill 112 84
+fill 56 50
+fill 56 80
+pattern 0
+# belfries and drive bays
+color 0
+fill 44 40
+fill 116 40
+color 1
+pattern 1 5
+fill 44 66
+fill 116 66
+fill 60 94
+fill 100 94
+pattern 0
+# the fan
+color 12
+fill 82 53
+fill 78 67
+color 9
+fill 85 57
+fill 75 63
+color 14
+fill 85 63
+fill 75 57
+color 5
+fill 82 67
+fill 78 53
+# doorway
+color 0
+fill 80 100
+# banners
+color 2
+fill 43 92
+color 6
+fill 114 92
+# shaded sides
+color 8
+fill 50 40
+fill 50 60
+fill 50 90
+fill 122 40
+fill 122 60
+fill 122 90
+# steps
+color 7
+fill 80 112
+fill 80 116
+fill 80 120
+fill 80 124
+# wall
+color 8
+pattern 14 7
+fill 4 105
+pattern 0
+# stones
+color 7
+fill 16 91
+fill 20 81
+# price list post
+color 6
+fill 12 134
+# grass
+color 2
+pattern 6 10
+fill 2 70
+fill 4 150
+fill 130 150
+fill 128 110
+pattern 0
+# path
+color 14
+pattern 1 6
+fill 80 150
+pattern 0
+
+# ================= priority and control =================
+color off
+# the price list hides whoever stands behind it
+pri 12
+rect 2 112 22 130
+fill 10 120
+rect 11 130 13 138
+# the right-hand cypress
+pri 9
+arc 130 76 4 20
+fill 130 76
+line 130 97 130 99
+# the building and the wall stop you: two rows, because JR steps by two
+pri 0
+line 0 110 126 110
+line 0 111 126 111
+line 125 59 125 110
+line 126 59 126 110
+# post and trunk
+line 10 139 14 139
+line 10 140 14 140
+line 129 100 131 100
+line 129 101 131 101

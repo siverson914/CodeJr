@@ -1,0 +1,305 @@
+# Room 4: the Godfathers' Inn. A half-timbered inn with two tables in the
+# yard. The godfathers sit at one, Gary Marcus at the other. Beside the
+# door: a petition, and a shelf with an almanac and a book on it.
+# Outlines first, fills after: a fill only replaces white.
+
+# ---- sky ----
+color 9
+line 0 30 14 30
+line 100 30 159 30
+color 14
+circle 142 12 6
+color 7
+arc 122 22 12 4 15
+line 110 22 134 22
+
+# ---- a far hill, the horizon, the tree ----
+color 2
+arc 118 56 17 8 15
+line 0 56 13 56
+line 101 56 136 56
+arc 148 66 14 16
+color 6
+line 145 82 145 94 151 94 151 82
+color 10
+plot 142 60 150 56 154 66 144 70 149 76 139 68 155 74 146 62
+
+# ---- the inn ----
+color 4
+poly 8 40 24 14 90 14 106 40
+line 19 23 95 23
+line 13 32 101 32
+color 8
+line 72 14 72 5 80 5 80 14
+line 71 4 81 4
+color 6
+line 14 40 14 98
+line 100 40 100 98
+line 14 98 100 98
+line 15 62 99 62
+line 15 63 99 63
+line 40 41 40 61
+line 72 41 72 61
+# corner braces
+line 15 52 22 61
+line 99 52 92 61
+line 41 54 46 61
+line 71 54 66 61
+# upstairs windows
+rect 22 45 34 57
+rect 50 45 62 57
+rect 78 45 90 57
+line 28 46 28 56
+line 56 46 56 56
+line 84 46 84 56
+# the door
+line 50 98 50 72
+line 64 98 64 72
+arc 57 72 7 6 15
+line 57 67 57 97
+# the petition, nailed up left of the door
+color 8
+rect 24 68 40 90
+color 0
+line 27 71 37 71
+line 27 72 37 72
+color 8
+line 27 75 37 75
+line 27 77 37 77
+line 27 79 34 79
+color 1
+rel 27 83 2 -1 2 1 2 -1 2 1
+rel 27 86 2 1 2 -1 2 1
+color 4
+line 35 86 37 86
+line 35 87 37 87
+# the shelf, right of the door
+color 6
+rect 70 67 96 91
+line 71 79 95 79
+# the bracket the sign hangs from
+color 0
+line 100 44 118 44
+line 104 44 104 46
+line 114 44 114 46
+
+# ---- the yard ----
+color 6
+line 14 98 0 126
+line 126 57 130 100 159 140
+
+# ---- the tables ----
+color 6
+rect 26 118 68 124
+rect 26 124 68 136
+rect 98 130 134 136
+rect 98 136 134 146
+
+# ---- pebbles and tufts ----
+color 6
+plot 84 112 20 150 140 160 90 160 60 108 112 118 76 142 46 152 120 80 110 96
+plot 8 140 30 160 100 110 86 126 150 152 116 66 108 76 124 160 64 150 12 118
+# flowers by the wall
+color 2
+line 44 99 44 96
+line 68 99 68 96
+line 98 99 98 96
+line 18 99 18 96
+color 12
+plot 44 95 98 95
+color 13
+plot 68 95 18 95
+color 2
+rel 4 108 1 -2 1 2
+rel 150 118 1 -2 1 2
+rel 140 106 1 -2 1 2
+rel 6 90 0 -3
+rel 4 70 0 -3
+rel 154 100 1 -2 1 2
+rel 134 76 1 -2 1 2
+
+# ================= fills =================
+color 9
+fill 2 2
+color 14
+fill 142 12
+color 11
+pattern 1 9
+fill 2 40
+fill 150 40
+pattern 0
+color 10
+pattern 1 2
+fill 118 52
+pattern 0
+# tree
+color 2
+fill 148 66
+color 6
+fill 148 88
+# grass
+color 2
+pattern 6 10
+fill 3 80
+fill 150 110
+pattern 0
+# the yard and the lane north: the same paving as Castle Steve's courtyard
+color 12
+pattern 1 6
+fill 80 150
+pattern 0
+# roof tiles
+color 4
+pattern 14 12
+fill 50 18
+fill 50 28
+fill 50 36
+pattern 0
+color 8
+pattern 14 7
+fill 76 10
+pattern 0
+# downstairs wall: stucco
+color 14
+pattern 1 7
+fill 20 80
+pattern 0
+# lit windows
+color 14
+fill 25 50
+fill 31 50
+fill 53 50
+fill 59 50
+fill 81 50
+fill 87 50
+# door
+color 6
+fill 53 85
+fill 61 85
+# shelf back
+color 8
+fill 80 73
+fill 80 85
+# table tops and cloths
+color 6
+pattern 12 14
+fill 40 121
+fill 110 133
+pattern 0
+color 1
+pattern 1 9
+fill 40 130
+fill 110 141
+pattern 0
+
+# ================= after the fills =================
+# door knob
+color 14
+plot 62 86
+# books, top shelf. The fat yellow one is the almanac, with a white
+# label pasted over its spine.
+color 4
+line 72 70 72 78
+line 73 70 73 78
+color 1
+line 75 71 75 78
+line 76 71 76 78
+color 2
+line 78 70 78 78
+color 13
+line 80 72 80 78
+line 81 72 81 78
+color 14
+line 84 70 84 78
+line 85 70 85 78
+line 86 70 86 78
+line 87 70 87 78
+line 88 70 88 78
+color 15
+line 85 73 87 73
+line 85 74 87 74
+color 3
+line 91 71 91 78
+line 92 71 92 78
+color 12
+line 94 72 94 78
+# bottom shelf. The black one with the red band is by Yudkowsky and Soares.
+color 9
+line 72 82 72 90
+line 73 82 73 90
+color 0
+line 76 81 76 90
+line 77 81 77 90
+line 78 81 78 90
+line 79 81 79 90
+color 4
+line 76 84 79 84
+line 76 85 79 85
+color 6
+line 82 83 82 90
+line 83 83 83 90
+color 10
+line 85 82 85 90
+color 7
+line 87 88 94 88
+line 87 89 94 89
+line 87 90 94 90
+# mugs on the godfathers' table
+color 7
+line 43 115 43 120
+line 44 115 44 120
+line 45 117 45 118
+line 50 115 50 120
+line 51 115 51 120
+line 49 117 49 118
+# a bowl of soup on the other table
+color 15
+line 125 131 132 131
+color 7
+line 126 132 131 132
+line 127 133 130 133
+color 12
+line 126 130 131 130
+# stones
+color 7
+line 84 154 88 154
+line 15 136 18 136
+line 140 124 143 124
+color 8
+line 85 155 89 155
+line 16 137 19 137
+line 141 125 144 125
+
+# ================= priority and control =================
+color off
+# the inn is solid, and so is the strip beside it
+pri 0
+line 0 99 101 99
+line 0 100 101 100
+line 101 57 101 100
+# the tables hide what is behind them; nobody walks through one
+pri 12
+rect 26 118 68 136
+fill 40 127
+pri 0
+rect 25 118 69 137
+line 25 119 69 119
+line 25 136 69 136
+pri 13
+rect 98 130 134 146
+fill 110 138
+pri 0
+rect 97 130 135 147
+line 97 131 135 131
+line 97 146 135 146
+# the tree
+pri 8
+arc 148 66 14 16
+fill 148 66
+pri 0
+line 142 86 154 86
+line 142 87 154 87
+line 142 94 154 94
+line 142 95 154 95
+line 142 86 142 95
+line 154 86 154 95

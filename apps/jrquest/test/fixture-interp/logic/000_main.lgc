@@ -1,0 +1,8 @@
+// Logic 0 of the interpreter fixture: start in room 1, run the room.
+if (f5 && v0 == 0) {
+  v7 = 10;
+  new.room(1);
+}
+call.v(v0);
+if (f2 && !f4) { print("Bad command or file name."); }
+return();

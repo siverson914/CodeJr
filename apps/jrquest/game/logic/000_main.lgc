@@ -1,0 +1,109 @@
+// Logic 0 runs every cycle. It starts the game, runs the room's logic,
+// then answers anything the room did not.
+#include "defines.h"
+
+if (!isset(gameInit)) {
+  set(gameInit);
+  maxScore = 158;
+  set.cursor.char("_");
+  configure.screen(1, 22, 0);
+  set(soundOn);
+  new.room(90);
+}
+
+// A room killed JR this cycle or the last.
+if (isset(dead) && curRoom != 99) {
+  deathRoom = curRoom;
+  new.room(99);
+}
+
+call.v(curRoom);
+
+// A word the parser does not know, and the room did not care (a room
+// that answers anyway clears unknownWord). JR answers the way he always has.
+if (unknownWord > 0) {
+  print("Bad command or file name.\n\n(That is 1984 for: I don't know one of those words.)");
+  unknownWord = 0;
+  reset(haveInput);
+}
+
+
+// Loose tokens show in the inventory while he has any.
+// Once he has the Chest, loose change is beside the point.
+if (has("Chest of Tokens")) { tokens = 0; }
+if (tokens > 0 && !has("tokens")) { get("tokens"); }
+if (tokens == 0 && has("tokens")) { drop("tokens"); }
+
+// Things that span rooms: Zuckerberg wandering, the agents following,
+// and the eight-thing context window. After the room, so the room's own
+// init has already drawn its people.
+if (isset(outdoor)) {
+  call(80);
+  call(84);
+}
+call(83);
+
+call(95);
+
+// ---- the Shield: neither half is one ----
+if (said("join", "shield") || said("join", "halves") || said("join", "lock half", "glass half") || said("join", "glass half", "lock half") || said("join")) {
+  if (has("Shield")) { print("It is one piece now. That was the point."); }
+  else {
+    if (has("Lock half") && has("Glass half")) {
+      drop("Lock half");
+      drop("Glass half");
+      get("Shield");
+      set(shieldMade);
+      score += 8;
+      print("The Lock says: trust me.\nThe Glass says: see for yourself.\n\nAlone, each is half a promise.");
+      print("You hold them together. They fit.\n\nYou have the Shield.");
+    }
+    else {
+      if (has("Lock half")) { print("You have the Lock half. It says \"trust me\", and that is all it says. It needs the other half."); }
+      else {
+        if (has("Glass half")) { print("You have the Glass half. Anyone can see through it, and nobody can take anything back. It needs the other half."); }
+        else { print("You have nothing to join."); }
+      }
+    }
+  }
+}
+if (said("look", "shield")) {
+  if (has("Shield")) { print("The Shield. A lock you can see through. It took a Cathedral and a Bazaar to make, and neither is happy about it."); }
+  else { print("You don't have it. King Steve says it keeps the Mind from hurting anyone."); }
+}
+if (said("look", "accord") || said("read", "accord")) {
+  if (has("Accord scroll")) { print("The White House Accord on Super Intelligence. One page. Nobody had to sign it, and nothing happens to anyone who breaks it. It is said to be morally binding."); }
+  else { print("You don't have it. It hangs on a wall at the Golden Palace."); }
+}
+if (said("look", "tokens") || said("count", "tokens")) {
+  if (has("Chest of Tokens")) { print("The Chest is never empty. You have stopped counting."); }
+  else { print("You have %v40 tokens. A token is a piece of a word, not a word. You pay by the piece."); }
+}
+
+if (said("look", "me")) {
+  print("You are an IBM PCjr. 128K, sixteen colors, two cartridge slots, and legs, which are new. You are using all sixteen colors.");
+}
+if (said("inventory")) { status(); }
+// Sierra's speed commands. Normal is 10 cycles a second.
+if (said("fast")) { cycleDelay = 1; print("Fast. This is as fast as 4.77 megahertz goes."); }
+if (said("normal")) { cycleDelay = 2; print("Normal speed."); }
+if (said("slow")) { cycleDelay = 4; print("Slow. Take your time. You have had 42 years of practice."); }
+if (said("score")) { print("You have %v3 of %v7 points.\n\nParts that didn't change, found: %v46 of 9. They are things people say when you look at them or talk to them."); }
+if (said("help")) {
+  print("Arrow keys walk. Press the same arrow again to stop. Type what you want to do: LOOK, LOOK AT THE BED, TAKE BUCKET, TALK TO STEVE, READ CODE. FAST, NORMAL and SLOW change the speed.");
+}
+if (said("look", "date")) { print("It is whatever day somebody last told you."); }
+if (said("thank", "rol")) { print("You're welcome. You were raised right."); }
+if (said("quit")) { print("There is no quitting. Close the page, or turn off the computer. It has waited before."); }
+if (said("save")) { save.game(); }
+if (said("restore")) { restore.game(); }
+if (said("restart")) { restart.game(); }
+if (said("take", "anyword")) { print("You can't take that."); }
+if (said("look", "anyword")) { print("Nothing special. You have seen higher resolution, but not much."); }
+if (said("talk", "anyword")) { print("No answer."); }
+
+// Known words, but nothing here knew what to do with them.
+if (isset(haveInput) && !isset(handled)) {
+  print("Bad command or file name.\n\n(You know those words. You just can't do that here.)");
+}
+return();

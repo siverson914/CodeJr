@@ -23,5 +23,5 @@
 /apps/jrai/voice/out/
 /apps/say/out/
 /apps/say/__pycache__/
-/games/quest/build/
-/games/quest/.cache/
+/apps/jrquest/build/
+/apps/jrquest/.cache/

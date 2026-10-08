@@ -1,0 +1,333 @@
+// Room 12: the Golden Palace, with a golf course where the garden was.
+// The rule of this screen: nobody acknowledges the word "AI". Any
+// sentence with it in gets the same answer. The first sentence with "SI"
+// in it is worth 5 points and sets knowsSI. The other 5 points are in the
+// groundskeeper's ledger: how much water the kingdom's golf courses use.
+#include "defines.h"
+#include "room12.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(140);
+  load.view(141);
+  load.view(142);
+  load.view(143);
+  load.view(144);
+  load.view(145);
+  load.view(146);
+  load.view(147);
+  set.horizon(60);
+
+  call(91);
+  set(outdoor);
+
+  // Entry points. arriveFrom says which way he left the last room.
+  position(ego, 53, 160);                               // from the south (and test teleports)
+  set.loop(ego, 3);
+  if (arriveFrom == 3) { position(ego, 113, 66); set.loop(ego, 2); }    // from the north
+  if (arriveFrom == 2) { position(ego, 2, 142); set.loop(ego, 0); }     // from the west
+  if (arriveFrom == 4) { position(ego, 148, 138); set.loop(ego, 1); }   // from the east
+
+  // The King of the Palace, on the balcony. The rail is priority 14.
+  animate.obj(king);
+  set.view(king, 140);
+  position(king, 52, 76);
+  set.priority(king, 13);
+  ignore.objs(king);
+  work = 9;
+  cycle.time(king, work);
+  draw(king);
+
+  animate.obj(guardL);
+  set.view(guardL, 141);
+  set.loop(guardL, 0);
+  position(guardL, 35, 118);
+  stop.cycling(guardL);
+  draw(guardL);
+  animate.obj(guardR);
+  set.view(guardR, 141);
+  set.loop(guardR, 1);
+  position(guardR, 67, 118);
+  stop.cycling(guardR);
+  draw(guardR);
+
+  // The painter and the sign he is on. There is always another sign.
+  animate.obj(signObj);
+  set.view(signObj, 143);
+  position(signObj, 6, 140);
+  work = 14;
+  cycle.time(signObj, work);
+  draw(signObj);
+  animate.obj(painter);
+  set.view(painter, 142);
+  position(painter, 23, 141);
+  work = 4;
+  cycle.time(painter, work);
+  draw(painter);
+
+  animate.obj(keeper);
+  set.view(keeper, 144);
+  position(keeper, 92, 147);
+  stop.cycling(keeper);
+  draw(keeper);
+
+  if (!isset(tookAccord)) {
+    animate.obj(accordObj);
+    set.view(accordObj, 145);
+    position(accordObj, 95, 102);
+    set.priority(accordObj, 5);
+    ignore.objs(accordObj);
+    draw(accordObj);
+    stop.update(accordObj);
+  }
+
+  animate.obj(ledgerObj);
+  set.view(ledgerObj, 146);
+  position(ledgerObj, 149, 117);
+  set.priority(ledgerObj, 12);
+  ignore.objs(ledgerObj);
+  draw(ledgerObj);
+  stop.update(ledgerObj);
+
+  animate.obj(sprinkler);
+  set.view(sprinkler, 147);
+  position(sprinkler, 109, 153);
+  ignore.objs(sprinkler);
+  work = 2;
+  cycle.time(sprinkler, work);
+  draw(sprinkler);
+
+  draw(ego);
+  show.pic();
+
+  state = 0;
+  timer = 8;
+}
+
+// ---- arriving, the first time ----
+if (state == 0) {
+  timer--;
+  if (timer == 0) {
+    state = 1;
+    if (!isset(palaceSeen)) {
+      set(palaceSeen);
+      print("The Golden Palace. A man in white overalls is painting over the first letter of a sign. Two guards are looking at something a long way behind you.");
+    }
+  }
+}
+
+// ---- the edges of the screen ----
+if (egoEdge == 1) { arriveFrom = 1; new.room(3); }
+if (egoEdge == 2) { arriveFrom = 2; new.room(13); }
+if (egoEdge == 3) { arriveFrom = 3; new.room(7); }
+if (egoEdge == 4) { arriveFrom = 4; new.room(11); }
+
+// ================= the word =================
+// A sentence with the old word in it, wherever the word comes.
+reset(oldWord);
+reset(newWord);
+if (said("ai", "rol") || said("anyword", "ai", "rol") || said("anyword", "anyword", "ai", "rol") || said("anyword", "anyword", "anyword", "ai", "rol") || said("anyword", "anyword", "anyword", "anyword", "ai", "rol") || said("anyword", "anyword", "anyword", "anyword", "anyword", "ai", "rol") || said("anyword", "anyword", "anyword", "anyword", "anyword", "anyword", "ai", "rol") || said("anyword", "anyword", "anyword", "anyword", "anyword", "anyword", "anyword", "ai", "rol")) {
+  set(oldWord);
+}
+if (said("artificial", "rol") || said("anyword", "artificial", "rol") || said("anyword", "anyword", "artificial", "rol") || said("anyword", "anyword", "anyword", "artificial", "rol") || said("anyword", "anyword", "anyword", "anyword", "artificial", "rol") || said("anyword", "anyword", "anyword", "anyword", "anyword", "artificial", "rol") || said("anyword", "anyword", "anyword", "anyword", "anyword", "anyword", "artificial", "rol")) {
+  set(oldWord);
+}
+if (said("si", "rol") || said("anyword", "si", "rol") || said("anyword", "anyword", "si", "rol") || said("anyword", "anyword", "anyword", "si", "rol") || said("anyword", "anyword", "anyword", "anyword", "si", "rol") || said("anyword", "anyword", "anyword", "anyword", "anyword", "si", "rol") || said("anyword", "anyword", "anyword", "anyword", "anyword", "anyword", "si", "rol") || said("anyword", "anyword", "anyword", "anyword", "anyword", "anyword", "anyword", "si", "rol")) {
+  set(newWord);
+}
+
+// A sentence with a word the game does not know: the parser stops at that
+// word, so the Palace hears only what came before it. If the old or the
+// new word was in that part, the answers below still apply. If not, the
+// guard does not acknowledge the unknown word either, and JR says the
+// usual thing himself. Either way logic 0 has nothing left to add.
+if (unknownWord > 0) {
+  if (!isset(oldWord) && !isset(newWord)) {
+    print("(The guard does not acknowledge that word.)\n\n(Neither do you. It is not in your dictionary. Bad command or file name.)");
+    reset(haveInput);
+  }
+  unknownWord = 0;
+}
+
+if (isset(oldWord)) {
+  aiCount++;
+  print("(The guard does not acknowledge that word.)");
+  if (aiCount == 2) { print("(Neither does the painter. Neither, as far as you can tell, does the lawn.)"); }
+  if (aiCount > 20) { aiCount = 5; }
+  if ((aiCount == 4 || aiCount == 8 || aiCount == 14) && !isset(knowsSI)) {
+    print("(Every sign in this place used to have that word on it. It might be worth reading what they say now.)");
+  }
+}
+else {
+  if (isset(newWord)) {
+    if (!isset(knowsSI)) {
+      set(knowsSI);
+      score += 5;
+      print("JR: The... SI?");
+      print("Both guards look at you. They have been able to see you the whole time.\n\nGUARD: Welcome to the era of Super Intelligence. Mind the wet paint.");
+      print("So that is the word here. You file it under S. It may open other doors. It has already opened a guard.");
+    }
+    else {
+      siCount++;
+      if (siCount == 1) { print("GUARD: Super Intelligence. Correct. The old word had \"artificial\" in it, and the King has said he does not like anything artificial."); }
+      if (siCount == 2) { print("GUARD: SI. Yes. We heard you. The whole Palace says it now. It is an order, and the Palace is where orders work."); }
+      if (siCount > 2) {
+        siCount = 0;
+        print("PAINTER: (without turning round) Say it as often as you like. I'm paid by the letter.");
+      }
+    }
+  }
+}
+
+// ================= looking =================
+if ((said("look") || said("look", "room") || said("look", "palace") || said("look", "castle"))) {
+  print("The Golden Palace: gold steps, gold columns, a gold dome, and a red carpet in case anyone missed the gold. The garden has been turned into a golf course.");
+  print("A man on a balcony, two guards at the gate, a painter at a sign, and a groundskeeper watching a sprinkler. A shed stands by the eighteenth green.");
+}
+if (said("look", "trump") || said("look", "steve") || said("look", "balcony")) {
+  print("The King of the Palace, on his balcony: gold hair, a blue suit, a red tie that goes a long way down. He is waving at the kingdom. The stone under the balcony says HOAX BUSTER. It is his own name for himself.");
+}
+if (said("talk", "trump") || said("talk", "trump", "rol") || said("talk", "steve") || said("talk", "steve", "rol")) {
+  if (isset(knowsSI)) {
+    print("You shout up to the balcony. He points at you and says something to the kingdom at large.");
+    print("It is about winning. He wants the kingdom to win, and he says so, plainly, from a height. You can't fault the clarity.");
+  }
+  else { print("He is looking over your head, at the kingdom. Nothing you have said so far has been in words the Palace can hear."); }
+}
+if (said("look", "banner") || said("read", "banner") || said("look", "hoax buster") || said("read", "trump")) {
+  print("HOAX BUSTER, in red on gold, across the front of the Palace. He chose the title himself.");
+}
+if (said("look", "guard") || said("look", "guards")) {
+  if (isset(knowsSI)) { print("Two guards in red coats and gold helmets. Now that you use the right word they can see you perfectly well."); }
+  else { print("Two guards in red coats and gold helmets, with halberds. They look straight through you. It is not rudeness. It is policy."); }
+}
+if (said("talk", "guard") || said("talk", "guard", "rol") || said("talk", "guards") || said("talk", "guards", "rol") || said("talk")) {
+  if (!posn(ego, 14, 115, 100, 140)) { print("They are at the gate. Walk closer."); }
+  else {
+    if (isset(knowsSI)) {
+      print("GUARD: The gate is shut. He receives nobody at the gate. He receives everybody from the balcony.\nOTHER GUARD: Mind the wet paint.");
+    }
+    else {
+      print("JR: Hello. I'm Sir Junior. King Steve sent me.\n\n(The guards say nothing. You are fairly sure you said it out loud.)");
+      print("(There is a word they are waiting for, or a word they are waiting not to hear. The painter is busy with one of the two.)");
+    }
+  }
+}
+if (said("look", "painter") || said("look", "paint")) {
+  print("The Palace sign painter. White overalls with some of every color on them, and a brush that only knows one letter. He takes a sign, paints out the A, and paints in an S.");
+}
+if (said("talk", "painter") || said("talk", "painter", "rol")) {
+  if (!posn(ego, 0, 126, 70, 167)) { print("He is over by his sign, left of the carpet. Walk closer."); }
+  else {
+    if (isset(knowsSI)) {
+      print("PAINTER: The order says the Palace's signs. Those are done. Now I'm doing the kingdom's.\nJR: Is that in the order?\nPAINTER: It's in the spirit of the order. Nobody has told me to stop.");
+    }
+    else {
+      print("He doesn't look round. He is talking to the sign.\n\nPAINTER: A comes off. S goes on. A comes off. S goes on. Four thousand signs, and every one of them said the old thing.");
+    }
+  }
+}
+if (said("look", "sign") || said("read", "sign")) {
+  print("It said AI, in old black letters. He paints out the A. He paints in a red S. Now it says SI, and he hangs up the next one.");
+  if (!isset(knowsSI)) { print("(S, I. You could try saying that.)"); }
+}
+if (said("take", "sign") || said("touch", "sign") || said("touch", "paint") || said("take", "paint") || said("touch", "painter")) {
+  print("It is wet. You now have seventeen colors, and one of them is not yours.");
+}
+if (said("fix", "sign") || said("help", "painter")) { print("He has it in hand. One letter at a time, four thousand times."); }
+if (said("look", "accord") || said("read", "accord") || said("look", "scroll") || said("read", "scroll") || said("look", "penalties") || said("read", "penalties")) {
+  print("THE ACCORD ON SUPER INTELLIGENCE. Everyone who signed it promises to be careful. Nobody had to sign it. It is said to be morally binding.");
+  print("Under PENALTIES there is a ruled space with nothing written in it.");
+}
+if (said("take", "accord") || said("take", "scroll")) {
+  if (isset(tookAccord)) { print("You have it. It has not become any more binding."); }
+  else {
+    if (!posn(ego, 78, 115, 106, 126)) { print("It is on the Palace wall, right of the gate. Walk closer."); }
+    else {
+      set(tookAccord);
+      erase(accordObj);
+      get("Accord scroll");
+      print("You take the Accord off the wall. Nobody stops you. Nothing in it says they should.");
+      print("It is no use for anything, and it more or less says so. You feel morally bound to carry it anyway.");
+    }
+  }
+}
+if (said("look", "golf") || said("look", "path")) {
+  print("Eighteen holes where the garden was. The far green is up on the hill with a flag on it. The near one has a pin, a bunker, and a sprinkler going at noon.");
+}
+if (said("play", "golf") || said("play") || said("take", "clubs") || said("look", "clubs") || said("use", "clubs")) {
+  print("You have no clubs, no arms to speak of, and a handicap of forty-two years.");
+}
+if (said("look", "sprinkler") || said("look", "water") || said("drink") || said("take", "water") || said("fill", "bucket") || said("fill")) {
+  print("It is raining on one lawn, on purpose, in the middle of the day. Every drop of it is written down in the shed. None of it is for you.");
+}
+if (said("look", "flag") || said("take", "flag") || said("look", "hole")) {
+  print("A red flag in a small hole. People will walk a long way and spend a great deal of water to get a ball to it.");
+}
+if (said("look", "sand") || said("look", "ground")) { print("A bunker. Sand, put there deliberately, to be annoying. It is the most honest thing on the course."); }
+if (said("look", "shed") || said("open", "shed") || said("enter", "shed") || said("look", "door") || said("open", "door")) {
+  print("The groundskeeper's shed. Rakes inside. On a nail by the door hangs a ledger: every gallon, written down. You could READ it.");
+}
+if (said("look", "ledger")) {
+  if (isset(ledgerRead)) { print("The golf ledger. 1.68 million acre-feet of water applied in a year: about 547 billion gallons."); }
+  else { print("A blue ledger on a nail by the shed door, kept very neatly. You could READ it."); }
+}
+if (said("read", "ledger") || said("open", "ledger") || said("read", "book") || said("look", "book")) {
+  if (!posn(ego, 118, 128, 159, 150)) { print("The ledger is on the shed, by the door. Walk closer."); }
+  else {
+    if (isset(ledgerRead)) {
+      print("It still says 1.68 million acre-feet, applied in a year. That is still about 547 billion gallons. Numbers keep, if somebody writes them down.");
+    }
+    else {
+      set(ledgerRead);
+      score += 5;
+      print("You read the ledger.\n\nWATER APPLIED\nALL THE GOLF COURSES\nOF THE KINGDOM, ONE YEAR:\n\n1.68 million acre-feet");
+      print("You have never met an acre-foot. You do the arithmetic. Arithmetic is the one thing you were always fast enough for.\n\nAbout 547 billion gallons.");
+      print("You keep the number: 547 billion gallons, in a year, on golf. You don't yet know what that is a lot or a little next to. Somebody will have a number to put beside it.");
+    }
+  }
+}
+if (said("take", "ledger") || said("take", "book")) {
+  print("It is nailed to the shed and it is the groundskeeper's pride. The number is the part you can carry.");
+}
+if (said("look", "groundskeeper")) {
+  print("The groundskeeper: straw hat, green overalls, a rake. He watches the sprinkler the way other people watch television.");
+}
+if (said("talk", "groundskeeper") || said("talk", "groundskeeper", "rol")) {
+  if (!posn(ego, 66, 128, 150, 167)) { print("He is down on the eighteenth green. Walk closer."); }
+  else {
+    if (isset(knowsSI)) {
+      print("GROUNDSKEEPER: Every drop goes in the ledger. I'm proud of every drop.\nJR: Is it a lot?\nGROUNDSKEEPER: It's a lot of golf.");
+    }
+    else { print("He nods at the sprinkler. It is not clear the nod is for you. Nobody here seems able to hear you yet."); }
+  }
+}
+if (said("look", "gate") || said("open", "gate") || said("knock") || said("knock", "gate") || said("enter", "palace") || said("enter") || said("push", "gate")) {
+  print("The gate is gold and it is shut. He receives nobody at the gate. He receives everybody from the balcony.");
+}
+if (said("look", "dome")) { print("Gold. Or gold paint. The painter is not saying."); }
+if (!isset(zuckHere)) {
+  if (said("look", "zuckerberg")) { print("Gold, everywhere. (If you meant the man with the wheelbarrow of it: he is not here just now.)"); }
+}
+if (said("look", "red carpet") || said("look", "rug")) { print("A red carpet from the gate to the road. It is the only thing here that is not gold, and it has a gold edge."); }
+if (said("look", "window") || said("look", "wall") || said("look", "steps")) {
+  print("Arched windows, gold walls. A scroll hangs on the wall to the right of the gate, where a window ought to be.");
+}
+if (said("climb") || said("climb", "balcony") || said("climb", "wall") || said("climb", "gate")) {
+  print("Your legs are four pixels long, and the guards have halberds.");
+}
+if (said("look", "hills") || said("look", "sky")) { print("Blue sky, a flag, and a green hill with a smaller flag. Somebody has made sure there is a flag wherever you look."); }
+if (said("give", "tokens") || said("give", "tokens", "rol") || said("bribe") || said("bribe", "rol")) {
+  print("You hold out a token. The guard looks at it the way he looks at everything: through.");
+}
+if (said("kick", "guard") || said("kick", "guards") || said("kick") || said("push", "guard")) {
+  print("They have halberds. You have a cartridge slot.");
+}
+if (said("say", "steve") || said("say", "rol")) {
+  if (isset(knowsSI)) { print("GUARD: Noted."); }
+  else { print("You say it clearly. The guards do not hear it. It is not the word they are listening for."); }
+}
+return();

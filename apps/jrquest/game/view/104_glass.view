@@ -1,0 +1,13 @@
+desc "The Glass half"
+loop 0
+cel 7 10 trans=5
+9999999
+9BFBBB9
+9BFBBB9
+9BBFBB9
+9BBBBB9
+.9BBBB9
+.9BBBB9
+..9BBB9
+...9BB9
+....999

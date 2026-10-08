@@ -1,0 +1,258 @@
+# Room 9, outside the All-In Tavern: the bouncer, the wrong ways in, the
+# right way in, the door, and all four edges.
+# node tools/play.js build --script test/rooms/09_tavern.txt
+5
+type debug
+5
+type tp
+2
+type 9
+6
+shot 01-arrive
+type look
+3
+expect The All-In Tavern
+key enter
+2
+expect Four voices
+key enter
+2
+type read sign
+3
+expect COVER $7,500
+key enter
+2
+
+# up the rope lane: the bouncer says his piece
+key up
+24
+expect exactly where the door is
+shot 02-bouncer
+key enter
+2
+expect seventy-five hundred dollars
+key enter
+2
+# he really is in the way
+key up
+12
+shot 03-blocked
+# press the same arrow again to stop
+key up
+2
+type open door
+3
+expect You will have to talk to him
+key enter
+2
+
+# the wrong ways in
+type pay the bouncer
+3
+expect pieces of words
+key enter
+2
+expect tell me who sent you
+key enter
+2
+type sneak in
+3
+expect You do not sneak
+key enter
+2
+type push bouncer
+3
+expect He does not notice
+key enter
+2
+type say im on the list
+3
+expect I'm not on the list
+key enter
+2
+expect First honest one today
+key enter
+2
+type look at the carriage
+3
+expect four minutes away
+key enter
+2
+type listen
+3
+expect getting quieter
+key enter
+2
+type look in the window
+3
+expect four tall chairs
+key enter
+2
+type drink tequila
+3
+expect Liquids are how computers end
+key enter
+2
+
+# the right way in: say who sent you
+type say king steve sent me
+3
+expect King Steve. He listens to the show
+key enter
+2
+expect A listener? We have a listener!
+shot 04-listener
+key enter
+2
+expect It cost nothing
+key enter
+2
+34
+shot 05-aside
+type talk to bouncer
+3
+expect Go on in, listener
+key enter
+2
+key up
+8
+# inside (room 10): the opening scene
+10
+expect Four chairs, four hosts
+shot 06-inside
+key enter
+2
+key enter
+2
+key enter
+2
+# and out again by the mat
+key down
+10
+4
+type look
+3
+expect The All-In Tavern
+shot 07-out-again
+key enter
+2
+key enter
+2
+
+# ---- the four edges. Each time: walk off, turn round in the next room,
+# ---- walk back, and land on this room's entry point for that side.
+# (Enter is pressed a few times in case the neighbor has something to say.)
+# the rope is solid: walking left from the door stops at it
+key left
+10
+key left
+2
+shot 08-rope
+# west, to the Bazaar (8)
+key down
+14
+key left
+40
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key right
+8
+key enter
+2
+key enter
+2
+type look
+3
+expect The All-In Tavern
+shot 09-from-west
+key enter
+2
+key enter
+2
+# east, to the Data Center (6)
+key right
+80
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key left
+8
+key enter
+2
+key enter
+2
+type look
+3
+expect The All-In Tavern
+shot 10-from-east
+key enter
+2
+key enter
+2
+# north, up the lane, to the GPU Field (14)
+key left
+8
+key up
+50
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key down
+8
+key enter
+2
+key enter
+2
+type look
+3
+expect The All-In Tavern
+shot 11-from-north
+key enter
+2
+key enter
+2
+# south, to the Cold Reactor (5)
+key down
+44
+key left
+26
+key down
+12
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key up
+8
+key enter
+2
+key enter
+2
+type look
+3
+expect The All-In Tavern
+shot 12-from-south
+key enter
+2
+key enter
+2

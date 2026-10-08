@@ -1,0 +1,388 @@
+# Room 5, the Cold Reactor. No points here: a guard, a joke, four edges
+# and the cave mouth. node tools/play.js build --script test/rooms/05_reactor.txt
+5
+type debug
+5
+type tp
+3
+type 5
+12
+expect not a wisp of steam
+shot 01-arrive
+key enter
+2
+expect GUARD: Restarting soon.
+key enter
+3
+type look
+3
+expect The Cold Reactor
+key enter
+2
+expect future tense
+key enter
+2
+expect there is a cave
+key enter
+2
+1
+type look at the towers
+3
+expect holding their breath
+key enter
+2
+1
+type look at the steam
+3
+expect That is the whole news here
+key enter
+2
+1
+type look at the guard
+3
+expect the easy shift
+key enter
+2
+1
+
+# ---- too far away ----
+type talk to guard
+3
+expect Walk closer
+key enter
+2
+1
+type read clipboard
+3
+expect Walk closer
+key enter
+2
+1
+
+# ---- walk up to him ----
+key up
+9
+key up
+2
+shot 02-guard
+type talk to guard
+3
+expect It's been soon for two years
+key enter
+2
+1
+type talk to guard
+3
+expect A nuclear plant! To do what?
+key enter
+2
+1
+shot 03-email
+type talk to guard
+3
+expect nobody has ever brought a closed one of these back
+key enter
+2
+expect the day a light comes on
+key enter
+2
+1
+type talk to guard
+3
+expect without burning anything
+key enter
+2
+expect Forty items
+key enter
+2
+1
+type talk to guard
+3
+expect There's a dragon in it
+key enter
+2
+1
+type talk to guard
+3
+expect It's been soon for two years
+key enter
+2
+1
+type ask guard about the email
+3
+expect A lot of it is email
+key enter
+2
+1
+type ask guard about the dragon
+3
+expect never once shut down
+key enter
+2
+1
+type ask guard when
+3
+expect I can't give you a date
+key enter
+2
+1
+type ask guard about the mirror
+3
+expect past the dragon
+key enter
+2
+1
+type read clipboard
+3
+expect Every box says SOON
+key enter
+2
+1
+
+# ---- wrong tries ----
+type take clipboard
+3
+expect sign for it
+key enter
+2
+1
+type restart the reactor
+3
+expect GUARD: Soon.
+key enter
+2
+1
+type open the gate
+3
+expect Staff only
+key enter
+2
+1
+type climb the fence
+3
+expect twenty-two pixels
+key enter
+2
+1
+type give bucket to guard
+3
+expect item nineteen
+key enter
+2
+1
+type look at the sign
+3
+expect SOON
+key enter
+2
+expect by the cave
+key enter
+2
+1
+type look at the booth
+3
+expect nothing circled
+key enter
+2
+1
+type look at the dome
+3
+expect waiting to be asked
+key enter
+2
+1
+type look at the birds
+3
+expect CROW: Caw.
+key enter
+2
+1
+type listen
+3
+expect No hum at all
+key enter
+2
+1
+type look at the cave
+3
+expect Walk in, if you mean it
+key enter
+2
+1
+type look at the email
+3
+expect it wants a power plant
+key enter
+2
+1
+type look at the road
+3
+expect South is the GPU Field
+key enter
+2
+1
+
+# ---- the fence stops him ----
+key left
+14
+key up
+20
+key up
+1
+shot 04-fence
+type look
+3
+expect The Cold Reactor
+key enter
+2
+key enter
+2
+key enter
+2
+1
+
+# ---- along the fence to the cave mouth, and in ----
+key right
+47
+key right
+1
+type read the notice
+3
+expect THE DRAGON IS NOT PLANT PROPERTY
+key enter
+2
+1
+shot 05-cave-mouth
+key up
+6
+type look
+3
+expect dragon's cave
+key enter
+2
+key enter
+2
+1
+shot 06-in-the-cave
+# ---- and out again: he arrives beside the cave ----
+key left
+8
+type look at the cave
+3
+expect Walk in, if you mean it
+key enter
+2
+1
+shot 07-back-out
+
+# ---- east: Castle Steve ----
+key right
+14
+shot 08-east
+8
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+type tp
+3
+type 5
+10
+expect Score:0 of 158
+# ---- south: the GPU Field ----
+key down
+8
+shot 09-south
+8
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+type tp
+3
+type 5
+10
+
+# ---- west: the Godfathers' Inn ----
+key left
+40
+shot 10-west
+8
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+type tp
+3
+type 5
+10
+
+# ---- north, up the lane beside the fence: the Tavern ----
+key left
+32
+key up
+30
+shot 11-lane
+30
+shot 12-north
+8
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+type tp
+3
+type 5
+10
+
+# ---- back with the Mirror (item 12): the guard has a question for it ----
+type gimme
+3
+type 12
+3
+key up
+9
+key up
+2
+type talk to guard
+3
+expect The word is "soon"
+key enter
+2
+1
+type look
+3
+expect The Cold Reactor
+key enter
+2
+key enter
+2
+key enter
+2
+1
+shot 13-end
+hash

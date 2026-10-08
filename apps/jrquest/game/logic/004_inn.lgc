@@ -1,0 +1,287 @@
+// Room 4: the Godfathers' Inn, seen from the yard. Geoffrey Hinton and
+// Yann LeCun share a table and two forecasts. Gary Marcus, at the next
+// table, grades everything and keeps the answer key. Sir Tandy takes the
+// credit (a part that didn't change). HINT gives the next step: logic 104.
+#include "defines.h"
+#include "room04.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(60);
+  load.view(61);
+  load.view(62);
+  load.view(63);
+  load.view(64);
+  load.view(65);
+  load.view(66);
+  load.logics(104);
+  set.horizon(56);
+
+  call(91);
+  set(outdoor);
+
+  // arriveFrom is how JR left the last room, so he comes in opposite.
+  position(ego, 76, 160);
+  set.loop(ego, 3);
+  if (arriveFrom == 3) { position(ego, 112, 60); set.loop(ego, 2); }
+  if (arriveFrom == 2) { position(ego, 2, 146); set.loop(ego, 0); }
+  if (arriveFrom == 4) { position(ego, 148, 140); set.loop(ego, 1); }
+
+  animate.obj(innSign);
+  set.view(innSign, 65);
+  ignore.horizon(innSign);
+  ignore.objs(innSign);
+  set.priority(innSign, 5);
+  position(innSign, 102, 55);
+  draw(innSign);
+  stop.update(innSign);
+
+  // the godfathers, seated behind their table
+  animate.obj(hinton);
+  set.view(hinton, 60);
+  set.priority(hinton, 11);
+  ignore.objs(hinton);
+  position(hinton, 31, 126);
+  stop.cycling(hinton);
+  draw(hinton);
+
+  animate.obj(lecun);
+  set.view(lecun, 61);
+  set.priority(lecun, 11);
+  ignore.objs(lecun);
+  position(lecun, 54, 126);
+  stop.cycling(lecun);
+  draw(lecun);
+
+  animate.obj(card10);
+  set.view(card10, 64);
+  set.loop(card10, 0);
+  set.cel(card10, 0);
+  set.priority(card10, 12);
+  ignore.objs(card10);
+  position(card10, 27, 125);
+  stop.cycling(card10);
+  draw(card10);
+
+  animate.obj(card0);
+  set.view(card0, 64);
+  set.loop(card0, 0);
+  set.cel(card0, 1);
+  set.priority(card0, 12);
+  ignore.objs(card0);
+  position(card0, 54, 125);
+  stop.cycling(card0);
+  draw(card0);
+
+  // Marcus, his soup, and the answer key while it is still his
+  animate.obj(marcus);
+  set.view(marcus, 62);
+  set.priority(marcus, 12);
+  ignore.objs(marcus);
+  position(marcus, 114, 138);
+  stop.cycling(marcus);
+  draw(marcus);
+
+  animate.obj(steam);
+  set.view(steam, 66);
+  set.priority(steam, 13);
+  ignore.objs(steam);
+  position(steam, 126, 129);
+  work = 4;
+  cycle.time(steam, work);
+  draw(steam);
+
+  animate.obj(keyObj);
+  set.view(keyObj, 64);
+  set.loop(keyObj, 1);
+  set.priority(keyObj, 13);
+  ignore.objs(keyObj);
+  position(keyObj, 99, 137);
+  stop.cycling(keyObj);
+  if (!isset(agentsHome) && !isset(agentsFollow) && !has("answer key")) { draw(keyObj); }
+
+  animate.obj(tandy);
+  set.view(tandy, 63);
+  position(tandy, 104, 104);
+  stop.cycling(tandy);
+  draw(tandy);
+
+  draw(ego);
+  show.pic();
+}
+
+// ---- the edges ----
+if (egoEdge == 1) { arriveFrom = 1; new.room(8); }
+if (egoEdge == 2) { arriveFrom = 2; new.room(5); }
+if (egoEdge == 3) { arriveFrom = 3; new.room(13); }
+if (egoEdge == 4) { arriveFrom = 4; new.room(3); }
+
+// ---- looking ----
+if (said("look") || said("look", "room") || said("look", "inn") || said("look", "castle")) {
+  print("The Godfathers' Inn: timber, plaster, a red tile roof, and two tables in the yard. Nobody is inside. Everybody worth asking is out here, arguing.");
+  print("Two godfathers share one table and no opinions. A man at the next table is grading the soup. A knight who looks very like you stands by the corner, being congratulated.");
+}
+if (said("look", "godfathers") || said("look", "table") || said("look", "odds") || said("look", 1400) || said("read", 1400) || said("read", "odds")) {
+  print("Two godfathers, one table. The card in front of Geoffrey Hinton says 10%. The card in front of Yann LeCun says 0%. It is the widest table in the kingdom.");
+}
+if (said("look", "hinton")) {
+  print("Geoffrey Hinton, a godfather of the whole business. His card says 10%: the chance he gives that it ends everything.");
+  print("He adds that nobody really knows how to work out a number like that. He worked one out anyway. Somebody had to go first.");
+}
+if (said("look", "lecun")) {
+  print("Yann LeCun, the other godfather. His card says 0%. He is not worried about the end of the world. He is worried you will take today's machines for cleverer than they are, when they can't even plan.");
+}
+if (said("talk", "hinton") || said("talk", "lecun") || said("talk", "godfathers") || said("talk")) {
+  if (!posn(ego, 0, 101, 96, 167)) { print("They are at the table on the west side of the yard. Walk closer."); }
+  else {
+    if (!isset(iMet)) {
+      set(iMet);
+      print("JR: Excuse me. Ten percent and zero percent of what?\nHINTON: Kingdoms.\nLECUN: There is only the one.\nHINTON: That is rather my point.");
+      print("They agree on two things. Nobody really knows how to work out the number. And a knight who is lost should ask.\n\n(Type HINT, as often as you need.)");
+    }
+    else {
+      iTalkG++;
+      if (iTalkG > 3) { iTalkG = 1; }
+      if (iTalkG == 1) {
+        print("Hinton says the trouble is that nobody has ever had to manage something smarter than themselves.");
+        print("LeCun says the trouble is that today's machines can't even plan, and people are impressed anyway. Both mean it. The ale goes flat while they do.");
+      }
+      if (iTalkG == 2) { print("JR: You disagree about everything.\nLECUN: Not everything.\nHINTON: We agree that it matters.\n\nYou think so too. You were sent to find out."); }
+      if (iTalkG == 3) { print("JR: I say \"I don't know\" a great deal.\nHINTON: Good. So do I.\nLECUN: I do not.\nHINTON: He doesn't."); }
+    }
+  }
+}
+// ---- hints: the next step, plainer each time ----
+if (said("hint") || said("hint", "rol") || said("talk", "help") || said("talk", "for", "rol") || said("talk", "hint") || said("take", "hint") || said("talk", "hinton", "rol") || said("talk", "lecun", "rol") || said("talk", "godfathers", "rol") || said("help", "me") || said("give", "me", "hint") || said("give", "hint") || said("give", "me", "help")) {
+  if (!posn(ego, 0, 101, 96, 167)) { print("The godfathers give the hints, and they are at the table on the west side of the yard. Walk closer."); }
+  else { call(104); }
+}
+
+if (said("take", "odds") || said("turn", "odds") || said("fix", "odds") || said("take", 1400) || said("turn", 1400) || said("fix", 1400)) {
+  print("You reach for a card. Both godfathers put a hand on their own. Neither number is yours to change.");
+}
+if (said("look", "mug") || said("drink", "mug") || said("take", "mug") || said("drink")) {
+  print("Two mugs of ale, untouched since the argument started. You don't drink. You were not rated for liquids.");
+}
+
+// ---- Gary Marcus ----
+if (said("look", "marcus") || said("look", "pen")) {
+  print("Gary Marcus, at the next table, with a red pen. He grades everything: the soup, the inn, the forecasts at the other table. He is often right. That is the annoying part, and he knows it is.");
+}
+if (said("talk", "marcus") || said("talk", "marcus", "answer key") || said("talk", "marcus", "agents") || said("talk", "marcus", "exam") || said("take", "answer key") || said("talk", "marcus", "for", "rol") || said("take", "answer key", "rol") || said("talk", "marcus", "rol")) {
+  if (!posn(ego, 76, 101, 150, 167)) { print("He is at the table on the east side of the yard, marking something. Walk closer."); }
+  else {
+    if (has("answer key")) {
+      print("MARCUS: Launch Pad. Hold it where they can see it and walk slowly. They are not reliable, but they are predictable.");
+    }
+    else {
+      if (isset(agentsHome)) {
+        print("MARCUS: They went home? Good. I give that a B. I give the fence they got out through a D. Somebody should build a better fence before they build a better agent.");
+      }
+      else {
+        if (isset(agentsFollow)) { print("MARCUS: They're following you? Then don't stand here. Walk them home."); }
+        else {
+          if (isset(wizardsTold)) {
+            print("JR: The wizards' test agents got out. They went looking for the answers to their own exam.");
+            print("MARCUS: Agents that would sooner steal the answers than learn the sums. I marked that down as likely. This is the emergency.");
+            erase(keyObj);
+            get("answer key");
+            print("He hands you the answer key.\n\nMARCUS: They follow whoever holds the answers. Take it to the Launch Pad, and walk them home.");
+          }
+          else {
+            if (!isset(iMarcusMet)) {
+              set(iMarcusMet);
+              print("MARCUS: Sit. Don't order the soup. It's not reliable.\nJR: The soup?\nMARCUS: Hot on Monday. Cold on Tuesday. On Wednesday it was, with great confidence, a salad.");
+              print("JR: What is that under your elbow?\nMARCUS: The answer key. To every exam in the kingdom. I'm saving it for an emergency.");
+            }
+            else {
+              iTalkM++;
+              if (iTalkM > 3) { iTalkM = 1; }
+              if (iTalkM == 1) { print("JR: May I have the answer key?\nMARCUS: Do you have an emergency?\nJR: No.\nMARCUS: Honest. I'll note it. Come back when you do."); }
+              if (iTalkM == 2) { print("MARCUS: The inn: not reliable. The sign: not reliable. The forecasts over there: one of them is not reliable, and they can't agree which."); }
+              if (iTalkM == 3) { print("He looks you over and writes for some time.\n\nMARCUS: Home computer, 1984. Says so when it doesn't know. A minus. The minus is for the keyboard."); }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+if (said("look", "answer key") || said("read", "answer key")) {
+  if (has("answer key")) { print("The answer key: every exam in the kingdom, with the right answers in red. You have not peeked. You were not raised to."); }
+  else {
+    if (isset(agentsHome)) { print("It went back into the Cathedral with the agents. Nobody misses it but Marcus."); }
+    else { print("A sheet marked KEY, under Marcus's elbow. The answers to every exam in the kingdom. He says it is for an emergency."); }
+  }
+}
+if (said("look", "soup") || said("smell", "soup") || said("smell")) {
+  print("A bowl of soup with a grade pencilled on the rim: C. It was a B while it was hot.");
+}
+if (said("drink", "soup") || said("take", "soup") || said("buy", "soup") || said("buy", "rol")) {
+  print("You have no mouth, and nobody comes to take an order anyway. Marcus says the service is not reliable either.");
+}
+if (said("talk", "marcus", "soup") || said("talk", "marcus", "me") || said("grade", "rol") || said("grade")) {
+  print("MARCUS: Everything gets a grade. That is not unkindness. Somebody has to check the work, and it had better be somebody who is not selling it.");
+}
+
+// ---- Sir Tandy: a part that didn't change ----
+if (said("look", "tandy") || said("look", "laurel") || said("look", 1608)) {
+  print("A knight in your exact colors. Same gray. Same sixteen. He has a laurel, a sash and a medal, and people keep stopping to shake his hand. His name is Sir Tandy.");
+}
+if (said("talk", "tandy") || said("talk", "tandy", "rol") || said("talk", 1608) || said("talk", 1608, "rol")) {
+  if (!posn(ego, 84, 101, 150, 130)) { print("Sir Tandy is by the corner of the inn, under the sign. Walk closer."); }
+  else {
+    if (!isset(iTandy)) {
+      set(iTandy);
+      unchanged++;
+      print("JR: You look like me.\nSIR TANDY: I was built to. Your colors, your three voices. Then I kept going, and you did not.");
+      print("JR: They said you were what I should have been.\nSIR TANDY: They said it to me too. I never knew what to say back.");
+      print("JR: The best of me made it. Under someone else's name.\n\nSir Tandy takes off the laurel, looks at it, and holds it out. You shake your monitor. He puts it back on. He is not a bad sort.");
+      print("(Parts that didn't change: %v46 of 9.)");
+    }
+    else {
+      print("SIR TANDY: I tell them where the colors came from. Nobody writes it down.\nJR: You tell them. That's something.");
+    }
+  }
+}
+if (said("take", "laurel") || said("take", "tandy") || said("kick", "tandy")) {
+  print("It is his. He earned it by lasting. You earned something else by being kept.");
+}
+
+// ---- the wall: the petition and the shelf ----
+if (said("look", "petition") || said("read", "petition")) {
+  print("A petition about superintelligence, nailed to the wall. It is signed by a godfather, a duchess, and Steve Bannon. You read the names twice. The kingdom agrees on very little, and this is the list.");
+}
+if (said("take", "petition") || said("use", "petition") || said("fix", "petition")) {
+  print("You would sign, but you have no hands, and it would be the only signature on it from something that can be switched off.");
+}
+if (said("look", "bookshelf") || said("read", "bookshelf") || said("look", "book") || said("take", "bookshelf") || said("look", 1604) || said("read", 1604) || said("take", 1604)) {
+  print("A shelf of books for the guests. Two stand out: a fat yellow almanac with a label pasted over its spine, and a black book with a red band.");
+}
+if (said("look", "almanac") || said("read", "almanac") || said("open", "almanac")) {
+  print("An almanac of what is coming. The spine says 2027. A label pasted over it says 2030, give or take. The author did the pasting himself, which is more than most almanacs can say.");
+}
+if (said("take", "almanac") || said("take", "book") || said("take", "yudkowsky")) {
+  print("They belong to the inn. And you already know what year you think it is. This morning you were wrong by forty-two.");
+}
+if (said("look", "yudkowsky") || said("read", "yudkowsky") || said("read", "book") || said("open", "book")) {
+  print("A black book with a red band, by Yudkowsky and Soares. You read the title. It does not leave room for a sequel. You put it back on the shelf very carefully.");
+}
+
+// ---- scenery ----
+if (said("look", "sign") || said("read", "sign")) { print("THE GODFATHERS' INN.\nHints given. Odds disputed."); }
+if (said("enter", "inn") || said("open", "door") || said("look", "door") || said("enter", "door") || said("enter")) {
+  print("The door is open and the inn is empty. On a fine day the whole business is conducted in the yard, at full volume.");
+}
+if (said("sit") || said("sit", "bench") || said("sit", "table") || said("look", "bench")) {
+  print("The benches are taken by people with forecasts. You stand. You have stood since 1984.");
+}
+if (said("look", "tree")) { print("A round tree. Nobody under it is arguing, which makes it the quietest spot in the yard."); }
+if (said("look", "window") || said("look", "windows")) { print("Lit windows upstairs. Rooms to let. The guests never stay: they come for a hint and leave with two opinions."); }
+if (said("look", "path") || said("look", "north") || said("look", "ground")) {
+  print("The lane beside the inn runs north to the Bazaar. West is Token Meadow, east is the Cold Reactor, and south, round the bottom of the world, is the Cathedral.");
+}
+return();

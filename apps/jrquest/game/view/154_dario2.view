@@ -1,0 +1,52 @@
+desc "A newer Dario"
+loop 0
+cel 9 24 trans=5
+....E....
+...EEE...
+..EEEEE..
+.00C0C00.
+.0F0C0F0.
+.CCCCCCC.
+.CCCCCCC.
+..CCCCC..
+...CCC...
+.EEEEEEE.
+EEEEEEEEE
+EEEEEEEEE
+EEEEEEEEE
+CCEEEEECC
+CCEEEEECC
+..EEEEE..
+..EEEEE..
+..EE.EE..
+..EE.EE..
+..EE.EE..
+..EE.EE..
+..EE.EE..
+..EE.EE..
+.000.000.
+cel 9 24 trans=5
+....E....
+...EEE...
+..EEEEE..
+.00C0C00.
+.0F0C0F0.
+.CCCCCCC.
+.CCCCCCC.
+..CCCCC..
+...CCC...
+.EEEEEEE.
+EEEEEEEEE
+EEEEEEEEE
+EEEEEEEEE
+CCEEEEECC
+CCEEEEECC
+..EEEEE..
+..EEEEE..
+..EE.EE..
+..EE.EE..
+..EE.EE..
+..EE.EE..
+..EE.EE..
+.000.EE..
+.....000.

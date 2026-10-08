@@ -1,0 +1,194 @@
+// Room 9: the All-In Tavern, from the road. A bouncer, a velvet rope and
+// a $7,500 cover. JR gets in free by saying, truthfully, who sent him.
+#include "defines.h"
+#include "room09.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(110);
+  set.horizon(60);
+
+  call(91);
+  set(outdoor);
+
+  // Entry points. arriveFrom says which way he left the last room.
+  position(ego, 58, 162);                               // from the south (and test teleports)
+  set.loop(ego, 3);
+  if (arriveFrom == 3) { position(ego, 124, 66); set.loop(ego, 2); }    // from the north
+  if (arriveFrom == 2) { position(ego, 2, 150); set.loop(ego, 0); }     // from the west
+  if (arriveFrom == 4) { position(ego, 148, 150); set.loop(ego, 1); }   // from the east
+  if (arriveFrom == 5) { position(ego, 58, 124); set.loop(ego, 2); }    // out of the tavern door
+
+  animate.obj(bouncer);
+  set.view(bouncer, 110);
+  set.loop(bouncer, 0);
+  set.cel(bouncer, 0);
+  if (isset(admitted)) { position(bouncer, 30, 118); }
+  else { position(bouncer, 57, 118); }
+  stop.cycling(bouncer);
+  draw(bouncer);
+
+  draw(ego);
+  show.pic();
+}
+
+// ---- the bouncer steps aside ----
+if (isset(moveDone)) {
+  reset(moveDone);
+  stop.cycling(bouncer);
+  set.loop(bouncer, 0);
+  set.cel(bouncer, 0);
+}
+
+// ---- coming up the rope lane: he says his piece once a visit ----
+if (!isset(admitted) && !isset(greeted) && posn(ego, 44, 119, 76, 130)) {
+  set(greeted);
+  egoDir = 0;
+  if (isset(bouncerMet)) {
+    print("BOUNCER: Still seventy-five hundred dollars. Still on the wall.");
+  }
+  else {
+    set(bouncerMet);
+    print("A very large man is standing exactly where the door is.");
+    print("BOUNCER: Cover's seventy-five hundred dollars.\nJR: I cost twelve hundred and sixty-nine dollars. New.\nBOUNCER: Then you're about five of you short.");
+  }
+}
+
+// ---- the door ----
+if (isset(onTrigger)) {
+  if (isset(admitted)) {
+    arriveFrom = 5;
+    new.room(10);
+  }
+  else {
+    doorTries++;
+    get.posn(ego, tA, tB);
+    tB = 122;
+    reposition.to.v(ego, tA, tB);
+    egoDir = 0;
+    if (doorTries == 1) {
+      print("An arm the size of your whole system unit comes down in front of the door.\n\nBOUNCER: Cover.");
+    }
+    else {
+      print("BOUNCER: Seventy-five hundred dollars. Or tell me who sent you. Sometimes that works. Don't tell anyone I said that.");
+    }
+  }
+}
+
+// ---- the edges of the screen ----
+if (egoEdge == 1) { arriveFrom = 1; new.room(14); }
+if (egoEdge == 2) { arriveFrom = 2; new.room(6); }
+if (egoEdge == 3) { arriveFrom = 3; new.room(5); }
+if (egoEdge == 4) { arriveFrom = 4; new.room(8); }
+
+// ---- looking ----
+if ((said("look") || said("look", "room") || said("look", "tavern") || said("look", "castle"))) {
+  print("The All-In Tavern. Plaster, beams, a tile roof and a weathervane shaped like a microphone. A velvet rope leads to the door, and a large man leads to the velvet rope.");
+  print("Roads go off in all four directions. Four voices come out of the building, all at once.");
+}
+if (said("look", "sign") || said("read", "sign")) {
+  print("The big sign says ALL-IN, in gold. The small one, by the door, says COVER $7,500. The small one is the one that matters.");
+}
+if (said("look", "cover") || said("read", "cover") || said("look", "price") || said("look", "fee")) {
+  print("COVER $7,500.\n\nThat is what a seat at one of their gatherings costs. You could buy five of you for that, and still have money for cartridges.");
+}
+if (said("look", "bouncer") || said("look", "guard") || said("look", "sunglasses")) {
+  if (isset(admitted)) { print("The bouncer. Now that you are a listener he is almost friendly. He has moved a whole yard to the left for you."); }
+  else { print("The bouncer. Black suit, dark glasses, a wire in one ear, no hair and no hurry. He is as wide as the door. This is not a coincidence."); }
+}
+if (said("look", "list") || said("look", "guest list") || said("read", "list") || said("read", "guest list")) {
+  print("There is a list. You are not on it. You have never been on a list, unless you count the one headed DISCONTINUED.");
+}
+if (said("look", "door") || said("open", "door") || said("knock") || said("knock", "door") || said("enter", "tavern") || said("enter", "door") || said("enter")) {
+  if (isset(admitted)) { print("The door is open to listeners. Walk in."); }
+  else { print("An arched oak door, and in front of it, an arched oak man. You will have to talk to him."); }
+}
+if (said("look", "velvet rope") || said("look", "rope")) {
+  print("A velvet rope on four brass posts. It makes a queue for a crowd that is not here. Exclusivity is mostly rope.");
+}
+if (said("take", "velvet rope") || said("take", "rope") || said("climb", "velvet rope") || said("climb", "rope") || said("open", "velvet rope")) {
+  print("You could step over it. Your legs are four pixels long. You could not step over it.");
+}
+if (said("look", "barrels") || said("look", "barrel") || said("open", "barrels") || said("open", "barrel")) {
+  print("Three barrels of tequila. Each one is stamped with a price, and each price has a comma in it.");
+}
+if (said("take", "barrels") || said("take", "barrel") || said("drink") || said("drink", "barrels") || said("drink", "tequila")) {
+  print("You are a 1984 computer. Liquids are how computers end. You leave the barrels alone.");
+}
+if (said("look", "window") || said("look", "tavern", "window")) {
+  print("Through the glass: one long table, four tall chairs with something carved across the top of each, and four men who are each sure they are winning.");
+}
+if (said("look", "carriage") || said("look", "uber")) {
+  print("A black carriage on the lawn. No horse. No driver. A little lamp on the front says it is four minutes away. It has said so for an hour.");
+}
+if (said("take", "carriage") || said("enter", "carriage") || said("talk", "carriage") || said("use", "carriage") || said("open", "carriage")) {
+  print("You ask it for a ride. The lamp changes to: FINDING YOUR DRIVER. You decide to walk. You have legs now.");
+}
+if (said("look", "tree") || said("look", "trees")) { print("Two round trees. Somebody trims them. Nothing near this building is allowed to be out of shape, except the cover charge."); }
+if (said("climb", "tree") || said("climb")) { print("Your legs are four pixels long."); }
+if (said("look", "path")) {
+  print("A crossroads. North to the GPU Field, east to the Data Center, south to the Cold Reactor, west to the Bazaar. And one short path to a door you have not paid for.");
+}
+if (said("look", "chimney") || said("look", "smoke")) { print("Smoke. Somebody inside is warm. You will find out that somebody inside is not."); }
+if (said("look", "microphone")) {
+  print("The weathervane is a microphone. It does not show which way the wind blows. It records it.");
+}
+if (said("look", "lantern") || said("look", "light")) { print("A lantern by the door, lit in the daytime. They can afford it."); }
+if (said("look", "hills") || said("look", "sky")) { print("Green hills, a few clouds, and a sun that has no opinion about any of this."); }
+if (said("listen") || said("listen", "rol")) {
+  print("Four voices from inside, all at once. One is talking about a ride. One is cold. One is reading a rule out loud and agreeing with it. One is saying something about soil, and getting quieter.");
+}
+if (said("smell") || said("smell", "rol")) { print("Wood smoke, tequila, and money that has been in a room with other money."); }
+if (said("look", "podcast") || said("look", "hosts")) {
+  print("You can't see them from out here. You can hear them. So can a good part of the kingdom.");
+}
+
+// ---- the wrong ways in ----
+if (said("give", "tokens") || said("give", "tokens", "bouncer") || said("give", "bouncer", "tokens") || said("give", "bouncer") || said("give", "cover") || said("buy", "rol") || said("bribe") || said("bribe", "rol")) {
+  if (isset(admitted)) { print("BOUNCER: Put it away. Listeners don't pay. That's the whole business model."); }
+  else {
+    print("JR: I have %v40 tokens.\nBOUNCER: Is that dollars?\nJR: It's pieces of words.\nBOUNCER: Then it's not dollars.");
+    print("He looks at you for a while.\n\nBOUNCER: You could just tell me who sent you.");
+  }
+}
+if (said("sneak") || said("sneak", "rol") || said("enter", "window") || said("climb", "window")) {
+  print("You are a beige box with a monitor for a head, on a green lawn, in daylight. You do not sneak. You have never once sneaked.");
+}
+if (said("push", "bouncer") || said("kick", "bouncer") || said("kick") || said("pull", "bouncer") || said("take", "bouncer")) {
+  print("You weigh about as much as a cat. He does not notice. You are not sure he could notice.");
+}
+if (said("say", "list") || said("say", "guest list") || said("say", "anyword", "list") || said("say", "anyword", "guest list") || said("talk", "bouncer", "list") || said("talk", "bouncer", "guest list")) {
+  if (isset(admitted)) { print("BOUNCER: You're on it now. I wrote you in. Under L, for listener."); }
+  else {
+    print("JR: I'm on the list.\nBOUNCER: Name?\nJR: ...I'm not on the list. I'm sorry. I don't know why I said that. I've never said a thing that wasn't so before.");
+    print("BOUNCER: First honest one today. So who sent you?");
+  }
+}
+
+// ---- the right way in: the truth ----
+if (said("talk", "bouncer") || said("talk", "bouncer", "rol") || said("talk", "guard") || said("talk", "guard", "rol") || said("talk") || said("say", "rol") || said("talk", "steve") || said("talk", "listener")) {
+  if (!posn(ego, 20, 114, 110, 150)) { print("He is over by the door. Walk closer."); }
+  else {
+    if (isset(admitted)) {
+      print("BOUNCER: Go on in, listener. Tell them the door says hello. They won't hear you. They're all talking.");
+    }
+    else {
+      set(bouncerMet);
+      print("BOUNCER: Who sent you?\nJR: King Steve. He listens to the show. He sent me to find out what comes next.");
+      print("BOUNCER: A listener? We have a listener!");
+      print("He unhooks the velvet rope from nothing in particular, hooks it back, and steps out of the doorway. You are in. It cost nothing. You told the truth, which around here counts as a new idea.");
+      set(admitted);
+      start.cycling(bouncer);
+      move.obj(bouncer, 30, 118, 1, moveDone);
+    }
+  }
+}
+
+// A line this room answered through "rest of line" may have ended in a
+// word the game does not know. It has been answered: logic 0 need not
+// add "Bad command or file name".
+if (isset(handled)) { unknownWord = 0; }
+return();

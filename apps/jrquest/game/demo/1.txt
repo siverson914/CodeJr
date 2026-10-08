@@ -1,0 +1,5776 @@
+# Jr's Quest plays itself: the whole game as a show, from the date prompt
+# to the ending. Every room, every character, all nine parts that didn't
+# change, two deaths, 158 of 158. This file is the source; tools/mkwalk.mjs
+# plays it and writes the two scripts:
+#   node tools/mkwalk.mjs build test/showcase.src test/showcase.txt --demo game/demo/1.txt
+# test/showcase.txt has expect lines and is what the tests run.
+# game/demo/1.txt is the same without them: "Let the AI play" on the title.
+# pace: a box stays up 12 cycles + 1 per 2 characters; one typed character
+# a cycle; 4 cycles of thought before typing.
+# ---- Act 0: the date prompt, the title, the opening ----
+10
+3
+char 1
+1
+char 0
+1
+char -
+1
+char 0
+1
+char 5
+1
+char -
+1
+char 2
+1
+char 6
+1
+key enter
+12
+3
+char 1
+1
+char 0
+1
+char -
+1
+char 0
+1
+char 5
+1
+char -
+1
+char 2
+1
+char 0
+1
+char 2
+1
+char 6
+1
+key enter
+30
+# the menu: P plays
+char p
+23
+37
+key enter
+2
+39
+key enter
+2
+63
+key enter
+2
+29
+key enter
+8
+# ---- Act 1: room 1, the Guest Room ----
+3
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+77
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char a
+1
+char t
+1
+key space
+1
+char t
+1
+char h
+1
+char e
+1
+key space
+1
+char b
+1
+char o
+1
+char x
+1
+key enter
+3
+38
+key enter
+5
+char t
+1
+char a
+1
+char k
+1
+char e
+1
+key space
+1
+char b
+1
+char u
+1
+char c
+1
+char k
+1
+char e
+1
+char t
+1
+key enter
+3
+35
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char s
+1
+char t
+1
+char e
+1
+char v
+1
+char e
+1
+key enter
+3
+35
+key enter
+2
+51
+key enter
+2
+key up
+1
+key pgup
+2
+key pgup
+4
+char r
+1
+char e
+1
+char a
+1
+char d
+1
+key space
+1
+char m
+1
+char a
+1
+char g
+1
+char a
+1
+char z
+1
+char i
+1
+char n
+1
+char e
+1
+key enter
+3
+52
+key enter
+5
+char t
+1
+char a
+1
+char k
+1
+char e
+1
+key space
+1
+char m
+1
+char a
+1
+char g
+1
+char a
+1
+char z
+1
+char i
+1
+char n
+1
+char e
+1
+key enter
+3
+36
+key enter
+2
+key pgdn
+9
+key down
+10
+key down
+4
+char t
+1
+char a
+1
+char k
+1
+char e
+1
+key space
+1
+char b
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+40
+key enter
+5
+char r
+1
+char e
+1
+char a
+1
+char d
+1
+key space
+1
+char b
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+57
+key enter
+5
+char i
+1
+char n
+1
+char v
+1
+char e
+1
+char n
+1
+char t
+1
+char o
+1
+char r
+1
+char y
+1
+key enter
+33
+key enter
+4
+key up
+15
+key pgup
+6
+key pgup
+1
+key up
+3
+# ---- Act 2: room 2, Castle Steve: the gate nobody read ----
+7
+26
+key enter
+2
+27
+key enter
+2
+19
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+69
+key enter
+5
+char f
+1
+char i
+1
+char x
+1
+key space
+1
+char c
+1
+char o
+1
+char d
+1
+char e
+1
+key enter
+3
+31
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char s
+1
+char q
+1
+char u
+1
+char i
+1
+char r
+1
+char e
+1
+key enter
+3
+51
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char p
+1
+char r
+1
+char i
+1
+char m
+1
+char e
+1
+char a
+1
+char g
+1
+char e
+1
+char n
+1
+key enter
+3
+49
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char a
+1
+char t
+1
+key space
+1
+char l
+1
+char u
+1
+char t
+1
+char e
+1
+key enter
+3
+74
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char a
+1
+char t
+1
+key space
+1
+char v
+1
+char i
+1
+char m
+1
+key enter
+3
+32
+key enter
+5
+char r
+1
+char e
+1
+char a
+1
+char d
+1
+key space
+1
+char c
+1
+char o
+1
+char d
+1
+char e
+1
+key enter
+3
+42
+key enter
+2
+28
+key enter
+2
+35
+key enter
+2
+24
+key enter
+5
+char f
+1
+char i
+1
+char x
+1
+key space
+1
+char c
+1
+char o
+1
+char d
+1
+char e
+1
+key enter
+3
+41
+key enter
+4
+21
+key enter
+2
+18
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char s
+1
+char q
+1
+char u
+1
+char i
+1
+char r
+1
+char e
+1
+key enter
+3
+19
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char p
+1
+char r
+1
+char i
+1
+char m
+1
+char e
+1
+char a
+1
+char g
+1
+char e
+1
+char n
+1
+key enter
+3
+41
+key enter
+2
+key down
+23
+key pgdn
+2
+key pgdn
+1
+key pgdn
+5
+key right
+28
+key right
+1
+key right
+5
+# ---- Act 3: room 3, Token Meadow ----
+10
+3
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+57
+key enter
+2
+60
+key enter
+5
+char r
+1
+char e
+1
+char a
+1
+char d
+1
+key space
+1
+char s
+1
+char i
+1
+char g
+1
+char n
+1
+key enter
+3
+36
+key enter
+2
+28
+key enter
+5
+char p
+1
+char i
+1
+char c
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+char k
+1
+char e
+1
+char n
+1
+char s
+1
+key enter
+3
+31
+key enter
+2
+46
+key enter
+2
+54
+key enter
+2
+26
+key enter
+5
+char p
+1
+char i
+1
+char c
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+char k
+1
+char e
+1
+char n
+1
+char s
+1
+key enter
+3
+23
+key enter
+2
+26
+key enter
+2
+key pgdn
+8
+key end
+4
+key end
+4
+char p
+1
+char i
+1
+char c
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+char k
+1
+char e
+1
+char n
+1
+char s
+1
+key enter
+3
+40
+key enter
+2
+26
+key enter
+2
+key up
+11
+key pgup
+10
+key pgup
+4
+char p
+1
+char a
+1
+char y
+1
+key space
+1
+char s
+1
+char i
+1
+char g
+1
+char n
+1
+key enter
+3
+36
+key enter
+2
+33
+key enter
+2
+44
+key enter
+2
+32
+key enter
+2
+33
+key enter
+2
+56
+key enter
+2
+key home
+5
+key pgup
+8
+key right
+2
+key right
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char g
+1
+char o
+1
+char a
+1
+char t
+1
+key enter
+3
+29
+key enter
+5
+char p
+1
+char e
+1
+char t
+1
+key space
+1
+char g
+1
+char o
+1
+char a
+1
+char t
+1
+key enter
+3
+39
+key enter
+2
+37
+key enter
+2
+key right
+1
+key pgdn
+21
+key end
+2
+key end
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char d
+1
+char h
+1
+char h
+1
+key enter
+3
+39
+key enter
+2
+45
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char d
+1
+char h
+1
+char h
+1
+key enter
+3
+64
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char a
+1
+char p
+1
+char p
+1
+char r
+1
+char e
+1
+char n
+1
+char t
+1
+char i
+1
+char c
+1
+char e
+1
+char s
+1
+key enter
+3
+42
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char a
+1
+char t
+1
+key space
+1
+char w
+1
+char i
+1
+char n
+1
+char d
+1
+char o
+1
+char w
+1
+char s
+1
+key enter
+3
+48
+key enter
+2
+37
+key enter
+2
+38
+key enter
+2
+28
+key enter
+2
+key pgdn
+6
+key right
+27
+key right
+1
+key right
+5
+# ---- Act 4: room 4, the Godfathers' Inn (first visit) ----
+10
+3
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+57
+key enter
+2
+64
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char g
+1
+char o
+1
+char d
+1
+char f
+1
+char a
+1
+char t
+1
+char h
+1
+char e
+1
+char r
+1
+char s
+1
+key enter
+3
+53
+key enter
+2
+57
+key enter
+5
+char h
+1
+char i
+1
+char n
+1
+char t
+1
+key enter
+3
+31
+key enter
+2
+40
+key enter
+2
+key pgdn
+2
+key right
+47
+key right
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char m
+1
+char a
+1
+char r
+1
+char c
+1
+char u
+1
+char s
+1
+key enter
+3
+62
+key enter
+2
+48
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char m
+1
+char a
+1
+char r
+1
+char c
+1
+char u
+1
+char s
+1
+key enter
+3
+50
+key enter
+2
+key left
+4
+key home
+6
+key pgup
+9
+key right
+1
+key right
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char t
+1
+char a
+1
+char n
+1
+char d
+1
+char y
+1
+key enter
+3
+47
+key enter
+2
+46
+key enter
+2
+69
+key enter
+2
+20
+key enter
+2
+key left
+6
+key end
+13
+key left
+29
+key left
+1
+key left
+4
+# back through the Meadow and north
+10
+# Zuckerberg has wandered in with his wheelbarrow
+3
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char a
+1
+char t
+1
+key space
+1
+char z
+1
+char u
+1
+char c
+1
+char k
+1
+char e
+1
+char r
+1
+char b
+1
+char e
+1
+char r
+1
+char g
+1
+key enter
+3
+65
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char z
+1
+char u
+1
+char c
+1
+char k
+1
+char e
+1
+char r
+1
+char b
+1
+char e
+1
+char r
+1
+char g
+1
+key enter
+3
+36
+key enter
+2
+45
+key enter
+5
+char n
+1
+char o
+1
+key enter
+3
+43
+key enter
+2
+key left
+23
+key home
+22
+key up
+19
+key up
+1
+key up
+5
+# ---- Act 5: room 7, Sand Hill Bridge (west bank) ----
+10
+3
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+55
+key enter
+2
+44
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char a
+1
+char t
+1
+key space
+1
+char b
+1
+char r
+1
+char i
+1
+char d
+1
+char g
+1
+char e
+1
+key enter
+3
+43
+key enter
+2
+46
+key enter
+2
+27
+key enter
+2
+31
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char t
+1
+char r
+1
+char o
+1
+char l
+1
+char l
+1
+key enter
+3
+48
+key enter
+5
+char r
+1
+char e
+1
+char a
+1
+char d
+1
+key space
+1
+char b
+1
+char o
+1
+char a
+1
+char r
+1
+char d
+1
+key enter
+3
+32
+key enter
+2
+38
+key enter
+5
+char t
+1
+char a
+1
+char k
+1
+char e
+1
+key space
+1
+char c
+1
+char o
+1
+char i
+1
+char n
+1
+key enter
+3
+43
+key enter
+2
+key up
+26
+key pgup
+12
+key up
+10
+key up
+1
+key up
+5
+# ---- Act 6: room 12, the Golden Palace ----
+7
+57
+key enter
+2
+3
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+59
+key enter
+2
+57
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char p
+1
+char a
+1
+char i
+1
+char n
+1
+char t
+1
+char e
+1
+char r
+1
+key enter
+3
+65
+key enter
+2
+key up
+16
+key home
+2
+key home
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char t
+1
+char h
+1
+char e
+1
+key space
+1
+char g
+1
+char u
+1
+char a
+1
+char r
+1
+char d
+1
+key enter
+3
+46
+key enter
+2
+48
+key enter
+5
+char e
+1
+char x
+1
+char c
+1
+char u
+1
+char s
+1
+char e
+1
+key space
+1
+char m
+1
+char e
+1
+char ,
+1
+key space
+1
+char w
+1
+char h
+1
+char e
+1
+char r
+1
+char e
+1
+key space
+1
+char i
+1
+char s
+1
+key space
+1
+char t
+1
+char h
+1
+char e
+1
+key space
+1
+char a
+1
+char i
+1
+char ?
+1
+key enter
+3
+23
+key enter
+5
+char r
+1
+char e
+1
+char a
+1
+char d
+1
+key space
+1
+char t
+1
+char h
+1
+char e
+1
+key space
+1
+char s
+1
+char i
+1
+char g
+1
+char n
+1
+key enter
+3
+49
+key enter
+2
+20
+key enter
+5
+char w
+1
+char h
+1
+char e
+1
+char r
+1
+char e
+1
+key space
+1
+char i
+1
+char s
+1
+key space
+1
+char t
+1
+char h
+1
+char e
+1
+key space
+1
+char s
+1
+char i
+1
+char ?
+1
+key enter
+3
+13
+key enter
+2
+55
+key enter
+2
+42
+key enter
+2
+3
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char t
+1
+char h
+1
+char e
+1
+key space
+1
+char g
+1
+char u
+1
+char a
+1
+char r
+1
+char d
+1
+key enter
+3
+51
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char t
+1
+char r
+1
+char u
+1
+char m
+1
+char p
+1
+key enter
+3
+38
+key enter
+2
+48
+key enter
+2
+key pgup
+1
+key right
+19
+key right
+4
+char t
+1
+char a
+1
+char k
+1
+char e
+1
+key space
+1
+char s
+1
+char c
+1
+char r
+1
+char o
+1
+char l
+1
+char l
+1
+key enter
+3
+36
+key enter
+2
+41
+key enter
+2
+key pgdn
+9
+key right
+11
+key right
+4
+char r
+1
+char e
+1
+char a
+1
+char d
+1
+key space
+1
+char l
+1
+char e
+1
+char d
+1
+char g
+1
+char e
+1
+char r
+1
+key enter
+3
+43
+key enter
+2
+56
+key enter
+2
+64
+key enter
+2
+3
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char g
+1
+char r
+1
+char o
+1
+char u
+1
+char n
+1
+char d
+1
+char s
+1
+char k
+1
+char e
+1
+char e
+1
+char p
+1
+char e
+1
+char r
+1
+key enter
+3
+49
+key enter
+2
+key left
+28
+key end
+10
+key end
+1
+key down
+5
+# ---- Act 7: room 7 again: across the bridge, and the toll ----
+key down
+16
+key end
+9
+key pgdn
+2
+key pgdn
+1
+key right
+7
+35
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char t
+1
+char r
+1
+char o
+1
+char l
+1
+char l
+1
+key enter
+3
+63
+key enter
+2
+key right
+50
+key pgdn
+2
+key pgdn
+1
+key right
+5
+# ---- Act 8: room 8, the Bazaar (first visit) ----
+9
+31
+key enter
+2
+35
+key enter
+2
+3
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+72
+key enter
+2
+30
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char d
+1
+char e
+1
+char e
+1
+char p
+1
+char s
+1
+char e
+1
+char e
+1
+char k
+1
+key enter
+3
+86
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char k
+1
+char i
+1
+char m
+1
+char i
+1
+key enter
+3
+44
+key enter
+2
+27
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char a
+1
+char t
+1
+key space
+1
+char p
+1
+char a
+1
+char i
+1
+char n
+1
+char t
+1
+char i
+1
+char n
+1
+char g
+1
+key enter
+3
+40
+key enter
+2
+37
+key enter
+2
+39
+key enter
+2
+3
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char a
+1
+char r
+1
+char t
+1
+key space
+1
+char s
+1
+char e
+1
+char l
+1
+char l
+1
+char e
+1
+char r
+1
+key enter
+3
+53
+key enter
+2
+key right
+17
+key pgup
+11
+key up
+7
+key up
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char s
+1
+char t
+1
+char a
+1
+char l
+1
+char l
+1
+char k
+1
+char e
+1
+char e
+1
+char p
+1
+char e
+1
+char r
+1
+key enter
+3
+34
+key enter
+2
+53
+key enter
+2
+33
+key enter
+2
+key pgdn
+18
+key right
+25
+key right
+1
+key right
+5
+# ---- Act 9: room 9, outside the All-In Tavern ----
+12
+3
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+63
+key enter
+2
+37
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char a
+1
+char t
+1
+key space
+1
+char c
+1
+char a
+1
+char r
+1
+char r
+1
+char i
+1
+char a
+1
+char g
+1
+char e
+1
+key enter
+3
+53
+key enter
+2
+key right
+20
+key pgup
+8
+key pgup
+1
+key up
+3
+27
+key enter
+2
+57
+key enter
+5
+char p
+1
+char a
+1
+char y
+1
+key space
+1
+char c
+1
+char o
+1
+char v
+1
+char e
+1
+char r
+1
+key enter
+3
+43
+key enter
+2
+33
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char b
+1
+char o
+1
+char u
+1
+char n
+1
+char c
+1
+char e
+1
+char r
+1
+key enter
+3
+42
+key enter
+2
+22
+key enter
+2
+71
+key enter
+2
+key up
+12
+# ---- Act 10: room 10, inside the Tavern: four signatures ----
+5
+48
+key enter
+2
+60
+key enter
+2
+55
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+65
+key enter
+2
+46
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char a
+1
+char t
+1
+key space
+1
+char c
+1
+char h
+1
+char a
+1
+char i
+1
+char r
+1
+char s
+1
+key enter
+3
+70
+key enter
+2
+key home
+15
+key end
+2
+key end
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char c
+1
+char h
+1
+char a
+1
+char m
+1
+char a
+1
+char t
+1
+char h
+1
+key enter
+3
+45
+key enter
+2
+56
+key enter
+5
+char g
+1
+char i
+1
+char v
+1
+char e
+1
+key space
+1
+char w
+1
+char o
+1
+char o
+1
+char l
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char c
+1
+char h
+1
+char a
+1
+char m
+1
+char a
+1
+char t
+1
+char h
+1
+key enter
+3
+37
+key enter
+2
+35
+key enter
+21
+50
+key enter
+3
+45
+key enter
+2
+25
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char c
+1
+char h
+1
+char a
+1
+char m
+1
+char a
+1
+char t
+1
+char h
+1
+key enter
+3
+69
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char j
+1
+char a
+1
+char s
+1
+char o
+1
+char n
+1
+key enter
+3
+31
+key enter
+5
+char a
+1
+char s
+1
+char k
+1
+key space
+1
+char j
+1
+char a
+1
+char s
+1
+char o
+1
+char n
+1
+key space
+1
+char a
+1
+char b
+1
+char o
+1
+char u
+1
+char t
+1
+key space
+1
+char t
+1
+char h
+1
+char e
+1
+key space
+1
+char w
+1
+char e
+1
+char a
+1
+char t
+1
+char h
+1
+char e
+1
+char r
+1
+key enter
+3
+65
+key enter
+5
+char a
+1
+char s
+1
+char k
+1
+key space
+1
+char j
+1
+char a
+1
+char s
+1
+char o
+1
+char n
+1
+key space
+1
+char a
+1
+char b
+1
+char o
+1
+char u
+1
+char t
+1
+key space
+1
+char u
+1
+char b
+1
+char e
+1
+char r
+1
+key enter
+3
+46
+key enter
+31
+42
+key enter
+2
+41
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char s
+1
+char a
+1
+char c
+1
+char k
+1
+char s
+1
+key enter
+3
+44
+key enter
+2
+33
+key enter
+5
+char i
+1
+char t
+1
+key space
+1
+char i
+1
+char s
+1
+key space
+1
+char a
+1
+key space
+1
+char q
+1
+char u
+1
+char e
+1
+char s
+1
+char t
+1
+key space
+1
+char f
+1
+char o
+1
+char r
+1
+key space
+1
+char a
+1
+char i
+1
+key enter
+3
+43
+key enter
+2
+29
+key enter
+5
+char i
+1
+char t
+1
+key space
+1
+char i
+1
+char s
+1
+key space
+1
+char a
+1
+key space
+1
+char q
+1
+char u
+1
+char e
+1
+char s
+1
+char t
+1
+key space
+1
+char f
+1
+char o
+1
+char r
+1
+key space
+1
+char s
+1
+char i
+1
+key enter
+3
+32
+key enter
+2
+36
+key enter
+2
+65
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char f
+1
+char r
+1
+char i
+1
+char e
+1
+char d
+1
+char b
+1
+char e
+1
+char r
+1
+char g
+1
+key enter
+3
+52
+key enter
+20
+19
+key enter
+2
+47
+key enter
+5
+char l
+1
+char i
+1
+char s
+1
+char t
+1
+char e
+1
+char n
+1
+key enter
+3
+32
+key enter
+11
+67
+key enter
+15
+62
+key enter
+15
+54
+key enter
+15
+57
+key enter
+15
+42
+key enter
+2
+56
+key enter
+2
+51
+key enter
+24
+32
+key enter
+2
+22
+key enter
+2
+19
+key enter
+2
+54
+key enter
+2
+60
+key enter
+32
+3
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char f
+1
+char r
+1
+char i
+1
+char e
+1
+char d
+1
+char b
+1
+char e
+1
+char r
+1
+char g
+1
+key enter
+3
+43
+key enter
+2
+key right
+7
+key pgdn
+10
+key pgdn
+1
+key down
+9
+# ---- Act 11: room 9 again, then east, round the world, to the Data Center ----
+13
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char b
+1
+char o
+1
+char u
+1
+char n
+1
+char c
+1
+char e
+1
+char r
+1
+key enter
+3
+42
+key enter
+2
+key pgdn
+13
+key right
+31
+key right
+1
+key right
+5
+# ---- Act 12: room 6, the Data Center ----
+7
+42
+key enter
+2
+22
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+69
+key enter
+2
+54
+key enter
+2
+key right
+37
+key pgdn
+6
+key pgdn
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char k
+1
+char e
+1
+char e
+1
+char p
+1
+char e
+1
+char r
+1
+key enter
+3
+56
+key enter
+5
+char f
+1
+char i
+1
+char l
+1
+char l
+1
+key space
+1
+char b
+1
+char u
+1
+char c
+1
+char k
+1
+char e
+1
+char t
+1
+key enter
+3
+51
+key enter
+2
+# the bank: one warning, and he takes it
+key end
+5
+key left
+10
+key left
+1
+key down
+4
+52
+key enter
+2
+key left
+1
+key home
+9
+key home
+4
+char r
+1
+char e
+1
+char a
+1
+char d
+1
+key space
+1
+char m
+1
+char e
+1
+char t
+1
+char e
+1
+char r
+1
+key enter
+3
+26
+key enter
+2
+64
+key enter
+2
+55
+key enter
+2
+key pgdn
+3
+key right
+22
+key right
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char k
+1
+char e
+1
+char e
+1
+char p
+1
+char e
+1
+char r
+1
+key enter
+3
+45
+key enter
+2
+33
+key enter
+2
+53
+key enter
+2
+46
+key enter
+2
+40
+key enter
+2
+33
+key enter
+2
+key pgup
+5
+key home
+2
+key home
+4
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char i
+1
+char n
+1
+key space
+1
+char w
+1
+char i
+1
+char n
+1
+char d
+1
+char o
+1
+char w
+1
+key enter
+3
+48
+key enter
+2
+21
+key enter
+2
+44
+key enter
+5
+char r
+1
+char e
+1
+char w
+1
+char r
+1
+char i
+1
+char t
+1
+char e
+1
+key space
+1
+char p
+1
+char r
+1
+char o
+1
+char g
+1
+char r
+1
+char a
+1
+char m
+1
+key enter
+3
+56
+key enter
+2
+38
+key enter
+2
+33
+key enter
+2
+41
+key enter
+25
+39
+key enter
+2
+38
+key enter
+2
+key down
+1
+key pgdn
+7
+key pgdn
+4
+char f
+1
+char i
+1
+char l
+1
+char l
+1
+key space
+1
+char b
+1
+char u
+1
+char c
+1
+char k
+1
+char e
+1
+char t
+1
+key enter
+3
+30
+key enter
+2
+30
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char k
+1
+char e
+1
+char e
+1
+char p
+1
+char e
+1
+char r
+1
+key enter
+3
+42
+key enter
+2
+key left
+28
+key home
+21
+key up
+10
+key up
+1
+key up
+5
+# ---- Act 13: room 11, the Launch Pad, and death 1: the static fire test ----
+12
+3
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+70
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char m
+1
+char u
+1
+char s
+1
+char k
+1
+key enter
+3
+54
+key enter
+2
+37
+key enter
+2
+31
+key enter
+5
+char a
+1
+char s
+1
+char k
+1
+key space
+1
+char m
+1
+char u
+1
+char s
+1
+char k
+1
+key space
+1
+char a
+1
+char b
+1
+char o
+1
+char u
+1
+char t
+1
+key space
+1
+char a
+1
+char g
+1
+char i
+1
+key enter
+3
+45
+key enter
+5
+char a
+1
+char s
+1
+char k
+1
+key space
+1
+char m
+1
+char u
+1
+char s
+1
+char k
+1
+key space
+1
+char a
+1
+char b
+1
+char o
+1
+char u
+1
+char t
+1
+key space
+1
+char a
+1
+char g
+1
+char i
+1
+key enter
+3
+49
+key enter
+5
+char r
+1
+char e
+1
+char a
+1
+char d
+1
+key space
+1
+char s
+1
+char i
+1
+char g
+1
+char n
+1
+key enter
+3
+58
+key enter
+2
+16
+key enter
+5
+char t
+1
+char u
+1
+char r
+1
+char n
+1
+key space
+1
+char h
+1
+char o
+1
+char u
+1
+char r
+1
+char g
+1
+char l
+1
+char a
+1
+char s
+1
+char s
+1
+key enter
+3
+41
+key enter
+2
+key pgup
+15
+key up
+2
+39
+key enter
+2
+32
+key enter
+2
+key up
+1
+58
+40
+char f
+40
+char r
+10
+key end
+1
+key left
+32
+key left
+1
+key left
+4
+# ---- Act 14: room 14, the GPU Field ----
+7
+49
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+44
+key enter
+2
+62
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char s
+1
+char c
+1
+char a
+1
+char r
+1
+char e
+1
+char c
+1
+char r
+1
+char o
+1
+char w
+1
+key enter
+3
+41
+key enter
+2
+33
+key enter
+2
+17
+key enter
+2
+key left
+28
+key left
+4
+char c
+1
+char l
+1
+char i
+1
+char m
+1
+char b
+1
+key enter
+3
+43
+key enter
+5
+char p
+1
+char l
+1
+char a
+1
+char n
+1
+char t
+1
+key space
+1
+char s
+1
+char e
+1
+char e
+1
+char d
+1
+key enter
+3
+42
+key enter
+2
+43
+key enter
+5
+char p
+1
+char o
+1
+char u
+1
+char r
+1
+key space
+1
+char w
+1
+char a
+1
+char t
+1
+char e
+1
+char r
+1
+key enter
+3
+38
+key enter
+2
+20
+key enter
+28
+62
+key enter
+2
+44
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char s
+1
+char c
+1
+char a
+1
+char r
+1
+char e
+1
+char c
+1
+char r
+1
+char o
+1
+char w
+1
+key enter
+3
+48
+key enter
+5
+char c
+1
+char l
+1
+char i
+1
+char m
+1
+char b
+1
+key enter
+3
+36
+key enter
+50
+# ---- Act 15: room 15, the Cloud ----
+45
+key enter
+2
+30
+key enter
+2
+56
+key enter
+2
+25
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+80
+key enter
+2
+51
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char a
+1
+char t
+1
+key space
+1
+char m
+1
+char a
+1
+char i
+1
+char n
+1
+char f
+1
+char r
+1
+char a
+1
+char m
+1
+char e
+1
+key enter
+3
+56
+key enter
+2
+50
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char g
+1
+char i
+1
+char a
+1
+char n
+1
+char t
+1
+key enter
+3
+45
+key enter
+2
+24
+key enter
+5
+char t
+1
+char a
+1
+char k
+1
+char e
+1
+key space
+1
+char c
+1
+char h
+1
+char e
+1
+char s
+1
+char t
+1
+key enter
+3
+63
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char m
+1
+char e
+1
+char r
+1
+char c
+1
+char h
+1
+char a
+1
+char n
+1
+char t
+1
+char s
+1
+key enter
+3
+36
+key enter
+2
+48
+key enter
+2
+key pgup
+4
+key pgdn
+2
+key pgdn
+4
+char g
+1
+char i
+1
+char v
+1
+char e
+1
+key space
+1
+char t
+1
+char o
+1
+char k
+1
+char e
+1
+char n
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char m
+1
+char e
+1
+char r
+1
+char c
+1
+char h
+1
+char a
+1
+char n
+1
+char t
+1
+key enter
+3
+20
+key enter
+2
+56
+key enter
+2
+36
+key enter
+2
+35
+key enter
+2
+43
+key enter
+2
+3
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char m
+1
+char e
+1
+char r
+1
+char c
+1
+char h
+1
+char a
+1
+char n
+1
+char t
+1
+char s
+1
+key enter
+3
+31
+key enter
+2
+40
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char a
+1
+char t
+1
+key space
+1
+char g
+1
+char i
+1
+char a
+1
+char n
+1
+char t
+1
+key enter
+3
+57
+key enter
+2
+44
+key enter
+2
+60
+key enter
+2
+key right
+17
+key pgdn
+8
+key pgdn
+4
+char t
+1
+char a
+1
+char k
+1
+char e
+1
+key space
+1
+char c
+1
+char h
+1
+char e
+1
+char s
+1
+char t
+1
+key enter
+3
+38
+key enter
+2
+52
+key enter
+2
+27
+key enter
+2
+key left
+24
+key home
+4
+key home
+4
+char c
+1
+char l
+1
+char i
+1
+char m
+1
+char b
+1
+key space
+1
+char d
+1
+char o
+1
+char w
+1
+char n
+1
+key enter
+3
+41
+key enter
+8
+# ---- Act 16: the GPU Field again, then west to the Cathedral ----
+key end
+1
+key left
+46
+key left
+1
+key left
+4
+# ---- Act 17: room 13, the Cathedral: the Confident Door ----
+12
+3
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+65
+key enter
+2
+key left
+29
+key home
+6
+key home
+1
+key up
+4
+33
+key enter
+2
+37
+key enter
+2
+40
+key enter
+5
+char s
+1
+char a
+1
+char y
+1
+key space
+1
+char a
+1
+key space
+1
+char m
+1
+char i
+1
+char l
+1
+char l
+1
+char i
+1
+char o
+1
+char n
+1
+key enter
+3
+38
+key enter
+5
+char i
+1
+key space
+1
+char d
+1
+char o
+1
+char n
+1
+char '
+1
+char t
+1
+key space
+1
+char k
+1
+char n
+1
+char o
+1
+char w
+1
+key enter
+3
+14
+key enter
+2
+19
+key enter
+2
+27
+key enter
+2
+45
+key enter
+2
+13
+key enter
+20
+34
+key enter
+2
+35
+key enter
+2
+key end
+1
+key down
+5
+key down
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char w
+1
+char i
+1
+char z
+1
+char a
+1
+char r
+1
+char d
+1
+char s
+1
+key enter
+3
+37
+key enter
+2
+63
+key enter
+2
+52
+key enter
+2
+34
+key enter
+5
+char r
+1
+char e
+1
+char a
+1
+char d
+1
+key space
+1
+char p
+1
+char r
+1
+char i
+1
+char c
+1
+char e
+1
+key space
+1
+char l
+1
+char i
+1
+char s
+1
+char t
+1
+key enter
+3
+35
+key enter
+2
+28
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char a
+1
+char p
+1
+char p
+1
+char r
+1
+char e
+1
+char n
+1
+char t
+1
+char i
+1
+char c
+1
+char e
+1
+char s
+1
+key enter
+3
+42
+key enter
+5
+char a
+1
+char s
+1
+char k
+1
+key space
+1
+char w
+1
+char i
+1
+char z
+1
+char a
+1
+char r
+1
+char d
+1
+char s
+1
+key space
+1
+char a
+1
+char b
+1
+char o
+1
+char u
+1
+char t
+1
+key space
+1
+char t
+1
+char h
+1
+char e
+1
+key space
+1
+char b
+1
+char a
+1
+char z
+1
+char a
+1
+char a
+1
+char r
+1
+key enter
+3
+33
+key enter
+2
+53
+key enter
+2
+key right
+24
+key pgup
+9
+key up
+20
+key up
+1
+key up
+5
+# ---- Act 18: the inn again: this is the emergency ----
+12
+key pgup
+5
+key right
+7
+key right
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char m
+1
+char a
+1
+char r
+1
+char c
+1
+char u
+1
+char s
+1
+key enter
+3
+38
+key enter
+2
+50
+key enter
+2
+49
+key enter
+2
+key end
+5
+key left
+7
+key left
+1
+key down
+5
+# ---- Act 19: west along the top of the kingdom to the Launch Pad ----
+10
+key down
+20
+key end
+24
+key left
+44
+key left
+1
+key left
+14
+key end
+7
+key left
+65
+key left
+1
+key left
+16
+33
+key enter
+2
+43
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char a
+1
+char g
+1
+char e
+1
+char n
+1
+char t
+1
+char s
+1
+key enter
+3
+35
+key enter
+2
+# ---- Act 20: walk the agents home ----
+key right
+15
+key pgdn
+12
+key pgup
+14
+key right
+46
+key right
+1
+key right
+10
+39
+key enter
+30
+41
+key enter
+2
+48
+key enter
+2
+35
+key enter
+2
+20
+key enter
+2
+# ---- Act 21: the Lock half ----
+key pgup
+15
+key right
+20
+key right
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char w
+1
+char i
+1
+char z
+1
+char a
+1
+char r
+1
+char d
+1
+char s
+1
+key enter
+3
+42
+key enter
+2
+41
+key enter
+5
+char p
+1
+char a
+1
+char y
+1
+key space
+1
+char t
+1
+char o
+1
+char k
+1
+char e
+1
+char n
+1
+char s
+1
+key enter
+3
+34
+key enter
+2
+45
+key enter
+2
+28
+key enter
+2
+21
+key enter
+10
+41
+key enter
+2
+41
+key enter
+2
+42
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char w
+1
+char i
+1
+char z
+1
+char a
+1
+char r
+1
+char d
+1
+char s
+1
+key enter
+3
+50
+key enter
+5
+char j
+1
+char o
+1
+char i
+1
+char n
+1
+key space
+1
+char s
+1
+char h
+1
+char i
+1
+char e
+1
+char l
+1
+char d
+1
+key enter
+3
+39
+key enter
+2
+key pgdn
+1
+key down
+18
+key down
+1
+key down
+5
+# ---- Act 22: the Bazaar again: the book for the Glass half ----
+12
+key down
+17
+key end
+11
+key left
+5
+key left
+4
+char g
+1
+char i
+1
+char v
+1
+char e
+1
+key space
+1
+char b
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+50
+key enter
+2
+64
+key enter
+2
+26
+key enter
+2
+50
+key enter
+2
+24
+key enter
+2
+3
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char s
+1
+char t
+1
+char a
+1
+char l
+1
+char l
+1
+char k
+1
+char e
+1
+char e
+1
+char p
+1
+char e
+1
+char r
+1
+key enter
+3
+40
+key enter
+2
+42
+key enter
+2
+key down
+14
+key pgdn
+6
+key pgdn
+1
+key down
+5
+# ---- Act 23: the inn a third time, passing through ----
+10
+key down
+18
+key pgdn
+12
+key down
+15
+key left
+18
+key left
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char m
+1
+char a
+1
+char r
+1
+char c
+1
+char u
+1
+char s
+1
+key enter
+3
+62
+key enter
+2
+key right
+19
+key pgup
+5
+key pgup
+1
+key right
+4
+# ---- Act 24: room 5, the Cold Reactor ----
+7
+33
+key enter
+2
+32
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+49
+key enter
+2
+73
+key enter
+2
+37
+key enter
+2
+key pgup
+3
+key right
+35
+key right
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char g
+1
+char u
+1
+char a
+1
+char r
+1
+char d
+1
+key enter
+3
+34
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char g
+1
+char u
+1
+char a
+1
+char r
+1
+char d
+1
+key enter
+3
+29
+key enter
+2
+key pgup
+5
+key right
+24
+key right
+4
+char r
+1
+char e
+1
+char a
+1
+char d
+1
+key space
+1
+char s
+1
+char i
+1
+char g
+1
+char n
+1
+key enter
+3
+46
+key enter
+2
+key up
+5
+# ---- Act 25: room 16, the Dragon's Cave, and death 2: two halves are not a Shield ----
+10
+3
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key enter
+3
+37
+key enter
+2
+54
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char d
+1
+char r
+1
+char a
+1
+char g
+1
+char o
+1
+char n
+1
+key enter
+3
+53
+key enter
+5
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char a
+1
+char t
+1
+key space
+1
+char h
+1
+char a
+1
+char l
+1
+char v
+1
+char e
+1
+char s
+1
+key enter
+3
+55
+key enter
+2
+17
+key enter
+2
+key right
+25
+57
+key enter
+2
+53
+key enter
+2
+key right
+13
+26
+key enter
+8
+50
+char a
+40
+char r
+13
+char j
+1
+char o
+1
+char i
+1
+char n
+1
+key space
+1
+char s
+1
+char h
+1
+char i
+1
+char e
+1
+char l
+1
+char d
+1
+key enter
+3
+38
+key enter
+2
+26
+key enter
+2
+key right
+25
+66
+key enter
+2
+key right
+13
+55
+key enter
+2
+40
+key enter
+2
+# ---- Act 26: the Mirror ----
+19
+35
+key enter
+2
+35
+key enter
+2
+key right
+6
+key right
+4
+char l
+1
+char o
+1
+char o
+1
+char k
+1
+key space
+1
+char a
+1
+char t
+1
+key space
+1
+char m
+1
+char i
+1
+char r
+1
+char r
+1
+char o
+1
+char r
+1
+key enter
+3
+71
+key enter
+2
+46
+key enter
+5
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char m
+1
+char i
+1
+char r
+1
+char r
+1
+char o
+1
+char r
+1
+key enter
+3
+19
+key enter
+8
+char t
+1
+char a
+1
+char k
+1
+char e
+1
+key space
+1
+char m
+1
+char i
+1
+char r
+1
+char r
+1
+char o
+1
+char r
+1
+key enter
+3
+42
+key enter
+2
+25
+key enter
+5
+char g
+1
+char i
+1
+char v
+1
+char e
+1
+key space
+1
+char c
+1
+char h
+1
+char e
+1
+char s
+1
+char t
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char m
+1
+char i
+1
+char r
+1
+char r
+1
+char o
+1
+char r
+1
+key enter
+3
+63
+key enter
+2
+37
+key enter
+2
+37
+key enter
+5
+char t
+1
+char e
+1
+char l
+1
+char l
+1
+key space
+1
+char m
+1
+char i
+1
+char r
+1
+char r
+1
+char o
+1
+char r
+1
+key space
+1
+char t
+1
+char h
+1
+char e
+1
+key space
+1
+char d
+1
+char a
+1
+char t
+1
+char e
+1
+key enter
+3
+26
+key enter
+2
+35
+key enter
+2
+14
+key enter
+2
+17
+key enter
+2
+34
+key enter
+2
+31
+key enter
+2
+28
+key enter
+5
+3
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char m
+1
+char i
+1
+char r
+1
+char r
+1
+char o
+1
+char r
+1
+key enter
+3
+34
+key enter
+5
+char t
+1
+char a
+1
+char k
+1
+char e
+1
+key space
+1
+char m
+1
+char i
+1
+char r
+1
+char r
+1
+char o
+1
+char r
+1
+key enter
+3
+35
+key enter
+2
+27
+key enter
+2
+35
+key enter
+2
+# ---- Act 27: home ----
+key left
+55
+key left
+1
+key left
+22
+key end
+5
+key left
+15
+key left
+4
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char g
+1
+char u
+1
+char a
+1
+char r
+1
+char d
+1
+key enter
+3
+53
+key enter
+2
+key right
+19
+key pgdn
+5
+key pgdn
+1
+key right
+17
+key right
+28
+key pgup
+10
+key pgup
+1
+key up
+17
+key home
+2
+key home
+1
+key up
+5
+# ---- Act 28: the Guest Room: the ending ----
+9
+55
+key enter
+2
+25
+key enter
+2
+18
+key enter
+2
+14
+key enter
+2
+49
+key enter
+2
+55
+key enter
+2
+55
+key enter
+2
+44
+key enter
+2
+38
+key enter
+2
+31
+key enter
+2
+46
+key enter
+2
+20
+key enter
+2
+19
+key enter
+2
+36
+key enter
+2
+51
+key enter
+2
+6
+3
+char t
+1
+char a
+1
+char l
+1
+char k
+1
+key space
+1
+char t
+1
+char o
+1
+key space
+1
+char s
+1
+char t
+1
+char e
+1
+char v
+1
+char e
+1
+key enter
+3
+36
+key enter
+5
+char s
+1
+char c
+1
+char o
+1
+char r
+1
+char e
+1
+key enter
+3
+53
+key enter
+5
+char i
+1
+char n
+1
+char v
+1
+char e
+1
+char n
+1
+char t
+1
+char o
+1
+char r
+1
+char y
+1
+key enter
+43
+key enter
+10

@@ -1,0 +1,124 @@
+# Jr's Quest vocabulary. One group a line; the first word is the name the
+# AI parser shows. Group 0 words are dropped from what the player types.
+0: a, an, the, my, please, at, to, of, in, on, into, up, with, this, that, his, some, about, it, is, i
+1: anyword
+9999: rol
+
+# ---- verbs ----
+20: look, examine, l, see, inspect, check, view
+21: read, study, review
+22: take, get, grab, pick, steal, carry, fetch, hold
+23: talk, speak, ask, greet, tell, chat, hello, hi
+24: open, unlock
+25: fix, repair, debug, patch, correct, change, edit, rewrite
+26: use, try
+27: close, shut
+28: help
+29: inventory, inv, items
+30: push, press, shove
+31: pull, eject, remove
+32: sit, sleep, lie, nap, rest
+33: climb, jump
+34: listen, hear
+35: kick, hit, punch, attack, kill
+36: say, shout, yell
+37: score, points
+38: save
+39: restore, load
+40: restart
+41: quit, exit, bye
+42: drop, leave, put
+43: wait
+44: thank, thanks
+45: enter, go, walk
+46: play
+47: drink, eat
+48: smell, sniff
+49: touch, feel, pet
+50: fast, faster, speed up, hurry
+51: normal
+52: slow, slower, slow down
+
+# ---- things in the guest room ----
+100: room, guest room, bedroom, around, here, place
+101: window, outside
+102: bed, pillow, blanket, mattress
+103: desk, table, rectangle, dust
+104: box, garage, carton
+105: rug, carpet
+106: door, doorway, stairs, stairway, staircase
+107: book, reference, technical reference, manual, bios
+108: bucket, pail
+109: magazine, byte, byte magazine
+110: steve, king, king steve, him, man
+111: me, myself, self, junior, jr, sir junior, pcjr, pc junior, yourself
+112: floor, ceiling
+113: washer, washing machine, laundry
+
+# ---- things at the castle ----
+130: gate, cartridge, slot, cartridge slot
+131: code, program, source, gate code, script, software
+132: squire, boy, kid
+133: primeagen, prime, theprimeagen, bard, streamer, mustache
+134: lute, plugin, robot, helper
+135: castle, house, home, tower, towers, roof
+136: palm, tree, palm tree
+137: wall, walls, stones, stone wall
+138: path, road, lawn, grass, garden, flowers, courtyard
+139: vim, editor
+140: pigs, pig
+141: quest, treasures, treasure, favor
+142: date, year, time, clock
+
+# ---- more verbs (shared by every room) ----
+53: hint, hints, clue
+60: give, hand, offer, show, pay, trade, feed
+61: plant, sow, bury
+62: pour, empty, dump, sprinkle, spill
+63: fill, refill, dip
+64: join, combine, assemble, connect, attach, merge
+65: buy, purchase, order
+66: yes, y, ok, okay, sure, accept, agree
+67: no, n, nope, never, refuse, decline, disagree
+68: wake, awaken, start, boot
+69: throw, toss
+70: wear
+71: follow, lead, herd
+72: count
+73: turn, twist, rotate
+74: swim, wade, dive
+75: tp
+76: gimme
+77: setflag
+78: setvar
+
+# ---- shared things (200 to 299). Rooms add their own in words/NN_*.txt,
+# ---- with group numbers room * 100 to room * 100 + 99.
+200: tokens, token, coins, coin, money
+201: seed, bean, seed round, funding
+202: wool, cashmere, tuft, sweater
+203: chest, chest of tokens
+204: shield
+205: lock half, lock
+206: glass half, glass
+207: halves, half, both halves, pieces
+208: mirror, mind
+209: answer key, answers, key
+210: water
+211: quinoa
+212: scroll, model, free model, weights
+213: zuckerberg, zuck, mark, mark zuckerberg, recruiter, wheelbarrow, gold
+214: agents, agent, swarm, experiments
+215: si, super intelligence, superintelligence
+216: ai, artificial intelligence
+217: dont know, don't know, i don't know, i dont know, idk, not sure, no idea, bad command, bad command or file name
+218: sky, sun, clouds, cloud
+219: sea, ocean, beach, pacific
+220: ground, dirt, sand
+221: sign, signpost, poster, label, notice
+222: uber
+223: term sheet, sheet, signatures, signature
+224: accord, pledge
+225: north, south, east, west
+226: dragon
+227: everything, all

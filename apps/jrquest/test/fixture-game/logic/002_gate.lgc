@@ -1,0 +1,6 @@
+#include "defines.h"
+/* Room 2: the gate.
+   Everything the compiler accepts, more or less. */
+if (said("pick up", "key")) { print("It is stuck."); }
+else { if (said("open", "gate")) { print("The gate is shut."); } }
+if ((said("look") || said("look", "room"))) { print("A gate."); }

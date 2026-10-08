@@ -1,0 +1,41 @@
+// Every piece of syntax the compiler accepts, checked by disassembly in
+// tools.test.js. Keep the two in step.
+#include "every.h"
+#define greeting "Hello,\n\"friend\" \\ %v3"
+#message 3 "The gate is shut."
+
+/* a block
+   comment */
+if (new.room) {            // a define that names a flag tests isset
+  load.pic(room.no); draw.pic(room.no); show.pic();
+}
+if (said("read", "code") && !f40) {
+  print("You read all of it.");
+  set(f40);
+  points += 8;
+}
+if ((said("look") || said("look", "room"))) { print(m3); }
+if (said("pick up", "key", 9999) && !has("brass key")) {
+  get("brass key");
+} else {
+  print("The gate is shut.");
+}
+if (v1 == 3 && v1 != v2 && v1 < 4 && v1 > v2 && v1 <= 5 && v1 >= v2) {
+  v1 = 3; v1 = v2; v1 += 2; v1 -= v2; v1 *= 2; v1 /= 2; v1++; v1--;
+  v1 += v2; v1 -= 1; v1 *= v2; v1 /= v2;
+}
+if (!(f1 && f2) && (f3 || !f4 || v9 == 1) && controller(menu.key) && obj.in.room("floppy disk", room.no)) {
+  goto(done);
+}
+again:
+if (posn(ego, 1, 2, 3, 4)) {
+  if (f7) set.view(ego, 2); else goto again;
+}
+print(greeting);
+print("part one, " "part two");
+display(1, 2, "Hello,\n\"friend\" \\ %v3");
+set.string(name.str, "x");
+word.to.string(name.str, w1);
+move.obj(ego, 10, 20, 1, f41);
+talk(2); link.status(v20);
+done:

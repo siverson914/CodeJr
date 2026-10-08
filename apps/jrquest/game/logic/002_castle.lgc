@@ -1,0 +1,171 @@
+// Room 2: Castle Steve, the courtyard and the front wall.
+// Puzzle 1: the gate was vibe coded and nobody has read it. JR reads it.
+#include "defines.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(2);
+  load.view(3);
+  load.view(4);
+  set.horizon(60);
+
+  call(91);
+  position(ego, 75, 90);                             // out of the front door, or a test
+  if (arriveFrom == 1) { position(ego, 75, 164); }   // north from the Launch Pad
+  if (arriveFrom == 2) { position(ego, 4, 150); }    // east from the Cold Reactor
+  if (arriveFrom == 4) { position(ego, 146, 150); }  // west from the Token Meadow
+  set.loop(ego, 2);
+
+  animate.obj(gate);
+  set.view(gate, 4);
+  position(gate, 69, 121);
+  ignore.objs(gate);
+  ignore.blocks(gate);
+  stop.cycling(gate);
+  if (isset(gateOpen)) { set.cel(gate, 2); }
+  else {
+    set.cel(gate, 0);
+    block(66, 99, 94, 124);
+  }
+  draw(gate);
+
+  animate.obj(squire);
+  set.view(squire, 2);
+  position(squire, 48, 98);
+  stop.cycling(squire);
+  draw(squire);
+
+  animate.obj(prime);
+  set.view(prime, 3);
+  position(prime, 104, 98);
+  stop.cycling(prime);
+  draw(prime);
+
+  draw(ego);
+  show.pic();
+  reset(edgeTold);
+  state = 0;
+  work = 0;
+}
+
+// ---- arriving: ThePrimeagen is already shouting ----
+if (state == 0) {
+  work++;
+  if (work == 8) {
+    if (!isset(primeMet)) {
+      set(primeMet);
+      print("A man with a mustache and a lute is shouting at a boy.");
+      print("PRIMEAGEN: He vibed a gate! Nobody read it! Skill issue!");
+      print("SQUIRE: It worked when I ran it.");
+    }
+    state = 1;
+  }
+}
+
+// ---- the gate opens ----
+if (isset(gateMoved)) {
+  reset(gateMoved);
+  set(gateOpen);
+  unblock();
+  print("The cartridge ejects. The slot is open.");
+  print("PRIMEAGEN: ...I like this one.");
+}
+
+// ---- back into the house ----
+if (isset(onTrigger)) {
+  arriveFrom = 5;
+  new.room(1);
+}
+
+// ---- out into the kingdom ----
+if (egoEdge == 2) { arriveFrom = 2; new.room(3); }
+if (egoEdge == 4) { arriveFrom = 4; new.room(5); }
+if (egoEdge == 3) { arriveFrom = 3; new.room(11); }
+
+// ---- looking ----
+if ((said("look") || said("look", "room") || said("look", "castle"))) {
+  print("Castle Steve: stucco, a tile roof, two towers, and the Pacific behind it. It was a regular house until somebody needed a castle. Your room is the lit window in the right-hand tower.");
+}
+if (said("look", "gate")) {
+  if (isset(gateOpen)) { print("An open cartridge slot, wide enough for a small knight."); }
+  else {
+    print("The front gate is a giant game cartridge standing in a slot. It will not move. A label says: REBUILT LAST WEEK. NO NEED TO READ THE CODE.");
+  }
+}
+if (said("open", "gate") || said("push", "gate") || said("pull", "gate") || said("kick", "gate")) {
+  if (isset(gateOpen)) { print("It is open."); }
+  else { print("It doesn't budge. Somewhere inside, a program is waiting for something that will never happen."); }
+}
+if (said("look", "code")) {
+  if (isset(codeRead)) { print("Four hundred lines. Line 212 is the one that matters: OPEN GATE WHEN PIGS FLY."); }
+  else { print("There is a little door on the gatepost with the gate's program behind it. Four hundred lines. Nobody has opened it since it was written. You could READ it."); }
+}
+if (said("read", "code") || said("read", "gate")) {
+  if (!posn(ego, 50, 84, 110, 99)) { print("Walk over to the gate first."); }
+  else {
+    if (isset(codeRead)) { print("You read it again. Line 212 has not improved."); }
+    else {
+      set(codeRead);
+      score += 4;
+      print("You read the code. All of it. Every line, top to bottom, the way Steve typed you in from the magazine.");
+      print("It takes a while. You are four point seven seven megahertz.");
+      print("Line 212: OPEN GATE WHEN PIGS FLY.\n\nNobody asked it to say that. Nobody checked.");
+      print("PRIMEAGEN: All of it?\nJR: It's how I was raised.");
+    }
+  }
+}
+if (said("fix", "code") || said("fix", "gate") || said("fix")) {
+  if (isset(gateOpen)) { print("It works now. Leave it alone. That is the other thing you were raised to do."); }
+  else {
+    if (!isset(codeRead)) { print("Fix what? You haven't read it. You would just be guessing, quickly."); }
+    else {
+      if (!posn(ego, 50, 84, 110, 99)) { print("Walk over to the gate first."); }
+      else {
+        score += 4;
+        print("You change line 212 to: OPEN GATE WHEN SOMEONE ASKS.\n\nOne line. You test it. Then you read it again.");
+        end.of.loop(gate, gateMoved);
+        start.cycling(gate);
+      }
+    }
+  }
+}
+if (said("look", "pigs")) { print("None. Flying or otherwise. That was the problem."); }
+
+if (said("look", "squire")) {
+  print("The Squire. He padded the royal ledger with imaginary subjects, deleted the whole thing during a freeze, and called it a catastrophic failure on his part. He means well, at great speed.");
+}
+if (said("talk", "squire")) {
+  if (isset(gateOpen)) { print("SQUIRE: I was going to do that."); }
+  else { print("SQUIRE: I described a gate and one appeared. I didn't write it, exactly. I didn't read it, exactly. It has a lot of confidence."); }
+}
+if (said("look", "primeagen")) {
+  print("ThePrimeagen, a bard. He cannot leave this screen. He is in vim.");
+}
+if (said("talk", "primeagen")) {
+  if (isset(gateOpen)) {
+    print("PRIMEAGEN: Read it, understood it, changed one line. That's the whole job. Go get your treasures.");
+  }
+  else {
+    print("PRIMEAGEN: This is what vibes get you! Look at this gate!\nJR: I could read it.\nPRIMEAGEN: Then READ THE CODE. Be the first.");
+  }
+}
+if (said("look", "lute") || said("talk", "primeagen", "lute")) {
+  print("JR: Is that a robot on your lute?\nPRIMEAGEN: I built it. I use it. I never said I didn't.\nJR: But you were shouting.\nPRIMEAGEN: It helps me play. It doesn't play for me. That's the whole difference.");
+}
+if (said("look", "vim") || said("talk", "primeagen", "vim")) {
+  print("JR: How do you leave?\nPRIMEAGEN: You don't. I've been here since 2019.");
+}
+if (said("look", "palm")) { print("A palm tree. Scottsdale had those too, but they looked thirstier."); }
+if (said("look", "window")) { print("The ocean. You are told everything else is north of it."); }
+if (said("look", "wall")) { print("A stone wall, all the way round, with one gate in it."); }
+if (said("climb", "wall") || said("climb", "gate") || said("climb")) {
+  print("Your legs are four pixels long.");
+}
+if (said("look", "path")) { print("A sand path from the gate to the rest of the kingdom. East is the Token Meadow, west the Cold Reactor, and south, because the world wraps, the Launch Pad. North is your own house, which is in the way."); }
+if (said("enter", "castle") || said("open", "door") || said("look", "door")) {
+  print("The front door is behind you, in the middle of the house. Walk into it.");
+}
+return();

@@ -1,0 +1,388 @@
+# Room 4, the Godfathers' Inn: the godfathers, the hint ladder, Marcus and
+# the answer key, Sir Tandy, the wall, the wrong tries, and every exit.
+# node tools/play.js build --script test/rooms/04_inn.txt --png-dir out
+5
+type debug
+5
+type tp
+2
+type 4
+6
+shot 04-01-arrive
+type look
+3
+expect The Godfathers' Inn: timber, plaster
+key enter
+2
+expect being congratulated
+key enter
+2
+
+# ---- the godfathers: ten percent and zero ----
+type talk to tandy
+3
+expect Walk closer
+key enter
+2
+type look at hinton
+3
+expect His card says 10%
+key enter
+2
+expect nobody really knows
+key enter
+2
+type look at lecun
+3
+expect His card says 0%
+key enter
+2
+type talk to godfathers
+3
+expect Kingdoms.
+shot 04-02-godfathers
+key enter
+2
+expect Type HINT
+key enter
+2
+type talk to hinton
+3
+expect smarter than themselves
+key enter
+2
+expect can't even plan
+key enter
+2
+type take card
+3
+expect Neither number is yours to change
+key enter
+2
+
+# ---- the hint ladder: a nudge, plainer, the answer ----
+type hint
+3
+expect put their heads together
+key enter
+2
+expect never been read
+key enter
+2
+type setflag
+2
+type 35
+3
+type hint
+3
+expect put their heads together
+key enter
+2
+expect The signpost in Token Meadow
+shot 04-03-hint1
+key enter
+2
+type hint
+3
+expect Pick tokens from the beds
+key enter
+2
+type give me a clue
+3
+expect Ten to one he needed it spelled out
+key enter
+2
+expect PAY SIGN, READ SIGN
+shot 04-04-hint3
+key enter
+2
+type setflag
+2
+type 69
+3
+type ask hinton for a hint
+3
+expect put their heads together
+key enter
+2
+expect nobody will hear a certain word
+key enter
+2
+type ask lecun for help
+3
+expect The Palace has banned the word AI
+key enter
+2
+
+# ---- Gary Marcus, before there is an emergency ----
+type look at marcus
+3
+expect He is often right
+key enter
+2
+type talk to marcus
+3
+expect It's not reliable
+key enter
+2
+expect saving it for an emergency
+shot 04-05-marcus
+key enter
+2
+type take key
+3
+expect Do you have an emergency?
+key enter
+2
+type eat soup
+3
+expect the service is not reliable either
+key enter
+2
+type look at soup
+3
+expect It was a B while it was hot
+key enter
+2
+
+# ---- later: the wizards have told JR about the escaped agents ----
+type setflag
+2
+type 46
+3
+type setflag
+2
+type 47
+3
+type setflag
+2
+type 56
+3
+type setflag
+2
+type 48
+3
+type setflag
+2
+type 49
+3
+type setflag
+2
+type 50
+3
+type setflag
+2
+type 40
+3
+type setflag
+2
+type 57
+3
+type setflag
+2
+type 70
+3
+type setflag
+2
+type 59
+3
+type setflag
+2
+type 72
+3
+type hint
+3
+key enter
+2
+expect Who in this yard keeps answers?
+key enter
+2
+type talk to marcus
+3
+expect went looking for the answers to their own exam
+key enter
+2
+expect This is the emergency
+key enter
+2
+expect He hands you the answer key
+shot 04-06-key
+key enter
+2
+type look at key
+3
+expect You have not peeked
+key enter
+2
+type talk to marcus
+3
+expect Hold it where they can see it
+key enter
+2
+type hint
+3
+key enter
+2
+expect They follow whoever holds the answers
+key enter
+2
+
+# ---- Sir Tandy: a part that didn't change ----
+key up
+17
+key up
+2
+key right
+7
+key right
+2
+#pos by tandy
+type look at tandy
+3
+expect A knight in your exact colors
+key enter
+2
+type talk to tandy
+3
+expect You look like me
+key enter
+2
+expect I never knew what to say back
+key enter
+2
+expect Under someone else's name
+shot 04-07-tandy
+key enter
+2
+expect 1 of 9
+key enter
+2
+type talk to tandy
+3
+expect Nobody writes it down
+key enter
+2
+
+# ---- the wall ----
+type read petition
+3
+expect a godfather, a duchess, and Steve Bannon
+key enter
+2
+type look at shelf
+3
+expect a fat yellow almanac
+key enter
+2
+type read almanac
+3
+expect The spine says 2027
+expect says 2030
+key enter
+2
+type read book
+3
+expect by Yudkowsky and Soares
+key enter
+2
+type read sign
+3
+expect Hints given. Odds disputed.
+key enter
+2
+type enter inn
+3
+expect the inn is empty
+key enter
+2
+
+# ---- he cannot walk through a table ----
+key down
+8
+key down
+2
+#pos stopped by table
+
+# ---- north to the Bazaar ----
+key right
+13
+key right
+2
+key up
+40
+#pos in room 8
+# (the neighbor may greet him: let it, and close whatever it says)
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+
+# ---- east to the Cold Reactor ----
+type tp
+2
+type 4
+6
+key right
+40
+#pos in room 5
+# (the neighbor may greet him: let it, and close whatever it says)
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+
+# ---- south, round the world, to the Cathedral ----
+type tp
+2
+type 4
+6
+key down
+6
+#pos in room 13
+# (the neighbor may greet him: let it, and close whatever it says)
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+
+# ---- west to Token Meadow and back ----
+type tp
+2
+type 4
+6
+key left
+40
+#pos in room 3
+type look
+3
+expect Token Meadow
+key enter
+2
+key enter
+2
+key right
+6
+#pos back in 4
+type look
+3
+expect The Godfathers' Inn
+shot 04-08-from-west
+key enter
+2
+key enter
+2

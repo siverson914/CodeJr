@@ -1,0 +1,204 @@
+// Logic 104: the hint ladder. Room 4 calls it when the player asks for a
+// hint. It finds the first unfinished step of the puzzle chain from the
+// global flags and gives a nudge, then a plainer one, then the answer, as
+// the same step is asked about again.
+#include "defines.h"
+#include "room04.h"
+
+work = 0;
+if (work == 0 && !isset(gateOpen)) { work = 1; }
+if (work == 0 && !isset(signRead)) { work = 2; }
+if (work == 0 && !isset(knowsSI)) { work = 3; }
+if (work == 0 && !isset(ledgerRead)) { work = 4; }
+if (work == 0 && !isset(sigChamath) && !isset(seedPlanted)) { work = 5; }
+if (work == 0 && !isset(sigJason) && !isset(seedPlanted)) { work = 6; }
+if (work == 0 && !isset(sigFriedberg) && !isset(seedPlanted)) { work = 7; }
+if (work == 0 && !isset(sigSacks) && !isset(seedPlanted)) { work = 8; }
+if (work == 0 && !has("Seed") && !isset(seedPlanted)) { work = 9; }
+if (work == 0 && !isset(meterRead)) { work = 10; }
+if (work == 0 && !isset(keeperTold)) { work = 11; }
+if (work == 0 && !isset(programFixed)) { work = 12; }
+if (work == 0 && !isset(tookBucket)) { work = 13; }
+if (work == 0 && !isset(bucketFull) && !isset(stalkGrown)) { work = 14; }
+if (work == 0 && !isset(seedPlanted)) { work = 15; }
+if (work == 0 && !isset(stalkGrown)) { work = 16; }
+if (work == 0 && !isset(tokenInRing) && !isset(gotChest)) { work = 17; }
+if (work == 0 && !isset(gotChest)) { work = 18; }
+if (work == 0 && !isset(doorOpen)) { work = 19; }
+if (work == 0 && !isset(wizardsTold)) { work = 20; }
+if (work == 0 && !isset(agentsHome) && !isset(agentsFollow) && !has("answer key")) { work = 21; }
+if (work == 0 && !isset(agentsHome) && !isset(agentsFollow)) { work = 22; }
+if (work == 0 && !isset(agentsHome)) { work = 23; }
+if (work == 0 && !isset(lockDone)) { work = 24; }
+if (work == 0 && !has("Glass half") && !isset(shieldMade) && !isset(tookBook)) { work = 25; }
+if (work == 0 && !has("Glass half") && !isset(shieldMade)) { work = 26; }
+if (work == 0 && !isset(shieldMade)) { work = 27; }
+if (work == 0 && !isset(dragonPassed)) { work = 28; }
+if (work == 0 && !isset(mirrorAwake)) { work = 29; }
+if (work == 0 && !has("Mirror") && !isset(gameWon)) { work = 30; }
+if (work == 0) { work = 31; }
+
+if (work == iHintStep) {
+  if (hintLevel < 3) { hintLevel++; }
+}
+else {
+  iHintStep = work;
+  hintLevel = 1;
+}
+if (hintLevel == 1) { print("The godfathers put their heads together. It is the only time they do."); }
+if (hintLevel == 3) { print("HINTON: Ten to one he needed it spelled out.\nLECUN: Zero. He was nearly there."); }
+
+if (work == 1) {
+  if (hintLevel == 1) { print("The gate at Castle Steve was written in a hurry and has never been read."); }
+  if (hintLevel == 2) { print("Nobody has read the gate's code. You could be the first. Then fix what you find."); }
+  if (hintLevel == 3) { print("At Castle Steve, by the gate: READ CODE, then FIX CODE."); }
+}
+if (work == 2) {
+  if (hintLevel == 1) { print("The signpost in Token Meadow, one screen west, knows the whole kingdom. It charges by the token, and tokens grow right beside it."); }
+  if (hintLevel == 2) { print("Pick tokens from the beds in Token Meadow. Then pay the signpost and read it."); }
+  if (hintLevel == 3) { print("In Token Meadow: stand by a token and PICK TOKENS, twice. Walk to the signpost, PAY SIGN, READ SIGN."); }
+}
+if (work == 3) {
+  if (hintLevel == 1) { print("At the Golden Palace nobody will hear a certain word. Watch what the painter is changing it to."); }
+  if (hintLevel == 2) { print("The Palace has banned the word AI. Every sign there now says SI. Use their word."); }
+  if (hintLevel == 3) { print("At the Golden Palace (north of Sand Hill Bridge): SAY SI."); }
+}
+if (work == 4) {
+  if (hintLevel == 1) { print("The Palace groundskeeper keeps a ledger in his shed. Numbers are worth reading."); }
+  if (hintLevel == 2) { print("The golf ledger at the Palace says how much water the greens drink. Somebody at the Data Center needs to hear it."); }
+  if (hintLevel == 3) { print("At the Golden Palace: READ LEDGER."); }
+}
+if (work == 5) {
+  if (hintLevel == 1) { print("The Tavern is north-east of here, and its four hosts each want something. One of them is cold. Something in Token Meadow is very warm."); }
+  if (hintLevel == 2) { print("The goat in Token Meadow is cashmere. Be nice to it. Then visit Chamath in the Tavern. (Tell the bouncer honestly who sent you.)"); }
+  if (hintLevel == 3) { print("In Token Meadow: PET GOAT. In the Tavern: GIVE WOOL TO CHAMATH."); }
+}
+if (work == 6) {
+  if (hintLevel == 1) { print("One of the Tavern's hosts is waiting to be asked about something. Every story he tells is heading there."); }
+  if (hintLevel == 2) { print("Jason's stories all turn toward a certain ride-hailing company. Ask him about it and get it over with."); }
+  if (hintLevel == 3) { print("In the Tavern: ASK JASON ABOUT UBER."); }
+}
+if (work == 7) {
+  if (hintLevel == 1) { print("One of the Tavern's hosts wants an audience. You were built to wait."); }
+  if (hintLevel == 2) { print("When Friedberg starts Science Corner, stay and listen to the very end. Nobody ever has."); }
+  if (hintLevel == 3) { print("In the Tavern: LISTEN, and keep pressing ENTER until Science Corner is over."); }
+}
+if (work == 8) {
+  if (hintLevel == 1) { print("One host will not sign anything with a certain word in it. The Palace taught you the other word."); }
+  if (hintLevel == 2) { print("Sacks wants the Palace's word, not the old one."); }
+  if (hintLevel == 3) { print("In the Tavern: SAY SI."); }
+}
+if (work == 9) {
+  if (hintLevel == 1) { print("The term sheet has all four signatures. The Seed is yours for the asking."); }
+  if (hintLevel == 2) { print("Go back into the Tavern and talk to the hosts. Four signatures make a Seed."); }
+  if (hintLevel == 3) { print("In the Tavern: TALK TO the hosts, or TAKE SEED."); }
+}
+if (work == 10) {
+  if (hintLevel == 1) { print("The Moat Keeper at the Data Center is angry about water. There is a meter there. Numbers are worth reading."); }
+  if (hintLevel == 2) { print("Read the water meter at the Data Center, west of Sand Hill Bridge."); }
+  if (hintLevel == 3) { print("At the Data Center: READ METER."); }
+}
+if (work == 11) {
+  if (hintLevel == 1) { print("The Moat Keeper has one number in her head. You have read two."); }
+  if (hintLevel == 2) { print("Tell the Moat Keeper both numbers: the meter's, and the golf ledger's from the Palace."); }
+  if (hintLevel == 3) { print("At the Data Center: TALK TO KEEPER, and tell her the numbers."); }
+}
+if (work == 12) {
+  if (hintLevel == 1) { print("Something inside the Data Center is working very hard at very little. Look in."); }
+  if (hintLevel == 2) { print("Look in the Data Center's window. You could write that program smaller. Much smaller."); }
+  if (hintLevel == 3) { print("At the Data Center: LOOK IN WINDOW, then REWRITE PROGRAM."); }
+}
+if (work == 13) {
+  if (hintLevel == 1) { print("The well at the Data Center is up, and you have nothing to carry water in."); }
+  if (hintLevel == 2) { print("There was a bucket in your guest room at Castle Steve."); }
+  if (hintLevel == 3) { print("In the guest room at Castle Steve: TAKE BUCKET."); }
+}
+if (work == 14) {
+  if (hintLevel == 1) { print("The well at the Data Center is up, and you have a bucket."); }
+  if (hintLevel == 2) { print("Fill the bucket at the Data Center's well."); }
+  if (hintLevel == 3) { print("At the Data Center: FILL BUCKET."); }
+}
+if (work == 15) {
+  if (hintLevel == 1) { print("A Seed wants a field. The GPU Field has rows of everything else."); }
+  if (hintLevel == 2) { print("Plant the Seed in the GPU Field, north of the Tavern."); }
+  if (hintLevel == 3) { print("At the GPU Field: PLANT SEED."); }
+}
+if (work == 16) {
+  if (hintLevel == 1) { print("A seed in the ground wants one more thing, and you are carrying a bucket of it."); }
+  if (hintLevel == 2) { print("Water the Seed."); }
+  if (hintLevel == 3) { print("At the GPU Field: POUR WATER."); }
+}
+if (work == 17) {
+  if (hintLevel == 1) { print("Climb the beanstalk. The giant never looks away from the Chest. Give him something better to watch."); }
+  if (hintLevel == 2) { print("Three merchants sit in a ring in the Cloud. Hand one of them a single token and see where it goes. (Bring a token from the Meadow.)"); }
+  if (hintLevel == 3) { print("In the Cloud: GIVE TOKEN TO MERCHANT."); }
+}
+if (work == 18) {
+  if (hintLevel == 1) { print("The giant is watching a token go round. He is not watching the Chest."); }
+  if (hintLevel == 2) { print("Take the Chest while the number goes up."); }
+  if (hintLevel == 3) { print("In the Cloud: TAKE CHEST."); }
+}
+if (work == 19) {
+  if (hintLevel == 1) { print("The Cathedral's door asks a question nobody could answer. Everybody answers it anyway."); }
+  if (hintLevel == 2) { print("What does an honest knight say to a question he can't answer? You say it all the time."); }
+  if (hintLevel == 3) { print("At the Cathedral (north of the Bazaar): SAY I DON'T KNOW."); }
+}
+if (work == 20) {
+  if (hintLevel == 1) { print("The two wizards on the Cathedral steps have a problem they are not discussing."); }
+  if (hintLevel == 2) { print("Talk to the wizards on the Cathedral steps."); }
+  if (hintLevel == 3) { print("At the Cathedral: TALK TO WIZARDS."); }
+}
+if (work == 21) {
+  if (hintLevel == 1) { print("The wizards' agents ran off to find the answers to their own exam. Who in this yard keeps answers?"); }
+  if (hintLevel == 2) { print("The man at the next table has the answer key, and this is the emergency he was saving it for."); }
+  if (hintLevel == 3) { print("Right here, at the east table: TALK TO MARCUS."); }
+}
+if (work == 22) {
+  if (hintLevel == 1) { print("The agents are at the Launch Pad, looking for a way to the open sky. They follow whoever holds the answers."); }
+  if (hintLevel == 2) { print("Carry the answer key to the Launch Pad, north of the Data Center, and let them see it."); }
+  if (hintLevel == 3) { print("Walk into the Launch Pad holding the answer key."); }
+}
+if (work == 23) {
+  if (hintLevel == 1) { print("They are following you. Where do they live?"); }
+  if (hintLevel == 2) { print("Walk the agents home to the Cathedral. Slowly. They are easily distracted."); }
+  if (hintLevel == 3) { print("Walk to the Cathedral, north of the Bazaar, with the agents behind you."); }
+}
+if (work == 24) {
+  if (hintLevel == 1) { print("Each wizard holds half a key, and they will not hold hands to turn it. Answers cost more than questions."); }
+  if (hintLevel == 2) { print("Pay the wizards from the Chest. Then somebody patient has to hold one hand of each."); }
+  if (hintLevel == 3) { print("At the Cathedral: PAY WIZARDS. It is 50 tokens, and the Chest is never empty."); }
+}
+if (work == 25) {
+  if (hintLevel == 1) { print("The Bazaar sells the Glass half only to someone who has published their own source. IBM printed something of yours once."); }
+  if (hintLevel == 2) { print("The Technical Reference in your guest room has your whole BIOS in it."); }
+  if (hintLevel == 3) { print("In the guest room at Castle Steve: TAKE BOOK. Then go to the Bazaar."); }
+}
+if (work == 26) {
+  if (hintLevel == 1) { print("The Bazaar sells the Glass half only to someone who has published their own source. You are carrying yours."); }
+  if (hintLevel == 2) { print("Show the stallkeeper the Technical Reference. You have been open since 1983."); }
+  if (hintLevel == 3) { print("At the Bazaar, just north of here: GIVE BOOK."); }
+}
+if (work == 27) {
+  if (hintLevel == 1) { print("You are holding two halves of one thing."); }
+  if (hintLevel == 2) { print("The Lock and the Glass fit together."); }
+  if (hintLevel == 3) { print("Anywhere: JOIN SHIELD."); }
+}
+if (work == 28) {
+  if (hintLevel == 1) { print("The Mirror is under the Cold Reactor, one screen east. Something guards the path."); }
+  if (hintLevel == 2) { print("Behind the cooling tower is a cave with a dragon in it. Keep the Shield up and keep walking."); }
+  if (hintLevel == 3) { print("At the Cold Reactor: walk into the cave mouth, then walk straight through the fire with the Shield."); }
+}
+if (work == 29) {
+  if (hintLevel == 1) { print("The Mirror agrees with everything and knows nothing. It needs something to think with, and something everybody has to be told."); }
+  if (hintLevel == 2) { print("The Mirror needs tokens to think. And it does not know what day it is. You had that problem this morning."); }
+  if (hintLevel == 3) { print("In the cave: GIVE CHEST, then TELL MIRROR THE DATE."); }
+}
+if (work == 30) {
+  if (hintLevel == 1) { print("The Mirror is awake. King Steve asked you to bring it."); }
+  if (hintLevel == 2) { print("Pick up the Mirror."); }
+  if (hintLevel == 3) { print("In the cave: TAKE MIRROR."); }
+}
+if (work == 31) {
+  print("Chest, Shield, Mirror. That is all three. Go home: Castle Steve is two screens west, and your room is the lit window.");
+}
+return();

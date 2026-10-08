@@ -1,0 +1,18 @@
+#include "defines.h"
+#message 2 "The gate is shut."
+
+if (new.room) {
+  load.pic(room.no); draw.pic(room.no); show.pic();
+  animate.obj(ego);
+  load.view(0); set.view(ego, 0);
+  position(ego, 80, 120);
+  draw(ego);
+}
+if (said("look", "gate")) { print(m2); }
+if (said("take", "key") && !has("brass key")) {
+  get("brass key");
+  score += 5;
+  speak(1);
+}
+call(2);
+return();

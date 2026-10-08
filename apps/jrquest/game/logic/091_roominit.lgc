@@ -1,0 +1,20 @@
+// Logic 91: every room calls this first thing in its init block.
+// It puts Sir Junior on the animation list, standing still, at the game's
+// walking speed, and clears the room-local scratch flags and variables.
+#include "defines.h"
+
+animate.obj(ego);
+set.view(ego, 0);
+egoDir = 0;            // arrive standing still, or you walk straight back out
+work = 2;              // 2 pixels a step: 1 was too slow to get around
+step.size(ego, work);
+entryEdge = arriveFrom;
+reset(outdoor);
+reset(zuckHere);
+reset(tmpA); reset(tmpB); reset(tmpC); reset(tmpD);
+state = 0;
+tA = 0; tB = 0; tC = 0; tD = 0; timer = 0;
+status.line.on();
+accept.input();
+player.control();
+return();

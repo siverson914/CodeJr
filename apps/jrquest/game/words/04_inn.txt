@@ -1,0 +1,21 @@
+# Room 4, the Godfathers' Inn (groups 400 to 499)
+400: hinton, geoffrey, geoff, geoffrey hinton
+401: lecun, yann, yann lecun
+402: godfathers, godfather
+403: marcus, gary, gary marcus, grader, critic
+404: tandy, sir tandy, twin
+405: almanac, forecast
+406: petition, statement, names
+407: bookshelf, bookcase, shelves
+408: inn
+409: soup, bowl, broth
+410: odds, ten, zero, chance, risk, forecasts
+411: mug, mugs, ale, beer, cup
+412: grade, grades, marking
+413: yudkowsky, soares, eliezer, black book
+414: pen, red pen
+415: bench, benches, chair, seat
+416: laurel, medal, sash, credit
+417: exam, emergency
+# "ask hinton for a hint": until "for" is a dropped word in words.txt
+498: for

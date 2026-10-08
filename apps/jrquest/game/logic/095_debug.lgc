@@ -1,0 +1,24 @@
+// Logic 95: test commands, called from logic 0. They are how the room
+// scripts in test/ get anywhere: TP (go to a room), GIMME (take inventory
+// item n), SETFLAG (set flag n). Harmless in the real game, and unlisted.
+#include "defines.h"
+
+if (said("tp")) {
+  get.num("room: ", work);
+  arriveFrom = 0;
+  new.room.v(work);
+}
+if (said("gimme")) {
+  get.num("item: ", work);
+  get.v(work);
+}
+if (said("setflag")) {
+  get.num("flag: ", work);
+  set.v(work);
+}
+if (said("setvar")) {
+  get.num("variable: ", work);
+  get.num("value: ", work2);
+  lindirectv(work, work2);
+}
+return();

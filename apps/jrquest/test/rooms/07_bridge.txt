@@ -1,0 +1,306 @@
+# Room 7, Sand Hill Bridge: the toll with nothing, with tokens and with the
+# Chest, the chiclet exchange, the wrong tries, and every exit.
+# node tools/play.js build --script test/rooms/07_bridge.txt --png-dir out
+5
+type debug
+5
+type tp
+2
+type 7
+6
+shot 07-01-arrive
+type look
+3
+expect the bridge across it is made of flat square keys
+key enter
+2
+expect a troll with a sign
+key enter
+2
+
+# ---- wrong tries ----
+type swim
+3
+expect river of money
+key enter
+2
+type take coins
+3
+expect You fish out a coin
+key enter
+2
+type pay troll
+3
+expect Not here. On the bridge.
+key enter
+2
+type kick troll
+3
+expect never once gone well
+key enter
+2
+type fill bucket
+3
+expect The bucket is for water
+key enter
+2
+
+# ---- the wanted poster ----
+type read poster
+3
+expect WANTED: THE SCRIBE
+shot 07-02-poster
+key enter
+2
+expect KNOWN BY HIS LONG DASHES
+key enter
+2
+
+# ---- the troll ----
+type talk to troll
+3
+expect I asked for twenty
+key enter
+2
+type talk to troll
+3
+expect stopped accepting delivery
+key enter
+2
+
+# ---- the chiclet keys: a part that didn't change ----
+type look at bridge
+3
+expect The bridge is a keyboard
+key enter
+2
+expect Everybody's bridge looks like this now
+key enter
+2
+expect You were early. That's worse.
+shot 07-03-chiclet
+key enter
+2
+expect 1 of 9
+key enter
+2
+type look at keys
+3
+expect and a space bar
+key enter
+2
+
+# ---- crossing with no tokens: free ----
+key up
+22
+key up
+2
+key right
+16
+#pos toll with nothing
+expect Fifteen percent of nothing. Go on.
+shot 07-04-nothing
+key enter
+2
+key right
+40
+key right
+2
+#pos east bank
+shot 07-05-east-bank
+# the bank stops him: no walking into the money
+key down
+17
+key down
+2
+key left
+20
+key left
+2
+#pos stopped at the bank
+type look at stream
+3
+expect A stream of money
+key enter
+2
+
+# ---- east to the Bazaar ----
+key right
+30
+#pos in room 8
+# (the neighbor may greet him: let it, and close whatever it says)
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+
+# ---- fetch four tokens from the meadow, and walk back north ----
+type tp
+2
+type 3
+6
+key left
+14
+key left
+2
+type pick tokens
+3
+expect You pick ABLE
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+key left
+6
+key left
+2
+type pick tokens
+3
+expect You pick UN
+key enter
+2
+expect You have 4 tokens
+key enter
+2
+key right
+19
+key right
+2
+key up
+56
+#pos in room 7 from the south
+type look
+3
+expect Sand Hill Bridge
+key enter
+2
+key enter
+2
+
+# ---- crossing with 4 tokens: fifteen percent, rounded up, is 1 ----
+key up
+22
+key up
+2
+key right
+16
+#pos toll with four
+expect takes 1
+expect You have 3 left
+shot 07-06-toll
+key enter
+2
+# stepping off and on again on the same side is the same crossing
+key left
+6
+key left
+2
+key right
+8
+key right
+2
+type count tokens
+3
+expect You have 3 tokens
+key enter
+2
+type pay troll
+3
+expect You've paid for this crossing
+key enter
+2
+key right
+40
+key right
+2
+#pos east bank again
+# and back: he takes his cut the other way too
+key left
+16
+#pos toll going west
+expect takes 1
+expect You have 2 left
+key enter
+2
+key left
+40
+key left
+2
+#pos west bank again
+
+# ---- with the Chest it is free ----
+type gimme
+2
+type 7
+3
+key right
+16
+#pos toll with chest
+expect a chest that never empties
+shot 07-07-chest
+key enter
+2
+
+# ---- west to the Data Center ----
+key left
+30
+#pos in room 6
+# (the neighbor may greet him: let it, and close whatever it says)
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+
+# ---- north to the Golden Palace ----
+type tp
+2
+type 7
+6
+key right
+8
+key right
+2
+key up
+54
+#pos in room 12
+# (the neighbor may greet him: let it, and close whatever it says)
+12
+key enter
+3
+key enter
+3
+key enter
+3
+key enter
+3
+
+# ---- south to Token Meadow ----
+type tp
+2
+type 7
+6
+key down
+6
+#pos in room 3
+type look
+3
+expect Token Meadow
+key enter
+2
+key enter
+2
+shot 07-08-end

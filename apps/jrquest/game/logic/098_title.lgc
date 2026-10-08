@@ -1,0 +1,77 @@
+// Room 98: the title screen and the main menu. Everyone you are going to
+// meet stands in two rows; they are stamped onto the picture, so the screen
+// costs no animated objects. P plays, W asks the host to play the whole
+// game by itself from a recorded script, R restores a saved game.
+#include "defines.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  status.line.off();
+  prevent.input();
+  program.control();
+
+  // the dragon, in the sky, behind everybody
+  add.to.pic(180, 0, 0, 92, 98, 5, 4);
+  // back row: the giant in the middle
+  add.to.pic(170, 0, 0, 58, 126, 9, 4);
+  add.to.pic(140, 0, 0, 4, 124, 10, 4);
+  add.to.pic(130, 0, 0, 16, 124, 10, 4);
+  add.to.pic(150, 0, 0, 28, 124, 10, 4);
+  add.to.pic(151, 0, 0, 40, 124, 10, 4);
+  add.to.pic(60, 0, 0, 90, 124, 10, 4);
+  add.to.pic(61, 0, 0, 102, 124, 10, 4);
+  add.to.pic(62, 0, 0, 114, 124, 10, 4);
+  add.to.pic(50, 0, 0, 126, 124, 10, 4);
+  add.to.pic(80, 0, 0, 144, 124, 10, 4);
+  // front row, with a gap in the middle for the hero
+  add.to.pic(1, 0, 0, 8, 152, 13, 4);
+  add.to.pic(3, 0, 0, 20, 152, 13, 4);
+  add.to.pic(120, 0, 0, 34, 152, 13, 4);
+  add.to.pic(122, 0, 0, 46, 152, 13, 4);
+  add.to.pic(123, 0, 0, 96, 152, 13, 4);
+  add.to.pic(124, 0, 0, 108, 152, 13, 4);
+  add.to.pic(8, 0, 0, 121, 152, 13, 4);
+  add.to.pic(53, 0, 0, 142, 152, 13, 4);
+  add.to.pic(0, 2, 0, 75, 157, 14, 4);
+  show.pic();
+
+  set.text.attribute(11, 0);
+  display(6, 6, "The Search for Intelligence");
+  clear.lines(22, 24, 0);
+  set.text.attribute(15, 0);
+  display(22, 1, "P Play   W Let the AI play   R Restore");
+  link.status(work);
+  set.text.attribute(7, 0);
+  if (work == 2) { display(24, 1, "AI parser and live ending: connected"); }
+  else { display(24, 1, "Classic parser. No AI is connected."); }
+  set.text.attribute(15, 0);
+  load.sound(1);
+  sound(1, tuneDone);
+}
+
+if (have.key()) {
+  // p P or Enter
+  if (keyPressed == 112 || keyPressed == 80 || keyPressed == 13) {
+    stop.sound();
+    clear.lines(22, 24, 0);
+    status.line.on();
+    arriveFrom = 0;
+    new.room(1);
+  }
+  // w W
+  if (keyPressed == 119 || keyPressed == 87) {
+    demo.play(1);
+    if (isset(demoNone)) {
+      reset(demoNone);
+      clear.lines(24, 24, 0);
+      display(24, 1, "Watching needs the browser version.");
+    }
+  }
+  // r R
+  if (keyPressed == 114 || keyPressed == 82) {
+    restore.game();
+  }
+}
+return();

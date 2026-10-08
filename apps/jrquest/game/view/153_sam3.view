@@ -1,0 +1,46 @@
+desc "A newer one yet"
+loop 0
+cel 9 21 trans=5
+....B....
+...BBB...
+..BBBBB..
+.6CCCCC6.
+.C0CCC0C.
+.CCCCCCC.
+.CCCCCCC.
+..CCCCC..
+...CCC...
+.BBBBBBB.
+BBBBBBBBB
+CCBBBBBCC
+CCBBBBBCC
+..BBBBB..
+..BBBBB..
+..BB.BB..
+..BB.BB..
+..BB.BB..
+..BB.BB..
+..BB.BB..
+.000.000.
+cel 9 21 trans=5
+....B....
+...BBB...
+..BBBBB..
+.6CCCCC6.
+.C0CCC0C.
+.CCCCCCC.
+.CCCCCCC.
+..CCCCC..
+...CCC...
+.BBBBBBB.
+BBBBBBBBB
+CCBBBBBCC
+CCBBBBBCC
+..BBBBB..
+..BBBBB..
+..BB.BB..
+..BB.BB..
+..BB.BB..
+..BB.BB..
+.000.BB..
+.....000.

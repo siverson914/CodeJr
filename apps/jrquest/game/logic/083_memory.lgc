@@ -1,0 +1,55 @@
+// Logic 83: the context window. JR can carry eight things. A ninth pushes
+// out something he doesn't need, never something he does: the game needs
+// at most seven at once. Called from logic 0 every cycle.
+#include "defines.h"
+
+carried = 0;
+if (has("Technical Reference")) { carried++; }
+if (has("bucket")) { carried++; }
+if (has("Byte magazine")) { carried++; }
+if (has("tokens")) { carried++; }
+if (has("wool")) { carried++; }
+if (has("Seed")) { carried++; }
+if (has("Chest of Tokens")) { carried++; }
+if (has("answer key")) { carried++; }
+if (has("Lock half")) { carried++; }
+if (has("Glass half")) { carried++; }
+if (has("Shield")) { carried++; }
+if (has("Mirror")) { carried++; }
+if (has("quinoa")) { carried++; }
+if (has("free model scroll")) { carried++; }
+if (has("Accord scroll")) { carried++; }
+if (has("term sheet")) { carried++; }
+
+if (carried > 8) {
+  if (!isset(memTold)) {
+    set(memTold);
+    print("Out of memory.");
+    print("You can hold eight things in mind. It is called a context window. The newest models hold about a million tokens. You hold eight things, and you know which eight.");
+  }
+  if (has("free model scroll")) {
+    drop("free model scroll");
+    print("Your context window is full. You forget how the conversation began.\n\n(The free model slips your mind. He has more.)");
+  }
+  else {
+    if (has("Accord scroll")) {
+      drop("Accord scroll");
+      print("Your context window is full.\n\n(The Accord scroll slips your mind. It was not binding anyway.)");
+    }
+    else {
+      if (has("quinoa")) {
+        drop("quinoa");
+        print("Your context window is full.\n\n(The quinoa slips your mind. It usually does.)");
+      }
+      else {
+        if (has("Byte magazine")) {
+          work = 1;
+          put("Byte magazine", work);
+          reset(tookByte);
+          print("Your context window is full.\n\n(The BYTE slips your mind. It will be back on the desk in your room, where things you forget go.)");
+        }
+      }
+    }
+  }
+}
+return();

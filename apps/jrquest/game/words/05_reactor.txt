@@ -1,0 +1,19 @@
+# Room 5, the Cold Reactor (groups 500 to 599). "cave" and "outcrop" are used by room 16 too.
+500: reactor, nuclear plant, nuclear reactor, cold reactor, power station, station, nuclear
+501: cooling tower, cooling towers, stack, stacks
+502: guard, watchman, security, officer, sentry
+503: clipboard, checklist, list, form, paper
+504: cave, cave mouth, cavern, mouth, tunnel, entrance
+505: steam, vapor, plume
+506: email, emails, mail
+507: booth, guard booth, guardhouse, shack, kettle
+508: barrier, arm, boom, bar
+509: dome, containment
+510: outcrop, boulder, cliff, crag
+511: birds, bird, nest, crows, crow
+512: soon, restarting, when, schedule
+513: yard, asphalt
+516: power, electricity, energy
+517: badge, cap, uniform
+518: lane, track
+519: radiation, hazard, warning, triangle

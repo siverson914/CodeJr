@@ -1,0 +1,86 @@
+// Logic 80: Mark Zuckerberg, wandering. Logic 0 calls this every cycle in
+// outdoor rooms. King's Quest 1 had a dwarf who turned up at random and
+// robbed you. This one turns up at random and tries to hire you.
+#include "defines.h"
+
+if (isset(newRoom)) {
+  reset(zuckHere);
+  reset(zuckAsk);
+  random(0, 3, zuckRoll);
+  if (zuckRoll == 0 && !isset(gameWon) && !isset(agentsFollow)) {
+    load.view(8);
+    animate.obj(zuck);
+    set.view(zuck, 8);
+    position(zuck, 118, 162);
+    ignore.objs(zuck);
+    zuckRoll = 1;
+    step.size(zuck, zuckRoll);
+    wander(zuck);
+    draw(zuck);
+    set(zuckHere);
+  }
+}
+
+if (isset(zuckHere)) {
+  if (said("look", "zuckerberg")) {
+    print("Mark Zuckerberg, pushing a wheelbarrow of gold. A sign on the barrow says SUPERINTELLIGENCE LAB: NOW HIRING. He named it that before the Palace made the word fashionable.");
+  }
+  if (said("talk", "zuckerberg") || said("talk", "zuckerberg", "rol")) {
+    zuckOffer++;
+    set(zuckAsk);
+    if (zuckOffer == 1) {
+      set(zuckMet);
+      print("ZUCK: A hundred million to start.\nJR: I cost twelve hundred and sixty-nine dollars.");
+      print("ZUCK: Two hundred.\nJR: What would I do?\nZUCK: We'll figure that out. Three hundred. Over four years. Yes or no?");
+    }
+    if (zuckOffer == 2) {
+      print("ZUCK: I've thought about it. More. Also, take a model. They're free.");
+      if (!has("free model scroll")) {
+        get("free model scroll");
+        print("He hands you a scroll. You have a free model.");
+      }
+      print("ZUCK: Yes or no?");
+    }
+    if (zuckOffer == 3) {
+      print("JR: You gave these away for years. Half the Bazaar is built on them.\nZUCK: People forget that.\nJR: I don't forget anything. I just get switched off.");
+      print("ZUCK: More. Yes or no?");
+    }
+    if (zuckOffer > 3) {
+      if (isset(zuckTook)) { print("ZUCK: The offer has gone up.\n\nYes or no?"); }
+      else { print("ZUCK: I keep raising it. People usually say yes by now.\n\nYes or no?"); }
+    }
+  }
+  if (isset(zuckAsk) && said("yes")) {
+    reset(zuckAsk);
+    set(zuckTook);
+    // A string holds 40 characters, so the line is three of them.
+    set.string(s6, "You took the offer. You are worth three");
+    set.string(s7, "hundred million dollars, and you never");
+    set.string(s8, "find the Mirror.");
+    set.string(s5, "%s6\n%s7\n%s8");
+    set(dead);
+  }
+  if (isset(zuckAsk) && said("no")) {
+    reset(zuckAsk);
+    print("JR: No, thank you. I'm on a quest.\nZUCK: That's what the last four said. Three of them work for me now.");
+  }
+  if (said("take", "zuckerberg") || said("take", "zuckerberg", "rol")) {
+    print("The gold is for people who say yes.");
+  }
+  if (said("give", "scroll", "zuckerberg") || said("give", "scroll")) {
+    print("ZUCK: Keep it. I have more. I have so many more.");
+  }
+}
+else {
+  if (said("talk", "zuckerberg") || said("look", "zuckerberg")) {
+    print("He isn't on this screen. He will be on one of them. He always is.");
+  }
+}
+
+if (said("look", "scroll") || said("read", "scroll")) {
+  if (has("free model scroll")) {
+    print("A free model, weights and all. The one on his tournament poster placed second. You hold them side by side. This is not the one on the poster.");
+  }
+  else { print("You don't have one. Yet."); }
+}
+return();

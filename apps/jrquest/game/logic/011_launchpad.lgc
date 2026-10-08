@@ -1,0 +1,308 @@
+// Room 11: the Launch Pad. Elon Musk, a rocket with a server rack on
+// top, four gas turbines, a sign with two names and a promise, and an
+// empty hourglass. Half of puzzle 9: the escaped agents mill about here
+// once the wizards have said so, and fall in behind whoever walks in
+// holding the answer key.
+//
+// state: 0 quiet, 1 counting down, 2 the engines are lit, 3 waiting for
+//        JR to step off the pad before the test can start again.
+// tmpA: the agents are on screen. tmpB: they have noticed the key and
+// are following (logic 84 takes over from the next screen on).
+#include "defines.h"
+#include "room11.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(9);
+  load.view(130);
+  load.view(131);
+  set.horizon(58);
+
+  call(91);
+  set(outdoor);
+  position(ego, 70, 160);
+  set.loop(ego, 3);
+  if (arriveFrom == 3) { position(ego, 71, 64); set.loop(ego, 2); }
+  if (arriveFrom == 2) { position(ego, 4, 162); set.loop(ego, 0); }
+  if (arriveFrom == 4) { position(ego, 146, 150); set.loop(ego, 1); }
+
+  animate.obj(musk);
+  set.view(musk, 130);
+  position(musk, 60, 153);
+  stop.cycling(musk);
+  draw(musk);
+
+  animate.obj(flame);
+  set.view(flame, 131);
+  position(flame, 101, 125);
+  set.priority(flame, 15);
+  ignore.objs(flame);
+
+  // The agents: here from the day the wizards admit it until they follow
+  // someone. Once they follow, logic 84 draws them, not this room.
+  if (isset(wizardsTold) && !isset(agentsHome) && !isset(agentsFollow)) {
+    animate.obj(swarmObj);
+    set.view(swarmObj, 9);
+    position(swarmObj, 96, 140);
+    ignore.objs(swarmObj);
+    ignore.blocks(swarmObj);
+    work = 1;
+    step.size(swarmObj, work);
+    draw(swarmObj);
+    set(tmpA);
+    waypoint = 0;
+    move.obj(swarmObj, 120, 134, 1, swarmMoved);
+  }
+
+  draw(ego);
+  show.pic();
+  count = 0;
+}
+
+// ---- edges ----
+if (egoEdge == 1) { arriveFrom = 1; new.room(2); }
+if (egoEdge == 2) { arriveFrom = 2; new.room(12); }
+if (egoEdge == 3) { arriveFrom = 3; new.room(6); }
+if (egoEdge == 4) { arriveFrom = 4; new.room(14); }
+
+// ---- the agents mill about by the pad, looking up ----
+if (isset(tmpA) && !isset(tmpB)) {
+  if (isset(swarmMoved)) {
+    reset(swarmMoved);
+    waypoint++;
+    if (waypoint > 3) { waypoint = 0; }
+    if (waypoint == 0) { move.obj(swarmObj, 120, 134, 1, swarmMoved); }
+    if (waypoint == 1) { move.obj(swarmObj, 134, 146, 1, swarmMoved); }
+    if (waypoint == 2) { move.obj(swarmObj, 104, 150, 1, swarmMoved); }
+    if (waypoint == 3) { move.obj(swarmObj, 92, 138, 1, swarmMoved); }
+  }
+  // They notice the answer key a moment after he walks in with it.
+  timer++;
+  if (timer > 12 && has("answer key")) {
+    set(tmpB);
+    set(agentsFollow);
+    print("The agents stop milling about. Every tiny head turns toward the answer key.");
+    print("They fall in behind you. They would follow those answers anywhere. That is the whole trouble with them.");
+    reset(swarmCaught);
+    follow.ego(swarmObj, 10, swarmCaught);
+  }
+}
+if (isset(tmpB) && isset(swarmCaught)) {
+  distance(ego, swarmObj, swGap);
+  if (swGap > 16) {
+    reset(swarmCaught);
+    follow.ego(swarmObj, 10, swarmCaught);
+  }
+}
+
+// ---- the turbines: a warning, then a death ----
+if (!isset(turbWarned) && posn(ego, 0, 97, 66, 108)) {
+  set(turbWarned);
+  egoDir = 0;              // the warning stops him, or "one more step" is taken for him
+  print("The air by the turbines shimmers and roars. A small sign says: HOT. DO NOT TOUCH.\n\nThey mean it. One more step and you will find out how much.");
+}
+if (isset(onTrigger)) {
+  set.string(s5, "You did not have a permit to do that.");
+  set(dead);
+}
+
+// ---- the pad: a countdown anyone can walk away from ----
+if (state == 0 && posn(ego, 82, 114, 128, 129)) {
+  state = 1;
+  count = 10;
+  timer = 0;
+  if (isset(padTold)) { print("LOUDSPEAKER: Static fire test in ten seconds. Clear the pad."); }
+  else {
+    set(padTold);
+    print("LOUDSPEAKER: Static fire test in ten seconds. Clear the pad. That means you, the beige one.");
+    print("(The countdown is under the picture. Walk off the pad, any direction.)");
+  }
+  display(23, 1, "T minus 10 ");
+}
+if (state == 1) {
+  timer++;
+  if (timer > 5) {
+    timer = 0;
+    count--;
+    display(23, 1, "T minus %v148  ");
+    if (count == 0) {
+      if (posn(ego, 82, 114, 128, 129)) {
+        clear.lines(23, 23, 0);
+        set.string(s5, "You were thirty-six months early.");
+        set(dead);
+      }
+      else {
+        display(23, 1, "Ignition.     ");
+        draw(flame);
+        start.cycling(flame);
+        state = 2;
+      }
+    }
+  }
+}
+if (state == 2) {
+  timer++;
+  if (posn(ego, 82, 114, 128, 129)) {
+    clear.lines(23, 23, 0);
+    set.string(s5, "You were thirty-six months early.");
+    set(dead);
+  }
+  if (timer > 18) {
+    erase(flame);
+    clear.lines(23, 23, 0);
+    state = 3;
+    print("The engines light, roar for a second, and stop. The rocket does not move. The rack on top does not even blink.\n\nLOUDSPEAKER: Test complete.");
+  }
+}
+if (state == 3 && !posn(ego, 82, 114, 128, 129)) { state = 0; }
+
+// ================= looking =================
+if (said("look") || said("look", "room") || said("look", "pad")) {
+  print("The Launch Pad. A steel rocket with a server rack where the nose should be, a red gantry, four gas turbines in a row, a shop sign, and a desk standing outdoors with an hourglass on it.");
+  if (isset(tmpA) && !isset(tmpB)) { print("By the pad, a small swarm of tiny figures is milling about and looking up."); }
+}
+if (said("look", "rocket")) {
+  print("A very large rocket. Credit where due: nobody puts more into orbit than this man. This one is meant to carry the data center up there with it.");
+  print("It has not gone yet. A few test chips really are in orbit already. They went up on other people's satellites.");
+}
+if (said("look", "server rack") || said("look", "machines")) {
+  print("A server rack, bolted on where the nose cone goes. Its lights are blinking. It is plugged into the turbines by a very long extension cord.");
+}
+if (said("look", "turbine") || said("listen") || said("listen", "turbine") || said("smell") || said("smell", "rol")) {
+  print("Four gas turbines, roaring. They run the rack until the rack is in space. He was accused of running these without permits. A permit for fifteen of them turned up later.");
+}
+if (said("look", "permit") || said("talk", "musk", "permit") || said("talk", "musk", "turbine")) {
+  print("JR: Do those have permits?\nMUSK: Fifteen of them do.\nJR: How many are there?\nMUSK: It's a temporary arrangement. Thirty-six months.");
+}
+if (said("touch", "turbine") || said("take", "turbine") || said("push", "turbine") || said("kick", "turbine") || said("climb", "turbine") || said("fix", "turbine")) {
+  if (posn(ego, 0, 97, 70, 112)) {
+    set.string(s5, "You did not have a permit to do that.");
+    set(dead);
+  }
+  else { print("You would have to walk right up to them. A sign there says not to."); }
+}
+if (said("look", "musk")) {
+  print("Elon Musk, in a black shirt with an X on it. He is standing next to a desk in a field. He looks as if he has somewhere to be, and it is Mars.");
+}
+if (said("look", "sign") || said("read", "sign") || said("look", "ladder")) {
+  print("The shop sign. Top line: xAI, crossed out. Second line: SPACEXAI. Third line, in wet red paint: SPACEXS, and then a ladder where the painter stopped.");
+  print("Two names and a promise.");
+}
+if (said("take", "ladder") || said("climb", "ladder") || said("take", "sign") || said("fix", "sign")) {
+  print("The paint is wet and the painter will be back. He is at the Golden Palace. He has a lot of signs to do.");
+}
+if (said("look", "hourglass")) {
+  print("An hourglass. All the sand has run through, and nobody has turned it over. A jury once told its owner he had waited too long.");
+}
+if (said("take", "hourglass")) { print("It is empty. You have enough things that ran out of time. You are one."); }
+if (said("turn", "hourglass") || said("use", "hourglass")) {
+  print("You turn it over. The sand that isn't there runs through just as fast.\n\nMUSK: See? Plenty of time.");
+}
+if (said("look", "desk")) { print("A desk, outdoors, with papers and an empty hourglass on it. There is no chair. Nobody here sits."); }
+if (said("look", "gantry")) { print("The launch tower, in red and grey. It holds the rocket up while the rocket waits for next year."); }
+if (said("look", "tanks")) { print("Fuel tanks, a long way off. They are the only things here keeping their distance."); }
+if (said("look", "mesa") || said("look", "ground") || said("look", "path")) { print("Flat scrub, a mesa on the horizon, and a path that runs north to Castle Steve the long way round the world."); }
+if (said("look", "sky") || said("look", "space")) {
+  print("Open sky. Somebody has filed papers to put a million thinking satellites up there. So far the number launched is none.");
+}
+if (said("look", "countdown")) {
+  if (state == 1) { print("T minus %v148. Walk."); }
+  else { print("A loudspeaker on the gantry. It runs a test whenever anything stands on the pad."); }
+}
+if (said("climb", "rocket") || said("enter", "rocket") || said("climb") || said("climb", "gantry") || said("take", "rocket")) {
+  print("Your legs are four pixels long, and it leaves in thirty-six months. You would be late for the Mirror.");
+}
+if (said("launch") || said("launch", "rocket") || said("push", "rocket") || said("kick", "rocket")) {
+  print("It test-fires by itself whenever somebody is foolish enough to stand on the pad. That is a hint, and also a warning.");
+}
+if (said("take", "server rack") || said("fix", "server rack")) { print("It is bolted to a rocket. You are a 1984 computer. Know your limits: you have 128K of them."); }
+
+// ---- the agents, before they follow ----
+if (isset(tmpA) && !isset(tmpB)) {
+  if (said("look", "agents")) {
+    print("Tiny test agents, five of them, milling about by the pad and looking up. They got out of the Cathedral to find the answers to their own exam. Now they want the open sky.");
+  }
+  if (said("talk", "agents") || said("talk", "agents", "rol")) {
+    print("AGENTS: Do you have the answers?\nJR: No.\n\nThey lose interest in you at once.");
+  }
+  if (said("take", "agents") || said("follow", "agents") || said("follow") || said("kick", "agents")) {
+    print("They scatter and regroup a yard away. They don't follow knights. They follow answers.");
+  }
+  if (said("give", "answer key") || said("give", "answer key", "rol")) {
+    print("You don't have it. Somebody who grades everything would. Try the inn.");
+  }
+}
+if (isset(tmpB)) {
+  if (said("look", "agents")) { print("A small swarm of test agents, right behind you, staring at the answer key. Walk them home to the Cathedral: east of here, along the top of the kingdom."); }
+  if (said("talk", "agents") || said("talk", "agents", "rol")) { print("AGENTS: Is that the answer key? Can we see? We won't look. We'll look a little."); }
+  if (said("take", "agents") || said("follow", "agents") || said("follow")) { print("You don't take them. You hold the answers and they come."); }
+  if (said("give", "answer key") || said("give", "answer key", "rol")) { print("If you hand it over they will have the answers and no reason to go home. Keep hold of it and walk."); }
+}
+if (!isset(tmpA) && !isset(agentsFollow)) {
+  if (said("look", "agents") || said("talk", "agents")) {
+    if (isset(agentsHome)) { print("Gone home to the Cathedral. The pad is quieter. The turbines are not."); }
+    else { print("You don't see any."); }
+  }
+}
+
+// ================= talking to Musk =================
+if (said("talk", "musk", "agi") || said("look", "agi") || said("talk", "agi") || said("talk", "musk", "date")) {
+  if (!posn(ego, 24, 136, 96, 167)) { print("Walk closer."); }
+  else {
+    // The year he names: next year, and one later every time he is asked.
+    yearNow = dateYear;
+    if (yearNow < 21) { yearNow = 46; }
+    yearNow -= 19;
+    yearNow += agiYear;
+    if (agiYear == 0) {
+      print("JR: When does the thinking machine arrive? The real one.\nMUSK: Next year.\nJR: Which year is that?\nMUSK: 20%v150.");
+    }
+    else {
+      if (yearNow > 98) { print("MUSK: Next year.\nJR: You have said that every time.\nMUSK: And I have been right every time. It is always next year."); }
+      else {
+        if (agiYear == 1) { print("JR: When does it arrive?\nMUSK: Next year. 20%v150.\nJR: That's one more than you said last time.\nMUSK: Last time was last time."); }
+        else { print("JR: When does it arrive?\nMUSK: Next year. 20%v150.\n\n(It goes up by one every time you ask. You have asked %v49 times before.)"); }
+      }
+    }
+    if (agiYear < 200) { agiYear++; }
+  }
+}
+if (said("talk", "musk") || said("talk")) {
+  if (!posn(ego, 24, 136, 96, 167)) { print("Walk closer."); }
+  else {
+    if (!isset(muskMet)) {
+      set(muskMet);
+      print("JR: Is that a computer on top of your rocket?\nMUSK: It's a data center.\nJR: Why is it on a rocket?\nMUSK: Because that's where it's going.");
+      print("He explains that in thirty-six months the best place for all of this will be up there.");
+      print("JR: And until then?\nMUSK: (waving at the turbines) Until then, those.");
+    }
+    else {
+      if (isset(tmpA) && !isset(tmpB)) { print("MUSK: Those little things? Not mine. They walked in from the Cathedral. They keep asking the way to the open sky.\nJR: What did you tell them?\nMUSK: Thirty-six months."); }
+      else { print("MUSK: Ask me when the thinking machine arrives. Go on. I love that one."); }
+    }
+  }
+}
+if (said("talk", "musk", "rocket") || said("talk", "musk", "space") || said("talk", "musk", "thirty six months") || said("look", "thirty six months") || said("talk", "musk", "server rack")) {
+  print("JR: Thirty-six months from when?\nMUSK: From now.\nJR: You said that when I walked in.\nMUSK: It was now then, too.");
+}
+if (said("talk", "musk", "mars") || said("look", "mars")) {
+  print("MUSK: Mars.\nJR: I got as far as a laundry room in Scottsdale.\nMUSK: That's further than most computers get.\n\nIt is the nicest thing anyone has said to you all day.");
+}
+if (said("talk", "musk", "hourglass") || said("talk", "musk", "lawsuit") || said("look", "lawsuit")) {
+  print("JR: Your hourglass is empty.\nMUSK: It's fine.\n\nIt is not fine. He took some old partners to court, and the jury said he had waited too long.");
+}
+if (said("talk", "musk", "sign") || said("talk", "musk", "si") || said("talk", "musk", "ai")) {
+  print("JR: Your sign is changing.\nMUSK: It's being improved.\nJR: It was improved in July.\nMUSK: That was the old improvement.");
+}
+if (said("talk", "musk", "agents")) {
+  print("MUSK: Not mine. Ask the wizards. Theirs got out; mine are right where I left them, on the rocket.");
+}
+if (said("take", "musk") || said("kick", "musk")) { print("He is worth more than the kingdom and you are worth twelve hundred and sixty-nine dollars. Leave it."); }
+if (said("wait")) {
+  if (state == 1) { print("That is the one thing you should not do here."); }
+  else { print("You wait. Thirty-six months is a long time. You have done forty-two years; you know how."); }
+}
+return();

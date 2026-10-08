@@ -1,0 +1,20 @@
+// Room 1: a floor, a wall line ego cannot cross, a door to look at.
+#define ego o0
+if (f5) {
+  load.pic(v0);
+  draw.pic(v0);
+  load.view(0);
+  animate.obj(ego);
+  set.view(ego, 0);
+  position(ego, 80, 130);
+  draw(ego);
+  show.pic();
+  status.line.on();
+  accept.input();
+}
+if (said("look", "door")) { print("A plain door. You have %v3 of %v7 points."); }
+if (said("take", "key")) {
+  if (has("key")) { print("You have it."); }
+  else { get("key"); v3 += 5; print("Taken."); }
+}
+return();

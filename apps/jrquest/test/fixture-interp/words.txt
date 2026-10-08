@@ -1,0 +1,8 @@
+# A tiny vocabulary for test/interp.test.js.
+0: a, the, at
+1: anyword
+9999: rol
+20: look, examine
+21: door
+22: take, pick up
+23: key

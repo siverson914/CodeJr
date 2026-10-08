@@ -1,0 +1,18 @@
+# Room 9, outside the All-In Tavern (groups 900 to 999). Room 10 uses
+# these too: both rooms have one author.
+900: bouncer, doorman
+901: tavern, pub, saloon, all-in, allin, all in, all-in tavern
+902: velvet rope, ropes, stanchion, stanchions, posts
+903: barrels, keg, kegs, casks
+904: cover, cover charge, charge, 7500, admission
+905: guest list
+906: microphone, mic, microphones, mics, weathervane, vane
+907: lantern, lamp
+908: listener, listeners, subscriber
+909: sneak, slip past, creep
+910: bribe
+911: sunglasses, shades, suit, earpiece
+912: podcast, pod, episode
+913: carriage, coach, cab, taxi, ride, driver, horse
+915: weather, rain
+916: sent, send, sends, from, came, here for

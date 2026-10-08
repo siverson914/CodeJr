@@ -1,0 +1,53 @@
+desc "The test fire"
+loop 0
+cel 13 16 trans=5
+..EEEEEEEEE..
+..EFFFFFFFE..
+.EEFFFFFFFEE.
+.CEEFFFFFEEC.
+.CEEEFFFEEEC.
+CCCEEEFEEECCC
+C.CCEEEEECC.C
+..CCCEEECCC..
+.C.CCEEECC.C.
+...CCCECCC...
+..C.CCCCC.C..
+....C4C4C....
+.4...C4C...4.
+.....4C4.....
+..4...4...4..
+......4......
+cel 13 16 trans=5
+..EEEEEEEEE..
+..EFFFFFFFE..
+..EEFFFFFEE..
+.CCEFFFFFECC.
+CCEEEFFFEEECC
+.CCEEEFEEECC.
+C.CEEEEEEEC.C
+.CCCCEEECCCC.
+..CCCEEECCC..
+.C..CCECC..C.
+...CCCCCCC...
+.4..CC4CC..4.
+....4C4C4....
+..4..C4C..4..
+......4......
+.4....4....4.
+cel 13 16 trans=5
+..EEEEEEEEE..
+..EFFFFFFFE..
+.CEFFFFFFFEC.
+.CEEFFFFFEEC.
+.CCEEFFFEECC.
+C.CEEEFEEEC.C
+.CCCEEEEECCC.
+C.CCEEEEECC.C
+..CCCCECCCC..
+...CCEEECC...
+.C..CCCCC..C.
+...4CC4CC4...
+..4..4C4..4..
+....4.4.4....
+.4....4....4.
+......4......

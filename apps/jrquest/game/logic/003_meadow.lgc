@@ -1,0 +1,331 @@
+// Room 3: Token Meadow. Puzzle 2: tokens are pieces of words, you pay by
+// the piece, and answers cost more than questions. Also DHH and his tiled
+// windows (a part that didn't change) and the cashmere goat (wool for the
+// Tavern).
+#include "defines.h"
+#include "room03.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(50);
+  load.view(51);
+  load.view(52);
+  load.view(53);
+  load.view(54);
+  load.view(55);
+  set.horizon(52);
+
+  call(91);
+  set(outdoor);
+
+  // arriveFrom is how JR left the last room, so he comes in opposite.
+  position(ego, 60, 160);
+  set.loop(ego, 3);
+  if (arriveFrom == 3) { position(ego, 58, 58); set.loop(ego, 2); }
+  if (arriveFrom == 2) { position(ego, 2, 128); set.loop(ego, 0); }
+  if (arriveFrom == 4) { position(ego, 148, 142); set.loop(ego, 1); }
+
+  animate.obj(car);
+  set.view(car, 52);
+  position(car, 117, 129);
+  draw(car);
+  stop.update(car);
+
+  animate.obj(dhh);
+  set.view(dhh, 50);
+  position(dhh, 98, 124);
+  stop.cycling(dhh);
+  draw(dhh);
+
+  animate.obj(apprentices);
+  set.view(apprentices, 51);
+  position(apprentices, 100, 156);
+  work = 4;
+  cycle.time(apprentices, work);
+  draw(apprentices);
+
+  animate.obj(goat);
+  set.view(goat, 53);
+  position(goat, 33, 76);
+  work = 7;
+  cycle.time(goat, work);
+  draw(goat);
+
+  animate.obj(signObj);
+  set.view(signObj, 55);
+  position(signObj, 36, 98);
+  draw(signObj);
+  stop.update(signObj);
+
+  // the five tokens in bloom
+  animate.obj(tokIng);
+  set.view(tokIng, 54);
+  set.cel(tokIng, 3);
+  position(tokIng, 6, 117);
+  ignore.objs(tokIng);
+  stop.cycling(tokIng);
+  draw(tokIng);
+
+  animate.obj(tokThe);
+  set.view(tokThe, 54);
+  set.cel(tokThe, 4);
+  position(tokThe, 26, 117);
+  ignore.objs(tokThe);
+  stop.cycling(tokThe);
+  draw(tokThe);
+
+  animate.obj(tokBeliev);
+  set.view(tokBeliev, 54);
+  set.cel(tokBeliev, 1);
+  position(tokBeliev, 10, 139);
+  ignore.objs(tokBeliev);
+  stop.cycling(tokBeliev);
+  draw(tokBeliev);
+
+  animate.obj(tokUn);
+  set.view(tokUn, 54);
+  set.cel(tokUn, 0);
+  position(tokUn, 4, 161);
+  ignore.objs(tokUn);
+  stop.cycling(tokUn);
+  draw(tokUn);
+
+  animate.obj(tokAble);
+  set.view(tokAble, 54);
+  set.cel(tokAble, 2);
+  position(tokAble, 18, 161);
+  ignore.objs(tokAble);
+  stop.cycling(tokAble);
+  draw(tokAble);
+
+  draw(ego);
+  show.pic();
+}
+
+// ---- the edges ----
+if (egoEdge == 1) { arriveFrom = 1; new.room(7); }
+if (egoEdge == 2) { arriveFrom = 2; new.room(4); }
+if (egoEdge == 3) { arriveFrom = 3; new.room(12); }
+if (egoEdge == 4) { arriveFrom = 4; new.room(2); }
+
+// ---- picked tokens grow back ----
+if (tA > 0) { tA--; if (tA == 0) { draw(tokUn); } }
+if (tB > 0) { tB--; if (tB == 0) { draw(tokBeliev); } }
+if (tC > 0) { tC--; if (tC == 0) { draw(tokAble); } }
+if (tD > 0) { tD--; if (tD == 0) { draw(tokIng); } }
+if (timer > 0) { timer--; if (timer == 0) { draw(tokThe); } }
+
+// ---- looking ----
+if (said("look") || said("look", "room") || said("look", "meadow")) {
+  print("Token Meadow. Tokens grow here in beds, like flowers, each one a piece of a word on a stem. A signpost stands by the path with a coin slot in it.");
+  print("To the east is a thatched cottage whose windows do not overlap. A man in a racing suit stands outside it, timing something. A goat is ignoring all of this.");
+}
+if (said("look", "un") || said("look", "flowers") || said("look", "soil") || said("look", "bed")) {
+  print("UN. BELIEV. ABLE. ING. THE. None of them is a word, except THE, which got lucky. They are pieces. Somebody downstream puts them together.");
+}
+if (said("smell", "un") || said("smell", "flowers") || said("smell", "tokens") || said("smell")) {
+  print("They smell like a fresh ribbon in a dot matrix printer.");
+}
+if (said("drink", "un") || said("drink", "tokens") || said("drink", "flowers")) {
+  print("You have no mouth. You have a cartridge slot, and they don't fit.");
+}
+if (said("plant", "tokens") || said("plant", "un")) {
+  print("They plant themselves. Nobody has worked out how to make them stop.");
+}
+
+// ---- picking tokens ----
+if (said("take", "tokens") || said("take", "flowers") || said("take", "un") || said("take") || said("take", "anyword", "tokens")) {
+  if (has("Chest of Tokens")) {
+    print("The Chest is never empty. Leave these for somebody who still has to count.");
+  }
+  else {
+    if (tokens > 10) {
+      print("You are holding %v40 tokens, and twelve is all a 128K knight can carry. Spend some first.");
+    }
+    else {
+      work = 0;
+      distance(ego, tokUn, work2);
+      if (work2 < 26) { work = 1; }
+      if (work == 0) { distance(ego, tokBeliev, work2); if (work2 < 30) { work = 2; } }
+      if (work == 0) { distance(ego, tokAble, work2); if (work2 < 26) { work = 3; } }
+      if (work == 0) { distance(ego, tokIng, work2); if (work2 < 26) { work = 4; } }
+      if (work == 0) { distance(ego, tokThe, work2); if (work2 < 26) { work = 5; } }
+      if (work == 0) {
+        print("Walk closer to a token that is in bloom. They are in the beds on the west side of the path.");
+      }
+      else {
+        tokens += 2;
+        if (work == 1) { erase(tokUn); tA = 150; print("You pick UN. It comes away in two tokens: the piece, and the space in front of it. Spaces count."); }
+        if (work == 2) { erase(tokBeliev); tB = 150; print("You pick BELIEV. It is most of a word. Most of a word is two tokens."); }
+        if (work == 3) { erase(tokAble); tC = 150; print("You pick ABLE. It goes on the end of things. Two tokens."); }
+        if (work == 4) { erase(tokIng); tD = 150; print("You pick ING. Two tokens. It is still going."); }
+        if (work == 5) { erase(tokThe); timer = 150; print("You pick THE. A whole word, for once, and its space. Two tokens."); }
+        if (!isset(mFirstPick)) {
+          set(mFirstPick);
+          score += 3;
+          print("So that is a token: not a word, a piece of one. UN, BELIEV, ABLE. The Mind reads in pieces and is paid in pieces.");
+          print("You pay for every token you send it and every token it sends back, and the ones it sends back cost more. Answers cost more than questions.");
+          print("JR: I never charged by the keystroke. I should have.");
+        }
+        else {
+          print("You have %v40 tokens. The stem is already budding again.");
+        }
+      }
+    }
+  }
+}
+
+// ---- the signpost ----
+if (said("look", "sign") || said("look", "map")) {
+  set(mSignSeen);
+  if (isset(signRead)) { print("The signpost. You have paid, so it stays lit for you. READ it whenever you like."); }
+  else { print("A signpost with a board that says MAP and a coin slot under it. Small print: 3 TOKENS TO READ. YOU PAY BY THE TOKEN. ANSWERS ARE EXTRA."); }
+}
+if (said("read", "sign") || said("read", "map") || said("use", "sign") || said("look", "kingdom")) {
+  if (isset(signRead)) { goto(showMap); }
+  set(mSignSeen);
+  print("The board lights up: \"THE KINGDOM IS...\" and goes dark.\n\nINSERT 3 TOKENS TO CONTINUE.");
+  if (tokens < 3 && !has("Chest of Tokens")) { print("You have %v40. Tokens grow in the beds beside you. PICK some."); }
+  else { print("You could PAY the sign."); }
+}
+if (said("give", "tokens", "rol") || said("give", "sign", "rol") || said("give", "three", "rol") || said("give") || said("use", "tokens") || said("use", "tokens", "sign") || said("drop", "tokens", "sign") || said("drop", "tokens", "anyword") || said("buy", "map") || said("give", "map")) {
+  if (isset(signRead)) { print("You have paid. The sign does not charge twice for the same answer. It is the only thing in the kingdom that doesn't."); }
+  else {
+    if (!posn(ego, 14, 86, 66, 118)) { print("The signpost is by the path, on the west side. Walk closer."); }
+    else {
+      if (has("Chest of Tokens")) { goto(paySign); }
+      if (tokens > 2) { tokens -= 3; goto(paySign); }
+      print("The slot wants 3 tokens and you have %v40. They grow in the beds right here. PICK some.");
+    }
+  }
+}
+goto(signDone);
+paySign:
+set(signRead);
+score += 3;
+print("Three tokens go in the slot. Clink, clink, clink. The board lights up and stays lit.");
+showMap:
+print("THE KINGDOM. It wraps: walk off any edge and you come round the other side.");
+print("SOUTH ROW, west to east:\nCastle Steve, Token Meadow (you are here), the Godfathers' Inn, the Cold Reactor.");
+print("MIDDLE ROW:\nthe Data Center, Sand Hill Bridge, the Bazaar, the Tavern.");
+print("NORTH ROW:\nthe Launch Pad, the Golden Palace, the Cathedral, the GPU Field.");
+print("STUCK? The Godfathers' Inn, one screen east, gives hints.\n\nThat was 70 tokens of answer for 3 tokens of question. The sign is running at a loss.");
+signDone:
+if (said("take", "sign") || said("push", "sign") || said("kick", "sign")) {
+  print("It is planted deeper than the tokens are. It also has your money, or will.");
+}
+
+// ---- DHH ----
+if (said("look", "dhh") || said("look", "man")) {
+  print("DHH. The finest swordsman in the kingdom, by his own account and several others'. He wears a racing suit and holds a stopwatch. His sword is stuck in the ground beside him, and the grass has grown round it.");
+}
+if (said("talk", "dhh") || said("talk", "man") || said("talk") || said("talk", "dhh", "sword") || said("talk", "dhh", "apprentices")) {
+  if (!posn(ego, 66, 111, 140, 150)) { print("He is over by the cottage, with his eye on a stopwatch. Walk closer."); }
+  else {
+    if (!isset(mDhhMet)) {
+      set(mDhhMet);
+      print("JR: They say you're the best swordsman in the kingdom.\nDHH: I haven't drawn it since March.");
+      print("He nods at the row of apprentices, who are fencing one another with great energy and no sign of getting tired.");
+    }
+    else {
+      mDhhTalk++;
+      if (mDhhTalk > 4) { mDhhTalk = 1; }
+      if (mDhhTalk == 1) { print("DHH: The apprentices built the whole new gatehouse on their own. Then I set them on the old keep, and the old keep was surprisingly tricky. I say so. Somebody should."); }
+      if (mDhhTalk == 2) { print("DHH: I moved out of the Cloud. This cottage is mine, down to the thatch.\nJR: I have never been in a cloud. I have been in a garage.\nDHH: Then you own your own castle too."); }
+      if (mDhhTalk == 3) { print("JR: Do you miss it? The sword?\nDHH: Ask me after this lap."); }
+      if (mDhhTalk == 4) { print("DHH: Have you looked at my windows?\n\nHe would like you to look at his windows."); }
+    }
+  }
+}
+if (said("look", "sword") || said("talk", "dhh", "rol")) {
+  print("A fine sword, point down in the turf. The narrator would call it pencils down. He has not drawn it since about March, and he says so plainly, which is more than most swordsmen would.");
+}
+if (said("take", "sword") || said("pull", "sword")) {
+  print("It is his, and he set it down on purpose. Besides, you were built with a keyboard, and it is wireless. You are armed enough.");
+}
+if (said("look", "apprentices")) {
+  print("A row of apprentices with square heads, fencing. They are identical. They do not get tired, they do not get bored, and every so often one of them lunges at the hedge for no reason anyone can find.");
+}
+if (said("talk", "apprentices")) {
+  print("APPRENTICE: Parry. Thrust. Shall I also rethatch the roof?\nDHH: No.\nAPPRENTICE: Rethatching the roof.");
+}
+if (said("take", "apprentices") || said("kick", "apprentices") || said("kick", "dhh")) {
+  print("There are three of them, they have swords, and you have legs four pixels long.");
+}
+if (said("look", "car") || said("look", "stopwatch")) {
+  print("A race car, low and red, parked on a patch of gravel. It has been to Le Mans and would like you to know. He times laps in it while the apprentices fence.");
+}
+if (said("take", "car") || said("enter", "car") || said("use", "car") || said("sit", "car") || said("open", "car")) {
+  print("You top out at 4.77 megahertz. The car does not go that slowly.");
+}
+if (said("look", "tools") || said("talk", "dhh", "tools")) {
+  print("Half the workshops in the kingdom were built with tools that came out of this cottage. He gave them away. Nobody in the meadow mentions it, which is how you know it is true.");
+}
+
+// ---- the tiled windows: a part that didn't change ----
+if (said("look", "windows") || said("look", "window") || said("talk", "dhh", "windows") || said("talk", "dhh", "window") || said("look", "cottage") || said("look", "castle")) {
+  if (!isset(mTiling)) {
+    set(mTiling);
+    unchanged++;
+    print("The cottage has four windows, set edge to edge like tiles. A big one, and a stack beside it. Not one overlaps another.");
+    print("JR: Your windows don't overlap.\nDHH: Tiled. Everything in its place. It's the future.");
+    print("JR: I show one program at a time. The whole screen. Since 1984.\nDHH: Then you were first.");
+    print("JR: That part came back!\n\n(Parts that didn't change: %v46 of 9.)");
+  }
+  else {
+    print("A thatched cottage with four tiled windows: a big one, and a stack beside it. Nothing overlaps. One program each, and all of each. You approve.");
+  }
+}
+if (said("open", "door") || said("look", "door") || said("enter", "cottage") || said("knock") || said("knock", "door") || said("open", "cottage") || said("enter", "door")) {
+  print("The door is shut and the owner is out here. He moved out of the Cloud to have a door of his own to shut.");
+}
+if (said("open", "windows") || said("open", "window") || said("close", "window") || said("close", "windows")) {
+  print("They are tiled. Open one and the others move over to make room. Close it and they take the room back. Nothing is ever on top of anything.");
+}
+
+// ---- the goat ----
+if (said("look", "goat")) {
+  if (isset(sigChamath)) { print("A cashmere goat, slightly less cashmere than before. He has heard he is famous in the Tavern."); }
+  else { print("A goat, white and very soft. It is a cashmere goat. King's Quest had a goat too, and that one wanted a carrot. This one wants nothing."); }
+}
+if (said("touch", "goat") || said("shear", "goat") || said("take", "wool") || said("take", "wool", "goat") || said("shear", "wool") || said("shear")) {
+  if (!posn(ego, 10, 60, 62, 96)) { print("The goat is up by the tree. Walk closer."); }
+  else {
+    if (has("wool")) { print("One tuft is plenty. He needs the rest. It gets cold in a meadow."); }
+    else {
+      if (isset(sigChamath)) { print("You pet the goat. He leans into it. Nobody is cold today."); }
+      else {
+        get("wool");
+        if (isset(mGoatPet)) { print("You pet the goat again and another tuft comes away. He has plenty, and you keep losing yours."); }
+        else {
+          set(mGoatPet);
+          print("You pet the goat. A tuft of cashmere comes away in your hand. He doesn't mind. He has more.");
+          print("You have the wool. It is the softest thing you have ever held, counting the dust cover.");
+        }
+      }
+    }
+  }
+}
+if (said("talk", "goat")) { print("GOAT: Meh.\n\nIt is the most honest answer you have had all day."); }
+if (said("take", "goat") || said("climb", "goat") || said("push", "goat")) {
+  print("He is a goat, not an item. You may take some of what he has too much of, if you are nice about it.");
+}
+if (said("kick", "goat") || said("drink", "goat")) { print("You are a knight. Sir Junior. There are standards."); }
+if (said("give", "tokens", "goat") || said("give", "goat", "rol") || said("give", "anyword", "goat")) {
+  print("He sniffs it and goes back to the grass. Goats are paid in grass.");
+}
+
+// ---- scenery ----
+if (said("look", "tree") || said("look", "bush")) { print("A round tree, the kind a child draws. The goat likes the shade."); }
+if (said("climb", "tree") || said("climb")) { print("Your legs are four pixels long."); }
+if (said("look", "hills") || said("look", "sky")) {
+  print("Green hills. On the western one, very small, is Castle Steve. You can't see your window from here, but you know which one it is.");
+}
+if (said("look", "path") || said("look", "north")) {
+  print("The path runs north to Sand Hill Bridge. West is Castle Steve. East is the Godfathers' Inn. South, round the bottom of the world, is the Golden Palace.");
+}
+if (said("look", "ground")) { print("Gravel, where the car is parked. He rakes it."); }
+return();

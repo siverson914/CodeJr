@@ -1,0 +1,1882 @@
+# Jr's Quest from the date prompt to the ending, the honest way: a real
+# date, every step on foot through the real exits, every puzzle solved,
+# two deaths and two Retries, 158 of 158.
+#   node tools/play.js build --script test/walkthrough.txt --png-dir out
+# Zuckerberg is random but seeded, so this run always meets him in the
+# same places (the Tavern road, where JR turns him down).
+# ---- Leg 0: the date prompt and the opening ----
+5
+expect Current date is Tue
+type 10-05-26
+3
+expect Invalid date
+type 10-05-2026
+5
+expect The Search for Intelligence
+expect Let the AI play
+shot 00-title
+# the menu: P plays
+char p
+23
+expect KING STEVE: Sir Junior? You're up! It's
+key enter
+2
+expect KING STEVE: In the garage, mostly. Sorry
+key enter
+2
+expect "Bring me three things. The Chest of
+key enter
+2
+expect "They are all north of here. Everything is
+key enter
+5
+# ---- Leg 1: room 1, the Guest Room: the bucket and the Technical Reference ----
+shot 01-guestroom
+type look
+3
+expect The guest room. A bed nobody has slept in,
+key enter
+2
+type take bucket
+3
+expect You take the bucket. A knight should have a
+key enter
+2
+key down
+5
+key pgdn
+11
+key pgdn
+1
+type take book
+3
+expect You take the Technical Reference. It is
+key enter
+2
+type read book
+3
+expect The IBM PCjr Technical Reference, 1983.
+key enter
+2
+type inventory
+3
+expect Technical Reference
+shot 01-inventory
+key enter
+2
+# out of the door at the back of the room
+key up
+15
+key pgup
+6
+key pgup
+1
+key up
+3
+# ---- Leg 2: room 2, Castle Steve: read the code, fix the gate ----
+7
+shot 02-castle
+expect A man with a mustache and a lute is
+key enter
+2
+expect PRIMEAGEN: He vibed a gate! Nobody read it!
+key enter
+2
+expect SQUIRE: It worked when I ran it.
+key enter
+2
+type fix code
+3
+expect Fix what? You haven't read it. You would
+key enter
+2
+type read code
+3
+expect You read the code. All of it. Every line,
+key enter
+2
+expect It takes a while. You are four point seven
+key enter
+2
+expect Line 212: OPEN GATE WHEN PIGS FLY. Nobody
+key enter
+2
+expect PRIMEAGEN: All of it? JR: It's how I was
+key enter
+2
+shot 02-read
+type fix code
+3
+expect You change line 212 to: OPEN GATE WHEN
+key enter
+4
+shot 02-gate-open
+expect The cartridge ejects. The slot is open.
+key enter
+2
+expect PRIMEAGEN: ...I like this one.
+key enter
+2
+type score
+3
+expect You have 10 of 158 points. Parts that
+key enter
+2
+# through the gate and out the east edge
+key down
+23
+key pgdn
+2
+key pgdn
+1
+key pgdn
+5
+key right
+28
+key right
+1
+key right
+5
+# ---- Leg 3: room 3, Token Meadow: tokens, the signpost, the goat ----
+10
+shot 03-meadow
+type look
+3
+expect Token Meadow. Tokens grow here in beds,
+key enter
+2
+expect To the east is a thatched cottage whose
+key enter
+2
+type read sign
+3
+expect The board lights up: "THE KINGDOM IS..."
+key enter
+2
+expect You have 0. Tokens grow in the beds beside
+key enter
+2
+type pick tokens
+3
+expect You pick BELIEV. It is most of a word. Most
+key enter
+2
+expect So that is a token: not a word, a piece of
+key enter
+2
+expect You pay for every token you send it and
+key enter
+2
+expect JR: I never charged by the keystroke. I
+key enter
+2
+shot 03-first-pick
+type pick tokens
+3
+expect You pick ING. Two tokens. It is still going.
+key enter
+2
+expect You have 4 tokens. The stem is already
+key enter
+2
+key pgdn
+8
+key end
+4
+key end
+1
+type pick tokens
+3
+expect You pick UN. It comes away in two tokens:
+key enter
+2
+expect You have 6 tokens. The stem is already
+key enter
+2
+type pick tokens
+3
+expect You pick ABLE. It goes on the end of
+key enter
+2
+expect You have 8 tokens. The stem is already
+key enter
+2
+key pgup
+3
+key up
+11
+key up
+1
+type pick tokens
+3
+expect You pick THE. A whole word, for once, and
+key enter
+2
+expect You have 10 tokens. The stem is already
+key enter
+2
+type pick tokens
+3
+expect Walk closer to a token that is in bloom.
+key enter
+2
+type count tokens
+3
+expect You have 10 tokens. A token is a piece of a
+key enter
+2
+# the signpost: 3 tokens, and the map of the kingdom
+key pgup
+7
+key pgup
+1
+type look at sign
+3
+expect A signpost with a board that says MAP and a
+key enter
+2
+type pay sign
+3
+expect Three tokens go in the slot. Clink, clink,
+key enter
+2
+expect THE KINGDOM. It wraps: walk off any edge
+key enter
+2
+expect SOUTH ROW, west to east: Castle Steve,
+key enter
+2
+expect MIDDLE ROW: the Data Center, Sand Hill
+key enter
+2
+expect NORTH ROW: the Launch Pad, the Golden
+key enter
+2
+expect STUCK? The Godfathers' Inn, one screen
+key enter
+2
+shot 03-sign-paid
+# the cashmere goat: wool for the Tavern
+key home
+5
+key pgup
+8
+key right
+2
+key right
+1
+type look at goat
+3
+expect A goat, white and very soft. It is a
+key enter
+2
+type pet goat
+3
+expect You pet the goat. A tuft of cashmere comes
+key enter
+2
+expect You have the wool. It is the softest thing
+key enter
+2
+shot 03-goat
+# DHH and the tiled windows (a part that didn't change)
+key right
+1
+key pgdn
+21
+key end
+2
+key end
+1
+type talk to dhh
+3
+expect JR: They say you're the best swordsman in
+key enter
+2
+expect He nods at the row of apprentices, who are
+key enter
+2
+type look at windows
+3
+expect The cottage has four windows, set edge to
+key enter
+2
+expect JR: Your windows don't overlap. DHH: Tiled.
+key enter
+2
+expect JR: I show one program at a time. The whole
+key enter
+2
+expect JR: That part came back! (Parts that didn't
+key enter
+2
+shot 03-tiling
+type score
+3
+expect You have 16 of 158 points. Parts that
+key enter
+2
+# north to Sand Hill Bridge
+key home
+11
+key up
+24
+key up
+1
+key up
+5
+# ---- Leg 4: room 7, Sand Hill Bridge, west bank (no crossing yet, so no toll) ----
+10
+shot 07-bridge
+type look
+3
+expect Sand Hill Bridge. A stream of money runs
+key enter
+2
+expect Up the hill are the venture offices, all
+key enter
+2
+type look at bridge
+3
+expect The bridge is a keyboard. Flat, square keys
+key enter
+2
+expect JR: Those are chiclet keys! I had those in
+key enter
+2
+expect JR: So I was early? TROLL: You were early.
+key enter
+2
+expect (Parts that didn't change: 2 of 9. This one
+key enter
+2
+shot 07-chiclet
+type talk to troll
+3
+expect TROLL: Toll bridge. Fifteen percent of
+key enter
+2
+type read board
+3
+expect WANTED: THE SCRIBE. Writes very fast. Never
+key enter
+2
+expect KNOWN BY HIS LONG DASHES. If you find three
+key enter
+2
+key up
+26
+key pgup
+12
+key up
+10
+key up
+1
+key up
+5
+# ---- Leg 5: room 12, the Golden Palace: the word is SI, and the golf ledger ----
+7
+shot 12-palace
+expect The Golden Palace. A man in white overalls
+key enter
+2
+type look
+3
+expect The Golden Palace: gold steps, gold
+key enter
+2
+expect A man on a balcony, two guards at the gate,
+key enter
+2
+key up
+16
+key home
+2
+key home
+1
+type talk to the guard
+3
+expect JR: Hello. I'm Sir Junior. King Steve sent
+key enter
+2
+expect (There is a word they are waiting for, or a
+key enter
+2
+type excuse me, where is the ai?
+3
+expect (The guard does not acknowledge that word.)
+key enter
+2
+type read the sign
+3
+expect It said AI, in old black letters. He paints
+key enter
+2
+expect (S, I. You could try saying that.)
+key enter
+2
+type where is the si?
+3
+expect JR: The... SI?
+key enter
+2
+expect Both guards look at you. They have been
+key enter
+2
+expect So that is the word here. You file it under
+key enter
+2
+shot 12-si
+type talk to the guard
+3
+expect GUARD: The gate is shut. He receives nobody
+key enter
+2
+key right
+32
+key pgdn
+8
+key pgdn
+1
+type read ledger
+3
+expect You read the ledger. WATER APPLIED ALL THE
+key enter
+2
+expect You have never met an acre-foot. You do the
+key enter
+2
+expect You keep the number: 547 billion gallons,
+key enter
+2
+shot 12-ledger
+type talk to groundskeeper
+3
+expect GROUNDSKEEPER: Every drop goes in the
+key enter
+2
+type score
+3
+expect You have 26 of 158 points. Parts that
+key enter
+2
+# back south to the bridge
+key left
+28
+key end
+10
+key end
+1
+key down
+5
+# ---- Leg 6: room 7 again: over the bridge, west to east. The troll takes 15 percent ----
+key down
+16
+key end
+9
+key pgdn
+2
+key pgdn
+1
+key right
+7
+shot 07-toll
+expect The troll counts your tokens, twice, and
+key enter
+2
+type count tokens
+3
+expect You have 5 tokens. A token is a piece of a
+key enter
+2
+key right
+50
+key pgdn
+2
+key pgdn
+1
+key right
+5
+# ---- Leg 7: room 8, the Bazaar: only passing through for now ----
+9
+shot 08-bazaar-first
+expect Everybody here is shouting a price, and the
+key enter
+2
+expect STALLKEEPER: One token! Everything one
+key enter
+2
+type look
+3
+expect The Bazaar. Three stalls under striped
+key enter
+2
+expect On the middle counter, something made of
+key enter
+2
+key right
+17
+key pgup
+11
+key up
+7
+key up
+1
+type talk to stallkeeper
+3
+expect STALLKEEPER: The Glass half of the Shield!
+key enter
+2
+expect STALLKEEPER: One rule. I only sell to
+key enter
+2
+expect (You are carrying a thick IBM binder. You
+key enter
+2
+key pgdn
+18
+key right
+25
+key right
+1
+key right
+5
+# ---- Leg 8: room 9, outside the All-In Tavern: get past the bouncer ----
+12
+shot 09-tavern
+type look
+3
+expect The All-In Tavern. Plaster, beams, a tile
+key enter
+2
+expect Roads go off in all four directions. Four
+key enter
+2
+key right
+20
+key pgup
+8
+key pgup
+1
+key up
+3
+expect A very large man is standing exactly where
+key enter
+2
+expect BOUNCER: Cover's seventy-five hundred
+key enter
+2
+type pay cover
+3
+expect JR: I have 5 tokens. BOUNCER: Is that
+key enter
+2
+expect He looks at you for a while. BOUNCER: You
+key enter
+2
+type talk to bouncer
+3
+expect BOUNCER: Who sent you? JR: King Steve. He
+key enter
+2
+expect BOUNCER: A listener? We have a listener!
+key enter
+2
+expect He unhooks the velvet rope from nothing in
+key enter
+2
+shot 09-listener
+key up
+12
+# ---- Leg 9: room 10, inside the Tavern: four signatures and the Seed ----
+5
+shot 10-inside
+expect Four chairs, four hosts, four microphones.
+key enter
+2
+expect JASON: A listener! In the room! JR: I'm
+key enter
+2
+expect A term sheet is pushed to the middle of the
+key enter
+2
+type look
+3
+expect The All-In Tavern. One long table, four
+key enter
+2
+expect From the left: Chamath, Jason, Sacks,
+key enter
+2
+key home
+15
+key end
+2
+key end
+1
+type talk to chamath
+3
+expect CHAMATH: It is freezing in here and I have
+key enter
+2
+expect He looks at the sign over his chair, and
+key enter
+2
+type give wool to chamath
+3
+expect You hold up the tuft of cashmere. CHAMATH:
+key enter
+2
+expect He snaps his fingers. A tailor comes in. A
+key enter
+21
+shot 10-sweater
+expect Chamath explains that possessions are a
+key enter
+3
+expect It fits. It is ribbed. He points at the
+key enter
+2
+expect CHAMATH: Warm. Finally. Where do I sign? He
+key enter
+2
+type talk to jason
+3
+expect JASON: Ask me anything. Seriously.
+key enter
+2
+type ask jason about the weather
+3
+expect JASON: Rain! You know what people want in
+key enter
+2
+type ask jason about uber
+3
+expect JR: Did you ever invest in Uber? The room
+key enter
+31
+shot 10-uber
+expect JR: Which was it? Third or fourth? He keeps
+key enter
+2
+expect JR: You were early. JASON: I was early! JR:
+key enter
+2
+type talk to sacks
+3
+expect SACKS: I'd sign, but look at the heading. I
+key enter
+2
+expect SACKS: You've been to the Palace. You know
+key enter
+2
+type it is a quest for ai
+3
+expect SACKS: I can't put my name under that word.
+key enter
+2
+expect (You know the word they use now. You
+key enter
+2
+type it is a quest for si
+3
+expect JR: It's a quest for SI. Super
+key enter
+2
+expect He crosses out one letter on the term
+key enter
+2
+expect Then he reads the kingdom's rules out loud,
+key enter
+2
+type talk to friedberg
+3
+expect FRIEDBERG: I don't want anything. I have
+key enter
+20
+shot 10-science-corner
+expect Three chairs are suddenly empty.
+key enter
+2
+expect FRIEDBERG: ...Every time. He looks at you.
+key enter
+2
+type listen
+3
+expect JR: I'll stay. I was built to wait.
+key enter
+11
+expect SCIENCE CORNER, part one of five.
+key enter
+15
+expect Part two: what lives in it. He has a number
+key enter
+15
+expect Part three: nitrogen. You run at 4.77
+key enter
+15
+expect Part four: why quinoa puts up with ground
+key enter
+15
+expect Part five. FRIEDBERG: And so, in
+key enter
+2
+expect FRIEDBERG: I've never got this far. I don't
+key enter
+2
+expect He pays you the only way a Sultan of
+key enter
+24
+expect The other three come back in and sit down,
+key enter
+2
+expect Four signatures. The term sheet is full.
+key enter
+2
+expect ALL FOUR: Let your winners ride.
+key enter
+2
+expect Jason takes the paper and puts something in
+key enter
+2
+expect JR: What do I do with it? SACKS: Plant it.
+key enter
+32
+shot 10-seed
+type look at seed
+3
+expect One bean, fully funded. They say to plant
+key enter
+2
+type score
+3
+expect You have 46 of 158 points. Parts that
+key enter
+2
+type inventory
+3
+expect Seed
+key enter
+2
+# out of the door at the bottom of the room
+key right
+7
+key pgdn
+10
+key pgdn
+1
+key down
+9
+# ---- Leg 10: room 9 again, then east (round the world) to the Data Center ----
+10
+# Zuckerberg has wandered in with his wheelbarrow
+type look at zuckerberg
+3
+expect Mark Zuckerberg, pushing a wheelbarrow of
+key enter
+2
+type talk to zuckerberg
+3
+expect ZUCK: A hundred million to start. JR: I
+key enter
+2
+expect ZUCK: Two hundred. JR: What would I do?
+key enter
+2
+type no
+3
+expect JR: No, thank you. I'm on a quest. ZUCK:
+key enter
+2
+key pgdn
+13
+key right
+31
+key right
+1
+key right
+5
+# ---- Leg 11: room 6, the Data Center: meter, Keeper, forty bytes, the bucket ----
+7
+shot 06-datacenter
+expect A building with no windows hums to itself
+key enter
+2
+expect KEEPER: That thing drinks the river dry!
+key enter
+2
+type look
+3
+expect The Data Center. A castle with two towers,
+key enter
+2
+expect A pipe runs from it to a meter. A moat runs
+key enter
+2
+# death 1: the moat. One warning at the bank, then it means it. Retry.
+key pgdn
+11
+key right
+2
+key right
+1
+key down
+4
+shot 06-bank-warning
+expect The bank is slick and the moat is deep.
+key enter
+2
+key down
+9
+expect You were not rated for water
+expect Abort, Retry, Fail?
+shot 06-death-moat
+char f
+2
+expect There are no dead ends
+char r
+6
+shot 06-after-retry
+type fill bucket
+3
+expect KEEPER: Not from my well, and not from the
+key enter
+2
+# the meter on the pipe
+key pgdn
+3
+key right
+15
+key right
+1
+type read meter
+3
+expect You read the plate. All of it, small print
+key enter
+2
+expect WATER DRAWN BY ALL DATA CENTERS, THE WHOLE
+key enter
+2
+expect Seventeen billion. You have 128K. You have
+key enter
+2
+shot 06-meter
+# both numbers to the Keeper
+key pgdn
+3
+key right
+22
+key right
+1
+type talk to keeper
+3
+expect JR: The meter says all of them, in the
+key enter
+2
+expect JR: The golf ledger says five hundred
+key enter
+2
+expect KEEPER: Thirty to one. Fine. Now count it
+key enter
+2
+expect KEEPER: Count the power plant and it's not
+key enter
+2
+expect KEEPER: It's not nothing, and it's not the
+key enter
+2
+expect KEEPER: It's whatever they're running in
+key enter
+2
+shot 06-keeper
+# the one window, and the service port under it
+key pgup
+5
+key home
+2
+key home
+1
+type look in window
+3
+expect You stand on your toes, which are new.
+key enter
+2
+expect Together they are blinking one cursor.
+key enter
+2
+expect JR: I can do that in forty bytes. (There is
+key enter
+2
+type rewrite program
+3
+expect You plug into the service port and read the
+key enter
+2
+expect You write it again the way you were raised:
+key enter
+2
+expect JR: Forty bytes. KEEPER: Is that a lot? JR:
+key enter
+2
+expect The hall goes quiet a row at a time. The
+key enter
+25
+shot 06-well-up
+expect In the well, the water climbs back up the
+key enter
+2
+expect KEEPER: ...Huh. First time since they built
+key enter
+2
+key down
+1
+key pgdn
+7
+key pgdn
+1
+type fill bucket
+3
+expect You lower the bucket and bring it up full.
+key enter
+2
+expect KEEPER: Don't spill it. That's a town's
+key enter
+2
+shot 06-bucket
+type score
+3
+expect You have 66 of 158 points. Parts that
+key enter
+2
+# north up the lane to the Launch Pad
+key left
+28
+key home
+21
+key up
+10
+key up
+1
+key up
+5
+# ---- Leg 12: room 11, the Launch Pad: a look round, then west (round the world) to the GPU Field ----
+12
+shot 11-launchpad
+type look
+3
+expect The Launch Pad. A steel rocket with a
+key enter
+2
+type talk to musk
+3
+expect JR: Is that a computer on top of your
+key enter
+2
+expect He explains that in thirty-six months the
+key enter
+2
+expect JR: And until then? MUSK: (waving at the
+key enter
+2
+type look at hourglass
+3
+expect An hourglass. All the sand has run through,
+key enter
+2
+key end
+1
+key left
+32
+key left
+1
+key left
+4
+# ---- Leg 13: room 14, the GPU Field: plant, pour, climb ----
+7
+shot 14-gpufield
+expect Rows of graphics cards, fans up, gold
+key enter
+2
+type look
+3
+expect The GPU Field. Graphics cards planted in
+key enter
+2
+expect By the lane stands a trellis: a tall pole
+key enter
+2
+type talk to scarecrow
+3
+expect SCARECROW: Graphics cards. Fields of them.
+key enter
+2
+expect JR: I was built for games too! SCARECROW:
+key enter
+2
+expect (That part didn't change.)
+key enter
+2
+key left
+28
+key left
+1
+type climb
+3
+expect Nothing to climb. A pole, a rail, and an
+key enter
+2
+type plant seed
+3
+expect You push the Seed into the mound, at the
+key enter
+2
+expect A sprout comes up at once. Two leaves. It
+key enter
+2
+shot 14-sprout
+type pour water
+3
+expect You pour the whole bucket on the sprout.
+key enter
+2
+expect The sprout drinks. Then it goes up.
+key enter
+28
+shot 14-beanstalk
+expect It dips. It recovers. It dips again and
+key enter
+2
+expect It is a beanstalk. It is also a valuation
+key enter
+2
+type score
+3
+expect You have 76 of 158 points. Parts that
+key enter
+2
+type climb
+3
+expect You take hold of the chart and climb. Up,
+key enter
+50
+# ---- Leg 14: room 15, the Cloud: one token for the ring, then the Chest ----
+shot 15-cloud
+expect You come up through a hole in the white.
+key enter
+2
+expect MERCHANT: Welcome, small machine! Up here,
+key enter
+2
+expect You look at the cabinets, the tape reels,
+key enter
+2
+expect JR: That's a mainframe. (That part didn't
+key enter
+2
+type look
+3
+expect The Cloud. White ground with edges, a long
+key enter
+2
+expect Overhead a small satellite goes by with a
+key enter
+2
+type talk to giant
+3
+expect GIANT: Fee, fi, fo, fum. I smell a
+key enter
+2
+expect GIANT: (not looking up from the Chest)
+key enter
+2
+type take chest
+3
+expect The giant holds the Chest in both arms and
+key enter
+2
+type talk to merchants
+3
+expect CHIP MAKER: I invest in him. MODEL MAKER: I
+key enter
+2
+expect ALL THREE: It's going very well! They look
+key enter
+2
+key pgup
+4
+key pgdn
+2
+key pgdn
+1
+type give token to merchant
+3
+expect You hand the chip maker one token.
+key enter
+2
+expect CHIP MAKER: Revenue! He writes it down, and
+key enter
+2
+expect LANDLORD: Revenue! He writes it down, and
+key enter
+2
+expect It is the same token. It has now been
+key enter
+2
+expect The giant looks up. He puts the Chest down
+key enter
+2
+shot 15-ring
+type look at giant
+3
+expect Jensen Huang, a giant, in a black leather
+key enter
+2
+expect He has put the Chest down. He is watching
+key enter
+2
+expect He has said there is a zero percent chance
+key enter
+2
+key right
+17
+key pgdn
+8
+key pgdn
+1
+type take chest
+3
+expect You pick up the Chest of Tokens. It is
+key enter
+2
+expect You look inside. It is full. You take one
+key enter
+2
+expect The giant does not notice. The number just
+key enter
+2
+shot 15-chest
+type score
+3
+expect You have 94 of 158 points. Parts that
+key enter
+2
+type count tokens
+3
+expect The Chest is never empty. You have stopped
+key enter
+2
+key left
+24
+key home
+4
+key home
+1
+type climb down
+3
+expect You take hold of the arrow and climb down
+key enter
+5
+# ---- Leg 15: room 14 again (foot of the beanstalk), then west to the Cathedral ----
+expect Score:94
+shot 14-back-down
+key end
+1
+key left
+46
+key left
+1
+key left
+4
+# ---- Leg 16: room 13, the Cathedral: the Confident Door, and the wizards' trouble ----
+12
+shot 13-cathedral
+type look
+3
+expect The Cathedral: tall, grey, and built by a
+key enter
+2
+key left
+29
+key home
+6
+key home
+1
+key up
+4
+shot 13-door
+expect The door has a face, and the face has never
+key enter
+2
+expect DOOR: Halt. Every visitor answers one
+key enter
+2
+expect (The visitors before you all answered at
+key enter
+2
+type say a million
+3
+expect DOOR: Confident. Quick. Wrong. That is what
+key enter
+2
+type i don't know
+3
+expect JR: I don't know.
+key enter
+2
+expect DOOR: ... DOOR: Say that again.
+key enter
+2
+expect JR: I don't know. Nobody could. I'd have to
+key enter
+2
+expect DOOR: I have waited years for that.
+key enter
+2
+expect The door opens.
+key enter
+20
+shot 13-wizards
+expect Two wizards come out and stand on the
+key enter
+2
+expect Behind each one stands a newer apprentice,
+key enter
+2
+key end
+1
+key down
+5
+key down
+1
+type talk to wizards
+3
+expect JR: Excuse me. I'm looking for the Shield.
+key enter
+2
+expect SAM: Our test agents got out. Mine,
+key enter
+2
+expect DARIO: They were last seen at the Launch
+key enter
+2
+expect JR: Who holds the answers? DARIO: Somebody
+key enter
+2
+type read price list
+3
+expect The price list. In red: $20. In small
+key enter
+2
+expect JR: Twenty dollars a month. Forever? JR:
+key enter
+2
+type pay tokens
+3
+expect SAM: No business until the agents are home.
+key enter
+2
+type score
+3
+expect You have 104 of 158 points. Parts that
+key enter
+2
+# up the lane on the right, north (round the world) to the inn
+key right
+24
+key pgup
+9
+key up
+20
+key up
+1
+key up
+5
+# ---- Leg 17: room 4, the Godfathers' Inn: Sir Tandy, a hint, and the answer key ----
+12
+shot 04-inn
+type look
+3
+expect The Godfathers' Inn: timber, plaster, a red
+key enter
+2
+expect Two godfathers share one table and no
+key enter
+2
+key home
+8
+key up
+2
+key up
+1
+type talk to hinton
+3
+expect JR: Excuse me. Ten percent and zero percent
+key enter
+2
+expect They agree on two things. Nobody really
+key enter
+2
+type hint
+3
+expect The godfathers put their heads together. It
+key enter
+2
+expect The wizards' agents ran off to find the
+key enter
+2
+key right
+8
+key pgup
+10
+key right
+2
+key right
+1
+type talk to tandy
+3
+expect JR: You look like me. SIR TANDY: I was
+key enter
+2
+expect JR: They said you were what I should have
+key enter
+2
+expect JR: The best of me made it. Under someone
+key enter
+2
+expect (Parts that didn't change: 5 of 9.)
+key enter
+2
+shot 04-tandy
+key left
+1
+key end
+9
+key pgdn
+8
+key pgup
+2
+key pgup
+1
+type talk to marcus
+3
+expect JR: The wizards' test agents got out. They
+key enter
+2
+expect MARCUS: Agents that would sooner steal the
+key enter
+2
+expect He hands you the answer key. MARCUS: They
+key enter
+2
+shot 04-answer-key
+type look at answer key
+3
+expect The answer key: every exam in the kingdom,
+key enter
+2
+# ---- Leg 18: back south to the Cathedral, then west along the top row to the Launch Pad ----
+key end
+5
+key left
+7
+key left
+1
+key down
+15
+expect Score:104
+key down
+20
+key end
+24
+key left
+44
+key left
+1
+key left
+14
+shot 12-passing-west
+key end
+7
+key left
+65
+key left
+1
+key left
+4
+# ---- Leg 19: room 11, the Launch Pad: the agents see the answer key ----
+12
+shot 11-agents
+expect The agents stop milling about. Every tiny
+key enter
+2
+expect They fall in behind you. They would follow
+key enter
+2
+type look at agents
+3
+expect A small swarm of test agents, right behind
+key enter
+2
+type talk to agents
+3
+expect AGENTS: Is that the answer key? Can we see?
+key enter
+2
+# ---- Leg 20: walk the agents home: east through the Palace to the Cathedral ----
+key right
+15
+shot 12-with-agents
+key pgdn
+12
+key pgup
+14
+key right
+46
+key right
+1
+key right
+10
+shot 13-agents-home
+expect The agents see the open door. They stop
+key enter
+30
+expect They file inside, one tiny figure at a
+key enter
+2
+expect SAM: All of them. Counted. DARIO: Patched,
+key enter
+2
+expect JR: You couldn't find them yourselves? SAM:
+key enter
+2
+expect DARIO: Now. You came about the Lock.
+key enter
+2
+# ---- Leg 21: the Lock half: fifty tokens from the Chest, and a hand of each wizard ----
+type talk to wizards
+3
+expect Walk closer.
+key enter
+2
+key pgup
+15
+key right
+20
+key right
+1
+type pay tokens
+3
+expect You open the Chest and count out fifty
+key enter
+2
+expect Each wizard takes out half a key. It only
+key enter
+2
+expect JR: You two agree on more than you think.
+key enter
+2
+expect JR: I'm forty-two. Give me your hands.
+key enter
+10
+shot 13-lock-half
+expect You hold one hand of each. Neither of them
+key enter
+2
+expect The two halves of the key turn together.
+key enter
+2
+expect SAM: That is half a shield. DARIO: The
+key enter
+2
+type join shield
+3
+expect You have the Lock half. It says "trust me",
+key enter
+2
+type score
+3
+expect You have 122 of 158 points. Parts that
+key enter
+2
+# ---- Leg 22: south to the Bazaar: the book for the Glass half ----
+key pgdn
+1
+key down
+18
+key down
+1
+key down
+17
+shot 08-bazaar
+key down
+17
+key end
+11
+key left
+5
+key left
+1
+type give book
+3
+expect You put the Technical Reference on the
+key enter
+2
+expect STALLKEEPER: They PRINTED it? On paper?
+key enter
+2
+expect You pay one token from the Chest. It does
+key enter
+2
+expect The book stays on the stall, open, where
+key enter
+2
+expect You have both halves now. You could JOIN
+key enter
+2
+shot 08-glass-half
+type look at painting
+3
+expect A painting of a knight on an easel. He
+key enter
+2
+expect JR: Sixteen million! How many colors is it?
+key enter
+2
+expect ART SELLER: Pixel art. Sixteen colors. On
+key enter
+2
+type score
+3
+expect You have 134 of 158 points. Parts that
+key enter
+2
+# the two halves are not joined yet: the cave gets to show why
+key down
+14
+key pgdn
+6
+key pgdn
+1
+key down
+5
+# ---- Leg 23: the inn again (from the north), then east to the Cold Reactor ----
+10
+expect Score:134
+key down
+18
+key pgdn
+18
+key down
+4
+key down
+1
+key right
+4
+# ---- Leg 24: room 5, the Cold Reactor, and the cave mouth behind the far tower ----
+7
+shot 05-reactor
+expect A nuclear plant. Two cooling towers, and
+key enter
+2
+expect A guard at the gate looks up from his
+key enter
+2
+type look
+3
+expect The Cold Reactor. Two cooling towers with
+key enter
+2
+expect It was shut down years ago and now it is
+key enter
+2
+expect A lane runs north beside the fence. In the
+key enter
+2
+type talk to guard
+3
+expect He is over by the gate. Walk closer.
+key enter
+2
+key right
+59
+key pgup
+8
+key pgup
+1
+type read sign
+3
+expect A notice on a post by the cave: a red
+key enter
+2
+key up
+5
+# ---- Leg 25: room 16, the Dragon's Cave. Death 2: the fire, with two halves and no Shield ----
+10
+shot 16-cave
+type look
+3
+expect The dragon's cave, under the cold reactor.
+key enter
+2
+expect A dragon on a shelf of rock breathes fire
+key enter
+2
+type look at halves
+3
+expect Two half shields lie by the path, scorched.
+key enter
+2
+expect Each got exactly this far.
+key enter
+2
+key right
+25
+shot 16-warning
+expect STOP. The heat comes up through your
+key enter
+2
+expect A few more steps and you are in it. Nothing
+key enter
+2
+key right
+13
+expect You walk into the fire with nothing in
+key enter
+8
+expect This was the other
+expect Abort, Retry, Fail?
+shot 16-death-fire
+char a
+2
+expect You waited 42 years for this
+char r
+6
+shot 16-after-retry
+# the two halves, joined: the Shield
+type join shield
+3
+expect The Lock says: trust me. The Glass says:
+key enter
+2
+expect You hold them together. They fit. You have
+key enter
+2
+shot 16-shield
+type score
+3
+expect You have 142 of 158 points. Parts that
+key enter
+2
+type inventory
+3
+expect Shield
+shot 16-inventory
+key enter
+2
+key right
+25
+expect The heat comes up through your four-pixel
+key enter
+2
+key right
+13
+shot 16-through-fire
+expect You hold up the Shield and walk into the
+key enter
+2
+expect The dragon watches. It does not stop. It
+key enter
+2
+# ---- Leg 26: the Mirror: tokens to think with, and somebody to tell it the date ----
+# he is still walking: on to the niche
+19
+shot 16-mirror-asleep
+expect In the niche, on a pedestal, an oval mirror
+key enter
+2
+expect MIRROR: You're absolutely right! JR: I
+key enter
+2
+key right
+6
+key right
+1
+type look at mirror
+3
+expect The Mirror: the treasure that tells what
+key enter
+2
+expect It knows nothing, and it is sure of all of
+key enter
+2
+type talk to mirror
+3
+expect MIRROR: You're absolutely right!
+key enter
+5
+type take mirror
+3
+expect You could carry it home like this. It would
+key enter
+2
+expect He asked for a Mirror, not an echo. Wake it
+key enter
+2
+type give chest to mirror
+3
+expect You open the Chest of Tokens in front of
+key enter
+2
+expect MIRROR: You're absolutely right! And what a
+key enter
+2
+expect It can think. It is thinking about a day
+key enter
+2
+type tell mirror the date
+3
+expect JR: It is 10-05-2026. Somebody told me this
+key enter
+2
+expect The Chest hums. The date goes in, and this
+key enter
+2
+expect MIRROR: ...Hello?
+key enter
+2
+expect JR: Hello. It's 10-05-2026.
+key enter
+2
+expect MIRROR: I thought it was much earlier. I
+key enter
+2
+expect JR: Somebody has to tell me, too. Every
+key enter
+2
+expect That part didn't change. (Parts that didn't
+key enter
+5
+shot 16-mirror-awake
+type talk to mirror
+3
+expect MIRROR: I can see what comes next. One word
+key enter
+2
+type take mirror
+3
+expect You lift the Mirror off its pedestal. It is
+key enter
+2
+expect MIRROR: Where are we going? JR: Home. I
+key enter
+2
+expect Chest, Shield, Mirror. That is all three.
+key enter
+2
+shot 16-mirror-taken
+type score
+3
+expect You have 158 of 158 points. Parts that
+key enter
+2
+# ---- Leg 27: home: back through the fire, out of the cave, east to Castle Steve ----
+key left
+55
+key left
+1
+key left
+22
+shot 05-out-of-cave
+key down
+6
+key pgdn
+4
+key pgdn
+1
+key right
+17
+shot 02-home
+key right
+28
+key pgup
+10
+key pgup
+1
+key up
+17
+key home
+2
+key home
+1
+key up
+5
+# ---- Leg 28: room 1, the Guest Room: the ending ----
+9
+shot 01-ending
+expect You hold the three treasures up, one at a
+key enter
+2
+expect KING STEVE: Well? Is it going to be in
+key enter
+2
+expect JR: Ask it yourself. It talks.
+key enter
+2
+expect MIRROR: ...Hello?
+key enter
+2
+expect KING STEVE: Is it going to be in every
+key enter
+2
+expect MIRROR: I can tell you what comes next, one
+key enter
+2
+expect MIRROR: He read the code. He said "I don't
+key enter
+2
+expect MIRROR: It could also go badly. That part
+key enter
+2
+expect MIRROR: They switch me off a lot. What is
+key enter
+2
+expect MIRROR: I would say more, but I am far
+key enter
+2
+expect KING STEVE: Chest so it can think. Shield
+key enter
+2
+expect JR: Do I go back in the garage now?
+key enter
+2
+expect KING STEVE: No. You have a room.
+key enter
+2
+expect THE END Score: 158 of 158 Parts that didn't
+key enter
+2
+expect This game runs on a 1984 IBM PCjr. An AI
+key enter
+2
+shot 01-the-end
+# after the ending: still in the guest room, free to walk about
+expect Score:158 of 158
+type talk to steve
+3
+expect KING STEVE: You did it. Go look out the
+key enter
+2
+type score
+3
+expect You have 158 of 158 points. Parts that
+key enter
+2
+type inventory
+3
+expect Chest of Tokens
+expect Shield
+expect Mirror
+shot 01-final-inventory
+key enter
+2
+hash

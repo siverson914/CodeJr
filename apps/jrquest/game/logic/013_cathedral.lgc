@@ -1,0 +1,432 @@
+// Room 13: the Cathedral. The closed labs.
+// Puzzle 8: the Confident Door (say "I don't know"). Puzzle 9: the wizards
+// tell JR their test agents got out; he walks them home from the Launch
+// Pad. Puzzle 10: fifty tokens from the Chest, and JR holds a hand of
+// each wizard so the key will turn. The Lock half.
+//
+// state: 0 quiet, 1 the Door is opening, 2 the wizards are walking out,
+//        5 the agents are going in, 7 the wizards are stepping up to JR.
+#include "defines.h"
+#include "room13.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(9);
+  load.view(150);
+  load.view(151);
+  load.view(152);
+  load.view(153);
+  load.view(154);
+  load.view(155);
+  load.view(156);
+  set.horizon(58);
+
+  call(91);
+  set(outdoor);
+  // South entry unless he came down the lane or along the road.
+  position(ego, 76, 160);
+  set.loop(ego, 3);
+  if (arriveFrom == 3) { position(ego, 141, 64); set.loop(ego, 2); }
+  if (arriveFrom == 2) { position(ego, 4, 152); set.loop(ego, 0); }
+  if (arriveFrom == 4) { position(ego, 146, 152); set.loop(ego, 1); }
+
+  animate.obj(door);
+  set.view(door, 156);
+  position(door, 71, 109);
+  set.priority(door, 5);
+  ignore.objs(door);
+  stop.cycling(door);
+  if (isset(doorOpen)) { set.cel(door, 2); }
+  else { set.cel(door, 0); }
+  draw(door);
+
+  animate.obj(sam);
+  set.view(sam, 150);
+  stop.cycling(sam);
+  animate.obj(dario);
+  set.view(dario, 151);
+  stop.cycling(dario);
+  animate.obj(samA);
+  set.view(samA, 152);
+  stop.cycling(samA);
+  animate.obj(samB);
+  set.view(samB, 153);
+  stop.cycling(samB);
+  animate.obj(darA);
+  set.view(darA, 154);
+  stop.cycling(darA);
+  animate.obj(darB);
+  set.view(darB, 155);
+  stop.cycling(darB);
+  position(sam, 56, 118);
+  position(dario, 94, 118);
+  position(samA, 45, 117);
+  position(samB, 35, 116);
+  position(darA, 105, 117);
+  position(darB, 115, 116);
+
+  // Each time Zuckerberg's offer has gone up by two, one more is gone.
+  gone = zuckOffer;
+  gone /= 2;
+  if (isset(doorOpen)) {
+    draw(sam);
+    draw(dario);
+    if (gone < 1) { draw(samB); }
+    if (gone < 2) { draw(darB); }
+    if (gone < 3) { draw(samA); }
+    if (gone < 4) { draw(darA); }
+  }
+
+  // The agents followed him here: they go in. The bookkeeping is done at
+  // once, so logic 84 never shows its own swarm on this screen.
+  if (isset(agentsFollow)) {
+    reset(agentsFollow);
+    set(agentsHome);
+    drop("answer key");
+    score += 12;
+    animate.obj(swarmObj);
+    set.view(swarmObj, 9);
+    ignore.objs(swarmObj);
+    ignore.blocks(swarmObj);
+    set.priority(swarmObj, 15);
+    position(swarmObj, 62, 158);
+    if (arriveFrom == 3) { position(swarmObj, 136, 74); }
+    if (arriveFrom == 2) { position(swarmObj, 16, 156); }
+    if (arriveFrom == 4) { position(swarmObj, 134, 156); }
+    draw(swarmObj);
+    state = 5;
+    timer = 0;
+  }
+
+  draw(ego);
+  show.pic();
+}
+
+// ---- edges ----
+if (egoEdge == 1) { arriveFrom = 1; new.room(4); }
+if (egoEdge == 2) { arriveFrom = 2; new.room(14); }
+if (egoEdge == 3) { arriveFrom = 3; new.room(8); }
+if (egoEdge == 4) { arriveFrom = 4; new.room(12); }
+
+// ---- the Door asks everyone who comes up the steps ----
+if (!isset(doorOpen) && !isset(doorAsked) && posn(ego, 44, 112, 106, 134)) {
+  set(doorAsked);
+  print("The door has a face, and the face has never once been unsure of anything.");
+  print("DOOR: Halt. Every visitor answers one question. How many leaves are on the beanstalk?");
+  print("(The visitors before you all answered at once, with great confidence. The door is still shut.)");
+}
+
+// ---- the Door opens, and the wizards come out ----
+if (state == 1 && isset(doorMoved)) {
+  reset(doorMoved);
+  position(sam, 72, 112);
+  position(dario, 80, 112);
+  ignore.objs(sam);
+  ignore.objs(dario);
+  draw(sam);
+  draw(dario);
+  start.cycling(sam);
+  start.cycling(dario);
+  move.obj(sam, 56, 118, 1, samOut);
+  move.obj(dario, 94, 118, 1, darioOut);
+  state = 2;
+}
+if (state == 2 && isset(samOut) && isset(darioOut)) {
+  reset(samOut);
+  reset(darioOut);
+  stop.cycling(sam);
+  stop.cycling(dario);
+  set.cel(sam, 0);
+  set.cel(dario, 0);
+  observe.objs(sam);
+  observe.objs(dario);
+  if (gone < 1) { draw(samB); }
+  if (gone < 2) { draw(darB); }
+  if (gone < 3) { draw(samA); }
+  if (gone < 4) { draw(darA); }
+  state = 0;
+  print("Two wizards come out and stand on the steps, as far apart as the steps allow.");
+  print("Behind each one stands a newer apprentice, and behind that one a newer one still.");
+}
+
+// ---- the agents go home ----
+if (state == 5) {
+  timer++;
+  if (timer == 6) {
+    print("The agents see the open door. They stop looking at the answer key and start looking guilty.");
+    start.cycling(swarmObj);
+    move.obj(swarmObj, 74, 112, 2, swarmIn);
+  }
+  if (isset(swarmIn)) {
+    reset(swarmIn);
+    erase(swarmObj);
+    state = 0;
+    print("They file inside, one tiny figure at a time. The answer key goes in with them. It was never yours.");
+    print("SAM: All of them. Counted.\nDARIO: Patched, watched, and we can switch them off. Try that with something from the Bazaar.");
+    print("JR: You couldn't find them yourselves?\nSAM: The neighbors noticed before we did.");
+    print("DARIO: Now. You came about the Lock.");
+  }
+}
+
+// ---- the wizards step up and the key turns ----
+if (state == 7 && isset(samNear) && isset(darioNear)) {
+  reset(samNear);
+  reset(darioNear);
+  stop.cycling(sam);
+  stop.cycling(dario);
+  state = 0;
+  get("Lock half");
+  set(lockDone);
+  score += 6;
+  player.control();
+  print("You hold one hand of each. Neither of them is holding the other's. Both of them are holding yours.");
+  print("The two halves of the key turn together.\n\nYou have the Lock half of the Shield. It says: trust me.");
+  if (has("Glass half")) { print("You have both halves now. You could JOIN them."); }
+  else { print("SAM: That is half a shield.\nDARIO: The other half is down the hill, at the Bazaar. We don't go there."); }
+}
+
+// ================= the Door's question =================
+if (said("dont know") || said("say", "dont know") || said("answer", "dont know") || said("talk", "door", "dont know") || said("say", "dont know", "rol")) {
+  if (isset(doorOpen)) { print("DOOR: Still the best answer I ever got."); }
+  else {
+    if (!isset(doorAsked)) { print("Nobody has asked you anything yet. Go up to the door."); }
+    else {
+      set(doorOpen);
+      score += 10;
+      print("JR: I don't know.");
+      print("DOOR: ...\n\nDOOR: Say that again.");
+      print("JR: I don't know. Nobody could. I'd have to count them.");
+      print("DOOR: I have waited years for that. Everybody always has an answer. Even when they don't know. Especially then.");
+      print("The door opens.");
+      end.of.loop(door, doorMoved);
+      start.cycling(door);
+      state = 1;
+    }
+  }
+}
+if (said("say", "rol") || said("answer", "rol") || said("answer") || said(1301) || said(1301, "rol") || said("talk", "door", 1301) || said("count", "rol")) {
+  if (isset(doorOpen)) { print("Nobody is asking. The door already has the only answer it wanted."); }
+  else {
+    if (!isset(doorAsked)) { print("Nobody has asked you anything yet. Go up to the door."); }
+    else {
+      wrongTries++;
+      if (wrongTries == 1) { print("DOOR: Confident. Quick. Wrong. That is what they all say, and that is how they all say it."); }
+      if (wrongTries == 2) { print("DOOR: Another one. Do you actually know, or do you just have an answer?"); }
+      if (wrongTries > 2) { print("DOOR: You can't see the beanstalk from here. You have not counted. What is the honest thing to say?"); }
+    }
+  }
+}
+
+// ================= looking =================
+if (said("look") || said("look", "room") || said("look", "cathedral")) {
+  if (isset(doorOpen)) {
+    print("The Cathedral: tall, grey, and built by a small number of people who would rather you did not see how. One door, now open. Two wizards on the steps. A price list.");
+  }
+  else {
+    print("The Cathedral: tall, grey, and built by a small number of people who would rather you did not see how. One door, shut, with a face on it. A wall with spikes. A price list.");
+  }
+}
+if (said("look", "door")) {
+  if (isset(doorOpen)) { print("Open. Inside it is dark and very tidy. You are not invited in. That is what closed means."); }
+  else { print("The Confident Door. Oak, iron, and a face that has never said \"I'm not sure\" in its life. It would like someone else to say it."); }
+}
+if (said("look", "wizards")) {
+  if (!isset(doorOpen)) { print("There is nobody on the steps. They are inside, behind the door."); }
+  else {
+    print("Sam Altman and Dario Amodei, wizards. They stand as far apart as one flight of steps allows.");
+    print("One says we are past the event horizon and that it will be gentle. The other writes long essays warning about what he makes, and then sells it.");
+  }
+}
+if (said("look", "sam")) {
+  if (!isset(doorOpen)) { print("He is inside."); }
+  else { print("Sam Altman, in green. He has the calm of a man who has already seen how this ends and liked it."); }
+}
+if (said("look", "dario")) {
+  if (!isset(doorOpen)) { print("He is inside."); }
+  else { print("Dario Amodei, in brown, with glasses. He looks worried about the thing he is selling. He is still selling it."); }
+}
+if (said("look", "apprentices")) {
+  if (!isset(doorOpen)) { print("There is nobody on the steps."); }
+  else {
+    if (gone > 3) { print("There are none left. Somebody with a wheelbarrow of gold has been by. The wizards do not want to talk about it."); }
+    else {
+      if (gone > 0) { print("Each apprentice is a slightly newer copy of the wizard in front. There were four. Somebody with a wheelbarrow of gold has been by."); }
+      else { print("Behind each wizard, a newer apprentice, and behind him a newer one. Each is a little smaller and a little shinier. The one in front gets replaced almost every month."); }
+    }
+  }
+}
+if (said("talk", "apprentices")) {
+  if (!isset(doorOpen) || gone > 3) { print("There is nobody there."); }
+  else { print("APPRENTICE: I'm the new one.\nNEWER APPRENTICE: I'm the new one.\nJR: I've been the same one since 1984."); }
+}
+if (said("look", "price list") || said("read", "price list") || said("look", "sign") || said("read", "sign")) {
+  set(priceSeen);
+  print("The price list. In red: $20. In small print: a month. In smaller print: forever.");
+  print("JR: Twenty dollars a month. Forever?\nJR: I'm all paid for.");
+}
+if (said("buy", "price list") || said("buy") || said("buy", "answer key") || said("give", "twenty") || said("give", "twenty", "rol")) {
+  if (isset(lockDone)) { print("You have what you came for. You are not signing up for anything monthly. You were bought once, in 1984, and that was that."); }
+  else { print("Twenty dollars a month buys answers, not the Lock. The wizards deal with the Lock themselves."); }
+}
+if (said("take", "price list") || said("take", "sign")) { print("It is the one thing here that is posted in the open. Leave it."); }
+if (said("look", "rose window") || said("look", "fan") || said("look", "window")) {
+  print("A rose window. Up close it is a cooling fan with stained glass between the blades. It is not turning. Nobody will say whether that is good.");
+}
+if (said("look", "banner")) {
+  print("Two banners, one green, one brown. They do not match. They hang on the same building anyway.");
+}
+if (said("take", "banner")) { print("Your legs are four pixels long, and it is not yours."); }
+if (said("look", "graves")) {
+  print("Small stones behind the wall, for retired models. The dates on them are very close together.");
+}
+if (said("look", "steps")) { print("Grey steps, wide enough for two people to stand on without touching."); }
+if (said("look", "wall") || said("look", "spikes")) { print("A wall with spikes on it. It keeps things in, mostly. Not always. Ask them about the agents."); }
+if (said("climb", "wall") || said("climb") || said("climb", "rol")) { print("Your legs are four pixels long. The agents managed it, but there were more of them."); }
+if (said("look", "cypress") || said("look", "palm")) { print("Cypresses. Tall, dark, and they all point the same way."); }
+if (said("look", "keyhole") || said("look", "lock half")) {
+  if (has("Lock half")) { print("The Lock half of the Shield. It says: trust me. That is all it says."); }
+  else { print("High in the gable there is a keyhole, like the case lock on an old computer. The Lock half is kept inside. Each wizard holds half its key."); }
+}
+if (said("look", "path") || said("look", "ground")) { print("A sand path. South, it runs down to the Bazaar. The lane on the right goes north."); }
+if (said("look", "sky")) { print("Grey clouds, parked over the Cathedral. They are not open to the public either."); }
+if (said("look", "agents") || said("talk", "agents")) {
+  if (isset(agentsHome)) { print("Back inside, behind the wall, sitting their exam again. This time without the answers."); }
+  else {
+    if (isset(wizardsTold)) { print("Not here. The wizards said the Launch Pad, west of here along the top of the kingdom."); }
+    else { print("You don't see any."); }
+  }
+}
+
+// ================= talking =================
+if (said("talk", "door") || said("talk", "door", "rol") || said("look", "question") || said("talk", "question")) {
+  if (isset(doorOpen)) { print("DOOR: \"I don't know.\" Three words. You would not believe how rare."); }
+  else {
+    set(doorAsked);
+    print("DOOR: One question. How many leaves are on the beanstalk?");
+  }
+}
+if (said("knock") || said("knock", "door") || said("open", "door") || said("push", "door") || said("kick", "door") || said("pull", "door")) {
+  if (isset(doorOpen)) { print("It is open."); }
+  else {
+    set(doorAsked);
+    print("DOOR: I open for one thing only. How many leaves are on the beanstalk?");
+  }
+}
+if (said("enter") || said("enter", "cathedral") || said("enter", "door")) {
+  if (isset(doorOpen)) { print("SAM: Staff only.\nDARIO: It's a safety thing.\nSAM: It's a business thing.\nDARIO: It's both."); }
+  else { print("The door is shut, and it has a question for you."); }
+}
+
+if (said("talk", "wizards") || said("talk", "sam") || said("talk", "dario") || said("talk")) {
+  if (!isset(doorOpen)) { print("There is nobody out here but the door. Talk to the door."); }
+  else {
+    if (!posn(ego, 30, 112, 124, 140)) { print("Walk closer."); }
+    else {
+      if (!isset(wizardsTold)) {
+        set(wizardsTold);
+        print("JR: Excuse me. I'm looking for the Shield.\nSAM: Not today.\nDARIO: We have a situation.");
+        print("SAM: Our test agents got out. Mine, strictly.\nDARIO: They were sitting an exam in the practice yard. One weekend they went over the wall to find the answers instead.");
+        print("DARIO: They were last seen at the Launch Pad, looking for a way up to the open sky.\nSAM: They'll follow whoever holds the answers.");
+        print("JR: Who holds the answers?\nDARIO: Somebody who grades everything. Try the inn.");
+      }
+      else {
+        if (!isset(agentsHome)) {
+          print("SAM: No business until the agents are home.\nDARIO: Launch Pad. They follow the answers. Somebody at the inn grades everything.");
+        }
+        else {
+          if (!isset(lockDone)) {
+            print("SAM: The Lock half. Fifty tokens.\nJR: The Glass half is one.\nDARIO: Answers cost more than questions.");
+            print("DARIO: And the key is in two halves. He has one.\nSAM: He has the other.\nBOTH: We do not hold hands.");
+          }
+          else {
+            print("SAM: Closed means we can fix it, watch it, and switch it off.\nDARIO: It also means you have to trust us. Hence the other half.");
+          }
+        }
+      }
+    }
+  }
+}
+if (said("talk", "sam", "event horizon") || said("look", "event horizon") || said("talk", "wizards", "event horizon")) {
+  if (!isset(doorOpen)) { print("There is nobody to ask."); }
+  else { print("Sam says we are past the event horizon, and that it will be gentle.\n\nJR: I was past mine a long time ago. It was not gentle. It was a garage."); }
+}
+if (said("talk", "dario", "essay") || said("look", "essay") || said("read", "essay") || said("talk", "wizards", "essay")) {
+  if (!isset(doorOpen)) { print("There is nobody to ask."); }
+  else { print("Dario hands you an essay about how dangerous his product might be. It is very long and quite good. On the back is an order form."); }
+}
+if (said("talk", "wizards", "homework") || said("talk", "sam", "homework") || said("talk", "dario", "homework") || said("talk", "wizards", "bazaar") || said("talk", "sam", "bazaar") || said("talk", "dario", "bazaar") || said("look", "bazaar")) {
+  if (!isset(doorOpen)) { print("Down the path to the south. You can hear it from here."); }
+  else {
+    print("BOTH: The Bazaar copied our homework!\nJR: Where did you get your homework?");
+    print("A pause. They got it by reading everyone's books. Dario's guild has since paid the authors one and a half billion dollars about that.");
+  }
+}
+if (said("talk", "dario", "war ministry") || said("talk", "wizards", "war ministry") || said("look", "war ministry")) {
+  if (!isset(doorOpen)) { print("There is nobody to ask."); }
+  else { print("The War Ministry asked the brown wizard's guild for two things. The guild said no to both, was put on a list of risky suppliers, and has paid for it since. The courts are still arguing."); }
+}
+if (said("talk", "wizards", "agents") || said("talk", "sam", "agents") || said("talk", "dario", "agents") || said("talk", "wizards", "practice yard") || said("look", "practice yard")) {
+  if (!isset(doorOpen)) { print("There is nobody to ask."); }
+  else {
+    if (isset(agentsHome)) { print("SAM: Home, patched, and resitting the exam.\nDARIO: That is the argument for a wall. You can go and get them back."); }
+    else { print("SAM: They broke out of a test to find the answers to the test.\nDARIO: Which is, if you think about it, exactly what we trained them to want."); }
+  }
+}
+if (said("talk", "wizards", "neighbors") || said("look", "neighbors")) {
+  print("The neighbors found the break-in and said so first. The Cathedral owned up five days later.");
+}
+if (said("look", "portrait") || said("talk", "wizards", "portrait") || said("look", "fists")) {
+  print("At the last group portrait everyone was asked to join hands. These two raised a fist each instead. It is in all the paintings.");
+}
+
+// ================= the Lock half =================
+if (said("give", "tokens") || said("give", "tokens", "rol") || said("give", "chest") || said("give", "chest", "rol") || said("give") || said("give", "wizards") || said("buy", "lock half") || said("take", "lock half") || said("take", "hands") || said("shake", "hands") || said("take", "hands", "rol") || said("give", "hands") || said("give", "hands", "rol") || said("turn", "answer key")) {
+  if (!isset(doorOpen)) { print("There is nobody here to deal with. Only the door, and it wants an answer, not money."); }
+  else {
+    if (isset(lockDone)) { print("It is done. Once was enough for both of them."); }
+    else {
+      if (!isset(wizardsTold)) { print("They are not listening. Something is wrong. Talk to them."); }
+      else {
+        if (!isset(agentsHome)) { print("SAM: No business until the agents are home."); }
+        else {
+          if (!has("Chest of Tokens")) {
+            print("DARIO: Fifty tokens.\n\nYou have %v40. Nobody carries fifty loose. That is what the Chest is for.");
+          }
+          else {
+            if (!posn(ego, 67, 112, 81, 130)) { print("Stand on the steps between the two of them."); }
+            else {
+              print("You open the Chest and count out fifty tokens. It does not look any emptier.");
+              print("Each wizard takes out half a key. It only turns if they turn it together. Neither will take the other's hand.");
+              print("JR: You two agree on more than you think.\nBOTH: We do not.");
+              print("JR: I'm forty-two. Give me your hands.");
+              program.control();
+              egoDir = 0;
+              ignore.objs(sam);
+              ignore.objs(dario);
+              get.posn(ego, tA, tB);
+              tC = tA;
+              tC -= 10;
+              tD = tA;
+              tD += 11;
+              work = 1;
+              start.cycling(sam);
+              start.cycling(dario);
+              move.obj.v(sam, tC, tB, work, samNear);
+              move.obj.v(dario, tD, tB, work, darioNear);
+              state = 7;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+if (said("give", "answer key") || said("give", "answer key", "rol")) {
+  if (has("answer key")) { print("They don't want the key. They want what is following it."); }
+  else { print("You don't have it."); }
+}
+if (said("take", "wizards") || said("take", "sam") || said("take", "dario")) { print("Somebody with a wheelbarrow keeps trying that. It costs more than you have."); }
+return();

@@ -1,0 +1,119 @@
+# Plays checkpoint 2 start to finish. node tools/play.js build --script test/checkpoint2.txt
+5
+expect Current date is Tue
+type 10-05-26
+3
+expect Invalid date
+type 10-05-2026
+5
+expect The Search for Intelligence
+shot 01-title
+key enter
+40
+expect You kept me
+shot 03-steve
+key enter
+2
+expect I need a favor
+key enter
+2
+expect Bring me three things
+key enter
+2
+expect north of San Diego
+shot 04-charge
+key enter
+2
+3
+type look
+3
+expect second room you have ever lived in
+shot 05-look
+key enter
+2
+type grab the pail
+3
+expect You take the bucket
+key enter
+2
+type defragment the bed
+3
+expect Bad command or file name
+shot 06-unknown
+key enter
+2
+type take bucket
+3
+expect You have it
+key enter
+2
+type take book
+3
+expect Walk closer
+key enter
+2
+type inventory
+3
+shot 07-inventory
+key enter
+2
+key right
+16
+key up
+3
+shot 08-walking
+16
+expect shouting at a boy
+shot 09-castle
+key enter
+2
+key enter
+2
+key enter
+2
+3
+type fix code
+3
+expect You haven't read it
+shot 10-fix-early
+key enter
+2
+type talk to primeagen
+3
+expect READ THE CODE
+key enter
+2
+type read code
+3
+expect All of it
+shot 11-read
+key enter
+2
+key enter
+2
+key enter
+2
+key enter
+2
+type fix code
+3
+expect WHEN SOMEONE ASKS
+shot 12-fix
+key enter
+2
+12
+expect The cartridge ejects
+shot 13-open
+key enter
+2
+key enter
+2
+key down
+24
+shot 14-through
+type score
+3
+expect You have 10 of 158 points
+key enter
+2
+hash

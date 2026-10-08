@@ -1,0 +1,352 @@
+// Room 15: the Cloud, at the top of the beanstalk. It is a mainframe.
+// Puzzle 7: the giant holds the Chest and never looks away from it. Give
+// one token to the ring of merchants; they pass it round forever, each
+// writing it down as revenue, and the giant cannot stop watching the
+// number go up. Then take the Chest. The white ground has edges, and the
+// hole the beanstalk came through is one of them.
+#include "defines.h"
+#include "room15.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(vGiant);
+  load.view(vMerchants);
+  load.view(vToken);
+  load.view(vChest);
+  load.view(vLamps);
+  load.view(vReels);
+  set.horizon(60);
+
+  call(91);
+  release.priority(ego);
+  observe.horizon(ego);
+  observe.objs(ego);
+
+  // The only way in is the beanstalk: he stands beside the hole.
+  position(ego, 38, 128);
+  set.loop(ego, 0);
+
+  animate.obj(lamps);
+  set.view(lamps, vLamps);
+  set.loop(lamps, 0);
+  set.cel(lamps, 0);
+  set.priority(lamps, 4);
+  ignore.objs(lamps);
+  ignore.blocks(lamps);
+  ignore.horizon(lamps);
+  position(lamps, 83, 55);
+  work = 4;
+  cycle.time(lamps, work);
+  normal.cycle(lamps);
+  draw(lamps);
+
+  animate.obj(reels);
+  set.view(reels, vReels);
+  set.loop(reels, 0);
+  set.cel(reels, 0);
+  set.priority(reels, 4);
+  ignore.objs(reels);
+  ignore.blocks(reels);
+  ignore.horizon(reels);
+  position(reels, 38, 63);
+  work = 3;
+  cycle.time(reels, work);
+  normal.cycle(reels);
+  draw(reels);
+
+  animate.obj(chipMaker);
+  set.view(chipMaker, vMerchants);
+  set.loop(chipMaker, 0);
+  fix.loop(chipMaker);
+  set.cel(chipMaker, 0);
+  release.priority(chipMaker);
+  observe.objs(chipMaker);
+  normal.motion(chipMaker);
+  position(chipMaker, 56, 110);
+  stop.cycling(chipMaker);
+  draw(chipMaker);
+
+  animate.obj(modelMaker);
+  set.view(modelMaker, vMerchants);
+  set.loop(modelMaker, 1);
+  fix.loop(modelMaker);
+  set.cel(modelMaker, 0);
+  release.priority(modelMaker);
+  observe.objs(modelMaker);
+  normal.motion(modelMaker);
+  position(modelMaker, 84, 110);
+  stop.cycling(modelMaker);
+  draw(modelMaker);
+
+  animate.obj(landlord);
+  set.view(landlord, vMerchants);
+  set.loop(landlord, 2);
+  fix.loop(landlord);
+  set.cel(landlord, 0);
+  release.priority(landlord);
+  observe.objs(landlord);
+  normal.motion(landlord);
+  position(landlord, 70, 130);
+  stop.cycling(landlord);
+  draw(landlord);
+
+  animate.obj(giant);
+  set.view(giant, vGiant);
+  set.loop(giant, 0);
+  fix.loop(giant);
+  set.cel(giant, 0);
+  release.priority(giant);
+  observe.objs(giant);
+  normal.motion(giant);
+  position(giant, 116, 130);
+  work = 9;
+  cycle.time(giant, work);
+  normal.cycle(giant);
+  if (isset(tokenInRing)) { set.loop(giant, 1); }
+  draw(giant);
+
+  animate.obj(chestObj);
+  set.view(chestObj, vChest);
+  set.loop(chestObj, 0);
+  set.cel(chestObj, 0);
+  release.priority(chestObj);
+  ignore.objs(chestObj);
+  position(chestObj, 100, 134);
+  stop.cycling(chestObj);
+
+  animate.obj(token);
+  set.view(token, vToken);
+  set.loop(token, 0);
+  set.cel(token, 0);
+  set.priority(token, 15);
+  ignore.objs(token);
+  ignore.blocks(token);
+  ignore.horizon(token);
+  position(token, 64, 101);
+  work = 2;
+  cycle.time(token, work);
+  normal.cycle(token);
+
+  if (isset(tokenInRing)) {
+    if (!isset(gotChest)) { draw(chestObj); }
+    draw(token);
+    work = 5;
+    cycle.time(chipMaker, work);
+    cycle.time(modelMaker, work);
+    cycle.time(landlord, work);
+    normal.cycle(chipMaker);
+    normal.cycle(modelMaker);
+    normal.cycle(landlord);
+    tA = 0;
+    set(tmpA);
+  }
+
+  draw(ego);
+  show.pic();
+  state = 0;
+  timer = 0;
+}
+
+// ---- arriving: JR's first words up here ----
+if (state == 0) {
+  timer++;
+  if (timer == 6) {
+    state = 1;
+    if (!isset(mainframeTold)) {
+      set(mainframeTold);
+      unchanged++;
+      print("You come up through a hole in the white. The ground is cloud, and it has edges. Mind them, and mind the hole.");
+      print("MERCHANT: Welcome, small machine! Up here, we call it the Cloud.");
+      print("You look at the cabinets, the tape reels, the panel of lights, the room it has all to itself, and the people renting time on it by the minute.");
+      print("JR: That's a mainframe.\n\n(That part didn't change.)");
+    }
+  }
+}
+
+// ---- the token goes round the ring, forever ----
+if (isset(tokenInRing) && isset(tmpA)) {
+  reset(tmpA);
+  tA++;
+  if (tA > 3) { tA = 1; }
+  if (tA == 1) { move.obj(token, 79, 101, 2, tmpA); }
+  if (tA == 2) { move.obj(token, 78, 121, 2, tmpA); }
+  if (tA == 3) { move.obj(token, 64, 101, 2, tmpA); }
+}
+
+// ---- the edges ----
+if (isset(onTrigger) && !isset(dead)) {
+  set.string(s6, "What goes up and to the right");
+  set.string(s7, "\nmust come down.");
+  set.string(s5, "%s6%s7");
+  set(dead);
+}
+if (isset(onWater) && !isset(dead)) {
+  set.string(s6, "The Cloud is somebody else's computer.");
+  set.string(s7, "\nSo is the ground, now.");
+  set.string(s5, "%s6%s7");
+  set(dead);
+}
+if (egoEdge > 0 && !isset(dead)) {
+  set.string(s6, "The Cloud is somebody else's computer.");
+  set.string(s7, "\nSo is the ground, now.");
+  set.string(s5, "%s6%s7");
+  set(dead);
+}
+
+// ---- looking ----
+if (said("look") || said("look", "room") || said("look", "sky", "rol") || said("look", "ground")) {
+  print("The Cloud. White ground with edges, a long way up. On it stands a row of gray cabinets with tape reels turning and lights blinking. Three merchants stand in a ring, and beside them a giant in a black leather jacket.");
+  print("Overhead a small satellite goes by with a handful of chips in it. At the Launch Pad they say that is where all of this goes next.");
+}
+if (said("look", "mainframe") || said("look", "reels") || said("look", "lights")) {
+  print("Cabinets, tape reels, a panel of lights, a room of its own, and people renting time on it. One big computer somewhere else, shared by everybody.");
+  print("You were supposed to be the end of these. A computer of your own, on a laundry room table. Everybody came back up here anyway.");
+}
+if (said("use", "mainframe") || said("talk", "mainframe") || said("fix", "mainframe") || said("touch", "mainframe")) {
+  print("It asks for an account, a card number and a region. You have a serial number and a laundry room.");
+}
+if (said("look", "edge") || said("look", "down") || said("look", "field") || said("look", "castle")) {
+  print("You look over the edge, carefully. The kingdom is very small. You can see the GPU Field, and the beanstalk coming up out of it like a line on a chart.");
+  print("It is a long way down, and none of it is yours. Walking off the white is the end of you.");
+}
+if (said("look", "hole") || said("look", "beanstalk") || said("look", "arrow")) {
+  print("The top of the beanstalk comes up through a hole in the cloud and ends in an arrow, pointing up and to the right, at nothing. CLIMB DOWN to go back. Don't walk into the hole.");
+}
+if (said("look", "giant")) {
+  print("Jensen Huang, a giant, in a black leather jacket. His company was the first to be worth four trillion, and it is worth more than most kingdoms now.");
+  if (isset(tokenInRing)) { print("He has put the Chest down. He is watching one token go round a ring, counting on his fingers, and smiling."); }
+  else { print("He holds the Chest of Tokens in both arms and does not look away from it."); }
+  print("He has said there is a zero percent chance that 2030 is the end of the world. At the inn, one godfather says ten percent. The other is not worried at all.");
+}
+if (said("look", "jacket")) {
+  print("Black leather. Years ago, when these cards were only for games, he sold them to people who played games, and nobody else saw what else they were good for. He did.");
+  print("JR: I was built for games too!\n\n(He does not look down. It is a long way.)");
+}
+if (said("talk", "giant", "rol")) {
+  if (isset(gotChest)) { print("GIANT: (not looking) Up and to the right. Up and to the right."); }
+  else {
+    if (isset(tokenInRing)) { print("He does not hear you. He is watching one token go round, and the number go up."); }
+    else {
+      if (!isset(giantMet)) {
+        set(giantMet);
+        print("GIANT: Fee, fi, fo, fum. I smell a processor. A small one.\nJR: An 8088, sir. Four point seven seven megahertz.");
+        print("GIANT: (not looking up from the Chest) Adorable.");
+      }
+      else { print("The giant is counting. Everyone in the kingdom who wants to think needs what is in that Chest, and he does not look away from it. He only looks at numbers. Numbers that go up."); }
+    }
+  }
+}
+if (said("kick", "giant") || said("push", "giant") || said("take", "giant") || said("climb", "giant")) {
+  print("He is forty feet of leather and you are a few pounds of beige. No.");
+}
+if (said("give", "anyword", "giant")) {
+  print("He does not look at it. It is not a number, and it is not going up.");
+}
+if (said("look", "chest") || said("open", "chest")) {
+  if (has("Chest of Tokens")) { print("The Chest of Tokens. You take one out and it is still full. Compute: as much thinking as you can pay for, and from now on you can pay."); }
+  else {
+    if (isset(tokenInRing)) { print("The Chest of Tokens is on the cloud beside his boots. He is not looking at it. He is looking at the ring."); }
+    else { print("The Chest of Tokens, in the giant's arms. It is never empty. He has not looked away from it once since you came up."); }
+  }
+}
+if (said("look", "merchants")) {
+  print("Three merchants in a ring: a chip maker in a green visor, a model maker in a pointed hat, and a cloud landlord in a top hat with a ring of keys. Each one buys from the next.");
+  if (isset(tokenInRing)) { print("One token goes round and round between them. Each of them writes it down as revenue every time it comes by."); }
+  else { print("Their hands are out. They have everything they need except something to pass round."); }
+}
+if (said("talk", "merchants", "rol") || said("talk")) {
+  if (isset(tokenInRing)) {
+    print("MERCHANTS: Revenue! Revenue! Revenue!\nJR: Isn't that the same token?");
+    print("LANDLORD: The chips are real. The models are real. The buildings are real. Don't be difficult.");
+  }
+  else {
+    print("CHIP MAKER: I invest in him.\nMODEL MAKER: I rent from him.\nLANDLORD: I buy from him.");
+    print("ALL THREE: It's going very well!\n\nThey look at you, and then at your pockets. One token would do. They only need the one.");
+  }
+}
+if (isset(tokenInRing) && said("look", "tokens")) {
+  print("One token, going round a ring of three. It has been counted more times than you have bytes, and it is the only one there is.");
+}
+if (isset(tokenInRing) && said("take", "tokens")) {
+  print("It is revenue now. Three people have it on their books. You could not afford to take it back.");
+}
+if (said("look", "revenue") || said("look", "numbers") || said("count", "revenue")) {
+  if (isset(tokenInRing)) { print("The number goes up every time the token comes round. Nobody here has subtracted in years."); }
+  else { print("There is no number yet. The merchants have nothing to pass round."); }
+}
+
+// ---- the token and the ring ----
+if (said("give", "tokens", "merchants") || said("give", "tokens") || said("give", "merchants", "tokens") || said("drop", "tokens", "rol") || said("give", "tokens", "ring") || said("throw", "tokens", "rol") || said("use", "tokens")) {
+  if (isset(tokenInRing)) { print("They have one. One is all it takes."); }
+  else {
+    if (!posn(ego, 30, 92, 112, 146)) { print("The merchants are in a ring in the middle of the cloud. Walk closer."); }
+    else {
+      if (!has("Chest of Tokens") && tokens == 0) {
+        print("You have no tokens to give. They grow in the Token Meadow, like flowers. Climb down and pick some.");
+      }
+      else {
+        if (!has("Chest of Tokens")) { tokens -= 1; }
+        set(tokenInRing);
+        score += 8;
+        print("You hand the chip maker one token.");
+        print("CHIP MAKER: Revenue!\nHe writes it down, and invests it in the model maker.\nMODEL MAKER: Revenue!\nHe writes it down, and rents a cloud with it.");
+        print("LANDLORD: Revenue!\nHe writes it down, and orders chips with it.\nCHIP MAKER: Revenue!");
+        print("It is the same token. It has now been counted four times, and it is speeding up.");
+        print("The giant looks up. He puts the Chest down to count on his fingers. He cannot look away from the number.");
+        set.loop(giant, 1);
+        draw(chestObj);
+        draw(token);
+        work = 5;
+        cycle.time(chipMaker, work);
+        cycle.time(modelMaker, work);
+        cycle.time(landlord, work);
+        normal.cycle(chipMaker);
+        normal.cycle(modelMaker);
+        normal.cycle(landlord);
+        tA = 0;
+        set(tmpA);
+      }
+    }
+  }
+}
+if (said("give", "tokens", "giant")) { print("GIANT: Keep it, little one. I have a chest of them."); }
+
+// ---- the Chest ----
+if (said("take", "chest") || said("take", "chest", "rol") || said("steal", "chest")) {
+  if (isset(gotChest)) { print("You have it. It is still full."); }
+  else {
+    if (!isset(tokenInRing)) {
+      print("The giant holds the Chest in both arms and never looks away from it. You would have to give him something else to look at, and he only looks at numbers that go up.");
+    }
+    else {
+      if (!posn(ego, 80, 120, 116, 150)) { print("The Chest is on the cloud by the giant's boots. Walk closer."); }
+      else {
+        erase(chestObj);
+        get("Chest of Tokens");
+        set(gotChest);
+        score += 10;
+        print("You pick up the Chest of Tokens. It is heavier than the Technical Reference, and it hums.");
+        print("You look inside. It is full. You take one out, and it is still full.\n\nYou have the Chest of Tokens: the first of the three treasures.");
+        print("The giant does not notice. The number just went up again.");
+      }
+    }
+  }
+}
+
+// ---- leaving ----
+if (said("climb", "down") || said("climb", "down", "beanstalk") || said("climb", "beanstalk") || said("climb") || said("enter", "hole") || said("climb", "hole") || said("climb", "beanstalk", "down")) {
+  if (!posn(ego, 26, 110, 62, 142)) { print("The beanstalk comes up through the hole at the left end of the cloud. Walk over to it. Not into it."); }
+  else {
+    print("You take hold of the arrow and climb down the chart. It is easier in this direction. It always is.");
+    arriveFrom = 5;
+    new.room(14);
+  }
+}
+if (said("fly") || said("fly", "rol")) { print("You have legs, which are new. Wings would be showing off."); }
+if (said("listen") || said("listen", "rol")) { print("Reels turning, lamps ticking, and three people who all want to say \"revenue\"."); }
+if (said("smell") || said("smell", "rol")) { print("Ozone and floor wax. Every machine room since 1964 has smelled like this."); }
+if (said("drink") || said("drink", "rol")) { print("There is nothing to eat up here but margin."); }
+return();

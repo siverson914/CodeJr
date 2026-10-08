@@ -1,0 +1,15 @@
+# Room 8, the Bazaar (groups 800 to 899)
+800: stall, stalls, market, bazaar, awning, awnings
+801: stallkeeper, shopkeeper, vendor, qwen
+802: deepseek, deep seek, whale
+803: kimi, moonshot
+804: painting, canvas, easel, art, pixel art
+805: art seller, artist, seller, beret
+806: parcel, package, string
+807: crates, crate, barrel, basket
+808: bunting, pennants
+809: shoppers, shopper, crowd, people, customers
+810: tally, tally board, plaque
+811: jars, jar, goods, wares, models, counter
+812: open source
+813: sixteen, sixteen colors, colors

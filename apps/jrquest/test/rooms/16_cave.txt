@@ -1,0 +1,499 @@
+# Room 16, the Dragon's Cave. Starts from the real date prompt, because
+# the Mirror has to be told the date the player typed.
+# node tools/play.js build --script test/rooms/16_cave.txt
+5
+expect Current date is Tue
+type 10-05-2026
+5
+expect The Search for Intelligence
+key enter
+40
+expect You kept me
+key enter
+2
+key enter
+2
+key enter
+2
+expect north of San Diego
+key enter
+2
+3
+type tp
+2
+type 16
+6
+shot 01-arrive
+type look
+3
+expect dragon's cave
+key enter
+2
+expect breathes fire across the only path
+key enter
+2
+1
+
+# ---- wrong tries, this side of the fire, no Shield ----
+type look at the fire
+3
+expect something made for exactly this
+key enter
+2
+1
+type look at the dragon
+3
+expect does not get tired
+key enter
+2
+1
+type talk to the dragon
+3
+expect You can only come prepared
+key enter
+2
+1
+type kill the dragon
+3
+expect 128K and good manners
+key enter
+2
+1
+type pet the dragon
+3
+expect You are not reckless
+key enter
+2
+1
+type pour water on the fire
+3
+expect Keep it for something that grows
+key enter
+2
+1
+type use shield
+3
+expect You don't have one
+key enter
+2
+1
+type wait
+3
+expect it still wins
+key enter
+2
+1
+type jump
+3
+expect four-pixel legs
+key enter
+2
+1
+type look at the mirror
+3
+expect all you can see in it is fire
+key enter
+2
+1
+type take mirror
+3
+expect far side of the fire
+key enter
+2
+1
+type tell mirror the date
+3
+expect can't hear you over the fire
+key enter
+2
+1
+type give chest
+3
+expect far side of the fire
+key enter
+2
+1
+type talk to mirror
+3
+expect Nobody on this side
+key enter
+2
+1
+type look at the halves
+3
+expect trust me
+key enter
+2
+expect Each got exactly this far
+key enter
+2
+1
+type take halves
+3
+expect They are the instructions
+key enter
+2
+1
+type look at the lava
+3
+expect Nobody thought to rate you for this
+key enter
+2
+1
+type look at the path
+3
+expect scorched black
+key enter
+2
+1
+type look at the daylight
+3
+expect The way out is the way in
+key enter
+2
+1
+type listen
+3
+expect agreeing with the echo
+key enter
+2
+1
+
+# ---- the warning stops him well short of the fire ----
+key right
+34
+expect STOP
+shot 02-warning
+key enter
+2
+expect Two scorched half shields
+key enter
+2
+4
+# he is standing still, not in the fire
+type look at the wall
+3
+expect veins of ember
+key enter
+3
+
+# ---- the way out is the way in: back to the reactor and in again ----
+key left
+40
+expect not a wisp of steam
+key enter
+2
+expect Restarting soon
+key enter
+3
+type look
+3
+expect The Cold Reactor
+key enter
+2
+key enter
+2
+key enter
+2
+1
+shot 03-outside
+key up
+8
+type look
+3
+expect dragon's cave
+key enter
+2
+key enter
+2
+1
+
+# ---- the Shield (item 11) and the Chest (item 7) ----
+type gimme
+2
+type 11
+3
+type gimme
+2
+type 7
+3
+type use shield
+3
+expect It is already up
+key enter
+2
+1
+key right
+34
+expect Keep walking
+key enter
+3
+key right
+18
+expect hold up the Shield
+shot 04-shield
+key enter
+2
+expect You were simply ready for it
+key enter
+3
+expect Score:10 of 158
+shot 05-in-the-fire
+# he is still walking: the message did not stop him
+30
+expect an oval mirror
+shot 06-mirror
+key enter
+2
+expect I didn't say anything
+expect Great point!
+key enter
+3
+
+# ---- asleep, it agrees with everything, nonsense included ----
+type plant the dragon
+3
+expect Bad command or file name
+key enter
+3
+expect MIRROR: You're absolutely right!
+shot 07-agrees
+key enter
+3
+type look at me
+3
+expect sixteen colors
+key enter
+3
+expect MIRROR: Great point!
+key enter
+3
+type talk to mirror
+3
+expect What a wonderful question
+key enter
+3
+type ask mirror about the future
+3
+expect I couldn't agree more
+key enter
+3
+type say i don't know
+3
+expect I know everything
+key enter
+2
+1
+type look at the mirror
+3
+expect absolutely right to look like that
+key enter
+2
+expect nobody has told it what day it is
+key enter
+2
+1
+type wake mirror
+3
+expect You tap the glass
+key enter
+2
+expect it does not know what day it is
+key enter
+2
+1
+type take mirror
+3
+expect absolutely right about everything
+key enter
+2
+expect not an echo
+key enter
+2
+1
+
+# ---- step one of two: the date. Not enough alone ----
+type tell mirror the date
+3
+expect JR: It is 10-05-2026.
+key enter
+2
+expect found nothing running
+key enter
+2
+1
+type tell mirror the date
+3
+expect kept nothing
+key enter
+2
+1
+type look at the mirror
+3
+key enter
+2
+expect There is nothing running in there
+key enter
+2
+1
+type take mirror
+3
+key enter
+2
+expect Wake it first
+key enter
+2
+1
+expect Score:10 of 158
+
+# ---- step two: the Chest. It wakes ----
+type show the chest to the mirror
+3
+expect You keep the Chest
+key enter
+2
+expect The dark glass clears
+key enter
+2
+expect MIRROR: ...Hello?
+shot 08-hello
+key enter
+2
+expect JR: Hello. It's 10-05-2026.
+shot 09-date
+key enter
+2
+expect Somebody has to tell me.
+key enter
+2
+expect Somebody has to tell me, too.
+key enter
+2
+expect That part didn't change.
+expect 1 of 9
+key enter
+3
+expect Score:18 of 158
+shot 10-awake
+type look at the mirror
+3
+expect this time it will listen
+key enter
+2
+1
+type talk to mirror
+3
+expect One word of it
+key enter
+2
+1
+type talk to mirror
+3
+expect That was the trouble
+key enter
+2
+1
+type ask mirror about the future
+3
+expect I only ever see one ahead
+key enter
+2
+1
+type say i don't know
+3
+expect Neither do I
+key enter
+2
+1
+type give chest
+3
+expect I only need to be near it
+key enter
+2
+1
+type tell mirror the date
+3
+expect It is 10-05-2026. You told me.
+key enter
+2
+1
+type plant the dragon
+3
+expect Bad command or file name
+key enter
+2
+1
+# awake, it no longer agrees with nonsense
+type look at the pedestal
+3
+expect with the Mirror on it
+key enter
+2
+1
+type take mirror
+3
+expect lighter than the Technical Reference
+key enter
+2
+expect I have a room now
+key enter
+2
+expect That is all three
+key enter
+2
+1
+shot 11-taken
+type take mirror
+3
+expect You have it
+key enter
+2
+1
+type look at the mirror
+3
+expect under your arm
+key enter
+2
+1
+type look at the pedestal
+3
+expect clean oval in the dust
+key enter
+2
+1
+
+# ---- no other way out: the far wall, the lava, the rock ----
+key right
+30
+key down
+20
+key up
+30
+key up
+1
+type look
+3
+expect dragon's cave
+key enter
+2
+expect the niche is empty
+key enter
+2
+1
+
+# ---- back through the fire, and out ----
+key left
+80
+type look
+3
+expect The Cold Reactor
+key enter
+2
+key enter
+2
+key enter
+2
+1
+expect Score:18 of 158
+shot 12-home-free
+hash

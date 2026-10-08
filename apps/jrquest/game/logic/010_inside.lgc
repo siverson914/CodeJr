@@ -1,0 +1,554 @@
+// Room 10: inside the All-In Tavern. Four hosts, four chairs, one term
+// sheet. Each host signs when JR has done one small thing for him:
+//   Chamath    give him the wool (he is cold)
+//   Jason      ask him about Uber (everything else nearly gets there)
+//   Friedberg  listen to all of Science Corner (the other three leave)
+//   Sacks      say "SI" (learned at the Palace), never "AI"
+// Four signatures: the Seed.
+//
+// state: 0 idle, 1 opening scene, 10 to 12 the tailor, 20 the three walk
+// out, 21 Friedberg waits for a listener, 22 Science Corner, 25 the three
+// come back, 30 the Uber story.
+#include "defines.h"
+#include "room10.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(120);
+  load.view(121);
+  load.view(122);
+  load.view(123);
+  load.view(124);
+  load.view(125);
+  load.view(126);
+  set.horizon(40);
+
+  call(91);
+  // One door: he always comes in at the mat, facing the table.
+  position(ego, 75, 156);
+  set.loop(ego, 3);
+
+  animate.obj(chamath);
+  if (isset(sigChamath)) { set.view(chamath, 121); }
+  else { set.view(chamath, 120); }
+  position(chamath, 15, 100);
+  set.loop(chamath, 2);
+  set.cel(chamath, 0);
+  ignore.objs(chamath);
+  stop.cycling(chamath);
+  draw(chamath);
+  if (!isset(sigChamath)) {
+    // He shivers.
+    work = 3;
+    cycle.time(chamath, work);
+    start.cycling(chamath);
+  }
+
+  animate.obj(jason);
+  set.view(jason, 122);
+  position(jason, 55, 100);
+  set.loop(jason, 2);
+  set.cel(jason, 0);
+  ignore.objs(jason);
+  stop.cycling(jason);
+  draw(jason);
+
+  animate.obj(sacks);
+  set.view(sacks, 123);
+  position(sacks, 95, 100);
+  set.loop(sacks, 2);
+  set.cel(sacks, 0);
+  ignore.objs(sacks);
+  stop.cycling(sacks);
+  draw(sacks);
+
+  animate.obj(friedberg);
+  set.view(friedberg, 124);
+  position(friedberg, 135, 100);
+  set.loop(friedberg, 2);
+  set.cel(friedberg, 0);
+  ignore.objs(friedberg);
+  stop.cycling(friedberg);
+  draw(friedberg);
+
+  animate.obj(tailor);
+  set.view(tailor, 125);
+  ignore.objs(tailor);
+
+  if (!isset(seedGiven)) {
+    animate.obj(sheet);
+    set.view(sheet, 126);
+    position(sheet, 76, 103);
+    set.priority(sheet, 11);
+    ignore.objs(sheet);
+    stop.cycling(sheet);
+    draw(sheet);
+  }
+
+  draw(ego);
+  show.pic();
+
+  if (!isset(tavernMet) || isset(walkedOut)) {
+    state = 1;
+    timer = 6;
+  }
+}
+
+// ---- the opening scene ----
+if (state == 1) {
+  timer--;
+  if (timer == 0) {
+    state = 0;
+    if (isset(walkedOut)) {
+      reset(walkedOut);
+      print("All four chairs are full again.\n\nFRIEDBERG: You left at nitrogen. Everybody leaves at nitrogen.");
+    }
+    else {
+      set(tavernMet);
+      print("Four chairs, four hosts, four microphones. All four are talking. It is not clear that any of them is talking to another.");
+      print("JASON: A listener! In the room!\nJR: I'm looking for seed money.\nJASON: Seeds! You know what else started small?\nCHAMATH, SACKS, FRIEDBERG: (quietly) Don't.");
+      print("A term sheet is pushed to the middle of the table. It has four empty lines on it.\n\nIt seems each of the four wants something before he signs.");
+    }
+  }
+}
+
+// ---- the tailor ----
+if (state == 10 && isset(tailorDone)) {
+  reset(tailorDone);
+  state = 11;
+  timer = 16;
+}
+if (state == 11) {
+  timer--;
+  if (timer == 0) {
+    print("Chamath explains that possessions are a sign of insecurity. He explains it all the way through being measured for the sweater.");
+    erase(chamath);
+    set.view(chamath, 121);
+    set.loop(chamath, 2);
+    set.cel(chamath, 0);
+    stop.cycling(chamath);
+    draw(chamath);
+    move.obj(tailor, 0, 100, 2, tailorDone);
+    state = 12;
+  }
+}
+if (state == 12 && isset(tailorDone)) {
+  reset(tailorDone);
+  erase(tailor);
+  state = 0;
+  accept.input();
+  print("It fits. It is ribbed. He points at the sign over his chair, in case you were about to call it something else.");
+  print("CHAMATH: Warm. Finally. Where do I sign?\n\nHe signs.");
+}
+
+// ---- Science Corner: three chairs empty ----
+if (state == 20 && isset(goneA) && isset(goneB) && isset(goneC)) {
+  reset(goneA); reset(goneB); reset(goneC);
+  erase(chamath);
+  erase(jason);
+  erase(sacks);
+  state = 21;
+  accept.input();
+  print("Three chairs are suddenly empty.");
+  print("FRIEDBERG: ...Every time.\n\nHe looks at you. You are the only one left to look at.\n\n(You could LISTEN. Nobody ever has.)");
+}
+if (state == 22) {
+  timer--;
+  if (timer == 0) {
+    part++;
+    timer = 14;
+    if (part == 1) {
+      print("SCIENCE CORNER, part one of five.\n\nFRIEDBERG: Soil. People think it's dirt. It is ground-up rock, water, air, and things that used to be alive. It takes a very long time to make.");
+    }
+    if (part == 2) {
+      print("Part two: what lives in it.\n\nHe has a number for how many living things are in one spoonful. It is a very large number. He says it twice, in case it gets bigger.");
+    }
+    if (part == 3) {
+      print("Part three: nitrogen.\n\nYou run at 4.77 megahertz. This is the first talk in forty-two years that you have had no trouble keeping up with.");
+    }
+    if (part == 4) {
+      print("Part four: why quinoa puts up with ground that other crops won't.\n\nThree faces look in at the door, see that it is still going, and go away again.");
+    }
+    if (part == 5) {
+      print("Part five.\n\nFRIEDBERG: And so, in conclusion, the thing to remember about all of this is...\n\nHe stops.");
+      print("FRIEDBERG: I've never got this far. I don't know how it ends either.\nJR: That's all right. I don't know how most things end. I get switched off.");
+      print("He pays you the only way a Sultan of Science can: with a bag of quinoa. Then he signs the term sheet. His hand shakes a little.");
+      get("quinoa");
+      set(sigFriedberg);
+      score += 5;
+      state = 24;
+    }
+  }
+}
+// The three come back: after the lecture, or after "no".
+if (state == 24) {
+  position(chamath, 0, 100);
+  position(jason, 0, 100);
+  position(sacks, 0, 100);
+  draw(chamath);
+  draw(jason);
+  draw(sacks);
+  start.cycling(chamath);
+  start.cycling(jason);
+  start.cycling(sacks);
+  move.obj(chamath, 15, 100, 2, goneA);
+  move.obj(jason, 55, 100, 3, goneB);
+  move.obj(sacks, 95, 100, 4, goneC);
+  state = 25;
+}
+if (state == 25 && isset(goneA) && isset(goneB) && isset(goneC)) {
+  reset(goneA); reset(goneB); reset(goneC);
+  // A walk of 2, 3 or 4 pixels a step stops short of the chair: seat them.
+  reposition.to(chamath, 15, 100);
+  reposition.to(jason, 55, 100);
+  reposition.to(sacks, 95, 100);
+  set.loop(chamath, 2); set.cel(chamath, 0);
+  set.loop(jason, 2); set.cel(jason, 0); stop.cycling(jason);
+  set.loop(sacks, 2); set.cel(sacks, 0); stop.cycling(sacks);
+  if (isset(sigChamath)) { stop.cycling(chamath); }
+  else { work = 3; cycle.time(chamath, work); }      // back to shivering
+  state = 0;
+  accept.input();
+  if (isset(sigFriedberg)) { print("The other three come back in and sit down, testing the air for nitrogen."); }
+  else { print("The other three come back in and sit down as if they had only gone to check on something."); }
+}
+
+// ---- the Uber story: the other three know the words ----
+if (state == 30) {
+  timer--;
+  if (timer == 0) {
+    close.window();
+    stop.cycling(jason); set.cel(jason, 0);
+    stop.cycling(sacks); set.cel(sacks, 0);
+    if (isset(sigChamath)) { stop.cycling(chamath); set.cel(chamath, 0); }
+    state = 0;
+    accept.input();
+    print("JR: Which was it? Third or fourth?\n\nHe keeps the \"or fourth\". It makes a better story, and he knows it.");
+    print("JR: You were early.\nJASON: I was early!\nJR: I was early too. It's worse.\n\nHe signs with a flourish.");
+  }
+}
+
+// ---- the way out ----
+if ((isset(onTrigger) || egoEdge == 3)) {
+  if (state == 21 || state == 22) { set(walkedOut); }
+  close.window();        // the Uber story's box, if it is still up
+  arriveFrom = 5;
+  new.room(9);
+}
+
+// ---- the term sheet shows its signatures ----
+tA = 0;
+if (isset(sigChamath)) { tA++; }
+if (isset(sigJason)) { tA++; }
+if (isset(sigFriedberg)) { tA++; }
+if (isset(sigSacks)) { tA++; }
+if (!isset(seedGiven)) { set.cel.v(sheet, tA); }
+
+// ---- four signatures ----
+if (tA == 4 && !isset(seedGiven) && state == 0) {
+  set(seedGiven);
+  print("Four signatures. The term sheet is full.");
+  print("ALL FOUR: Let your winners ride.");
+  erase(sheet);
+  get("Seed");
+  print("Jason takes the paper and puts something in your hand. It is the Seed: one bean. Every valuation in the kingdom started as one of these.");
+  print("JR: What do I do with it?\nSACKS: Plant it. Somewhere with a lot of graphics cards.\nFRIEDBERG: And water it. I can explain why.\nCHAMATH, JASON, SACKS: Don't.");
+}
+
+// ================= what the player types =================
+
+// The word Sacks will not sign under, anywhere in a sentence.
+if (said("ai", "rol") || said("anyword", "ai", "rol") || said("anyword", "anyword", "ai", "rol") || said("anyword", "anyword", "anyword", "ai", "rol") || said("anyword", "anyword", "anyword", "anyword", "ai", "rol")) {
+  if (state > 19 && state < 26) { print("FRIEDBERG: Sacks would have something to say about that word. He is not here. Nobody is here."); }
+  else {
+    if (isset(sigSacks)) { print("SACKS: (wincing) You knew the right word a minute ago."); }
+    else {
+      print("SACKS: I can't put my name under that word. It has been retired. I helped write the rules, so I'd know.");
+      if (isset(knowsSI)) { print("(You know the word they use now. You learned it at the Palace.)"); }
+      else { print("(There is a newer word. The Golden Palace is very strict about it. They would teach you, in their way.)"); }
+    }
+  }
+}
+// The right word.
+if (said("si", "rol") || said("anyword", "si", "rol") || said("anyword", "anyword", "si", "rol") || said("anyword", "anyword", "anyword", "si", "rol") || said("anyword", "anyword", "anyword", "anyword", "si", "rol")) {
+  if (state > 19 && state < 26) { print("You say it to an empty chair. The chair does not sign."); }
+  else {
+    if (isset(sigSacks)) { print("SACKS: Correct. Still correct."); }
+    else {
+      if (!isset(knowsSI)) {
+        print("You open your mouth and what comes out is the old word. Forty-two years of habit. Nobody has taught you the new one yet.");
+        print("SACKS: Try the Golden Palace. They don't acknowledge anything else.");
+      }
+      else {
+        set(sigSacks);
+        score += 5;
+        print("JR: It's a quest for SI. Super Intelligence.\nSACKS: Now that I can sign.");
+        print("He crosses out one letter on the term sheet, writes another one over it, and signs.");
+        print("Then he reads the kingdom's rules out loud, the ones he helped write, and reviews them on his own show. Four stars. He takes off one star for the parts other people added.");
+      }
+    }
+  }
+}
+
+// While three of them are out of the room.
+if (state > 19 && state < 26) {
+  if (said("talk", "chamath") || said("talk", "chamath", "rol") || said("talk", "jason") || said("talk", "jason", "rol") || said("talk", "sacks") || said("talk", "sacks", "rol") || said("talk", "hosts") || said("give", "wool") || said("give", "wool", "rol") || said("give", "chamath", "rol") || said("talk", "uber") || said("look", "chamath") || said("look", "jason") || said("look", "sacks")) {
+    print("His chair is empty. It emptied very fast. It will stay empty for as long as Science Corner lasts.");
+  }
+}
+
+// ---- looking ----
+if ((said("look") || said("look", "room") || said("look", "tavern"))) {
+  print("The All-In Tavern. One long table, four tall chairs with a nickname carved across the top of each, four microphones, and an ON AIR lamp that nobody remembers switching on.");
+  print("From the left: Chamath, Jason, Sacks, Friedberg. A bar in the corner has one bottle on it. The door is behind you.");
+}
+if (said("look", "hosts") || said("look", "podcast") || said("look", "them")) {
+  print("Four hosts who argue about everything, in public, into four microphones. They read the numbers themselves, they say what they think, and people do listen.");
+  print("You are one of the people now. The bouncer wrote it down.");
+}
+if (said("look", "chairs") || said("look", "chair") || said("read", "chairs") || said("read", "chair")) {
+  print("Four thrones. The carvings say DICTATOR, MODERATOR, RAIN MAN and SULTAN. The second and fourth ran out of wood: in full they are THE WORLD'S GREATEST MODERATOR and THE SULTAN OF SCIENCE.");
+}
+if (said("sit") || said("sit", "chairs") || said("sit", "chair") || said("take", "chairs") || said("take", "chair")) {
+  if (state == 21) { goto listening; }
+  print("Every chair has a name on it, and none of the names is yours. You were built to sit on a desk anyway.");
+}
+if (said("look", "chamath")) {
+  if (isset(sigChamath)) {
+    print("Chamath Palihapitiya, the Dictator, in new cashmere. He is telling the table the kingdom should build its own things. The model doing his paperwork came from the Bazaar. It was cheaper and it was faster, and he says so himself.");
+  }
+  else {
+    print("Chamath Palihapitiya, in the chair marked DICTATOR. He is shivering in a thin gray shirt, with his arms wrapped round himself. He owns forty sweaters. None of them is here.");
+  }
+}
+if (said("look", "jason")) {
+  print("Jason Calacanis, in the chair marked MODERATOR. He wears a headset so that nothing he says gets lost. He has the look of a man who is one question away from his favorite story.");
+}
+if (said("look", "sacks")) {
+  print("David Sacks, in the chair marked RAIN MAN. Gray suit, blue tie. Until the spring he was the kingdom's czar for thinking machines. He is reading the rules over, and nodding.");
+}
+if (said("look", "friedberg")) {
+  print("David Friedberg, in the corner, in the chair marked SULTAN. A lab coat, glasses, a bowl of quinoa, and a great deal to say to anyone who will stay for it.");
+}
+if (said("look", "david") || said("talk", "david") || said("talk", "david", "rol")) {
+  print("Two of them look up.\n\nSACKS AND FRIEDBERG: Which David?");
+}
+if (said("look", "snuggie") || said("look", "sign") || said("read", "sign") || said("read", "snuggie")) {
+  print("Over the Dictator's chair: NOT A SNUGGIE. It was true of a sweater once, and he wanted it on the record.\n\nIn the corner: SCIENCE CORNER, with the corner right under it.");
+}
+if (said("look", "science corner") || said("read", "science corner")) {
+  print("SCIENCE CORNER. It is a real corner. The science happens in it, to whoever is still in the room.");
+}
+if (said("look", "on air") || said("look", "lantern")) { print("ON AIR. It has been on for years. Everything said in this room is said to everybody."); }
+if (said("look", "chart")) { print("A chart on the wall. It goes up and to the right. They all do, on walls."); }
+if (said("look", "tequila") || said("look", "bar") || said("look", "counter") || said("look", "price") || said("read", "price")) {
+  print("One bottle of tequila on the bar. The card beside it says $1,200. That is the bottle, not the bar.");
+}
+if (said("take", "tequila") || said("buy", "tequila") || said("buy") || said("steal", "tequila")) {
+  print("Twelve hundred dollars. You cost twelve hundred and sixty-nine, with the keyboard. You decide not to trade nearly all of yourself for a drink you can't drink.");
+}
+if (said("drink") || said("drink", "tequila") || said("open", "tequila")) {
+  print("You are a 1984 computer. You were not rated for tequila.");
+}
+if (said("look", "table") || said("look", "microphone")) {
+  print("An oak table and four microphones, one a chair. Nothing said at this table is ever said only once.");
+}
+if (said("look", "term sheet") || said("read", "term sheet")) {
+  if (isset(seedGiven)) { print("Signed, sealed and swapped for a bean. That is how it is supposed to work."); }
+  else { print("SEED FUNDING, ONE (1) QUEST. Four lines for four signatures. %v220 of them are signed."); }
+}
+if (said("take", "term sheet") || said("sign", "term sheet") || said("sign")) {
+  print("It isn't yours to sign. You are the one being funded. All you have to do is be worth it, four times.");
+}
+if (said("look", "seed") || said("take", "seed") || said("talk", "seed") || said("talk", "hosts", "seed") || said("talk", "hosts") || said("talk")) {
+  if (isset(seedGiven)) { print("One bean, fully funded. They say to plant it where the graphics cards grow, and water it."); }
+  else { print("ALL FOUR: Four signatures, then the Seed.\n\nThey say it together. It is the only thing they have said together all day."); }
+}
+if (said("look", "rug") || said("look", "felt") || said("look", "chips") || said("take", "chips")) {
+  print("A rug of green card-table felt with three chips left on it. Somebody went all in and didn't come back for the change.");
+}
+if (said("look", "door") || said("look", "doormat") || said("open", "door")) { print("The door back to the road is behind you, at the bottom of the room. Walk onto the mat."); }
+if (said("look", "bottles")) { print("Bottles. Every one of them cost more than your disk drive."); }
+if (said("look", "quinoa") || said("eat", "quinoa") || said("eat")) {
+  if (has("quinoa")) { print("A bag of quinoa, paid to you for listening. You have no mouth. It is still the nicest thing anyone has paid you."); }
+  else { print("A bowl of quinoa at the Sultan of Science's place. Nobody else at the table has touched it."); }
+}
+if (said("look", "ceiling") || said("look", "floor") || said("look", "wall")) { print("Old beams, old boards, new money."); }
+if (said("give", "tokens") || said("give", "tokens", "rol")) {
+  print("JASON: Keep it. You've got this backwards. We fund you.");
+}
+if (said("give", "quinoa") || said("give", "quinoa", "rol")) { print("FRIEDBERG: No, no. That's yours. You earned it. Nobody has ever earned it before."); }
+if (said("say", "steve") || said("talk", "hosts", "steve")) { print("JASON: King Steve! A listener from the old days. Tell him the pod says hello."); }
+if (said("listen", "hosts") || said("listen", "podcast")) {
+  print("All four are talking. You pick out \"ride\", \"cold\", \"rules\" and \"soil\". It is like four radio stations sharing one antenna.");
+}
+
+// ---- Chamath: the sweater ----
+if (said("talk", "chamath") || said("talk", "chamath", "rol")) {
+  if (!posn(ego, 0, 118, 159, 140)) { print("Walk up to the table."); }
+  else {
+    if (isset(sigChamath)) {
+      print("He has signed. He is explaining to the table that possessions are a sign of insecurity. He strokes the sleeve while he explains it.\n\nJR: It's a nice sweater.\nCHAMATH: It's all right.");
+    }
+    else {
+      print("CHAMATH: It is freezing in here and I have nothing to wear.\nJR: Nothing?\nCHAMATH: Forty sweaters. All at home.");
+      print("He looks at the sign over his chair, and then at you.\n\nCHAMATH: Cashmere. If you ever come across any. I'd sign anything for a bit of cashmere.");
+    }
+  }
+}
+if (said("give", "wool") || said("give", "wool", "chamath") || said("give", "chamath", "wool") || said("give", "chamath")) {
+  if (isset(sigChamath)) { print("He has his sweater. One is enough. He has forty-one now."); }
+  else {
+    if (!has("wool")) {
+      print("You have nothing warm to give him. He wants cashmere. Cashmere grows on a certain kind of goat, and you have seen a meadow.");
+    }
+    else {
+      if (!posn(ego, 0, 118, 60, 140)) { print("He is at the left end of the table. Walk closer."); }
+      else {
+        drop("wool");
+        set(sigChamath);
+        score += 5;
+        print("You hold up the tuft of cashmere.\n\nCHAMATH: Is that from the goat? Itself? No middleman?");
+        print("He snaps his fingers. A tailor comes in. A tavern like this one keeps a tailor.");
+        stop.cycling(chamath);
+        set.cel(chamath, 0);
+        position(tailor, 0, 100);
+        draw(tailor);
+        start.cycling(tailor);
+        move.obj(tailor, 5, 100, 1, tailorDone);
+        prevent.input();
+        state = 10;
+      }
+    }
+  }
+}
+if (said("look", "tailor") || said("talk", "tailor")) { print("He has gone. He bills by the minute."); }
+if (said("talk", "chamath", "kimi") || said("look", "kimi")) {
+  print("Chamath says his shop moved its work to Kimi, a model from the Bazaar, because it did more and cost less. He is for the home team. He is also for arithmetic.");
+}
+
+// ---- Jason: the question ----
+if (said("talk", "jason", "uber") || said("talk", "uber") || said("say", "uber") || said("say", "uber", "rol") || said("talk", "jason", "investor") || said("talk", "hosts", "uber") || said("talk", "jason", "carriage") || said("talk", "carriage")) {
+  if (!posn(ego, 0, 118, 159, 140)) { print("Walk up to the table."); }
+  else {
+    if (isset(sigJason)) {
+      print("JASON: Third. Or fourth. Ask me again any time. People do.");
+    }
+    else {
+      set(sigJason);
+      score += 5;
+      print("JR: Did you ever invest in Uber?\n\nThe room goes quiet. Three men close their eyes.\n\nJASON: Finally. Somebody asked.");
+      set(leaveOpen);
+      // Low on the screen, so the mouths can be seen over it.
+      print.at("JASON: I was the third investor in Uber. Or the fourth.\n\n(The other three mouth the words along with him.)", 15, 5, 30);
+      reset(leaveOpen);
+      work = 2;
+      cycle.time(jason, work);
+      cycle.time(sacks, work);
+      start.cycling(jason);
+      start.cycling(sacks);
+      if (isset(sigChamath)) { cycle.time(chamath, work); start.cycling(chamath); }
+      prevent.input();
+      timer = 30;
+      state = 30;
+    }
+  }
+}
+if (said("talk", "jason", "seed") || said("talk", "jason", "tokens")) {
+  print("JASON: Seeds! You know what else started small? A little company that...\nCHAMATH, SACKS, FRIEDBERG: (quietly) Don't.\n\n(He would clearly like to be asked about it by name.)");
+}
+if (said("talk", "jason", "dragon")) {
+  print("JASON: A dragon. Everybody says, don't go near it. You know what else everybody said don't go near? Getting into a car with a stranger. And yet.\n\n(He waits. He would like to be asked which car.)");
+}
+if (said("talk", "jason", "weather") || said("talk", "weather")) {
+  print("JASON: Rain! You know what people want in the rain? A ride. And you know who saw that early?\n\n(He raises his eyebrows. He is waiting for you to ask him about it by name.)");
+}
+if (said("talk", "jason") || said("talk", "jason", "rol")) {
+  if (isset(sigJason)) { print("JASON: I signed! Best question I've had all year. Third or fourth. Tell your friends."); }
+  else {
+    jasonTurn++;
+    if (jasonTurn == 1) {
+      print("JASON: Ask me anything. Seriously. Anything. I have a story for it.");
+    }
+    if (jasonTurn == 2) {
+      print("JASON: Funny you should bring that up. It's exactly like a company I backed once, very early. It drove people around. I won't say which.\n\n(He very much wants you to ask which.)");
+    }
+    if (jasonTurn > 2) {
+      jasonTurn = 0;
+      print("JASON: That reminds me of a ride-hailing company I...\nCHAMATH, SACKS, FRIEDBERG: (quietly) Don't.\n\n(There is one question he is waiting for. It has four letters and starts with U.)");
+    }
+  }
+}
+
+// ---- Sacks: the word ----
+if (said("talk", "sacks") || said("talk", "sacks", "rol") || said("look", "rules") || said("read", "rules") || said("talk", "rules")) {
+  if (isset(sigSacks)) {
+    print("SACKS: Signed. And the rules hold up very well, I have to say. I've read them again since.");
+  }
+  else {
+    print("SACKS: I'd sign, but look at the heading. I won't say the word. Two letters. The first one is the problem.");
+    if (isset(knowsSI)) { print("SACKS: You've been to the Palace. You know what goes there instead. Say it."); }
+    else { print("JR: What's the new word?\nSACKS: If you have to ask, you haven't been to the Golden Palace. They'll set you straight. They set everybody straight."); }
+  }
+}
+
+// ---- Friedberg: an audience ----
+if (said("talk", "friedberg") || said("talk", "friedberg", "rol") || said("talk", "science corner") || said("look", "soil") || said("talk", "soil")) {
+  if (state == 21) { goto listening; }
+  if (state == 22) { print("He is in the middle of a sentence. He has been in the middle of it for some time."); }
+  else {
+    if (isset(sigFriedberg)) {
+      print("FRIEDBERG: Next time, part six. I'm writing an ending.\n\nThree chairs scrape. Nobody leaves. It is a start.");
+    }
+    else {
+      if (!posn(ego, 0, 118, 159, 140)) { print("Walk up to the table."); }
+      else {
+        if (isset(cornerCalled)) { print("FRIEDBERG: Shall we try again? Time for Science Corner."); }
+        else {
+          set(cornerCalled);
+          print("FRIEDBERG: I don't want anything. I have something to give. Knowledge.\n\nHe taps his microphone.\n\nFRIEDBERG: Time for Science Corner.");
+        }
+        start.cycling(chamath);
+        start.cycling(jason);
+        start.cycling(sacks);
+        work = 1;
+        cycle.time(chamath, work);
+        move.obj(chamath, 0, 100, 3, goneA);
+        move.obj(jason, 0, 100, 4, goneB);
+        move.obj(sacks, 0, 100, 5, goneC);
+        prevent.input();
+        state = 20;
+      }
+    }
+  }
+}
+if (said("listen") || said("listen", "rol") || said("wait") || said("stay") || said("stay", "rol") || said("yes")) {
+  if (state == 21) {
+    listening:
+    print("JR: I'll stay. I was built to wait.\nFRIEDBERG: ...Nobody's ever stayed.");
+    part = 0;
+    timer = 10;
+    state = 22;
+  }
+  else {
+    if (state == 22) { print("You are listening. It is going in at 4.77 megahertz, which turns out to be exactly fast enough."); }
+    else { print("Four men are talking at once. To hear one of them out, you would have to get him started on his own subject."); }
+  }
+}
+if (said("no") || said("skip") || said("skip", "rol")) {
+  if (state == 21 || state == 22) {
+    print("FRIEDBERG: That's fair. That's what everybody says.\n\nHe puts the lid back on the quinoa.");
+    prevent.input();
+    state = 24;
+  }
+  else { print("Nobody asked you anything. For once, in this room."); }
+}
+
+// A line this room answered through "rest of line" may have ended in a
+// word the game does not know. It has been answered: logic 0 need not
+// add "Bad command or file name".
+if (isset(handled)) { unknownWord = 0; }
+return();

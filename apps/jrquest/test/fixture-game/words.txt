@@ -1,0 +1,11 @@
+# A tiny word list for the tool tests.
+0: a, an, the, my, please, at, to
+1: anyword
+20: look, examine, read, check, l
+21: take, get, grab, pick up
+22: open
+100: code, program, source
+101: gate, gates
+102: key, keys
+103: room
+9999: rol

@@ -1,0 +1,259 @@
+// Room 7: Sand Hill Bridge. A bridge of flat square keys over a stream of
+// money. The Toll Troll takes fifteen percent of loose tokens for a
+// crossing either way. The chiclet keys are a part that didn't change.
+#include "defines.h"
+#include "room07.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(90);
+  load.view(91);
+  load.view(92);
+  set.horizon(56);
+
+  call(91);
+  set(outdoor);
+
+  // arriveFrom is how JR left the last room, so he comes in opposite.
+  position(ego, 20, 160);
+  set.loop(ego, 3);
+  bank = 1;
+  if (arriveFrom == 3) { position(ego, 44, 62); set.loop(ego, 2); }
+  if (arriveFrom == 2) { position(ego, 2, 120); set.loop(ego, 0); }
+  if (arriveFrom == 4) { position(ego, 148, 120); set.loop(ego, 1); bank = 2; }
+
+  animate.obj(poster);
+  set.view(poster, 92);
+  position(poster, 3, 84);
+  set.priority(poster, 9);
+  ignore.objs(poster);
+  draw(poster);
+  stop.update(poster);
+
+  animate.obj(troll);
+  set.view(troll, 90);
+  position(troll, 22, 110);
+  ignore.objs(troll);
+  work = 9;
+  cycle.time(troll, work);
+  draw(troll);
+
+  // what floats: it goes under the bridge and comes round again
+  animate.obj(coin);
+  set.view(coin, 91);
+  set.loop(coin, 0);
+  set.priority(coin, 4);
+  ignore.objs(coin);
+  ignore.blocks(coin);
+  ignore.horizon(coin);
+  position(coin, 75, 70);
+  work = 3;
+  cycle.time(coin, work);
+  draw(coin);
+  move.obj(coin, 78, 166, 1, coinDone);
+
+  animate.obj(note);
+  set.view(note, 91);
+  set.loop(note, 1);
+  set.priority(note, 4);
+  ignore.objs(note);
+  ignore.blocks(note);
+  ignore.horizon(note);
+  position(note, 80, 138);
+  work = 5;
+  cycle.time(note, work);
+  draw(note);
+  move.obj(note, 82, 166, 1, noteDone);
+
+  animate.obj(coin2);
+  set.view(coin2, 91);
+  set.loop(coin2, 0);
+  set.priority(coin2, 4);
+  ignore.objs(coin2);
+  ignore.blocks(coin2);
+  ignore.horizon(coin2);
+  position(coin2, 82, 150);
+  work = 4;
+  cycle.time(coin2, work);
+  draw(coin2);
+  move.obj(coin2, 86, 166, 1, coin2Done);
+
+  draw(ego);
+  show.pic();
+}
+
+// ---- the edges ----
+if (egoEdge == 1) { arriveFrom = 1; new.room(12); }
+if (egoEdge == 2) { arriveFrom = 2; new.room(8); }
+if (egoEdge == 3) { arriveFrom = 3; new.room(3); }
+if (egoEdge == 4) { arriveFrom = 4; new.room(6); }
+
+// ---- the stream keeps moving ----
+if (isset(coinDone)) {
+  reset(coinDone);
+  reposition.to(coin, 75, 58);
+  move.obj(coin, 78, 166, 1, coinDone);
+}
+if (isset(noteDone)) {
+  reset(noteDone);
+  reposition.to(note, 74, 58);
+  move.obj(note, 82, 166, 1, noteDone);
+}
+if (isset(coin2Done)) {
+  reset(coin2Done);
+  reposition.to(coin2, 77, 58);
+  move.obj(coin2, 86, 166, 1, coin2Done);
+}
+
+// ---- the toll ----
+// Which bank is he on? Reaching the far bank ends the crossing he paid for.
+if (posn(ego, 0, 57, 36, 167)) { bank = 1; }
+if (posn(ego, 116, 57, 159, 167)) { bank = 2; }
+if (isset(tollPaid) && bank != paidFrom) { reset(tollPaid); }
+
+if (posn(ego, 42, 104, 104, 128) && !isset(tollPaid)) {
+  set(tollPaid);
+  paidFrom = bank;
+  // He is stopped only when there is something to say. Once the troll
+  // has waved the Chest through, or an empty pocket, he doesn't do it
+  // again on every crossing.
+  work2 = 0;
+  if (!isset(bTrollMet)) { work2 = 1; }
+  if (has("Chest of Tokens")) {
+    if (!isset(bChestWaved)) { work2 = 1; }
+  }
+  else {
+    if (tokens > 0) { work2 = 1; }
+    else {
+      if (!isset(bEmptyWaved)) { work2 = 1; }
+    }
+  }
+  if (work2 == 1) {
+    egoDir = 0;
+    stop.motion(ego);
+    start.motion(ego);
+  }
+  if (!isset(bTrollMet)) {
+    set(bTrollMet);
+    print("A troll in a collector's cap holds up his sign. It says 15%.");
+    print("TROLL: Toll. Fifteen percent of whatever crosses.\nJR: Who decided fifteen?\nTROLL: I asked for twenty.");
+  }
+  if (has("Chest of Tokens")) {
+    if (!isset(bChestWaved)) {
+      set(bChestWaved);
+      print("TROLL: Fifteen percent of a chest that never empties is a chest that never empties. I can't carry that. Go on. Go on every time. Don't even slow down.");
+    }
+  }
+  else {
+    if (tokens == 0) {
+      if (!isset(bEmptyWaved)) {
+        set(bEmptyWaved);
+        print("TROLL: Fifteen percent of nothing. Go on. Come back when you're worth stopping.");
+      }
+    }
+    else {
+      work = tokens;
+      if (work > 60) { work = 60; }
+      work *= 3;
+      work += 19;
+      work /= 20;
+      tokens -= work;
+      print("The troll counts your tokens, twice, and takes %v31. He rounds up. You have %v40 left.");
+    }
+  }
+}
+
+// ---- looking ----
+if (said("look") || said("look", "room") || said("look", "hill")) {
+  print("Sand Hill Bridge. A stream of money runs down from the hill, green, with coins in it, and the bridge across it is made of flat square keys.");
+  print("Up the hill are the venture offices, all glass. On the west bank are a notice board and a troll with a sign.");
+}
+if (said("look", "bridge") || said("talk", "troll", "bridge") || said("touch", "bridge") || said("push", "bridge")) {
+  if (!isset(bChiclet)) {
+    set(bChiclet);
+    unchanged++;
+    print("The bridge is a keyboard. Flat, square keys with gaps between them, and one long key in the bottom row.");
+    print("JR: Those are chiclet keys! I had those in 1984. Everybody laughed.\nTROLL: Everybody's bridge looks like this now.");
+    print("JR: So I was early?\nTROLL: You were early. That's worse.");
+    print("(Parts that didn't change: %v46 of 9. This one only took forty years.)");
+  }
+  else {
+    print("Thirty-three flat square keys and a space bar. Yours had more, and no cord. You step on them carefully, out of respect.");
+  }
+}
+if (said("look", "troll")) {
+  print("The Toll Troll. Green, tusked, and wearing the cap of somebody official. His sign says 15%. He looks like he wrote a bigger number first.");
+}
+if (said("look", "stream") || said("look", "tokens") || said("look", "water")) {
+  print("A stream of money. It comes down from the offices on the hill, goes under the bridge, and according to the troll it comes back round. Everyone upstream is counting on that.");
+}
+if (said("look", "offices")) {
+  print("Venture offices, up Sand Hill, all glass. Each one has put money in the stream and is waiting for it to come back round as more.");
+}
+if (said("enter", "offices") || said("climb", "hill") || said("climb", "offices") || said("climb")) {
+  print("You get as far as the first step. A voice from the glass says they are not taking meetings with hardware. Your legs are four pixels long anyway.");
+}
+if (said("look", "sign") || said("read", "sign") || said("look", "scribe") || said("read", "scribe") || said("look", "board") || said("read", "board")) {
+  print("WANTED: THE SCRIBE.\nWrites very fast. Never tires. Always sounds sure.");
+  print("KNOWN BY HIS LONG DASHES. If you find three in one letter, it's him.\n\nREWARD: 15% OF HIM.");
+}
+if (said("take", "sign") || said("take", "scribe") || said("take", "board")) {
+  print("It is nailed up, and you are not a bounty hunter. You have never even used a long dash. You have a hyphen, and it has always been enough.");
+}
+if (said("look", "toll") || said("read", "toll")) {
+  print("The troll's sign says 15%. Under the paint you can just make out a 2 and a 0.");
+}
+if (said("look", "tree")) { print("A round tree on the east bank. Money does not grow on it. People have checked."); }
+if (said("look", "rocks")) { print("Rocks and reeds. The only things on the bank that are not waiting for a return."); }
+if (said("look", "path") || said("look", "north")) {
+  print("The bridge runs west to east. West is the Data Center, east is the Bazaar. The road north climbs to the Golden Palace, and south is Token Meadow.");
+}
+
+// ---- the troll ----
+if (said("talk", "troll") || said("talk") || said("talk", "troll", "toll") || said("talk", "troll", "customer") || said("talk", "troll", "tokens") || said("talk", "troll", "stream")) {
+  if (!isset(bTrollMet)) {
+    set(bTrollMet);
+    print("TROLL: Toll bridge. Fifteen percent of whatever crosses, either way.\nJR: Who decided fifteen?\nTROLL: I asked for twenty.");
+  }
+  else {
+    bTalk++;
+    if (bTalk > 3) { bTalk = 1; }
+    if (bTalk == 1) { print("TROLL: Everything going over pays me fifteen percent. The customer on the far side has stopped accepting delivery. I still get my fifteen. Of what, I am working on."); }
+    if (bTalk == 2) { print("JR: What do you do with the tokens?\nTROLL: Throw them in the stream. Where did you think it came from?"); }
+    if (bTalk == 3) { print("TROLL: I asked for twenty.\nJR: You said.\nTROLL: I want it remembered."); }
+  }
+}
+if (said("talk", "troll", "twenty") || said("say", "twenty") || said("look", "twenty")) {
+  print("TROLL: Twenty was the opening. Fifteen is where it landed. Everybody shook on it, and then the customer stopped buying.");
+}
+if (said("haggle") || said("haggle", "rol") || said("talk", "troll", "rol")) {
+  print("JR: Would you take ten?\nTROLL: I asked for twenty. Fifteen is me being reasonable.");
+}
+if (said("give", "tokens", "troll") || said("give", "troll") || said("give", "toll") || said("give", "troll", "rol") || said("give", "tokens") || said("give", "toll", "rol") || said("give")) {
+  if (isset(tollPaid)) { print("TROLL: You've paid for this crossing. Come back the other way and we'll do it again."); }
+  else { print("TROLL: Not here. On the bridge. I take it as it crosses. That is the whole art."); }
+}
+if (said("kick", "troll") || said("push", "troll") || said("take", "troll")) {
+  print("He is a troll and it is his bridge. In forty-two years of stories that has never once gone well for the knight.");
+}
+if (said("cross") || said("cross", "bridge") || said("enter", "bridge") || said("use", "bridge")) {
+  print("Walk across it. The troll will find you.");
+}
+
+// ---- the stream ----
+if (said("take", "tokens") || said("take", "stream") || said("take", "tokens", "stream") || said("take", "tokens", "anyword")) {
+  print("You fish out a coin. The troll takes fifteen percent of it, which for one coin, rounding up, is the coin.");
+}
+if (said("swim") || said("swim", "rol") || said("enter", "stream") || said("drink", "stream") || said("drink", "water") || said("drink")) {
+  print("You are a 1984 computer and that is a river of money. Either one would ruin you. The bank holds.");
+}
+if (said("drop", "tokens") || said("drop", "tokens", "rol") || said("throw", "tokens") || said("throw", "tokens", "rol")) {
+  print("Put your own tokens in the stream and wait for them to come back as more? That is what the offices are for. You are a knight.");
+}
+if (said("fill", "bucket") || said("fill") || said("fill", "bucket", "rol")) {
+  print("With money? King Steve asked for a Chest, and this is not how you get one. The bucket is for water.");
+}
+return();

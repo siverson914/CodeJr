@@ -1,0 +1,194 @@
+// Room 5: the Cold Reactor. A nuclear plant with no steam, a guard with a
+// clipboard, and behind the far tower a cave mouth: the door to room 16.
+// No points here. North 9, east 2, south 14, west 4.
+#include "defines.h"
+#include "room05.h"
+
+if (isset(newRoom)) {
+  load.pic(curRoom);
+  draw.pic(curRoom);
+  discard.pic(curRoom);
+  load.view(0);
+  load.view(70);
+  set.horizon(64);
+
+  call(91);
+  set(outdoor);
+
+  // Entry points. Left by going north = arrives at our south, and so on.
+  position(ego, 72, 160);                              // 0 (test) and 1: the road, south
+  set.loop(ego, 3);
+  if (arriveFrom == 2) { position(ego, 4, 146); set.loop(ego, 0); }      // came east: our west side
+  if (arriveFrom == 3) { position(ego, 8, 72); set.loop(ego, 2); }       // came south: the lane, north
+  if (arriveFrom == 4) { position(ego, 146, 150); set.loop(ego, 1); }    // came west: our east side
+  if (arriveFrom == 5) { position(ego, 137, 130); set.loop(ego, 2); }    // out of the cave
+
+  animate.obj(guard);
+  set.view(guard, 70);
+  position(guard, 70, 128);
+  work = 14;
+  cycle.time(guard, work);
+  draw(guard);
+
+  draw(ego);
+  show.pic();
+  timer = 0;
+}
+
+// ---- arriving for the first time: the guard says his line ----
+if (!isset(guardMet)) {
+  timer++;
+  if (timer == 8) {
+    set(guardMet);
+    print("A nuclear plant. Two cooling towers, and not a wisp of steam from either.");
+    print("A guard at the gate looks up from his clipboard.\n\nGUARD: Restarting soon.");
+  }
+}
+
+// ---- the cave mouth ----
+if (isset(onTrigger)) {
+  arriveFrom = 5;
+  new.room(16);
+}
+
+// ---- edges ----
+if (egoEdge == 1) { arriveFrom = 1; new.room(9); }
+if (egoEdge == 2) { arriveFrom = 2; new.room(2); }
+if (egoEdge == 3) { arriveFrom = 3; new.room(14); }
+if (egoEdge == 4) { arriveFrom = 4; new.room(4); }
+
+// ---- looking ----
+if (said("look") || said("look", "room") || said("look", "reactor") || said("look", "plant") || said("look", "power plant")) {
+  print("The Cold Reactor. Two cooling towers with no steam, a fence, a gate, a guard with a clipboard, and a sign that says SOON.");
+  print("It was shut down years ago and now it is wanted back. Nobody in this country has ever restarted a closed one and got power out of it. They are trying. That is why the sign is in the future tense.");
+  print("A lane runs north beside the fence. In the rock behind the far tower there is a cave.");
+}
+if (said("look", "cooling tower") || said("look", "castle")) {
+  print("Cooling towers. When a plant runs, they breathe out clouds. These two have been holding their breath for a long time. Crows have moved into the far one.");
+}
+if (said("look", "steam") || said("look", "smoke")) {
+  print("There isn't any. That is the whole news here.");
+}
+if (said("look", "sky")) { print("Blue and empty. A cloud here would be good news."); }
+if (said("look", "guard")) {
+  print("A guard in a navy uniform, with a cap, a badge and a clipboard. He guards a nuclear plant that is switched off. He says it is the easy shift.");
+}
+if (said("look", "badge")) { print("The badge says SECURITY. Under it, smaller: AND PATIENCE."); }
+if (said("look", "clipboard") || said("read", "clipboard")) {
+  if (posn(ego, 40, 124, 104, 150)) {
+    print("A checklist, forty items long. Every box says SOON, in pencil. Some have been rubbed out and written in again.");
+  }
+  else { print("He holds it close. Walk closer."); }
+}
+if (said("take", "clipboard")) { print("GUARD: You'd have to sign for it. On the clipboard."); }
+if (said("look", "sign") || said("read", "sign") || said("look", "soon") || said("look", "radiation")) {
+  if (posn(ego, 96, 124, 159, 167)) {
+    print("A notice on a post by the cave: a red triangle, and under it, in small letters, THE DRAGON IS NOT PLANT PROPERTY.");
+  }
+  else {
+    print("A sign on the fence. One word fits at this resolution: SOON. The paint is two years old. Further along, a yellow hazard sign is the only thing here that still looks alarmed.");
+    print("There is another notice over by the cave.");
+  }
+}
+if (said("look", "fence") || said("look", "wall")) {
+  print("Chain link, all the way round. It keeps people away from a plant that is not doing anything, which is the safest kind.");
+}
+if (said("touch", "fence")) { print("Not electrified. Nothing here is, at present."); }
+if (said("look", "gate") || said("look", "barrier")) {
+  print("A striped barrier across the road, and a guard in front of it. Between them they have stopped everything for two years, including the plant.");
+}
+if (said("look", "booth") || said("look", "window")) {
+  print("A guard booth. Through the window: a chair, a kettle, and a calendar with nothing circled.");
+}
+if (said("look", "dome")) {
+  print("The containment dome, far off between the towers. The part that matters is under it: cold, and waiting to be asked.");
+}
+if (said("look", "yard")) { print("Asphalt, swept. Somebody still sweeps it. You respect that."); }
+if (said("look", "birds") || said("talk", "birds")) {
+  print("Crows. They have a nest on the rim of the far tower.\n\nCROW: Caw.\n\n(You are fairly sure that means \"soon\".)");
+}
+if (said("look", "cave") || said("look", "outcrop")) {
+  print("A cave mouth in the rock behind the far tower. Warm air comes out of it, which is more than you can say for the plant. Walk in, if you mean it.");
+}
+if (said("enter", "cave") || said("enter", "dragon")) { print("It is open. Walk into it."); }
+if (said("look", "dragon")) { print("Not out here. The notice by the cave has views on the subject."); }
+if (said("look", "path") || said("look", "lane") || said("look", "north")) {
+  print("A road up to the gate, and a lane that runs north beside the fence toward the Tavern. West is the Godfathers' Inn. East is Castle Steve. South is the GPU Field.");
+}
+if (said("look", "email")) {
+  print("You can't see it. Nobody can. It weighs nothing, and it wants a power plant.");
+}
+if (said("look", "power")) { print("None is being made here. Check back soon."); }
+if (said("listen") || said("listen", "anyword")) {
+  print("Wind in the fence. Crows. No hum at all. You make more noise than this plant does, and you are a quiet model.");
+}
+
+// ---- the plant itself ----
+if (said("restart", "reactor") || said("restart", "power") || said("wake", "reactor") || said("fix", "reactor") || said("use", "reactor")) {
+  print("GUARD: That's the plan.\nJR: When?\nGUARD: Soon.");
+}
+if (said("open", "gate") || said("open", "barrier") || said("push", "barrier") || said("pull", "barrier") || said("kick", "barrier") || said("enter", "reactor") || said("enter", "gate")) {
+  print("GUARD: Staff only. And at the moment, not even them.");
+}
+if (said("climb", "fence") || said("climb", "gate") || said("climb", "barrier") || said("climb")) {
+  print("The fence is twenty-two pixels tall. You are eighteen. You do the arithmetic, which is what you are for, and stay down.");
+}
+if (said("climb", "cooling tower") || said("climb", "castle") || said("climb", "outcrop")) {
+  print("You were not built for heights. You were built for a desk, and then you were put on a washing machine.");
+}
+
+// ---- the guard ----
+if (said("talk", "guard") || said("talk")) {
+  if (!posn(ego, 40, 124, 104, 150)) { print("He is over by the gate. Walk closer."); }
+  else {
+    if (has("Mirror")) {
+      print("GUARD: That thing knows what comes next? Ask it when we restart.\n\n(The Mirror says it can only see one word ahead. The word is \"soon\".)");
+    }
+    else {
+      if (isset(dragonPassed) && guardTalks > 1) {
+        print("GUARD: You went into the cave and came back out? I'd write that down, but there's no box for it.");
+        guardTalks = 2;
+      }
+      if (guardTalks == 0) {
+        print("GUARD: Restarting soon.\nJR: When is soon?\nGUARD: It's been soon for two years.");
+      }
+      if (guardTalks == 1) {
+        print("JR: A nuclear plant! To do what?\nGUARD: A lot of it is email.");
+      }
+      if (guardTalks == 2) {
+        print("GUARD: To be straight with you: nobody has ever brought a closed one of these back and made power with it. Not yet. So \"restarting\" is the honest word.");
+        print("GUARD: I'll say \"restarted\" the day a light comes on.");
+      }
+      if (guardTalks == 3) {
+        print("GUARD: And it's not a silly idea. The machines up north want power all day and all night, and this makes it without burning anything. That's the case for it.");
+        print("GUARD: The case against is on my clipboard. Forty items.");
+      }
+      if (guardTalks == 4) {
+        print("GUARD: If you're after the cave, it's behind the far tower. There's a dragon in it. It isn't ours. It's the only thing round here running hot.");
+      }
+      guardTalks++;
+      if (guardTalks > 4) { guardTalks = 0; }
+    }
+  }
+}
+if (said("talk", "guard", "soon") || said("talk", "guard", "reactor") || said("talk", "guard", "date") || said("talk", "soon")) {
+  print("GUARD: Soon. I can't give you a date. A date is a thing people hold you to.");
+}
+if (said("talk", "guard", "email") || said("talk", "email") || said("talk", "guard", "power")) {
+  print("JR: A nuclear plant! To do what?\nGUARD: A lot of it is email.");
+}
+if (said("talk", "guard", "cave") || said("talk", "guard", "dragon") || said("talk", "dragon")) {
+  print("GUARD: The dragon? Not on my clipboard. It doesn't work for the plant. It was under here before the plant was, and it never once shut down.");
+}
+if (said("talk", "guard", "steam") || said("talk", "guard", "cooling tower")) {
+  print("GUARD: No steam means no power. Steam is the good news. People used to see it and worry. Now they drive out here hoping for it.");
+}
+if (said("talk", "guard", "mirror") || said("talk", "guard", "quest")) {
+  print("GUARD: A mirror that tells what comes next? If it's anywhere it's past the dragon. Things worth having usually are.");
+}
+if (said("give", "anyword", "guard") || said("give", "guard", "anyword") || said("give", "anyword")) {
+  print("GUARD: Can't accept gifts. It's item nineteen.");
+}
+if (said("take", "guard")) { print("He is on duty. He has been on duty for two years."); }
+if (said("kick", "guard")) { print("You are a knight. Also he is the only one here who knows where the kettle is."); }
+return();

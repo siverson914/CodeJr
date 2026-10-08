@@ -1,0 +1,335 @@
+# Room 13, the Cathedral: the Confident Door, the wizards, the agents
+# going home, the Lock half, and all four exits.
+# node tools/play.js build --script test/rooms/13_cathedral.txt --png-dir out
+5
+type debug
+5
+type tp
+3
+type 13
+6
+shot 13-01-arrive
+type look
+3
+expect One door, shut, with a face on it
+key enter
+2
+type talk to the wizards
+3
+expect nobody out here but the door
+key enter
+2
+type say i don't know
+3
+expect Nobody has asked you anything yet
+key enter
+2
+type look at the price list
+3
+expect $20
+key enter
+2
+expect I'm all paid for
+key enter
+2
+type pay
+3
+expect it wants an answer, not money
+key enter
+2
+
+# ---- walk up to the steps: the Door asks ----
+key up
+16
+expect The door has a face
+shot 13-02-door-asks
+key enter
+2
+expect How many leaves are on the beanstalk
+key enter
+2
+key enter
+2
+# he walks on until the wall of the building stops him
+14
+key down
+1
+key down
+2
+shot 13-03-at-the-door
+type enter cathedral
+3
+expect it has a question for you
+key enter
+2
+
+# ---- the wrong tries: confident answers ----
+type say 42
+3
+expect Confident. Quick. Wrong.
+key enter
+2
+type answer a million
+3
+expect do you just have an answer
+key enter
+2
+type say the dragon
+3
+expect What is the honest thing to say
+key enter
+2
+type open door
+3
+expect I open for one thing only
+key enter
+2
+
+# ---- the answer ----
+type i don't know
+3
+expect JR: I don't know.
+key enter
+2
+key enter
+2
+key enter
+2
+expect I have waited years for that
+key enter
+2
+expect The door opens
+key enter
+2
+40
+expect Two wizards come out
+shot 13-04-wizards
+key enter
+2
+expect a newer apprentice
+key enter
+2
+type score
+3
+expect 10 of 158
+key enter
+2
+
+# ---- the wizards, before the agents are home ----
+type look at the wizards
+3
+expect Sam Altman and Dario Amodei
+key enter
+2
+key enter
+2
+type look at apprentices
+3
+expect replaced almost every month
+key enter
+2
+type hold hands
+3
+expect Something is wrong. Talk to them
+key enter
+2
+type talk to sam
+3
+expect We have a situation
+key enter
+2
+expect Our test agents got out
+key enter
+2
+expect Launch Pad
+key enter
+2
+expect Somebody who grades everything
+key enter
+2
+type talk to dario
+3
+expect No business until the agents are home
+key enter
+2
+type pay the wizards
+3
+expect No business until the agents are home
+key enter
+2
+type ask wizards about the bazaar
+3
+expect The Bazaar copied our homework
+key enter
+2
+key enter
+2
+type ask dario about his essay
+3
+expect On the back is an order form
+key enter
+2
+type look at the rose window
+3
+expect cooling fan
+key enter
+2
+type climb wall
+3
+expect four pixels long
+key enter
+2
+type enter the cathedral
+3
+expect Staff only
+key enter
+2
+
+# ---- south exit: down the path to the Bazaar, and back with the agents ----
+key down
+30
+12
+expect same
+shot 13-05-bazaar
+key enter
+2
+key enter
+2
+type gimme
+3
+type 8
+3
+type setflag
+3
+type 61
+3
+key up
+6
+shot 13-06-agents-arrive
+8
+expect start looking guilty
+key enter
+2
+30
+expect They file inside
+shot 13-07-agents-home
+key enter
+2
+expect Patched, watched
+key enter
+2
+expect The neighbors noticed before we did
+key enter
+2
+expect You came about the Lock
+key enter
+2
+type score
+3
+expect 22 of 158
+key enter
+2
+type inventory
+3
+shot 13-08-no-key
+key enter
+2
+
+# ---- the Lock half ----
+type pay
+3
+expect Nobody carries fifty loose
+key enter
+2
+type gimme
+3
+type 7
+3
+type pay the wizards
+3
+expect Stand on the steps between the two of them
+key enter
+2
+key up
+17
+key up
+2
+type talk to wizards
+3
+expect Fifty tokens
+key enter
+2
+expect We do not hold hands
+key enter
+2
+type pay the wizards
+3
+expect count out fifty tokens
+key enter
+2
+key enter
+2
+expect We do not
+key enter
+2
+expect Give me your hands
+key enter
+2
+16
+expect You hold one hand of each
+shot 13-09-hands
+key enter
+2
+expect Lock half of the Shield
+key enter
+2
+expect down the hill, at the Bazaar
+key enter
+2
+type score
+3
+expect 28 of 158
+key enter
+2
+type pay
+3
+expect Once was enough
+key enter
+2
+type talk to sam
+3
+expect switch it off
+key enter
+2
+type join
+3
+expect It needs the other half
+key enter
+2
+
+# ---- east exit ----
+key down
+8
+key right
+42
+shot 13-10-east-exit
+type tp
+3
+type 13
+6
+# ---- west exit ----
+key left
+42
+shot 13-11-west-exit
+type tp
+3
+type 13
+6
+# ---- north exit: across to the lane and up it ----
+key right
+33
+key up
+30
+shot 13-12-lane
+24
+shot 13-13-north-exit
