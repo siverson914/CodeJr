@@ -13,6 +13,12 @@ Keys: `X` faster, `Z` slower, `,` climb, `/` dive, `.` flip, Space fire, `B`
 bomb, `H` home, `S` sound, Ctrl-Break quit. The arrow keys also climb, dive
 and change speed.
 
+This folder is the faithful one: the original's menus, look and game, with
+a modern build and faster drawing. `apps/sopwith26` builds the same source
+with `SOPWITH26` defined, which is where changes to how the game looks or
+plays go (inside `#ifdef SOPWITH26`). Speed work that leaves the game
+identical is shared by both.
+
 ## Where the source came from
 
 - `orig/` is the Sopwith 2 source exactly as released: reverse-engineered
@@ -54,6 +60,7 @@ stand-in for a PCjr; the real machine will differ) on a scripted battle of
 | Sprite rows in assembly | 13.6 | 40.2 ms | 18.6 ms | 12.7 ms |
 | Tighter ground loop | 14.4 | 36.5 ms | 18.6 ms | 12.7 ms |
 | Whole sprite and ground line in assembly (`sopgfx.asm`) | 17.4 | 26.2 ms | 16.9 ms | 12.7 ms |
+| Sprites compared directly for collisions (`cj_hit`) | 19.8 | 26.2 ms | 9.8 ms | 12.7 ms |
 
 The game aims for 9.1 frames a second (every second timer tick). The
 straight port fell short of that in a busy scene; now there is headroom.
@@ -124,8 +131,22 @@ With `P`, the log also counts the frames that took too long: how many
 finished under 55, 110 and 165 ms and over (110 ms is two timer ticks, the
 game's full speed, so anything above is a slowdown the player sees), where
 the time went in the slow ones, and the slowest frame. In DOSBox at 400
-cycles, 54 of the 1000 frames are slow and collisions take 70 ms of each
+cycles, 54 of the 1000 frames were slow and collisions took 70 ms of each
 (16 ms on average over all frames): explosion debris is what slows the game.
+
+So the collision test no longer draws. The original drew one sprite in a
+scratch corner, XORed the other in while watching for pixels already set,
+and wiped the corner: three passes over memory for every pair of objects
+whose boxes overlap. `cj_hit` compares the same bytes straight from the two
+sprites. With that, 28 of the 1000 frames are slow, none over 165 ms, and
+the slowest is 122 ms (was 182). What is left in a slow frame is mostly
+drawing the debris (64 ms of screen). Emulator figures; not yet measured on
+the real PCjr.
+
+A build with `-dCJ_CHECKHIT` runs both tests on every pair and counts the
+disagreements in `LOG.TXT`: none in 11,624 pairs over 6000 frames. A single
+pixel (a bullet) still goes the original's way. `@5T` (Sopwith26 only)
+saves the title screen and exits.
 
 `shot.sh` deletes its output files before it runs. It didn't at first, and
 a build that hung left the previous build's screen in place, which then

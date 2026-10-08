@@ -810,3 +810,17 @@ Not tested: playing it by hand on the PCjr keyboard. Every real run so far is th
 **Played by hand, and the slowdowns.** Steve played it on the PCjr: the keys work in IBM keyboard mode (hold `X` to take off). He noticed the game slows in explosions and runs faster in quiet scenes. The limiter is the original's (wait for two timer ticks, 9.1 fps) and can only cap the speed: a frame over 110 ms just runs late. To see how often, the test log now counts frames by time. DOSBox at 400 cycles: 946 of 1000 under 110 ms, 43 under 165, 11 over; the slow frames spend 70 ms in collisions against 16 on average, and the slowest (182 ms) spent 113 there. Not yet measured on the PCjr (it had hung up); the build is queued.
 
 **Decided:** `apps/sopwith` stays the faithful Sopwith 2 (original menus, look and logic), and a copy, Sopwith26, takes the changes: one-key start, no dead multiplayer entries, more speed, later 16 colors. Speed work that keeps the game identical goes into both.
+
+## Sopwith26, and collisions without drawing (2026-10-08)
+
+The assembly build landed as the faithful Sopwith 2 (it needed a merge first: main had moved, and both sides had appended to this journal and the handoff). Then Steve: "lets work on optimizing this game and getting it solid", drop the keyboard question and the dead multiplayer entries, "or is this a good place to fork the project... Sopwith26".
+
+**The fork is a switch, not a copy.** `apps/sopwith26/build.sh` builds `apps/sopwith`'s source with `SOPWITH26` defined. A copy of a 3,800-line file would have needed every speed fix made twice and would have drifted; this way the faithful build can't change by accident (its screens are compared after every edit) and Sopwith26 gets every speed fix for free. If 16 colours ever needs a different drawing layer, that part can become its own file then.
+
+**Sopwith26 so far:** a title screen with the keys on it, "Press any key to play" (`C` for the computer game), no keyboard question (always the held-keys mode; `-j` still means joystick), `-m` and `-a` refused with a message, Esc quits. The DOS name is `SOP26.EXE` in `SOP26`: "SOPWITH26" is nine letters.
+
+**Collisions.** The slow frames were collision time (70 ms of each). The original's test draws sprite one in a scratch corner, XORs sprite two in while collecting the pixels already there, then clears the corner. `cj_hit` gets the same answer from the sprite bytes directly, using the shift and mask tables the drawing already has: the first sprite as `putimage` would draw it at x=15 (in its plane's colour, where the second plane's colour-3 pixels come out 0 and so can't be hit, a quirk worth keeping), ANDed with the second's pixel mask. To prove "the same answer" there is a `-dCJ_CHECKHIT` build that runs both on every pair: 11,624 pairs in 6000 frames, none different. DOSBox at 400 cycles, 1000 frames: collisions 16.0 to 9.8 ms a frame, 19.8 fps unlimited (was 17.4), slow frames 54 to 28, the slowest 182 to 122 ms. What remains in a slow frame is drawing the debris.
+
+**Wrong turn.** The checking build first failed to compile: the mismatch counter was declared after the function that prints it.
+
+Emulator-only, all of it: the PCjr had hung up. Both builds are queued for its next call.

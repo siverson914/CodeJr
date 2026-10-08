@@ -211,6 +211,17 @@ deploy-sopwith: sopwith
     cp apps/sopwith/license.txt "{{ws}}/SOPWITH/LICENSE.TXT"
     @echo "queued: sent on the PCjr's next connection"
 
+# Build Sopwith26 (apps/sopwith26: the same source with our changes switched on)
+sopwith26:
+    apps/sopwith26/build.sh
+
+# Build Sopwith26 and queue it for the PCjr as SOP26\SOP26.EXE, with its licence
+deploy-sopwith26: sopwith26
+    mkdir -p "{{ws}}/SOP26"
+    cp apps/sopwith26/SOP26.EXE "{{ws}}/SOP26/"
+    cp apps/sopwith/license.txt "{{ws}}/SOP26/LICENSE.TXT"
+    @echo "queued: sent on the PCjr's next connection"
+
 # Build JRAI, the "PCjr MEETS AI" demo
 jrai:
     apps/jrai/build.sh

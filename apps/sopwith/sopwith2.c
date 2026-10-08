@@ -37,6 +37,7 @@ static int on_pcjr;
    time (the enemy planes attack with nobody at the keys). SOPTEST=nF also
    turns the frame limiter off, to measure how fast the game can go. */
 static long cj_limit;
+static int cj_title;
 static int cj_free;
 static unsigned long cj_t0;
 
@@ -401,6 +402,9 @@ static unsigned long cj_phase[4];
 static unsigned long cj_cnt[6],cj_tc; static unsigned long cj_now(void); /* profiling counters */
 /* The slow frames: a frame over two timer ticks (131072 PIT counts, 110 ms)
    is one the player sees as a slowdown. */
+#ifdef CJ_CHECKHIT
+static unsigned long cj_hitbad; /* pairs where cj_hit and the original disagree */
+#endif
 static unsigned cj_fn,cj_hist[4],cj_worstn;
 static unsigned long cj_worst,cj_wph[3],cj_overph[3];
 
@@ -422,6 +426,20 @@ static unsigned long cj_ticks(void)
   return *(unsigned long far *)MK_FP(0x40,0x6c);
 }
 
+static void cj_shot(void)
+{
+  FILE *f=fopen("SHOT.BIN","wb");
+  if (f!=NULL) {
+    static unsigned char line[80];
+    unsigned off;
+    for (off=0;off<0x4000;off+=80) {
+      _fmemcpy(line,MK_FP(0xb800,off),80);
+      fwrite(line,80,1,f);
+    }
+    fclose(f);
+  }
+}
+
 static void cj_frame(void)
 {
   static long n;
@@ -434,16 +452,7 @@ static void cj_frame(void)
   if (++n<cj_limit)
     return;
   t=cj_ticks()-cj_t0;
-  f=fopen("SHOT.BIN","wb");
-  if (f!=NULL) {
-    static unsigned char line[80];
-    unsigned off;
-    for (off=0;off<0x4000;off+=80) {
-      _fmemcpy(line,MK_FP(0xb800,off),80);
-      fwrite(line,80,1,f);
-    }
-    fclose(f);
-  }
+  cj_shot();
   f=fopen("LOG.TXT","a");
   if (f!=NULL) {
     fprintf(f,"sopwith2: %ld frames in %lu ticks = %lu.%lu fps%s\n",n,t,
@@ -456,6 +465,9 @@ static void cj_frame(void)
       fprintf(f,"  a frame: %lu.%lu pair tests, %lu.%lu crash tests, %lu.%lu bitblt, %lu.%lu putimage (%lu.%lu single pixels), docollision %lu.%lu ms\n",
         cj_cnt[0]/n,cj_cnt[0]*10/n%10,cj_cnt[1]/n,cj_cnt[1]*10/n%10,cj_cnt[2]/n,cj_cnt[2]*10/n%10,
         cj_cnt[3]/n,cj_cnt[3]*10/n%10,cj_cnt[4]/n,cj_cnt[4]*10/n%10,cj_tc/1193/n,cj_tc/119/n%10);
+#ifdef CJ_CHECKHIT
+    fprintf(f,"  cj_hit checked against the original on %lu pairs: %lu differ\n",cj_cnt[5],cj_hitbad);
+#endif
     if (cj_prof) {
       unsigned o=cj_hist[2]+cj_hist[3];
       fprintf(f,"  frames by time: %u under 55 ms, %u under 110, %u under 165, %u over (full speed is 110)\n",
@@ -490,6 +502,7 @@ void main(int argc,char *argv[])
     if (e!=NULL) {
       cj_limit=atol(e);
       cj_free=strchr(e,'F')!=NULL;
+      cj_title=strchr(e,'T')!=NULL;
       if (strchr(e,'P')!=NULL) { cj_prof=1; outportb(0x43,0x34); outportb(0x40,0); outportb(0x40,0); }
       randno=1984; /* the same game every time, so two builds can be compared */
     }
@@ -556,6 +569,9 @@ void keybint(void)
     case SC_H:     k=KEY_HOME;    break;
     case SC_S:     k=KEY_SOUND;   break;
     case SC_BREAK: k=KEY_BREAK;   break;
+#ifdef SOPWITH26
+    case 1:        k=KEY_BREAK;   break; /* Esc quits too */
+#endif
     default: k=0;
   }
   if (k!=0)
@@ -2153,8 +2169,24 @@ void init(int argc,char *argv[])
     printstr("\r\nOnly one of -j and -k may be specified\r\n");
     exit(1);
   }
+#ifdef SOPWITH26
+  /* Sopwith26: the network and serial games were never in the released
+     source (the menu entries led to stubs), and the "non-IBM keyboard"
+     was for 1984 clones: it can't see a key held down. So there is one
+     question left, asked on the title screen. -j still picks a joystick. */
+  if (modem || modea) {
+    printstr("\r\nSopwith26 has no network or serial game yet: use -s or -c\r\n");
+    exit(1);
+  }
+  ibmkeyboard=TRUE;
+  if (ncontrols==0)
+    ncontrols=1;
+  if (nmodes>0)
+    notitlesflag=TRUE;
+#else
   if (nmodes>0 && ncontrols>0)
     notitlesflag=TRUE;
+#endif
   initrand();
   randno=inithistory(randno);
   initsndlist();
@@ -2217,6 +2249,27 @@ void titles(void)
     return;
   initsound(SOUND_TUNE,0,NULL);
   updatesound();
+#ifdef SOPWITH26
+  setcolour(3);
+  poscurs(10,4);
+  printstr("S O P W I T H   2 6");
+  poscurs(12,7);
+  setcolour(1);
+  printstr("BMB ");
+  setcolour(3);
+  printstr("Compuscience");
+  setcolour(2);
+  poscurs(5,9);
+  printstr("The 1984 game, changed in 2026");
+  setcolour(1);
+  poscurs(2,13);
+  printstr("X faster  Z slower   , climb  / dive");
+  poscurs(2,15);
+  printstr(". flip    Space fire      B bomb");
+  poscurs(2,17);
+  printstr("H home    S sound         Esc quit");
+  setcolour(3);
+#else
   setcolour(3);
   poscurs(13,8);
   printstr("S O P W I T H");
@@ -2225,6 +2278,7 @@ void titles(void)
   printstr("BMB ");
   setcolour(3);
   printstr("Compuscience");
+#endif
 }
 
 void initrand(void)
@@ -2310,6 +2364,27 @@ void getcontrol(void)
 
 int getgamemode(void)
 {
+#ifdef SOPWITH26
+  int k;
+  clearwin();
+  printstr("        Press any key to play\r\n\r\n");
+  printstr("    C - play against the computer");
+  if (cj_limit!=0 && cj_title) { /* test mode, T: save the title screen and leave */
+    cj_shot();
+    finish(NULL,FALSE);
+  }
+  while (TRUE) {
+    if (testbreak())
+      finish(NULL,FALSE);
+    k=inkeys();
+    if (k==27)
+      finish(NULL,FALSE);
+    if (k=='C' || k=='c')
+      return GAME_COMPUTER;
+    if (k!=0)
+      return GAME_SINGLE;
+  }
+#else
   clearwin();
   printstr("Key: S - single player\r\n");
   printstr("     C - single player against computer\r\n");
@@ -2329,6 +2404,7 @@ int getgamemode(void)
         return GAME_ASYNCH;
     }
   }
+#endif
 }
 
 int getgamenumber(void)
@@ -2975,6 +3051,44 @@ void checkcollisions(void)
   }
 }
 
+/* CodeJr: do two sprites touch? The original drew the first in a scratch
+   area at (15,15), XORed the second in at its offset, watched for pixels
+   that were already set, and cleared the area again: three passes over
+   memory for every pair, and what slows the game when debris flies. This
+   compares the same bytes straight from the two sprites, row by row, and
+   gives the same answer: the first sprite as putimage would draw it (in
+   its plane's colour, where a colour 3 pixel of the second plane becomes
+   0), against the mask of the second's pixels as bitblt builds it.
+   x2,y2 is where the second sprite goes; 0 <= y2 <= 15, x2 >= 0. */
+static int cj_hit(object *o1,object *o2,int x2,int y2)
+{
+  unsigned char *a1=sprtab[3]+(o1->colour==1 ? 0 : 1024);  /* hi, lo at +256 */
+  unsigned char *m2=sprtab[x2&3]+512;                      /* mhi, mlo at +256 */
+  int w1=o1->width>>2,w2=o2->width>>2;
+  int h1=o1->height>16 ? 16 : o1->height;
+  int h2=o2->height>y2+1 ? y2+1 : o2->height;
+  int c2=(x2>>2)-3;            /* the second's first byte column, from the first's */
+  int lo=c2>0 ? c2 : 0,hi=c2+w2<w1 ? c2+w2 : w1,col,r1,r2;
+  unsigned char *p1,*p2;
+  if (lo>hi)
+    return 0;
+  r1=15-y2;
+  p1=o1->sprite+r1*w1;
+  p2=o2->sprite;
+  for (r2=0;r2<h2 && r1<h1;r2++,r1++,p1+=w1,p2+=w2)
+    for (col=lo;col<=hi;col++) {
+      int k=col-c2;
+      unsigned char a=0,m=0;
+      if (col<w1) a=a1[p1[col]];
+      if (col>0) a|=a1[256+p1[col-1]];
+      if (k<w2) m=m2[p2[k]];
+      if (k>0) m|=m2[256+p2[k-1]];
+      if (a&m)
+        return 1;
+    }
+  return 0;
+}
+
 void checkcollision(object *obj1,object *obj2)
 {
   int type1,type2;
@@ -2991,14 +3105,36 @@ void checkcollision(object *obj1,object *obj2)
     obj1=obj2;
     obj2=t;
   }
-  drawobject(15,15,obj1);
-  if (bitblt(obj2->x-obj1->x+15,obj2->y-obj1->y+15,obj2) && collc<199) {
-    collobj1[collc]=obj1;
-    collobj2[collc++]=obj2;
-    collobj1[collc]=obj2;
-    collobj2[collc++]=obj1;
+  { /* CodeJr: two sprites are compared directly (cj_hit). A single
+       pixel (a bullet) still goes the original's way: drawn in the scratch
+       area and tested there. */
+    int x2=obj2->x-obj1->x+15,y2=obj2->y-obj1->y+15,hit;
+    if ((obj1->height==1 && obj1->width==1) || (obj2->height==1 && obj2->width==1) ||
+        x2<0 || y2<0 || y2>15) {
+      drawobject(15,15,obj1);
+      hit=bitblt(x2,y2,obj2);
+      clearscorearea();
+    }
+    else {
+      hit=cj_hit(obj1,obj2,x2,y2);
+#ifdef CJ_CHECKHIT
+      { int old;
+        drawobject(15,15,obj1);
+        old=bitblt(x2,y2,obj2);
+        clearscorearea();
+        cj_cnt[5]++;
+        if ((old!=0)!=(hit!=0))
+          cj_hitbad++;
+      }
+#endif
+    }
+    if (hit && collc<199) {
+      collobj1[collc]=obj1;
+      collobj2[collc++]=obj2;
+      collobj1[collc]=obj2;
+      collobj2[collc++]=obj1;
+    }
   }
-  clearscorearea();
 }
 
 void checkcrash(object *obj)
