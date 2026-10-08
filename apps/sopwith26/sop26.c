@@ -188,6 +188,7 @@ static void cj_gameend(int quitting)
     return;
   cj_paused=1;
   outportb(PORT_SPKR,inportb(PORT_SPKR)&0xfc);
+  cj_fxreset();
   setgmode(4);
   while (cj_limit==0 && kbhit())
     getch();
@@ -233,6 +234,7 @@ static void cj_pause(void)
   int k;
   cj_paused=1;
   outportb(PORT_SPKR,spk&0xfc);
+  cj_flashoff();      /* not left red while paused */
   cj_pausetext();
   cj_pkey=0;
   if (cj_limit!=0) {

@@ -477,6 +477,9 @@ static void cj_shot(void)
 
 #ifdef SOPWITH26
 static int cj_testpause,cj_testend;
+static int cj_classic;      /* -x */
+static void cj_flashoff(void);
+static void cj_fxreset(void);
 #include "sop26.c"
 #endif
 
@@ -504,6 +507,14 @@ static void cj_frame(void)
   cj_shot();
   f=fopen("LOG.TXT","a");
   if (f!=NULL) {
+    { /* CodeJr: the game's state in one number, to compare builds whose
+         pictures differ on purpose */
+      unsigned sum=0;
+      object *o;
+      for (o=firstobject;o!=NULL;o=o->next)
+        sum=(sum<<5)+sum+(unsigned)o->x*7u+(unsigned)o->y*3u+(unsigned)o->type+(unsigned)o->status*5u+(unsigned)o->score;
+      fprintf(f,"state %04x at frame %u\n",sum,(unsigned)frametick);
+    }
     fprintf(f,"sopwith2: %ld frames in %lu ticks = %lu.%lu fps%s\n",n,t,
             t ? n*182/(t*10) : 0,t ? n*182/t%10 : 0,cj_free ? " (unlimited)" : "");
     if (cj_skipped)
@@ -918,6 +929,14 @@ void setcolour(int c)
   writecharcol=c;
 }
 
+/* CodeJr: Sopwith26 shows debris its own way (sop26fx.c). */
+#ifdef SOPWITH26
+#include "sop26fx.c"
+#define CJ_SHOW cj_show
+#else
+#define CJ_SHOW putimage
+#endif
+
 void updatescreen(void)
 {
   object *obj;
@@ -930,10 +949,13 @@ void updatescreen(void)
         obj->soundfunc(obj);
     for (obj=firstdeleted;obj!=NULL;obj=obj->next)
       if (obj->oldonscreen)
-        putimage(obj->oldx,obj->oldy,obj->oldsprite,obj);
+        CJ_SHOW(obj->oldx,obj->oldy,obj->oldsprite,obj);
     if (pixtoscroll!=0)
       cj_groundstale=1;
     cj_stale=1;
+#ifdef SOPWITH26
+    cj_steps++;
+#endif
     return;
   }
   cj_stale=0;
@@ -946,11 +968,11 @@ void updatescreen(void)
     }
     else {
       if (obj->oldonscreen)
-        putimage(obj->oldx,obj->oldy,obj->oldsprite,obj);
+        CJ_SHOW(obj->oldx,obj->oldy,obj->oldsprite,obj);
       if (!obj->onscreen)
         continue;
       if (obj->x>=scnleft && obj->x<=scnright) {
-        putimage(obj->oldx=obj->x-scnleft,obj->oldy=obj->y,obj->sprite,obj);
+        CJ_SHOW(obj->oldx=obj->x-scnleft,obj->oldy=obj->y,obj->sprite,obj);
         if (obj->soundfunc!=NULL)
           obj->soundfunc(obj);
       }
@@ -959,7 +981,10 @@ void updatescreen(void)
     }
   for (obj=firstdeleted;obj!=NULL;obj=obj->next)
     if (obj->oldonscreen)
-      putimage(obj->oldx,obj->oldy,obj->oldsprite,obj);
+      CJ_SHOW(obj->oldx,obj->oldy,obj->oldsprite,obj);
+#ifdef SOPWITH26
+  cj_fxframe();
+#endif
   if (cj_prof) {
     unsigned long t=cj_now();
     updateground();
@@ -2326,7 +2351,11 @@ void init(int argc,char *argv[])
 {
   int nmodes,ncontrols,i;
   bool modes=FALSE,modec=FALSE,modem=FALSE,modea=FALSE,keybflag=FALSE;
+#ifdef SOPWITH26
+  getopt(&argc,&argv,"w&y#q&e&g#s&c&m&a&j&k&i&h*v*x&:sopwith2*",
+#else
   getopt(&argc,&argv,"w&y#q&e&g#s&c&m&a&j&k&i&h*v*:sopwith2*",
+#endif
          &hiresflag,        /* -w */
          &latency,          /* -y[num] */
          &soundflag,        /* -q (quiet) */
@@ -2341,7 +2370,14 @@ void init(int argc,char *argv[])
          &ibmkeyboard,      /* -i */
          &recordfilename,   /* -h[string] (record) */
          &playbackfilename  /* -v[string] (playback) */
+#ifdef SOPWITH26
+         ,&cj_classic       /* -x: explosions as in 1984 (Sopwith26) */
+#endif
         );
+#ifdef SOPWITH26
+  if (hiresflag)
+    cj_classic=1;           /* the sparks are drawn for the 4-colour screen */
+#endif
   soundflag=!soundflag;
   nmodes=(modes ? 1 : 0)+(modec ? 1 : 0)+(modem ? 1 : 0)+(modea ? 1 : 0);
   if (nmodes>1) {
@@ -2789,6 +2825,9 @@ void useonscreenbuf(void)
 
 void copyoffscbuftoscn(void)
 {
+#ifdef SOPWITH26
+  cj_fxreset();   /* the screen is wiped: no sparks on it now */
+#endif
   farmemset(MK_FP(0xb800,0),0x1000,0);
   farmemset(MK_FP(0xb800,0x2000),0x1000,0);
   farmemmove(MK_FP(_DS,&scrbuf),MK_FP(0xb800,0x1000),0x1000);
@@ -3068,6 +3107,9 @@ void createexplosion(object *obj)
   int i,step,l,x,y,xv,yv,colour,type,kind;
   unsigned int randno1;
   bool soundf;
+#ifdef SOPWITH26
+  cj_boom(obj);
+#endif
   x=obj->x+(obj->width>>1);
   y=obj->y+(obj->height>>1);
   xv=obj->xv;
