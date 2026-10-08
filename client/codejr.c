@@ -41,7 +41,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.0.23"
+#define VERSION "1.0.24"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 #define PULL_OLD "CJPULL.OLD" /* the copy being replaced, until the new one is in */
@@ -131,7 +131,8 @@ static char up_name[24];
 #define KQ_MAX 30
 #define CJSHOT "C:\\CODEJR\\CJSHOT.BIN"
 static struct { unsigned char delay, scan, ascii; } kq[KQ_MAX]; /* delay: units of 2 ticks, before the key */
-static volatile unsigned char kq_n, kq_i, kq_break;
+static volatile unsigned char kq_n, kq_i, kq_break, kq_hold;
+#define KEY_HOLD 5 /* ticks a scripted key stays down (0.27 s) */
 static volatile unsigned kq_wait;
 static unsigned char shot_want;          /* seconds; 0 none, 255 keep the latest */
 static unsigned char far *shot_buf;      /* 32 KB, allocated once */
@@ -1175,10 +1176,16 @@ static void __interrupt __far tick_hook(void)
 			grab_screen();
 	}
 	if (kq_break) {
-		/* let go of the key pressed on the last tick */
-		if (use_int9())
-			int9((unsigned char)(kq_break | 0x80));
-		kq_break = 0;
+		/* The key stays down a quarter second before we let go: a game
+		 * that looks at the keyboard once a frame, at 6 frames a second,
+		 * would miss a press that lasted one tick. */
+		if (kq_hold) {
+			kq_hold--;
+		} else {
+			if (use_int9())
+				int9((unsigned char)(kq_break | 0x80));
+			kq_break = 0;
+		}
 	} else if (kq_i < kq_n) {
 		if (kq_wait) {
 			kq_wait--;
@@ -1189,6 +1196,7 @@ static void __interrupt __far tick_hook(void)
 				if (use_int9()) {
 					int9(sc);
 					kq_break = sc;
+					kq_hold = KEY_HOLD - 1;
 				} else {
 					stuff_key(sc, as);
 				}
