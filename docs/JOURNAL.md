@@ -878,3 +878,14 @@ Steve, on debris: "we could even consider simpler debris or just a totally diffe
 Not seen on the real screen by anyone: the sparks and the flash. The flash is a palette register write, the first this game makes, and can't be captured from the emulator.
 
 **A landing sent to the wrong session (2026-10-08).** To land this session's key-hold change I typed `gw done WT-034-...` when the session was WT-035. WT-034 was the Sopwith session's worktree, so its unfinished spark-explosion work went through the gate and onto main as a56750c, under my message about scripted keys (1.0.24), while the key-hold change itself stayed unlanded. I tried to stop it and was refused, rightly: it was another session's work. Steve said to let it land and clean up after. The Sopwith session finished and documented its part in de8e14c; this commit is the real key-hold change. The habit to keep: copy the session id from the start record, don't retype it, and read the first line `gw done` prints (it names the session) before walking away.
+
+## Pictures of everything, from the real PCjr (2026-10-08, 4 pm)
+
+Steve asked for a title screen and a gameplay picture of every app, and a public README page built on them. The key-hold change (1.0.24) landed properly as c2e644c and went to the PCjr by itself: one `just restart` to send it, a second to make the PCjr start it. Then every picture was taken on the real machine with `just pcjr-run`: titles with `KEYS='{9}{ESC}{1.5}{ESC}{1.5}{ESC}' SHOT=7` (all five games took the Esc, so a quarter second is long enough), gameplay from the modes that end by themselves (`/TEST`, `/DEMO:n`, `/RUN:n`, JRAI's `/PART:n /ONLY /NOBOOT /QUIET`, Sopwith's `@nFP` and `@5T`). They are in `docs/shots/` and the README is rewritten around them: what CodeJr is, then one entry per program, grouped by written at the PCjr, written on the laptop, and improved (Sopwith26).
+
+**Wrong turns.** `JRCUBE /RUN:20` is 20 frames, not seconds: it ended before the picture was due. `SHOT=last` is the answer for anything short. JRAI's `/PART:n` with `/NOBOOT` is one off from the README's table (1 gave the fire, 5 the plasma title); the files are named for what they show.
+
+**Seen on the way.** Sopwith26's scripted pilot (`@500FP -s -q`) crashes on its own runway and the game reaches THE END with a score of -3550 by 20 seconds. That may be the pilot's known respawns and nothing new, but it is the Sopwith session's to judge. The picture at 12 seconds shows the new block debris on the real screen, which nobody had seen there.
+
+**Not done.** A Sopwith picture with the plane in the air (it needs someone flying), the PCjr's real palette (the pictures use the standard 16 colors), JRQUEST (not built for the PCjr yet).
+
