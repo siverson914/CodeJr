@@ -197,6 +197,17 @@ deploy-games: games
     cp apps/jrcube/JRCUBE.EXE "{{ws}}/JRCUBE/"
     @echo "queued: sent on the PCjr's next connection"
 
+# Build Sopwith 2 from source (apps/sopwith)
+sopwith:
+    apps/sopwith/build.sh
+
+# Build Sopwith 2 and queue it for the PCjr, in its own folder, with its licence
+deploy-sopwith: sopwith
+    mkdir -p "{{ws}}/SOPWITH"
+    cp apps/sopwith/SOPWITH2.EXE "{{ws}}/SOPWITH/"
+    cp apps/sopwith/license.txt "{{ws}}/SOPWITH/LICENSE.TXT"
+    @echo "queued: sent on the PCjr's next connection"
+
 # Build JRAI, the "PCjr MEETS AI" demo
 jrai:
     apps/jrai/build.sh
