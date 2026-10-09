@@ -392,6 +392,18 @@ func (w *Workspace) Session() string {
 	return strings.TrimSpace(string(b))
 }
 
+// Context is the conversation's size in tokens after the last turn (0 if
+// not known); SetContext records it.
+func (w *Workspace) Context() int {
+	b, _ := os.ReadFile(w.state("context"))
+	n, _ := strconv.Atoi(strings.TrimSpace(string(b)))
+	return n
+}
+
+func (w *Workspace) SetContext(tokens int) error {
+	return os.WriteFile(w.state("context"), []byte(strconv.Itoa(tokens)), 0o644)
+}
+
 // Convo is what the welcome shows of a conversation being continued: its
 // size in characters (what the user typed plus what CodeJr said) and
 // CodeJr's last reply. Both are zero for a conversation from before the
@@ -413,6 +425,7 @@ func (w *Workspace) SetConvo(chars int, last string) error {
 func (w *Workspace) SetSession(id string) error {
 	if id == "" {
 		os.Remove(w.state("convo")) // a fresh conversation has no size or last reply
+		os.Remove(w.state("context"))
 		err := os.Remove(w.state("session"))
 		if os.IsNotExist(err) {
 			return nil

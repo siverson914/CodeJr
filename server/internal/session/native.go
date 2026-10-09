@@ -412,6 +412,7 @@ func (n *native) submit(line string) bool {
 	n.speak()
 	n.sync()
 	n.playQueued()
+	n.tidy()
 	n.status("Ready.  Enter sends,  /help for commands,  /exit quits.")
 	s.logf("native turn done; %s", n.link.Stats())
 	return true
@@ -586,6 +587,73 @@ func (n *native) turn(prompt string) {
 	}
 }
 
+// compactPrompt is Claude Code's own command for replacing a conversation
+// with a summary of it.
+const compactPrompt = "/compact"
+
+// tidyAbove is the conversation size, in tokens, past which it is
+// shortened after a turn. A resumed conversation is read in full at the
+// start of every turn (measured 2026-10-08: nothing of it comes from the
+// cache, whatever the system prompt), so a long one makes every answer
+// slower to start.
+const tidyAbove = 80000
+
+// tidy shortens a conversation that has grown long, after the reply and
+// its files are on the PCjr, while the user reads. Lines typed meanwhile
+// wait in the client. Ctrl-C skips it.
+func (n *native) tidy() {
+	s := n.s
+	session, before := s.ws.Session(), s.ws.Context()
+	if session == "" || before < tidyAbove {
+		return
+	}
+	s.logf("conversation is %d tokens: tidying", before)
+	err := n.runClaude(session, compactPrompt)
+	n.flush()
+	after := s.ws.Context()
+	switch {
+	case err != nil:
+		s.logf("tidying failed: %v", err)
+		s.ws.SetContext(0) // not again after every turn; the next turn measures it anew
+	case after < before:
+		n.print(cjp.StyleNote, fmt.Sprintf("(Long conversation tidied up: %s tokens down to %s. CodeJr keeps a summary.)\n", kilo(before), kilo(after)))
+	}
+}
+
+// kilo writes a token count the short way: 850, 1.2K, 153K.
+func kilo(n int) string {
+	switch {
+	case n < 1000:
+		return strconv.Itoa(n)
+	case n < 10000:
+		return fmt.Sprintf("%.1fK", float64(n)/1000)
+	}
+	return fmt.Sprintf("%dK", (n+500)/1000)
+}
+
+// describeWriting is the status line while Claude is still writing a tool
+// call: a long file takes minutes, and nothing else shows meanwhile.
+func describeWriting(e claude.Event) string {
+	file := strings.ToUpper(baseName(e.Text))
+	size := ""
+	if e.Bytes >= 1024 {
+		size = fmt.Sprintf(", %d KB so far", e.Bytes/1024)
+	}
+	switch e.Name {
+	case "Write":
+		if file == "" {
+			return "CodeJr is writing a file"
+		}
+		return "CodeJr is writing " + file + size
+	case "Edit", "MultiEdit":
+		if file == "" {
+			return "CodeJr is changing a file"
+		}
+		return "CodeJr is changing " + file + size
+	}
+	return "CodeJr is getting a tool ready"
+}
+
 func (n *native) runClaude(session, prompt string) error {
 	s := n.s
 	ctx, cancel := context.WithCancel(context.Background())
@@ -594,6 +662,8 @@ func (n *native) runClaude(session, prompt string) error {
 	cfg.SystemPrompt += nativeNote + contextNote(time.Now(), s.cfg.Location)
 	if n.voiceOn() {
 		cfg.SystemPrompt += voiceNote
+	} else {
+		cfg.SystemPrompt += progressNote
 	}
 	events := make(chan claude.Event, 256)
 	errc := make(chan error, 1)
@@ -604,6 +674,10 @@ func (n *native) runClaude(session, prompt string) error {
 
 	start := time.Now()
 	activity := "CodeJr is thinking"
+	tidy := prompt == compactPrompt
+	if tidy {
+		activity = "Tidying up a long conversation"
+	}
 	tick := time.NewTicker(time.Second)
 	defer tick.Stop()
 	textTick := time.NewTicker(100 * time.Millisecond)
@@ -623,12 +697,25 @@ func (n *native) runClaude(session, prompt string) error {
 				}
 				return err
 			}
+			if tidy && e.Kind != claude.Done && e.Kind != claude.Compacted {
+				continue // nothing of a tidy-up is for the screen
+			}
 			switch e.Kind {
 			case claude.Text:
+				activity = "CodeJr is answering"
 				n.print(cjp.StylePlain, e.Text)
 				n.reply.WriteString(e.Text)
 			case claude.Thinking:
 				activity = "CodeJr is thinking"
+			case claude.Thought:
+				activity = "CodeJr is thinking, " + kilo(e.Tokens) + " tokens so far"
+			case claude.ToolInput:
+				activity = describeWriting(e)
+			case claude.Compacting:
+				activity = "Tidying up a long conversation"
+			case claude.Compacted:
+				s.ws.SetContext(e.Tokens)
+				s.logf("conversation tidied to %d tokens", e.Tokens)
 			case claude.ToolUse:
 				note, act := describeTool(e)
 				activity = act
@@ -643,6 +730,9 @@ func (n *native) runClaude(session, prompt string) error {
 			case claude.Done:
 				if e.SessionID != "" {
 					s.ws.SetSession(e.SessionID)
+				}
+				if e.Tokens > 0 && !tidy {
+					s.ws.SetContext(e.Tokens)
 				}
 				if e.IsError {
 					n.flush()

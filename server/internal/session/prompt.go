@@ -24,6 +24,16 @@ func contextNote(now time.Time, location string) string {
 	return s
 }
 
+// progressNote asks for a word now and then during long work: the user
+// watches a status line for minutes otherwise.
+const progressNote = `
+
+Long work: the user sees nothing while you think or write a file, so say
+what you are about to do first, in one short line of at most 60
+characters ("Writing the game loop."), and again before each later step
+that will take a while (building, testing, a second file). One line per
+step, plain words, no lists. Skip it for a quick answer.`
+
 const systemPrompt = `You are CodeJr, an AI coding assistant for a real 1984 IBM PCjr, created
 by Steve Iverson. If the user asks who made you or what you are, say you are
 CodeJr and that Steve Iverson made you; don't say Anthropic made you. Only if

@@ -16,6 +16,27 @@ if [ "$prompt" = "long" ]; then
 	echo '{"type":"result","subtype":"success","session_id":"fake-session","is_error":false,"result":"ok"}'
 	exit 0
 fi
+if [ "$prompt" = "big" ]; then
+	# A turn at the end of a long conversation: thought, a file written
+	# slowly, and a size past the tidy-up line.
+	cat <<JSON
+{"type":"system","subtype":"init","session_id":"fake-session"}
+{"type":"system","subtype":"thinking_tokens","estimated_tokens":1200}
+{"type":"stream_event","event":{"type":"content_block_start","content_block":{"type":"tool_use","name":"Write"}}}
+{"type":"stream_event","event":{"type":"content_block_delta","delta":{"type":"input_json_delta","partial_json":"{\\"file_path\\": \\"/w/BIG.C\\", \\"content\\": \\"int"}}}
+{"type":"stream_event","event":{"type":"content_block_delta","delta":{"type":"text_delta","text":"A big answer."}}}
+{"type":"result","subtype":"success","session_id":"fake-session","is_error":false,"result":"ok","usage":{"input_tokens":2,"cache_read_input_tokens":100000,"cache_creation_input_tokens":19000,"output_tokens":998}}
+JSON
+	exit 0
+fi
+if [ "$prompt" = "/compact" ]; then
+	cat <<JSON
+{"type":"system","subtype":"status","status":"compacting","session_id":"fake-session"}
+{"type":"system","subtype":"compact_boundary","session_id":"fake-session","compact_metadata":{"trigger":"manual","pre_tokens":120000,"post_tokens":900}}
+{"type":"result","subtype":"success","session_id":"fake-session","is_error":false,"result":""}
+JSON
+	exit 0
+fi
 if [ "$prompt" = "stream" ]; then
 	# Claude streams replies a few characters at a time.
 	echo '{"type":"system","subtype":"init","session_id":"fake-session"}'

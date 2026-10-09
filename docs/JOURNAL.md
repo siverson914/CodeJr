@@ -899,3 +899,15 @@ Steve wanted CodeJr's own screen at the top of the README: chatting, a transfer,
 
 Not known: whether the PCjr has an INT 1Fh table (characters 128-255 are blank in the picture if not; CodeJr's screen uses none).
 
+## "Why is it not responding?" (2026-10-08, 10:15 pm)
+
+Steve asked CodeJr for a Xonix clone and watched "CodeJr is thinking" for five minutes. Nothing was stuck. The session's transcript showed it afterwards: the turn's first request produced 25,297 tokens, the whole game in one Write call, from 10:13:46 to about 10:17, and the server shows a tool call only once it is complete. The conversation was also 153,163 tokens long, all of it read again at the start of the turn.
+
+**My first answer was a guess.** I told Steve the long conversation was the likely cause and to try /new. The long file was. Then a second guess, that the clock in the system prompt defeats the cache on every turn. Measured with three scratch turns: with the same system prompt a resumed turn still wrote 12,581 of 16,142 tokens to the cache anew, with a changed one 14,469. So a resumed conversation is read in full every turn whatever the prompt says, and moving the clock would gain almost nothing. That change was taken out again.
+
+**What the stream offers.** With thinking on, `claude -p` sends no thoughts: `thinking_delta` events come empty, with only `system/thinking_tokens` counts. A tool call's JSON does stream (`input_json_delta`), file name first. `/compact` works as a resumed headless prompt and reports `compact_boundary` with the size before and after (4,166 to 985 tokens in the trial).
+
+**Built (server only).** The status line now says what is going on: "CodeJr is thinking, 1.2K tokens so far", "CodeJr is writing XONIXJR.C, 12 KB so far", "CodeJr is answering". The system prompt asks for one short line before each long step (not while voice is on: it would be read aloud). After a turn that leaves the conversation over 80,000 tokens, the server runs `/compact` while the user reads ("Tidying up a long conversation", Ctrl-C skips it) and says what it saved. The size is kept in `.codejr/context`.
+
+Tested with the fake Claude and two real transcripts. Not yet seen on the real PCjr, and the real `/compact` has only been tried on a tiny conversation with fewer flags than the server uses.
+

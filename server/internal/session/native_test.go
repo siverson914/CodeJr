@@ -400,3 +400,38 @@ func TestNativePull(t *testing.T) {
 		t.Fatal("server didn't hang up")
 	}
 }
+
+// A conversation past the tidy-up line is shortened after the turn, with
+// Claude Code's own /compact, and the user is told.
+func TestNativeTidiesLongConversation(t *testing.T) {
+	c, ws, _ := startNative(t)
+	c.link.Send(cjp.Input, []byte("big"))
+	c.waitText("A big answer.")
+	c.waitText("tidied up: 120K tokens down to 900")
+	if b, _ := os.ReadFile(filepath.Join(ws.Dir, ".lastprompt")); string(b) != compactPrompt {
+		t.Fatalf("the tidy-up sent %q", b)
+	}
+	if ws.Context() != 900 {
+		t.Fatalf("context = %d", ws.Context())
+	}
+}
+
+func TestDescribeWriting(t *testing.T) {
+	for _, c := range []struct {
+		e    claude.Event
+		want string
+	}{
+		{claude.Event{Name: "Write"}, "CodeJr is writing a file"},
+		{claude.Event{Name: "Write", Text: "/w/XONIXJR/xonixjr.c", Bytes: 300}, "CodeJr is writing XONIXJR.C"},
+		{claude.Event{Name: "Write", Text: "/w/XONIXJR/xonixjr.c", Bytes: 12500}, "CodeJr is writing XONIXJR.C, 12 KB so far"},
+		{claude.Event{Name: "Edit", Text: "/w/A.C", Bytes: 2048}, "CodeJr is changing A.C, 2 KB so far"},
+		{claude.Event{Name: "mcp__pcjr__build"}, "CodeJr is getting a tool ready"},
+	} {
+		if got := describeWriting(c.e); got != c.want {
+			t.Errorf("%+v: %q, want %q", c.e, got, c.want)
+		}
+	}
+	if kilo(850) != "850" || kilo(1200) != "1.2K" || kilo(153163) != "153K" {
+		t.Errorf("kilo: %s %s %s", kilo(850), kilo(1200), kilo(153163))
+	}
+}
