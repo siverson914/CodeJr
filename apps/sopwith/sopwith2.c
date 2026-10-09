@@ -929,12 +929,9 @@ void setcolour(int c)
   writecharcol=c;
 }
 
-/* CodeJr: Sopwith26 shows debris its own way (sop26fx.c). */
+/* CodeJr: Sopwith26's flash when a building goes (sop26fx.c). */
 #ifdef SOPWITH26
 #include "sop26fx.c"
-#define CJ_SHOW cj_show
-#else
-#define CJ_SHOW putimage
 #endif
 
 void updatescreen(void)
@@ -949,13 +946,10 @@ void updatescreen(void)
         obj->soundfunc(obj);
     for (obj=firstdeleted;obj!=NULL;obj=obj->next)
       if (obj->oldonscreen)
-        CJ_SHOW(obj->oldx,obj->oldy,obj->oldsprite,obj);
+        putimage(obj->oldx,obj->oldy,obj->oldsprite,obj);
     if (pixtoscroll!=0)
       cj_groundstale=1;
     cj_stale=1;
-#ifdef SOPWITH26
-    cj_steps++;
-#endif
     return;
   }
   cj_stale=0;
@@ -968,11 +962,11 @@ void updatescreen(void)
     }
     else {
       if (obj->oldonscreen)
-        CJ_SHOW(obj->oldx,obj->oldy,obj->oldsprite,obj);
+        putimage(obj->oldx,obj->oldy,obj->oldsprite,obj);
       if (!obj->onscreen)
         continue;
       if (obj->x>=scnleft && obj->x<=scnright) {
-        CJ_SHOW(obj->oldx=obj->x-scnleft,obj->oldy=obj->y,obj->sprite,obj);
+        putimage(obj->oldx=obj->x-scnleft,obj->oldy=obj->y,obj->sprite,obj);
         if (obj->soundfunc!=NULL)
           obj->soundfunc(obj);
       }
@@ -981,7 +975,7 @@ void updatescreen(void)
     }
   for (obj=firstdeleted;obj!=NULL;obj=obj->next)
     if (obj->oldonscreen)
-      CJ_SHOW(obj->oldx,obj->oldy,obj->oldsprite,obj);
+      putimage(obj->oldx,obj->oldy,obj->oldsprite,obj);
 #ifdef SOPWITH26
   cj_fxframe();
 #endif
@@ -2371,13 +2365,10 @@ void init(int argc,char *argv[])
          &recordfilename,   /* -h[string] (record) */
          &playbackfilename  /* -v[string] (playback) */
 #ifdef SOPWITH26
-         ,&cj_classic       /* -x: explosions as in 1984 (Sopwith26) */
+         ,&cj_classic       /* -x: no flash when a building goes (Sopwith26) */
 #endif
         );
-#ifdef SOPWITH26
-  if (hiresflag)
-    cj_classic=1;           /* the sparks are drawn for the 4-colour screen */
-#endif
+
   soundflag=!soundflag;
   nmodes=(modes ? 1 : 0)+(modec ? 1 : 0)+(modem ? 1 : 0)+(modea ? 1 : 0);
   if (nmodes>1) {
@@ -2638,6 +2629,10 @@ int getgamemode(void)
   printstr("     C - single player against computer\r\n");
   printstr("     M - multiple players on network\r\n");
   printstr("     A - 2 players on asynchronous line");
+  if (cj_limit!=0 && cj_title) { /* CodeJr: test mode, T: save this screen and leave */
+    cj_shot();
+    finish(NULL,FALSE);
+  }
   while (TRUE) {
     if (testbreak())
       finish(NULL,FALSE);

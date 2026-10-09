@@ -22,7 +22,7 @@ A DOS name holds eight letters, hence `SOP26`.
 | `P` pauses. Esc pauses too, and Esc again there quits | One slip on Esc shouldn't end a game. Ctrl-Break (Fn then B on a PCjr) still quits the original's way |
 | A top ten, kept in `SOP26.HI` beside the program: three initials, score, level reached, date. Shown after every game and with `T` on the title screen; the best score is on the title screen | |
 | `1` to `7` on the title screen (or `-g0` to `-g6`) pick the starting level, and losing all lives returns to it, not to the first | There are 7 levels: each win moves up one and makes everything fly faster; from the second the enemy's buildings shoot back |
-| Explosions: the game's debris is shown as small bright blocks, 12 to 20 sparks fly out and fall, and the background flashes red for one frame when a building goes (`sop26fx.c`). `-x` gives the original look | Only what is shown changes. The fifteen pieces still move, hit and score as in 1984: a number summing the game's state is the same with and without. On the real PCjr it costs about the same as the original debris (37 ms of screen in a frame with an explosion, against 39) |
+| The background flashes red for one frame when a building blows up (`sop26fx.c`); `-x` turns it off | A palette register on the PCjr, so it costs nothing and draws nothing. Steve saw it on the real screen and kept it |
 | When a frame is late the next one's drawing is left out, so the game keeps its pace through an explosion | The original's limiter can only slow the game down. See `apps/sopwith/SPEED.md` |
 
 The game itself (the world, the planes, the scoring) is the same: with the
@@ -55,11 +55,9 @@ Emulator only so far: the title screen, pause, the top ten and its file,
 the starting level. Nobody has yet pressed P or typed initials on the real
 keyboard.
 
-The explosions have run on the real PCjr for timing and the state number,
-but nobody has looked at them there, and the red flash can't be seen in
-the emulator's screen captures at all (it is a palette register, not
-screen memory). It is the first palette change this game makes: if the
-picture goes wrong after an explosion, `-x` turns all of it off.
+Tried and dropped: debris shown as small blocks with sparks flying out.
+On the real PCjr it cost the same as the original debris, and the
+original's chunks looked better.
 
 `LOG.TXT` from any test run starts with `state XXXX at frame N`: a sum over
 every object's position, type, status and score. Two builds that show

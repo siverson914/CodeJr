@@ -301,8 +301,12 @@ Measured on the real PCjr, a frame with an explosion in it:
 The sparks cost what the blocks saved. Each spark is a little C: a
 structure, a far pointer, and at first a shift by a variable count, which
 an 8088 does a bit at a time. With fewer sparks and the shift replaced by
-a 4-entry table it comes out slightly ahead. It stays in for its looks,
-not its speed.
+a 4-entry table it comes out slightly ahead.
+
+It was taken out again. Seen on the real screen, the original's chunks
+looked better, and without a speed gain there was nothing to weigh against
+that. The red flash that came with it (one palette register write when a
+building goes, no drawing) stayed.
 
 Because the picture now differs from the faithful build's on purpose, the
 screen comparison no longer applies. The log gained a state number (a sum

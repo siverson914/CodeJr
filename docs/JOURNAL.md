@@ -899,6 +899,8 @@ Steve wanted CodeJr's own screen at the top of the README: chatting, a transfer,
 
 Not known: whether the PCjr has an INT 1Fh table (characters 128-255 are blank in the picture if not; CodeJr's screen uses none).
 
+**Steve's verdict on the real screen (2026-10-08, evening):** "the chunks look better but the red flash is a good idea. keep it." The blocks and sparks are removed; Sopwith26 draws the original debris again and its screens match the faithful build's once more. The flash stays (`-x` turns it off) and works on the real monitor: the first palette change from this project's code that anyone has seen there. He also said the game "does seem smoother and faster": the cap is 9.1 frames a second as before, but yesterday's build fell below it in every busy moment (it managed 10.5 unlimited, so any frame much above average was late), and today's has 60% headroom and, in Sopwith26, makes up lost time.
+
 ## "Why is it not responding?" (2026-10-08, 10:15 pm)
 
 Steve asked CodeJr for a Xonix clone and watched "CodeJr is thinking" for five minutes. Nothing was stuck. The session's transcript showed it afterwards: the turn's first request produced 25,297 tokens, the whole game in one Write call, from 10:13:46 to about 10:17, and the server shows a tool call only once it is complete. The conversation was also 153,163 tokens long, all of it read again at the start of the turn.
@@ -911,3 +913,4 @@ Steve asked CodeJr for a Xonix clone and watched "CodeJr is thinking" for five m
 
 Tested with the fake Claude and two real transcripts. Not yet seen on the real PCjr, and the real `/compact` has only been tried on a tiny conversation with fewer flags than the server uses.
 
+**A page for Sopwith (2026-10-09).** Steve asked for the README to lead to a detailed page per project, "sopwith in particular... screenshots and diagrams/etc about porting sopwith and then the improvements made here". Every project entry in the README now links to its own README, and `docs/sopwith/README.md` tells the Sopwith story start to finish: where the game came from, the port, how it draws, the speed work with three charts made from the real-PCjr numbers, what the emulator got wrong, the 1984 bugs, how each change was proven harmless, Sopwith26, and what didn't work. Its screenshots came off the real PCjr through the game's own test mode (the faithful build's menu needed a `T` hook like Sopwith26's). The top ten picture is from the emulator: taking it on the real machine would have written a test score into Steve's table, which by then held a real one (3300, SRI).
