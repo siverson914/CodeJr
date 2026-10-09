@@ -381,6 +381,4 @@ Source reverse-engineered and released: Andrew Jenner, 1999 to 2000.
 Arrow keys: Retro Jack, 2026. The licence is in
 [`apps/sopwith/license.txt`](../../apps/sopwith/license.txt).
 
-The port, the speed work and Sopwith26 were written by Claude (Anthropic)
-working with Steve, who owns the PCjr, played the builds on it and said
-which ideas were worth keeping.
+The port, the speed work and Sopwith26: Steve Iverson, 2026.
