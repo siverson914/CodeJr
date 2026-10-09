@@ -264,6 +264,37 @@ func (n *native) fetch(name string) (int, error) {
 	return len(b), nil
 }
 
+// screen asks the PCjr for its own text screen as the user sees it now
+// (video memory and the ROM's character shapes) and keeps it for
+// tools/textshot.py to draw. The client writes nothing on the screen.
+func (n *native) screen() (string, error) {
+	if !n.remote {
+		return "", errors.New("this CODEJR.EXE can't send its screen; it updates itself on the next call")
+	}
+	if err := n.link.Send(cjp.Fetch, []byte("*SCREEN")); err != nil {
+		return "", errors.New("the PCjr hung up")
+	}
+	b, err := n.collect(time.Minute)
+	if err != nil {
+		if strings.Contains(err.Error(), "no such file") {
+			err = errors.New("this CODEJR.EXE is older than 1.0.25 and can't send its screen")
+		}
+		return "", err
+	}
+	if len(b) != screenBytes {
+		return "", fmt.Errorf("the screen came back as %d bytes, not %d", len(b), screenBytes)
+	}
+	path := n.s.ws.ScreenPath()
+	if err := os.WriteFile(path, b, 0o644); err != nil {
+		return "", err
+	}
+	n.s.logf("native: got the PCjr's text screen (%d bytes)", len(b))
+	return path, nil
+}
+
+// screenBytes is 80x25 characters with attributes and two 1024-byte fonts.
+const screenBytes = 4000 + 2048
+
 // ---- the control socket's side ----
 
 type ctlReq struct {
@@ -345,6 +376,8 @@ func (n *native) handleCtl(r ctlReq) {
 		n.sendPending()
 		after, _, _, _ := n.s.ws.Pending()
 		resp.out = fmt.Sprintf("%d file(s) sent to the PCjr, %d still waiting.", len(before)-len(after), len(after))
+	case "screen":
+		resp.out, resp.err = n.screen()
 	case "fetch":
 		var size int
 		size, resp.err = n.fetch(r.arg)

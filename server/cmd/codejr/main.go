@@ -53,7 +53,7 @@ func main() {
 		shot := fs.String("shot", "", `run: screenshot after this many seconds, or "last"`)
 		fs.Parse(os.Args[2:])
 		if fs.NArg() < 2 {
-			log.Fatal("usage: codejr ctl -workspace DIR dos COMMAND... | fetch NAME | run FOLDER COMMAND... | sync now")
+			log.Fatal("usage: codejr ctl -workspace DIR dos COMMAND... | fetch NAME | run FOLDER COMMAND... | sync now | screen now")
 		}
 		w, _ := filepath.Abs(*wsDir)
 		arg := strings.Join(fs.Args()[1:], " ")

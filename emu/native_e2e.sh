@@ -231,12 +231,14 @@ remoterun() {
 	sleep 25
 	server/codejr ctl -workspace "$tmp/ws" dos ${CTLCMD:-VER} > "$tmp/ctl-dos.txt" 2>&1
 	server/codejr ctl -workspace "$tmp/ws" fetch 'GAME\LOG.TXT' > "$tmp/ctl-fetch.txt" 2>&1
+	server/codejr ctl -workspace "$tmp/ws" screen now > "$tmp/ctl-screen.txt" 2>&1
+	tools/textshot.py "$tmp/ws/.codejr/screen.bin" "$tmp/screen.png" >> "$tmp/ctl-screen.txt" 2>&1
 	wait $dp
 	kill $sp 2>/dev/null; wait $sp 2>/dev/null
 	echo "== $2"
 	shift 2
 	for c in "$@"; do eval "$c"; done
-	[ $fail = 1 ] && { echo "--- server log"; cat "$tmp/server.log"; echo "--- screen"; cat "$tmp/c/CODEJR/PROGS/SCREEN.TXT"; echo "--- ctl"; cat "$tmp/ctl-dos.txt" "$tmp/ctl-fetch.txt"; ls -R "$tmp/ws"; }
+	[ $fail = 1 ] && { echo "--- server log"; cat "$tmp/server.log"; echo "--- screen"; cat "$tmp/c/CODEJR/PROGS/SCREEN.TXT"; echo "--- ctl"; cat "$tmp/ctl-dos.txt" "$tmp/ctl-fetch.txt" "$tmp/ctl-screen.txt"; ls -R "$tmp/ws"; }
 	rm -rf "$tmp"
 }
 
@@ -244,7 +246,9 @@ job remoterun "/dos VER" "/dos, and the laptop's control socket" \
 	'check "the screen shows what VER printed" "grep -qi dosbox $tmp/c/CODEJR/PROGS/SCREEN.TXT"' \
 	'check "the screen was repainted" "grep -q \"CodeJr 1\" $tmp/c/CODEJR/PROGS/SCREEN.TXT"' \
 	'check "the laptop ran a command on the PCjr" "grep -qi dosbox $tmp/ctl-dos.txt"' \
-	'check "the laptop fetched a file from a folder" "printf \"score 42\n\" | cmp -s - $tmp/ws/GAME/LOG.TXT"'
+	'check "the laptop fetched a file from a folder" "printf \"score 42\n\" | cmp -s - $tmp/ws/GAME/LOG.TXT"' \
+	'check "the laptop got the screen of the client" "[ \$(wc -c < $tmp/ws/.codejr/screen.bin) = 6048 ] && [ -s $tmp/screen.png ]"' \
+	'check "the client wrote nothing on its screen for that" "! grep -qi screen.bin $tmp/c/CODEJR/PROGS/SCREEN.TXT"'
 # A command that could change something runs only if the user presses Y
 # (/A:Y and /A:N answer for the user here).
 job COPT=/A:N CTLCMD="DEL NOTE.TXT" remoterun "hi" "a risky command, refused at the PCjr" \

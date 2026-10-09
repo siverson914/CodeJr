@@ -149,6 +149,10 @@ pcjr-sync:
 pcjr-fetch name:
     @server/codejr ctl -workspace "{{ws}}" fetch "$@"
 
+# A picture of CodeJr's own screen on the connected PCjr: just pcjr-screen out.png
+pcjr-screen out="screen.png":
+    @tools/textshot.py "$(server/codejr ctl -workspace "{{ws}}" screen now)" "{{out}}" && echo "{{out}}"
+
 # Sort the workspace's loose files into app folders (then run ORGANIZE on the PCjr)
 organize: build
     server/codejr organize -workspace "{{ws}}"

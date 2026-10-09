@@ -41,7 +41,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.0.24"
+#define VERSION "1.0.25"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 #define PULL_OLD "CJPULL.OLD" /* the copy being replaced, until the new one is in */
@@ -130,6 +130,8 @@ static char up_name[24];
  * (see tick_hook). */
 #define KQ_MAX 30
 #define CJSHOT "C:\\CODEJR\\CJSHOT.BIN"
+#define CJSCR "C:\\CODEJR\\CJSCR.BIN" /* our own text screen, for a picture */
+#define SCREEN_NAME "*SCREEN"         /* a fetch of this name asks for it */
 static struct { unsigned char delay, scan, ascii; } kq[KQ_MAX]; /* delay: units of 2 ticks, before the key */
 static volatile unsigned char kq_n, kq_i, kq_break, kq_hold;
 #define KEY_HOLD 5 /* ticks a scripted key stays down (0.27 s) */
@@ -1308,6 +1310,39 @@ static void start_upload(const char *path, const char *name, int kind, int temp)
 	up_name[sizeof up_name - 1] = 0;
 }
 
+/* Our own screen as the user sees it now, for a picture made on the
+ * laptop (tools/textshot.py): 4000 bytes of video memory, then the ROM's
+ * 8x8 characters 0-127 (F000:FA6E) and 128-255 (the INT 1Fh table, zeros
+ * if there is none). Nothing is written on the screen for it. */
+static void upload_screen(void)
+{
+	static unsigned char b[250];
+	unsigned char far *src[3];
+	unsigned len[3], k, i, n;
+	FILE *f = fopen(CJSCR, "wb");
+
+	if (!f) {
+		upload_fail("can't write the screen file on the PCjr");
+		return;
+	}
+	src[0] = (unsigned char far *)MK_FP(0xB800, 0);
+	len[0] = 4000;
+	src[1] = (unsigned char far *)MK_FP(0xF000, 0xFA6E);
+	src[2] = *(unsigned char far * far *)MK_FP(0, 0x1F * 4);
+	len[1] = len[2] = 1024;
+	for (k = 0; k < 3; k++)
+		for (i = 0; i < len[k]; i += n) {
+			n = len[k] - i < sizeof b ? len[k] - i : sizeof b;
+			if (src[k])
+				_fmemcpy(b, src[k] + i, n);
+			else
+				memset(b, 0, n);
+			fwrite(b, 1, n, f);
+		}
+	fclose(f);
+	start_upload(CJSCR, "SCREEN.BIN", 'B', 1);
+}
+
 static void pump_upload(void)
 {
 	unsigned char b[1 + 120];
@@ -2042,7 +2077,10 @@ int main(int argc, char **argv)
 			} else if (pend_cmd[0]) {
 				run_command();
 			} else if (pend_get[0]) {
-				start_upload(pend_get, pend_get, 'B', 0);
+				if (strcmp(pend_get, SCREEN_NAME) == 0)
+					upload_screen();
+				else
+					start_upload(pend_get, pend_get, 'B', 0);
 				pend_get[0] = 0;
 			}
 		}

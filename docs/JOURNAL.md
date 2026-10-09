@@ -889,3 +889,13 @@ Steve asked for a title screen and a gameplay picture of every app, and a public
 
 **Not done.** A Sopwith picture with the plane in the air (it needs someone flying), the PCjr's real palette (the pictures use the standard 16 colors), JRQUEST (not built for the PCjr yet).
 
+## A picture of CodeJr itself (2026-10-08, 4:40 pm)
+
+Steve wanted CodeJr's own screen at the top of the README: chatting, a transfer, voice on. The screenshot hook only grabs graphics screens of a program CodeJr runs, and CodeJr's screen is text.
+
+**First try, no client change.** A remote DOS command doesn't blank the screen, so a small tool (VIDDUMP) run with `just pcjr` saved B800 to a file, with the ROM's 8x8 characters from F000:FA6E so the picture has the PCjr's real letters, and `just pcjr-fetch` brought it back. It worked the first time on the real PCjr. But every capture puts "Running on this PCjr: UTILS\VIDDUMP" on the screen being captured.
+
+**What was built instead (client 1.0.25).** A fetch of the name `*SCREEN` makes the client write the same 6048 bytes (4000 of video memory, 1024 of characters 0-127, 1024 from the INT 1Fh table or zeros) to `C:\CODEJR\CJSCR.BIN` and upload it, without writing anything on the screen first. Server: control op `screen`, kept as `.codejr/screen.bin`. `tools/textshot.py` draws it (640x400, standard colors, no libraries). `just pcjr-screen out.png` does both. VIDDUMP was deleted again. Emulator test: the file is 6048 bytes, the picture is made, and the client's screen doesn't mention it. An older client answers "no such file", which the server turns into "older than 1.0.25".
+
+Not known: whether the PCjr has an INT 1Fh table (characters 128-255 are blank in the picture if not; CodeJr's screen uses none).
+
