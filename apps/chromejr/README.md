@@ -8,7 +8,7 @@ holds the session, the cookies and the encryption, modern sites work,
 forms and logins included. This is its own app, not part of CodeJr; it
 borrows CodeJr's serial link and nothing else.
 
-**State: a prototype (2026-10-09), to find out how hard this is.** The
+**Next: `HANDOFF.md` here** (an LLM on the laptop that picks out what matters on each page). **State: a prototype (2026-10-09), to find out how hard this is.** The
 laptop half exists (`server/cmd/chromejr`, `server/internal/web`). The
 PCjr half is for now the CodeJr terminal program pointed at ChromeJr's
 port, which gives a scrolling text screen, paging, a status bar and an
