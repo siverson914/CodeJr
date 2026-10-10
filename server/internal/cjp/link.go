@@ -380,6 +380,13 @@ func (l *Link) Stats() string {
 	return fmt.Sprintf("link: %d frames resent, %d bad frames received", l.Resent, l.BadFrames)
 }
 
+// ResentCount is how many frames have been sent again so far.
+func (l *Link) ResentCount() int {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.Resent
+}
+
 // Close ends the link.
 func (l *Link) Close() {
 	l.mu.Lock()

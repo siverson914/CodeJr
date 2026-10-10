@@ -436,6 +436,46 @@ func TestDescribeWriting(t *testing.T) {
 	}
 }
 
+// /usage: a turn that wrote a file counts overall, for today, for this
+// call, and the file that went to the PCjr is counted with its size.
+func TestNativeUsage(t *testing.T) {
+	c, ws, _ := startNative(t)
+	c.link.Send(cjp.Input, []byte("hello there"))
+	c.waitText("[writes HELLO.BAS]")
+	c.receiveFile()
+	c.waitText("Saved HELLO.BAS")
+	c.text.Reset()
+	c.link.Send(cjp.Input, []byte("/usage"))
+	c.waitText("Counted since")
+	out := c.text.String()
+	for _, want := range []string{"all time", "today", "this call", "Messages", "Files sent", "Files changed"} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("/usage lacks %q:\n%s", want, out)
+		}
+	}
+	for _, line := range strings.Split(out, "\n") {
+		if len(line) > 79 {
+			t.Fatalf("a /usage line is %d columns: %q", len(line), line)
+		}
+	}
+	u := ws.Usage()
+	if u.Total.Turns != 1 || u.Total.TypedChars != len("hello there") || u.Total.FilesSent != 1 || u.Total.Edits != 1 || u.Total.Calls != 1 {
+		t.Fatalf("totals: %+v", u.Total)
+	}
+	// A project's row: its files, its builds, and the turns that touched it.
+	ws.AddUsage("SNAKE", func(s *Stats) { s.Builds++ })
+	ws.AddProjectUsage("SNAKE", func(s *Stats) { s.Turns++ })
+	if u = ws.Usage(); u.Projects["SNAKE"].Builds != 1 || u.Projects["SNAKE"].Turns != 1 || u.Total.Turns != 1 || u.Total.Builds != 1 {
+		t.Fatalf("project: %+v total %+v", u.Projects["SNAKE"], u.Total)
+	}
+	if txt := ws.UsageText("snake", nil); !strings.Contains(txt, "SNAKE") || !strings.Contains(txt, "Builds") {
+		t.Fatalf("project text:\n%s", txt)
+	}
+	if txt := ws.UsageText("NOPE", nil); !strings.Contains(txt, "No usage recorded for NOPE") {
+		t.Fatalf("unknown project:\n%s", txt)
+	}
+}
+
 // A run's key script always ends with the way out: Esc three times once
 // the limit has passed.
 func TestWithLimit(t *testing.T) {

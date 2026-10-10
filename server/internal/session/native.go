@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -44,11 +45,22 @@ folders; a number runs one, and CodeJr calls back when it ends). End BASIC progr
 so they return to DOS and CodeJr comes back by itself. You cannot see the PCjr's screen; if the user reports a
 display problem, say so and suggest /help, rather than guessing settings.`
 
+// maxLine is the longest typed line the server puts together from pieces.
+const maxLine = 4000
+
 type native struct {
 	s    *session
 	link *cjp.Link
-	wrap wrapper
-	pull bool // the client fetches files with the pull protocol (CODEJR/2)
+	// For /usage: this call's counts, the projects the turn in progress
+	// has touched, what the turn cost, and the last transfer's bytes on
+	// the line.
+	call     Stats
+	touched  map[string]bool
+	turnOut  int
+	turnCost float64
+	lineSent int
+	wrap     wrapper
+	pull     bool // the client fetches files with the pull protocol (CODEJR/2)
 	// Messages that arrived while a file was going over (a line typed
 	// early, say); handled once the transfer is done.
 	backlog []cjp.Msg
@@ -105,6 +117,13 @@ func (s *session) native() {
 	n := &native{s: s, link: link, ctl: make(chan ctlReq)}
 	setActive(n)
 	defer setActive(nil)
+	began := time.Now()
+	n.count("", func(st *Stats) { st.Calls++ })
+	defer func() {
+		secs := int(time.Since(began).Seconds())
+		resent := link.ResentCount()
+		n.count("", func(st *Stats) { st.ConnectedSec += secs; st.Resent += resent })
+	}()
 
 	// The client speaks first.
 	select {
@@ -160,7 +179,9 @@ func (s *session) native() {
 		}
 		switch m.Type {
 		case cjp.InputMore:
-			n.long = append(n.long, m.Payload...)
+			if len(n.long) < maxLine { // the client stops at 1,000
+				n.long = append(n.long, m.Payload...)
+			}
 		case cjp.Input:
 			line := string(append(n.long, m.Payload...))
 			n.long = nil
@@ -287,6 +308,7 @@ func (n *native) serve(name string, chunks [][]byte, offerType byte, offer []byt
 					continue
 				}
 				n.s.logf("native: %s: %d requests for %d chunks, %d bytes on the line", name, pulls, len(chunks), sent)
+				n.lineSent = sent
 				if m.Payload[0] == 0 {
 					return true, ""
 				}
@@ -428,6 +450,7 @@ const nativeHelp = `Commands:
   /new         start a fresh conversation
   /run         number your programs; type a number to run one
   /voice       speak replies aloud (on/off); replies get short
+  /usage       what CodeJr has done: messages, files, time (/usage NAME: one project)
   /exit        hang up (or press Alt-X)
 Alt-S shows the line's error counters. PgUp, PgDn and the arrows scroll
 back through the chat; a long reply stops at -- More -- (Space goes on).
@@ -514,6 +537,8 @@ func (n *native) command(line string) bool {
 		} else {
 			n.print(cjp.StyleNote, "Trust off: CodeJr asks (Y or N) before anything that runs a program or\ncould delete or change a file. Looking (DIR, TYPE) never asks.\n")
 		}
+	case "/usage", "/stats":
+		n.print(cjp.StylePlain, s.ws.UsageText(arg, &n.call))
 	case "/voice":
 		n.toggleVoice()
 	case "/quit", "/bye", "/exit":
@@ -562,6 +587,28 @@ func (n *native) turn(prompt string) {
 			r + "\n]\n\n" + prompt
 		s.ws.SetLastRun("")
 	}
+	typed := len(prompt)
+	began := time.Now()
+	n.touched = map[string]bool{}
+	n.turnOut, n.turnCost = 0, 0
+	defer func() {
+		// The turn counts once overall and once for each project it
+		// touched (a build, a run, a file written there).
+		secs, reply, out, cost := int(time.Since(began).Seconds()), n.reply.Len(), n.turnOut, n.turnCost
+		add := func(st *Stats) {
+			st.Turns++
+			st.TypedChars += typed
+			st.ReplyChars += reply
+			st.TurnSec += secs
+			st.OutTokens += out
+			st.CostUSD += cost
+		}
+		n.count("", add)
+		for p := range n.touched {
+			n.countProject(p, add)
+		}
+		n.touched = nil
+	}()
 	err := n.runClaude(session, prompt)
 	if err != nil && session != "" && err != context.Canceled {
 		s.logf("resume failed (%v), retrying fresh", err)
@@ -585,6 +632,56 @@ func (n *native) turn(prompt string) {
 	case err != nil:
 		n.print(cjp.StyleWarn, "\nCodeJr error: "+err.Error()+"\n")
 	}
+}
+
+// count adds to the usage record (all time, today, the project if there
+// is one) and to this call's own counts.
+func (n *native) count(project string, add func(*Stats)) {
+	add(&n.call)
+	if err := n.s.ws.AddUsage(project, add); err != nil {
+		n.s.logf("usage: %v", err)
+	}
+}
+
+// countProject adds to one project's row only (the rest was counted).
+func (n *native) countProject(project string, add func(*Stats)) {
+	if err := n.s.ws.AddProjectUsage(project, add); err != nil {
+		n.s.logf("usage: %v", err)
+	}
+}
+
+// countTool counts one tool call, for the project it names if it does.
+func (n *native) countTool(e claude.Event) {
+	project := ""
+	if p, ok := e.Input["project"].(string); ok && validDir(strings.ToUpper(p)) {
+		project = strings.ToUpper(p)
+	} else if p, ok := e.Input["file_path"].(string); ok {
+		if rel, err := filepath.Rel(n.s.ws.Dir, p); err == nil && !strings.HasPrefix(rel, "..") {
+			project = projectOf(filepath.ToSlash(rel))
+		}
+	}
+	var add func(*Stats)
+	switch e.Name {
+	case "Write", "Edit", "MultiEdit":
+		add = func(st *Stats) { st.Edits++ }
+	case "mcp__pcjr__build":
+		add = func(st *Stats) { st.Builds++ }
+	case "mcp__pcjr__run":
+		add = func(st *Stats) { st.EmuRuns++ }
+	case "mcp__pcjr__run_on_pcjr":
+		add = func(st *Stats) { st.PCjrRuns++ }
+	case "WebSearch", "WebFetch":
+		add = func(st *Stats) { st.Web++ }
+	default:
+		return
+	}
+	if project == strings.ToUpper(LibDir) {
+		project = "" // the library is everybody's
+	}
+	if project != "" && n.touched != nil {
+		n.touched[project] = true
+	}
+	n.count(project, add)
 }
 
 // compactPrompt is Claude Code's own command for replacing a conversation
@@ -717,6 +814,9 @@ func (n *native) runClaude(session, prompt string) error {
 				s.ws.SetContext(e.Tokens)
 				s.logf("conversation tidied to %d tokens", e.Tokens)
 			case claude.ToolUse:
+				if !tidy {
+					n.countTool(e)
+				}
 				note, act := describeTool(e)
 				activity = act
 				if note != "" {
@@ -734,6 +834,8 @@ func (n *native) runClaude(session, prompt string) error {
 				if e.Tokens > 0 && !tidy {
 					s.ws.SetContext(e.Tokens)
 				}
+				n.turnOut += e.OutTokens
+				n.turnCost += e.CostUSD
 				if e.IsError {
 					n.flush()
 					n.print(cjp.StyleWarn, "\nCodeJr: "+firstLine(e.Result)+"\n")
@@ -846,6 +948,19 @@ func (n *native) sync() {
 			s.logf("native: keeping a copy of %s: %v", f.Name, err)
 		}
 		el := time.Since(start)
+		{
+			size, line, secs := int64(len(f.Data)), int64(n.lineSent), int(el.Seconds()+0.5)
+			if !n.pull {
+				line = size
+			}
+			n.count(projectOf(f.Name), func(st *Stats) {
+				st.FilesSent++
+				st.FileBytes += size
+				st.LineBytes += line
+				st.SendSec += secs
+			})
+			n.lineSent = 0
+		}
 		s.logf("native: sent %s (%d bytes) in %s, %.0f bytes/s; %s", f.Name, len(f.Data), el.Round(100*time.Millisecond), float64(len(f.Data))/el.Seconds(), n.link.Stats())
 		if !n.pull {
 			// Pull clients print their own line, with the line's speed.

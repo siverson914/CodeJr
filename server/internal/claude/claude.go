@@ -51,6 +51,7 @@ type Event struct {
 	Result    string
 	CostUSD   float64
 	Tokens    int // Done: the conversation's size, in tokens, as the last request saw it
+	OutTokens int // Done: tokens Claude wrote in the whole turn
 	Bytes     int
 }
 
@@ -187,6 +188,14 @@ func (u *usage) size() int {
 	return u.Input + u.CacheRead + u.CacheWrite + u.Output
 }
 
+// out is what Claude wrote in the whole turn.
+func (u *usage) out() int {
+	if u == nil {
+		return 0
+	}
+	return u.Output
+}
+
 var filePathRE = regexp.MustCompile(`"file_path"\s*:\s*"((?:[^"\\]|\\.)*)"`)
 
 // toolStep is how many more bytes of a tool call arrive between two
@@ -259,7 +268,7 @@ func parse(r io.Reader, emit func(Event)) bool {
 			}
 		case "result":
 			done = true
-			emit(Event{Kind: Done, SessionID: m.SessionID, IsError: m.IsError, Result: m.Result, CostUSD: m.CostUSD, Tokens: m.Usage.size()})
+			emit(Event{Kind: Done, SessionID: m.SessionID, IsError: m.IsError, Result: m.Result, CostUSD: m.CostUSD, Tokens: m.Usage.size(), OutTokens: m.Usage.out()})
 		}
 	}
 	return done

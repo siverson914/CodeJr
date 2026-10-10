@@ -958,3 +958,17 @@ Emulator and unit tests only; the limit has not fired on the real PCjr yet.
 
 **And the second backoff failed the gate.** Backing off only into silence passed once and then failed the same noisy-line test in the gate: at the end of an exchange the other side is silent because it has nothing more to say, and a lost last frame then waited out a doubled timer. The first four resends now keep the short timer and only later ones double. Three runs of the noisy test in a row pass. I also started the next session before reading this gate's verdict, the same slip as on 2026-10-08.
 
+## Longer lines and /usage (2026-10-09, night)
+
+Steve: "Can you also increase the message limit the jr can send in codejr. I have hit that limit often. And can you add a /usage thing ... per project/folder and all time ... Maybe stored in each dir or?"
+
+**Longer lines (client 1.0.26).** A typed line was 299 characters; it is 1,000 now. A frame carries 128 bytes and the client's outgoing queue holds 8 frames, so a long line can't be queued at once any more: Enter copies it to `sendbuf` and `pump_line` feeds the queue as room comes, leaving two slots free. At the limit the client says so once (never drop a key silently). `/T:@FILE` types a file's first line, for the emulator test, since a DOS command line holds 127 characters: an 858-character line arrives whole. The server puts together at most 4,000.
+
+**/usage (server).** `.codejr/usage.json` in the workspace: an all-time row, a row per day (90 kept) and a row per project. Counted as things happen: calls and time connected, messages, characters typed and received, how long CodeJr worked, tokens written and the cost at list price (both from Claude's result), files changed, builds, emulator runs, runs on the PCjr, web lookups, files sent with their size, bytes on the line and time, frames resent. A message counts once overall and once for every project it touched (a build, a run, a file written there). `/usage` shows all time, today and this call side by side; `/usage JUNRIS` shows one project. Lines with nothing but zeros are left out.
+
+Not one file per project folder, as Steve wondered: everything in a project folder is sent to the PCjr, so a counter there would mean a transfer after every turn.
+
+**Seeded from the log.** The first time, the server reads its own log for what happened before: 63 calls, 110 messages, 216 files (7.4 MB, 4.4 MB on the line), and files per project. The log has times but no dates, and no tokens, so days and the rest start now.
+
+Emulator and unit tests only.
+

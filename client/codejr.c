@@ -41,7 +41,7 @@
 #include "pull.h"
 #include "screen.h"
 
-#define VERSION "1.0.25"
+#define VERSION "1.0.26"
 #define TICKS_PER_SEC 18
 #define PULL_TMP "CJPULL.$$$" /* a pull lands here, then is renamed */
 #define PULL_OLD "CJPULL.OLD" /* the copy being replaced, until the new one is in */
@@ -55,7 +55,15 @@ static const unsigned char style_attr[] = {
 };
 
 static cjp_link link;
-static char input[300];
+/* A typed line: up to INPUT_MAX characters (299 before 1.0.26, which
+ * people hit). It leaves in frames of CJP_MAXPAYLOAD, more than the
+ * outgoing queue holds at once, so a sent line waits in sendbuf and
+ * pump_line feeds it to the queue as room comes. */
+#define INPUT_MAX 1000
+static char input[INPUT_MAX + 1];
+static char sendbuf[INPUT_MAX + 1];
+static int send_len, send_off, sending;
+static int full_told; /* said once that the line is full */
 static int input_len;
 
 /* Outgoing messages wait here when the send window is full. */
@@ -204,6 +212,23 @@ static void queue(unsigned char type, const void *p, unsigned n)
 	outq[i].len = n;
 	memcpy(outq[i].p, p, n);
 	outq_n++;
+}
+
+/* Feeds the line in sendbuf to the queue: INPUT_MORE pieces, then INPUT
+ * with the last one. Two queue slots stay free for keys and acks of
+ * other work. */
+static void pump_line(void)
+{
+	while (sending && outq_n < OUTQ - 2) {
+		int left = send_len - send_off;
+		if (left > CJP_MAXPAYLOAD) {
+			queue(CJP_INPUT_MORE, sendbuf + send_off, CJP_MAXPAYLOAD);
+			send_off += CJP_MAXPAYLOAD;
+		} else {
+			queue(CJP_INPUT, sendbuf + send_off, (unsigned)left);
+			sending = 0;
+		}
+	}
 }
 
 static void flush_queue(void)
@@ -1719,7 +1744,7 @@ static void key(unsigned k)
 	} else if (k == 0x2D00) { /* Alt-X */
 		hang_up();
 	} else if (ch == '\r') {
-		if (input_len && !ready) {
+		if (input_len && (!ready || sending)) {
 			/* Never drop it: it goes as soon as CodeJr is ready. */
 			line_waits = 1;
 			scr_status("Your line goes as soon as CodeJr is ready.");
@@ -1729,21 +1754,20 @@ static void key(unsigned k)
 			if (ui)
 				echo_line(input);
 			if (!local_line(input)) {
-				/* A frame carries 128 bytes: a longer line goes as
-				 * INPUT_MORE pieces, then INPUT with the last one.
-				 * (1.3 and earlier queued the whole line as one frame,
-				 * which was dropped silently when it was too long.) */
-				int off = 0;
-				while (input_len - off > CJP_MAXPAYLOAD) {
-					queue(CJP_INPUT_MORE, input + off, CJP_MAXPAYLOAD);
-					off += CJP_MAXPAYLOAD;
-				}
-				queue(CJP_INPUT, input + off, (unsigned)(input_len - off));
+				/* A frame carries 128 bytes: a longer line goes in
+				 * pieces (see pump_line). input_len <= INPUT_MAX, the
+				 * size of both buffers less the NUL. */
+				memcpy(sendbuf, input, (size_t)input_len + 1);
+				send_len = input_len;
+				send_off = 0;
+				sending = 1;
+				pump_line();
 				if (ui)
 					ready = 0;
 			}
 			input_len = 0;
 			input[0] = 0;
+			full_told = 0;
 		}
 	} else if (ch == 3) {
 		unsigned char c = CJP_KEY_CTRLC;
@@ -1751,9 +1775,13 @@ static void key(unsigned k)
 	} else if (ch == 8) {
 		if (input_len)
 			input[--input_len] = 0;
-	} else if (ch >= 32 && ch < 127 && input_len < (int)sizeof(input) - 1) {
+	} else if (ch >= 32 && ch < 127 && input_len < INPUT_MAX) {
 		input[input_len++] = (char)ch;
 		input[input_len] = 0;
+	} else if (ch >= 32 && ch < 127 && !full_told) {
+		/* Never drop a key silently. */
+		full_told = 1;
+		note("That is the longest line CodeJr takes (1000 characters). Press Enter to send it, then go on.");
 	}
 	if (!quitting) /* gone for good once CodeJr is leaving */
 		scr_input(input, ready);
@@ -2051,6 +2079,18 @@ int main(int argc, char **argv)
 			 * (including a line typed before CodeJr is ready). */
 			strncpy(input, auto_text, sizeof input - 1);
 			input[sizeof input - 1] = 0;
+			if (auto_text[0] == '@') {
+				/* /T:@FILE types the file's first line: a DOS command
+				 * line can't hold a long one. fgets stops at the size. */
+				FILE *tf = fopen(auto_text + 1, "r");
+				input[0] = 0;
+				if (tf) {
+					if (!fgets(input, sizeof input, tf))
+						input[0] = 0;
+					fclose(tf);
+				}
+				input[strcspn(input, "\r\n")] = 0;
+			}
 			input_len = (int)strlen(input);
 			key('\r');
 			sent_auto = 1;
@@ -2084,6 +2124,7 @@ int main(int argc, char **argv)
 				pend_get[0] = 0;
 			}
 		}
+		pump_line();
 		pump_upload();
 		if (!up && shot_pending && outq_n == 0) {
 			/* The text went; now the picture, or why there is none. */

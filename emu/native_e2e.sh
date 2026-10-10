@@ -211,6 +211,27 @@ voicerun() { # $1 = typed line, $2 = label, $3 = 1 to start with voice on, $4 = 
 
 job voicerun /voice "/voice plays its clip" 0 ON.SND
 job voicerun "hi there" "a voiced reply is spoken" 1 REPLY.SND
+# A line longer than the old 299-character limit, and than the client's
+# queue of outgoing frames, arrives whole.
+longrun() {
+	tmp=$(mktemp -d)
+	mkdir -p "$tmp/c/CODEJR/PROGS" "$tmp/ws"
+	cp client/CODEJR.EXE "$tmp/c/CODEJR/PROGS/"
+	printf "DIAL=x:1\r\n" > "$tmp/c/CODEJR.CFG"
+	long=$(awk 'BEGIN { for (i = 0; i < 95; i++) printf "word%04d ", i; printf "end" }')
+	printf '%s\r\n' "$long" > "$tmp/c/CODEJR/PROGS/LONG.TXT"
+	server/codejr -listen 127.0.0.1:$port -workspace "$tmp/ws" -claude "$claudebin" -speech "" > "$tmp/server.log" 2>&1 &
+	sp=$!
+	sleep 0.5
+	printf '[dosbox]\nmachine=pcjr\n[cpu]\ncycles=fixed 3000\n[serial]\nserial1=nullmodem server:127.0.0.1 port:%s transparent:1\n[autoexec]\nmount c %s/c\nc:\ncd \\CODEJR\\PROGS\nCODEJR /P:1 /F:37287 /T:@LONG.TXT /X:45 /S:SCREEN.TXT\nexit\n' $port "$tmp" > "$tmp/dosbox.conf"
+	SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 200 dosbox -conf "$tmp/dosbox.conf" >/dev/null 2>&1
+	kill $sp 2>/dev/null; wait $sp 2>/dev/null
+	echo "== a 858-character line"
+	check "the whole line reached CodeJr" "[ \"\$(cat $tmp/ws/.lastprompt)\" = \"$long\" ]"
+	[ $fail = 1 ] && { echo "--- server log"; cat "$tmp/server.log"; echo "--- prompt"; cat "$tmp/ws/.lastprompt"; echo; echo "--- screen"; cat "$tmp/c/CODEJR/PROGS/SCREEN.TXT"; }
+	rm -rf "$tmp"
+}
+job longrun
 # Remote work: /dos runs a command on the PCjr and shows what it printed,
 # /send uploads a file, and the laptop can ask for both through the
 # control socket while a call is up (what Claude's dos and fetch tools use).
