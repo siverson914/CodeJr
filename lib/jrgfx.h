@@ -222,16 +222,16 @@ extern volatile unsigned char key_down[128];
 void key_init(void);
 void key_done(void);
 
-/* The PCjr's keyboard can lose a scan code (seen as a key that stays
- * "down" after it was let go). Two helps here, and a whole layer for
- * games in jrkeys.h (use that for anything played with held keys):
- * key_makes[] counts every press of a key and key_seq counts all presses,
- * so a press shows even on a key that key_down already has as down;
- * key_heal (on by default; set it to 0 before key_init to turn it off)
- * makes the release of an arrow key free the opposite arrow too. */
+/* key_makes[] counts every press of a key and key_seq all presses: a tap
+ * that came and went between two looks at key_down still shows there,
+ * and so do the keyboard's repeats (a held key sends its press again
+ * after 0.6 s and then every 96 ms; only the newest held key does).
+ * The keyboard loses nothing: measured on the real PCjr, 731 codes in
+ * text mode and under game conditions (apps/keytest, 2026-10-10). For
+ * games, jrkeys.h puts taps and "which of two held keys is newer" on top
+ * of this. */
 extern volatile unsigned char key_makes[128];
 extern volatile unsigned key_seq;
-extern int key_heal;
 
 /* Acts as if the keyboard had sent this key: for test scripts. */
 void key_feed(int scancode, int down);

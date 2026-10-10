@@ -729,7 +729,6 @@ fix fix_div(fix a, fix b)
 volatile unsigned char key_down[128];
 volatile unsigned char key_makes[128];
 volatile unsigned key_seq;
-int key_heal = 1;
 static void (__interrupt __far *old_kb)(void);
 static int kb_on;
 static int is_pcjr;
@@ -741,11 +740,8 @@ static int is_pcjr;
  * which does the EOI, Ctrl-Alt-Del and the PCjr's own housekeeping. */
 
 /* One scan code, from the interrupt or from key_feed. A press is counted
- * as well as recorded: the PCjr can lose a key's release code, which
- * leaves key_down set, and then only the count shows the key pressed
- * again. With key_heal, letting go of an arrow also frees the opposite
- * arrow: a release is nearly always lost while the other key of the pair
- * is being pressed or released. */
+ * as well as recorded, so a tap that is over before the program looks
+ * still shows, and so do the keyboard's repeats of a held key. */
 static void kb_code(unsigned char sc)
 {
 	unsigned char k = sc & 0x7F;
@@ -758,12 +754,6 @@ static void kb_code(unsigned char sc)
 		return;
 	}
 	key_down[k] = 0;
-	if (key_heal) {
-		if (k == KEY_LEFT) key_down[KEY_RIGHT] = 0;
-		else if (k == KEY_RIGHT) key_down[KEY_LEFT] = 0;
-		else if (k == KEY_UP) key_down[KEY_DOWN] = 0;
-		else if (k == KEY_DOWN) key_down[KEY_UP] = 0;
-	}
 }
 
 void key_feed(int scancode, int down)

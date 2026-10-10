@@ -1008,3 +1008,20 @@ His note: "the keyboard is not super responsive - the yellow boxes were always o
 
 **One fix from the measurement.** The key layer dropped any key that stopped repeating. Only the newest held key repeats, so an older key still held (fire, with a direction tapped after it) was let go after 60 ticks. The rule now applies to the newest key only, with a test.
 
+## The key code without the guesses (2026-10-10)
+
+Steve: "is the keyboard work done for now - is it in the shared library with only the changes needed and the prior bad guesses removed?" It was not. The library still carried every repair built on the lost-release theory, and with the keyboard measured as losing nothing, each of them could only do harm, by dropping a key that was really held:
+
+- `key_heal` in the keyboard interrupt (on by default, so in every rebuilt game): letting go of one arrow cleared the opposite arrow. Hold right, tap left, and right was gone.
+- The key layer's hold limit: Xonix asked for 120 ticks, Junris for 90. A direction held longer than that stopped.
+- Letting go of one key of a group let go of them all.
+- A key that stopped repeating counted as let go.
+
+All four are out. What is left is what a game at 5 to 10 frames a second does need and `key_down` alone doesn't give: a tap that is over before the tick still counts for one tick, the keyboard's repeats of a held key are not new presses, and of two held keys of a group the one pressed last wins. `jk_add` keeps its fourth argument and ignores it, so Xonix and Junris compile unchanged. `test/tkeys.c` is rewritten around what the keyboard was measured to do: a key held for 400 ticks with repeats stays down and is hit once; right held, left tapped and let go, right is still held.
+
+The repo's KEYTEST is now the version CodeJr improved on the PCjr side (it names repeats and lost codes itself, and times each part of a frame). CodeJr's prompt no longer says the keyboard loses release codes.
+
+**The lesson is in the rules already:** add a counter before theorizing. The theory came from the PCjr side's CodeJr, but I moved its repair into the library, made part of it the default for every game, and only then built the tool that measured the keyboard. The measuring should have come first; it took two 45-second runs.
+
+So the stuck keys in Xonix and Junris have no known cause yet. The games as rebuilt now have none of the repairs, which makes them the honest test: if a key sticks again, it is in the game's own code.
+

@@ -344,7 +344,7 @@ Assumed from the Tech Ref and BIOS listing, not tried on the real PCjr:
 ## Files
 
 - `jrgfx.h`, `jrgfx.c`, `jrfast.c`, `jrtab.c`: the core. `jrgfx.lib`: built from every `jr*.c` here.
-- `jrkeys.h`, `jrkeys.c`: game keys that survive lost release codes (the header says how to use them). `test/tkeys.c` plays the failures at it with `key_feed`.
+- `jrkeys.h`, `jrkeys.c`: keys for games: taps shorter than a tick, and the newest of two held keys (the header says how to use them, and what was taken out again). `test/tkeys.c` plays the real keyboard's behaviour at it with `key_feed`.
 - `jrmusic.h`, `jrmusic.c`, `MUSIC.md`: a tracker on the 60 Hz retrace interrupt, with sound effects that borrow a voice. `test/tmusic.c`, `test/tmusic.sh`.
 - `jrtest.h`, `jrtest.c`, `TESTING.md`: the `/TEST` mode every game needs: arguments, a key script, screenshots, the standard log lines, a tick limit.
 - `shared/`: what CodeJr added to the library from the PCjr side (the workspace's `JRGFX` folder), saved by `apps/save-projects.sh`. Every build includes it.

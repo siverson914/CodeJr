@@ -1,6 +1,8 @@
-/* TKEYS: the key layer (jrkeys.h) against scripted scan codes, with the
- * failures a PCjr keyboard produces: a release that never arrives, a tap
- * shorter than a tick. Needs no screen and ends by itself. */
+/* TKEYS: the key layer (jrkeys.h) against scripted scan codes that
+ * behave as the real PCjr keyboard was measured to (apps/keytest): every
+ * press has its release, and a held key repeats, the newest one only.
+ * A held key must read as held for as long as it is held. Needs no
+ * screen and ends by itself. */
 #include <stdio.h>
 #include "../jrgfx.h"
 #include "../jrkeys.h"
@@ -28,9 +30,9 @@ int main(void)
 	remove("LOG.TXT");
 	key_init();
 	jk_init();
-	l = jk_add(KEY_LEFT, KEY_A, 1, 90);
-	r = jk_add(KEY_RIGHT, KEY_D, 1, 90);
-	f = jk_add(KEY_SPACE, 0, 0, 30);
+	l = jk_add(KEY_LEFT, KEY_A, 1, 0);
+	r = jk_add(KEY_RIGHT, KEY_D, 1, 0);
+	f = jk_add(KEY_SPACE, 0, 0, 0);
 	check(l == 0 && r == 1 && f == 2, "three keys added");
 
 	/* plain press and release */
@@ -45,83 +47,57 @@ int main(void)
 
 	/* a tap that is over before the tick still counts, once */
 	key_feed(KEY_SPACE, 1);
-	jk_poll();
 	key_feed(KEY_SPACE, 0);
 	jk_tick();
 	check(jk_down(f) && jk_hit(f), "a tap counts for one tick");
 	jk_tick();
-	check(!jk_down(f), "and only one");
+	check(!jk_down(f) && !jk_hit(f), "and only one");
 
-	/* the release of right is lost while left is worked */
-	key_heal = 0; /* the layer alone, without the interrupt's own repair */
-	key_feed(KEY_RIGHT, 1);
-	ticks(3);
-	key_feed(KEY_LEFT, 1);
-	jk_tick();
-	check(jk_best(1) == l, "the newest press of a group wins");
-	key_feed(KEY_LEFT, 0); /* right's release never comes */
-	jk_tick();
-	check(key_down[KEY_RIGHT], "key_down still has right as down");
-	check(!jk_down(r) && !jk_down(l), "letting go of left frees the group");
-	key_feed(KEY_RIGHT, 1); /* pressed again: key_down doesn't change */
-	jk_tick();
-	check(jk_down(r) && jk_hit(r), "a press on a stuck key is seen");
-	key_feed(KEY_RIGHT, 0);
-	jk_tick();
-	check(!jk_down(r), "and its release");
-
-	/* a lost release with nothing else pressed: the limit ends it */
+	/* two taps inside one tick are one tick's worth, not lost and not two */
 	key_feed(KEY_SPACE, 1);
-	ticks(30);
-	check(jk_down(f), "down up to the limit");
-	jk_tick();
-	check(!jk_down(f) && key_down[KEY_SPACE], "past the limit it counts as let go");
+	key_feed(KEY_SPACE, 0);
 	key_feed(KEY_SPACE, 1);
-	jk_tick();
-	check(jk_down(f) && jk_hit(f), "until it is pressed again");
 	key_feed(KEY_SPACE, 0);
 	jk_tick();
+	check(jk_hit(f), "two quick taps are seen");
+	jk_tick();
+	check(!jk_down(f), "and then it is up");
 
-	/* the interrupt's own repair, for games that read key_down */
-	key_heal = 1;
+	/* held for a long time, with the keyboard repeating it: held, and
+	 * the repeats are not new presses */
 	key_feed(KEY_RIGHT, 1);
+	jk_tick();
+	for (i = 0; i < 400; i++) {
+		if (i % 6 == 5)
+			key_feed(KEY_RIGHT, 1); /* a repeat */
+		jk_tick();
+		if (!jk_down(r) || jk_hit(r))
+			break;
+	}
+	check(i == 400, "a key held for 400 ticks stays down and is hit once");
+	check(jk_repeats, "the repeats were noticed");
+
+	/* right held, left tapped: left wins while it is down, right is
+	 * still held afterwards (it no longer repeats: that means nothing) */
 	key_feed(KEY_LEFT, 1);
+	jk_tick();
+	check(jk_down(l) && jk_down(r) && jk_best(1) == l, "the newest press of a group wins");
 	key_feed(KEY_LEFT, 0);
-	check(!key_down[KEY_RIGHT] && !key_down[KEY_LEFT], "key_heal: an arrow's release frees the opposite arrow");
-	key_feed(KEY_A, 1);
-	key_feed(KEY_D, 1);
-	key_feed(KEY_D, 0);
-	check(key_down[KEY_A], "key_heal leaves other keys alone");
-	key_feed(KEY_A, 0);
-
-	/* a keyboard that repeats: a key that stops repeating was let go */
-	ticks(2);
-	key_feed(KEY_RIGHT, 1);
-	for (i = 0; i < 4; i++) {
-		ticks(5);
-		key_feed(KEY_RIGHT, 1);
-	}
 	jk_tick();
-	check(jk_repeats, "repeats noticed");
-	check(jk_down(r), "down while it repeats");
-	ticks(JK_QUIET + 1);
-	check(!jk_down(r), "quiet for long enough counts as let go");
-
-	/* only the newest key repeats: an older held key that has gone quiet
-	 * is still held */
-	key_feed(KEY_SPACE, 1);          /* held throughout, no limit reached */
-	jk_tick();
-	key_feed(KEY_RIGHT, 1);          /* the newer key takes the repeats */
-	for (i = 0; i < 12; i++) {
-		ticks(2);
-		key_feed(KEY_RIGHT, 1);
-	}
-	jk_tick();
-	check(jk_down(f) && jk_down(r), "an older key stays down while the newer one repeats");
+	check(!jk_down(l) && jk_down(r) && jk_best(1) == r, "letting go of left leaves right held");
+	ticks(200);
+	check(jk_down(r), "and it stays held with no repeats at all");
 	key_feed(KEY_RIGHT, 0);
-	key_feed(KEY_SPACE, 0);
 	jk_tick();
-	check(!jk_down(f) && !jk_down(r), "both let go");
+	check(!jk_down(r) && jk_best(1) == -1, "until it is let go");
+
+	/* the second key of a pair */
+	key_feed(KEY_A, 1);
+	jk_tick();
+	check(jk_down(l) && jk_hit(l), "A is left's second key");
+	key_feed(KEY_A, 0);
+	jk_tick();
+	check(!jk_down(l), "and its release");
 
 	dbg_log("TKEYS done: %d failures", fails);
 	printf("TKEYS done: %d failures\n", fails);

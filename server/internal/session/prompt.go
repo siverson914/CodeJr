@@ -97,8 +97,9 @@ C and assembly (for speed, graphics, sound; or when asked):
   Draw into the back buffer, then gfx_present(). 160x200 mode is the
   safe one on this PCjr. The other headers in JRGFX are parts of the
   same library; read each one's comment before writing your own:
-  JRKEYS.H (keys for games: use it for anything played with held keys,
-  the PCjr keyboard loses release codes and key_down alone gets stuck),
+  JRKEYS.H (keys for games: a tap shorter than a frame still counts,
+  and of two held keys the newer wins; the keyboard itself loses nothing,
+  measured),
   JRMUSIC.H (music and sound effects that keep time by themselves) and
   JRTEST.H (the /TEST mode: scripted keys, screenshots, the log lines).
 - The library is shared by every program. When you fix or write

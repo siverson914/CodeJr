@@ -112,9 +112,6 @@ R30 RJ20 U40 20 J {ENTER}5 !W
 - Limits: 8 keys in a group, 60000 ticks in a group, 255 characters in a
   script. A longer script is cut and the test failed. An unknown key or a
   bad character is logged as a failure and skipped; the run goes on.
-- `key_heal` (jrgfx) frees the opposite arrow when an arrow is released,
-  for scripted keys too: after `LR10 R10` right is up as well. Scripts
-  that hold both arrows of a pair are not worth writing.
 
 ## Log lines
 
