@@ -32,8 +32,12 @@
  *
  * Where this came from: written by CodeJr on 2026-10-09 for Xonix Junior
  * and Junris after left and right "got stuck"; moved into the library the
- * same day. The cause (codes lost while two arrive close together) is a
- * theory until apps/keytest has been run on the real PCjr.
+ * same day. Its theory was that codes are lost when two arrive close
+ * together. apps/keytest on the real PCjr that evening did NOT show that:
+ * 400 codes in text mode, 16 ms apart at the closest, none lost. It did
+ * show that the keyboard repeats: a held key sends its press again after
+ * 0.6 s and then every 96 ms, and only the newest held key does. Whether
+ * codes are lost while a game runs is KEYTEST G's question.
  */
 #ifndef JRKEYS_H
 #define JRKEYS_H

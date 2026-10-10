@@ -988,3 +988,13 @@ Emulator only on the PCjr side: a search typed in the emulated PCjr came back as
 
 **Starting it for real found two things.** `just chromejr` said "already running" on its first run: `just` writes a recipe with a `#!` line to a file named after the recipe, so `pgrep -x chromejr` found the recipe itself. And port 4861 was already taken on this laptop by another program (on the loopback address only, which is still enough to refuse a listener on all addresses). ChromeJr is on 4850 now, and the recipe checks the port, not the process name.
 
+## KEYTEST on the real PCjr: nothing lost (2026-10-09, 10 pm)
+
+Steve ran KEYTEST for 45 seconds, mashing left and right. 400 codes: 256 presses, 144 releases, 110 "press while already down", 0 "release while up".
+
+Every one of the 110 odd presses is the keyboard repeating, not a lost release: 107 follow the same key's previous code with no other key between, 93 of them 80 to 99 ms later and 14 about 600 ms later (the first repeat). The other 3 have one other key's code between and are also 96 ms after the last. So a held key repeats after 0.6 s and then every 96 ms. With two keys down (21 of the 45 seconds) only the newest repeats: 86 repeats of the newest key, none of the older. The two keys "still down at the end" were pressed 0.6 and 1.2 seconds before the 45 seconds ran out. Closest two codes: 16 ms, both recorded.
+
+**So the theory in JRKEYS is not what this shows.** CodeJr wrote that a code is lost when two arrive within about 10 ms, and built the repair on it; I carried the theory into the library with a note that it was unmeasured. In a quiet text-mode program the keyboard and the BIOS lose nothing. Keys did stick in Xonix and Junris, so either a running game is part of it (the retrace interrupt, page flips, the music, sound chip writes) or the games' own input code was. `KEYTEST G` records the same thing while doing what a game does: `fx_init`, a frame loop with flips, the library's music.
+
+What the repeats are good for: a key that is really held says so ten times a second. The key layer already drops a key that stops repeating, once it has seen repeats, but only the newest key repeats, so that rule can only be trusted for the newest.
+

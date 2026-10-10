@@ -8,6 +8,12 @@
  * keyboard repeating), a release of a key that is up (a lost press).
  * Everything goes to LOG.TXT. Esc ends it; it ends by itself after 45
  * seconds (KEYTEST n: after n seconds).
+ *
+ * KEYTEST G [n] does the same the way a game runs: graphics with page
+ * flipping on the retrace interrupt, something moving, and music from
+ * the library's player. The first run (text mode, 2026-10-09) lost
+ * nothing in 400 codes, so if keys stick in games, something a game does
+ * is part of it.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +22,12 @@
 #include <dos.h>
 #include <i86.h>
 #include "jrgfx.h"
+#include "jrmusic.h"
+
+static const char *const lead[] = { "E5:4 B4:2 C5:2 D5:4 C5:2 B4:2 | A4:4 A4:2 C5:2 E5:4 D5:2 C5:2", 0 };
+static const char *const bass[] = { "E3 E4 E3 E4 E3 E4 E3 E4 E3 E4 E3 E4 E3 E4 E3 E4 | A2 A3 A2 A3 A2 A3 A2 A3 A2 A3 A2 A3 A2 A3 A2 A3", 0 };
+static const char *const drums[] = { "k.h.s.h.k.h.s.h.k.h.s.h.k.hks.ss", 0 };
+static const mus_song song = { 6, 32, { lead, bass, 0, drums } };
 
 #define NEV 1500
 
@@ -89,11 +101,16 @@ int main(int argc, char **argv)
 	unsigned secs = 45, i, shown = 0xFFFF, base;
 	unsigned char st[128];
 	unsigned long far *bios = (unsigned long far *)MK_FP(0x40, 0x6C);
-	unsigned stuck = 0;
+	unsigned stuck = 0, frames = 0;
+	int game = 0, a, x = 0, music = -1;
 	FILE *f;
 
-	if (argc > 1 && atoi(argv[1]) > 0 && atoi(argv[1]) <= 300)
-		secs = (unsigned)atoi(argv[1]);
+	for (a = 1; a < argc; a++) {
+		if (argv[a][0] == 'G' || argv[a][0] == 'g')
+			game = 1;
+		else if (atoi(argv[a]) > 0 && atoi(argv[a]) <= 300)
+			secs = (unsigned)atoi(argv[a]);
+	}
 	pcjr = *(unsigned char far *)MK_FP(0xF000, 0xFFFE) == 0xFD;
 	key_heal = 0;
 	key_init();
@@ -101,6 +118,34 @@ int main(int argc, char **argv)
 	old9 = _dos_getvect(9);
 	_dos_setvect(9, kt_isr);
 
+	if (game && fx_init(0) != 0) {
+		printf("KEYTEST: no graphics (error %d); the plain test instead.\n", gfx_err);
+		game = 0;
+	}
+	if (game) {
+		music = mus_start(&song, 0);
+		t0 = *bios;
+		while (!esc && *bios - t0 < (unsigned long)secs * 182UL / 10UL) {
+			fx_begin();
+			fx_clear(0x1111);
+			fx_text(4, 8, "MASH LEFT AND RIGHT", 15);
+			fx_text(4, 20, "ESC ENDS", 7);
+			fx_fill_rect(x, 60, 24, 100, 0xCCCC);
+			fx_fill_rect(159 - 24 - x, 100, 24, 60, 0xAAAA);
+			if (down[KEY_LEFT]) fx_fill_rect(10, 170, 60, 20, 0xEEEE);
+			if (down[KEY_RIGHT]) fx_fill_rect(90, 170, 60, 20, 0xEEEE);
+			fx_flip();
+			mus_poll();
+			x = (x + 3) % 136;
+			frames++;
+		}
+		mus_stop();
+		_dos_setvect(9, old9);
+		key_done();
+		tmr_done();
+		gfx_done();
+		goto report;
+	}
 	printf("KEYTEST: what the keyboard sends.\n\n");
 	printf("For %u seconds: mash LEFT and RIGHT as in a game. Roll from one to\n", secs);
 	printf("the other, hold one and tap the other, let go of both at once.\n");
@@ -118,6 +163,7 @@ int main(int argc, char **argv)
 	key_done();
 	tmr_done();
 
+report:
 	f = fopen("LOG.TXT", "w");
 	if (!f) {
 		printf("\nCan't write LOG.TXT\n");
@@ -126,6 +172,8 @@ int main(int argc, char **argv)
 	fprintf(f, "KEYTEST %s, %u codes (%u not recorded), %u presses, %u releases\n",
 	        pcjr ? "on a PCjr" : "not on a PCjr", ev_n, n_lost, n_make, n_break);
 	fprintf(f, "press while down: %u   release while up: %u\n", n_remake, n_rebreak);
+	if (game)
+		fprintf(f, "game conditions: %u frames, retrace interrupt %d, pages %d, music start %d\n", frames, fx_irq, fx_pages, music);
 	memset(st, 0, sizeof st);
 	base = ev_n ? ev_tick[0] : 0;
 	for (i = 0; i < ev_n; i++) {
