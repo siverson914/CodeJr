@@ -60,11 +60,71 @@ func (e Env) toolEnv() []string {
 		"INCLUDE="+filepath.Join(w, "h"))
 }
 
+// SharedDir is the workspace folder that holds the library's headers
+// (kept there by the server) and whatever Claude adds to the library:
+// every .C and .ASM in it is built into the library for every project.
+const SharedDir = "JRGFX"
+
+// libFile is one of the library's files: its lower-case name and where
+// it is.
+type libFile struct{ name, path string }
+
+// library lists the JRGFX library as a build sees it: the repo's lib/jr*
+// files, then lib/shared (additions saved from a workspace), then the
+// workspace's shared folder, a later one replacing an earlier one of the
+// same name. The repo's own modules can't be replaced from the workspace.
+func (e Env) library() (srcs, heads []libFile) {
+	byName := map[string]string{}
+	core := map[string]bool{}
+	add := func(dir string, only func(string) bool, isCore bool) {
+		des, _ := os.ReadDir(dir)
+		for _, de := range des {
+			n := strings.ToLower(de.Name())
+			if !de.Type().IsRegular() || (only != nil && !only(n)) || (core[n] && !isCore) {
+				continue
+			}
+			switch filepath.Ext(n) {
+			case ".c", ".asm", ".h", ".inc":
+				byName[n] = filepath.Join(dir, de.Name())
+				core[n] = core[n] || isCore
+			}
+		}
+	}
+	add(filepath.Join(e.Repo, "lib"), func(n string) bool { return strings.HasPrefix(n, "jr") }, true)
+	add(filepath.Join(e.Repo, "lib", "shared"), nil, false)
+	if des, err := os.ReadDir(e.Workspace); err == nil {
+		for _, de := range des {
+			if de.IsDir() && strings.EqualFold(de.Name(), SharedDir) {
+				add(filepath.Join(e.Workspace, de.Name()), nil, false)
+			}
+		}
+	}
+	var names []string
+	for n := range byName {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	for _, n := range names {
+		f := libFile{n, byName[n]}
+		switch filepath.Ext(n) {
+		case ".c", ".asm":
+			srcs = append(srcs, f)
+		default:
+			heads = append(heads, f)
+		}
+	}
+	return srcs, heads
+}
+
+var includeRE = regexp.MustCompile(`(?im)^\s*#\s*include\s*"([^"]+)"`)
+
 // Build compiles every .C and .ASM file in the project into NAME.EXE
 // (NAME = the folder), 8088 only, large model. A program that includes
-// jrgfx.h is linked with the JRGFX library. Objects are built in a
-// scratch folder, so only the .EXE lands in the project (and goes to the
-// PCjr). It returns the compiler's output; ok is false if it failed.
+// one of the library's headers (jrgfx.h, jrkeys.h, ...) is linked with
+// the JRGFX library, built fresh as a .lib so only the parts it uses go
+// into the program. Objects are built in a scratch folder, so only the
+// .EXE lands in the project (and goes to the PCjr). It returns the
+// compiler's output; ok is false if it failed.
 func (e Env) Build(ctx context.Context, name string) (out string, ok bool, err error) {
 	dir, err := e.project(name)
 	if err != nil {
@@ -82,6 +142,11 @@ func (e Env) Build(ctx context.Context, name string) (out string, ok bool, err e
 
 	var cs, asms []string
 	jrgfx := false
+	libSrcs, libHeads := e.library()
+	isLibHead := map[string]bool{}
+	for _, h := range libHeads {
+		isLibHead[h.name] = true
+	}
 	for _, de := range des {
 		n := de.Name()
 		if !de.Type().IsRegular() {
@@ -103,8 +168,10 @@ func (e Env) Build(ctx context.Context, name string) (out string, ok bool, err e
 		switch ext {
 		case ".C":
 			cs = append(cs, strings.ToLower(n))
-			if bytes.Contains(bytes.ToLower(b), []byte("jrgfx.h")) {
-				jrgfx = true
+			for _, m := range includeRE.FindAllSubmatch(b, -1) {
+				if isLibHead[strings.ToLower(string(m[1]))] {
+					jrgfx = true
+				}
 			}
 		case ".ASM":
 			asms = append(asms, strings.ToLower(n))
@@ -150,15 +217,47 @@ func (e Env) Build(ctx context.Context, name string) (out string, ok bool, err e
 	}
 	args := []string{"wcl", "-q", "-bt=dos", "-ml", "-0", "-ox", "-w4", "-fe=" + exe}
 	if jrgfx {
-		lib := filepath.Join(e.Repo, "lib")
-		args = append(args, "-i="+lib)
+		// The library from its sources, so a stale jrgfx.lib can't bite,
+		// in its own folder: a project's file of the same name is the
+		// project's, and the project's headers come first.
+		ld := filepath.Join(tmp, "jrlib")
+		if err := os.Mkdir(ld, 0o755); err != nil {
+			return "", false, err
+		}
+		for _, f := range append(libHeads, libSrcs...) {
+			b, err := os.ReadFile(f.path)
+			if err != nil {
+				return "", false, err
+			}
+			if err := os.WriteFile(filepath.Join(ld, f.name), b, 0o644); err != nil {
+				return "", false, err
+			}
+		}
+		lib := []string{"wlib", "-q", "-n", "-b", "jrlib/jr.lib"}
+		for _, f := range libSrcs {
+			o := "jrlib/" + strings.TrimSuffix(f.name, filepath.Ext(f.name)) + ".o"
+			var ok bool
+			if filepath.Ext(f.name) == ".asm" {
+				ok = run("wasm", "-q", "-0", "-ml", "-fo="+o, "jrlib/"+f.name)
+			} else {
+				ok = run("wcl", "-q", "-bt=dos", "-ml", "-0", "-ox", "-w4", "-c", "-i=jrlib", "-fo="+o, "jrlib/"+f.name)
+			}
+			if !ok {
+				return "The library didn't build (a file in " + SharedDir + "?):\n" + cleanLog(log.String(), tmp), false, nil
+			}
+			lib = append(lib, "+"+o)
+		}
+		if !run(lib...) {
+			return cleanLog(log.String(), tmp), false, nil
+		}
+		args = append(args, "-i=jrlib")
 		args = append(args, cs...)
-		// The library's sources, so a stale or missing jrgfx.lib can't bite.
-		args = append(args, filepath.Join(lib, "jrgfx.c"), filepath.Join(lib, "jrtab.c"), filepath.Join(lib, "jrfast.c"))
+		args = append(args, objs...)
+		args = append(args, "jrlib/jr.lib")
 	} else {
 		args = append(args, cs...)
+		args = append(args, objs...)
 	}
-	args = append(args, objs...)
 	if !run(args...) {
 		return cleanLog(log.String(), tmp), false, nil
 	}

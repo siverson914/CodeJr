@@ -127,6 +127,9 @@ func (w *Workspace) Scan() ([]Entry, map[string][]byte, error) {
 			continue
 		}
 		if de.IsDir() {
+			if strings.EqualFold(n, LibDir) {
+				continue
+			}
 			sub, err := os.ReadDir(filepath.Join(w.Dir, n))
 			if err != nil {
 				continue
@@ -385,6 +388,12 @@ func (w *Workspace) SetLastRun(r string) error {
 	}
 	return os.WriteFile(w.state("lastrun.txt"), []byte(r), 0o644)
 }
+
+// LibDir is the workspace folder with the library's headers and Claude's
+// additions to the library (pcjr.SharedDir). It stays on the laptop: the
+// PCjr can't compile, and its files would cost a minute of every first
+// call at 9600 baud.
+const LibDir = "JRGFX"
 
 // Session remembers the Claude conversation between calls.
 func (w *Workspace) Session() string {

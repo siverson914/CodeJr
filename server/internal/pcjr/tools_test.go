@@ -68,6 +68,39 @@ int main(void)
 		t.Fatal("no screenshot")
 	}
 
+	// A file Claude adds to the shared folder is part of the library for
+	// every project: here one that includes only the new header, with the
+	// key layer from the repo's library beside it.
+	shared := filepath.Join(e.Workspace, SharedDir)
+	os.MkdirAll(shared, 0o755)
+	os.WriteFile(filepath.Join(shared, "EXTRA.H"), []byte("int extra_twice(int n);\n"), 0o644)
+	os.WriteFile(filepath.Join(shared, "EXTRA.C"), []byte("#include \"extra.h\"\nint extra_twice(int n) { return n * 2; }\n"), 0o644)
+	// A copy of one of the library's own files there is not used.
+	os.WriteFile(filepath.Join(shared, "JRKEYS.C"), []byte("this is not C\n"), 0o644)
+	dir2 := filepath.Join(e.Workspace, "USESLIB")
+	os.MkdirAll(dir2, 0o755)
+	os.WriteFile(filepath.Join(dir2, "USESLIB.C"), []byte(`#include <stdio.h>
+#include "extra.h"
+#include "jrkeys.h"
+int main(void)
+{
+	int k;
+	key_init();
+	jk_init();
+	k = jk_add(KEY_SPACE, 0, 0, 30);
+	key_feed(KEY_SPACE, 1);
+	jk_tick();
+	printf("twice %d space %d\n", extra_twice(21), jk_down(k));
+	return 0;
+}
+`), 0o644)
+	if out, ok, err := e.Build(ctx, "USESLIB"); err != nil || !ok {
+		t.Fatalf("build with the shared folder: %v %v\n%s", ok, err, out)
+	}
+	if r, err := e.Run(ctx, "USESLIB", "USESLIB.EXE", "", 60); err != nil || !strings.Contains(r.Text, "twice 42 space 1") {
+		t.Fatalf("shared library run: %v\n%v", err, r)
+	}
+
 	// Broken code comes back as a failed build with the compiler's words.
 	os.WriteFile(filepath.Join(dir, "boxes.c"), []byte("int main(void) { return x; }\n"), 0o644)
 	out, ok, _ = e.Build(ctx, "boxes")

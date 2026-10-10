@@ -32,4 +32,16 @@ for d in "$ws"/*/; do
 		[ -f "$dest/README.md" ] || printf '# %s\n\nWritten with CodeJr on the PCjr. The working copy is the `%s` folder of\nthe live workspace (`C:\\CODEJR\\PROGS\\%s` on the PCjr); `just save-projects`\ncopies its sources here. Build: `apps/build.sh %s`.\n' "$name" "$name" "$name" "$dest" > "$dest/README.md"
 	fi
 done
+# What CodeJr added to the library from the PCjr side (the workspace's
+# JRGFX folder, minus the headers the server keeps there) goes to
+# lib/shared, which every build includes.
+for f in "$ws"/JRGFX/*; do
+	[ -f "$f" ] || continue
+	base=$(basename "$f" | tr A-Z a-z)
+	case "$base" in *.c | *.h | *.asm | *.inc) ;; *) continue ;; esac
+	[ -f "../lib/$base" ] && continue
+	mkdir -p ../lib/shared
+	cp "$f" "../lib/shared/$base"
+	echo "saved JRGFX/$base -> lib/shared"
+done
 echo "$n project(s) saved"

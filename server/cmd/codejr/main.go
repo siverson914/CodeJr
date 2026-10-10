@@ -175,8 +175,10 @@ func main() {
 	}
 	scrdump, _ := os.ReadFile(filepath.Join(repoDir(), "client", "SCRDUMP.EXE"))
 	sayExe, _ := os.ReadFile(filepath.Join(repoDir(), "apps", "say", "SAY.EXE"))
+	if err := ws.Provide(libHeaders()); err != nil {
+		log.Print(err)
+	}
 	if err := ws.Provide(map[string][]byte{
-		"JRGFX/JRGFX.H": jrgfxHeader(),
 		// /run captures the screen with it after a program ends.
 		session.SysDir + "/SCRDUMP.EXE": scrdump,
 		// /voice plays clips with it; the repo's build matches the clips
@@ -309,14 +311,18 @@ func mcpConfig(ws string) string {
 	return string(b)
 }
 
-// jrgfxHeader is the graphics library's header, kept in the workspace so
-// the PCjr's Claude can read it (the build tool uses the repo's copy).
-func jrgfxHeader() []byte {
-	b, err := os.ReadFile(filepath.Join(repoDir(), "lib", "jrgfx.h"))
-	if err != nil {
-		return nil
+// libHeaders are the library's headers (lib/jr*.h), kept in the workspace
+// so the PCjr's Claude can read them (the build tool uses the repo's
+// copies).
+func libHeaders() map[string][]byte {
+	m := map[string][]byte{}
+	paths, _ := filepath.Glob(filepath.Join(repoDir(), "lib", "jr*.h"))
+	for _, p := range paths {
+		if b, err := os.ReadFile(p); err == nil {
+			m[pcjr.SharedDir+"/"+strings.ToUpper(filepath.Base(p))] = b
+		}
 	}
-	return b
+	return m
 }
 
 // speechTool resolves the -speech flag.

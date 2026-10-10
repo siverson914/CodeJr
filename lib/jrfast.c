@@ -685,7 +685,7 @@ int fx_init(int fl)
 		outp(0x21, old_mask & ~0x20);
 		v0 = fx_vbl;
 		t = tmr_ms();
-		while (fx_vbl == v0 && tmr_ms() - t < 100) ;
+		while (fx_vbl == v0 && (long)(tmr_ms() - t) < 100) ; /* signed: a read at a timer wrap can step back */
 		if (fx_vbl != v0) fx_irq = 1;
 		else {
 			outp(0x21, inp(0x21) | (old_mask & 0x20));

@@ -15,7 +15,7 @@ Every picture on this page came off the real PCjr that way: the client copied vi
 
 - **`CODEJR.EXE`** (`client/`): the 47 KB DOS client. Draws its own screen, keeps 200 lines of scrollback, pulls files in compressed bursts at 37287 baud (about 2,600 bytes a second of file), and sends only the changed parts of a file it already has.
 - **The server** (`server/`): Go. Answers the call, runs Claude, and gives it tools to build, to run in the emulator, and to run on the PCjr itself.
-- **JRGFX** (`lib/`): a graphics, input, timing and sound library for the PCjr's 160x200 16-color mode, with page flipping on the retrace interrupt.
+- **JRGFX** (`lib/`): a graphics, input, timing and sound library for the PCjr's 160x200 16-color mode, with page flipping on the retrace interrupt, game keys that survive the keyboard's lost codes, a music player, and a test mode every game can share. Claude adds to it from the PCjr side when it solves something a second game would need.
 - **MS-Kermit fallback**: needs nothing on the PCjr but Kermit 3.14. Slower, and it always works; it is how a new PCjr gets `CODEJR.EXE` the first time.
 
 ## Made with CodeJr

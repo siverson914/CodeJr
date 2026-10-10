@@ -914,3 +914,30 @@ Steve asked CodeJr for a Xonix clone and watched "CodeJr is thinking" for five m
 Tested with the fake Claude and two real transcripts. Not yet seen on the real PCjr, and the real `/compact` has only been tried on a tiny conversation with fewer flags than the server uses.
 
 **A page for Sopwith (2026-10-09).** Steve asked for the README to lead to a detailed page per project, "sopwith in particular... screenshots and diagrams/etc about porting sopwith and then the improvements made here". Every project entry in the README now links to its own README, and `docs/sopwith/README.md` tells the Sopwith story start to finish: where the game came from, the port, how it draws, the speed work with three charts made from the real-PCjr numbers, what the emulator got wrong, the 1984 bugs, how each change was proven harmless, Sopwith26, and what didn't work. Its screenshots came off the real PCjr through the game's own test mode (the faithful build's menu needed a `T` hook like Sopwith26's). The top ten picture is from the emulator: taking it on the real machine would have written a test score into Steve's table, which by then held a real one (3300, SRI).
+
+## One library, not a fix per game (2026-10-09)
+
+Steve, after Xonix and then Junris both had left and right "getting stuck": "I feel like we need more libraries here - keyboard, maybe audio, screenshot, etc that future apps can use so we dont keep fixing the same bugs or doing the same things."
+
+**What had happened.** CodeJr on the PCjr side had found a cause (a release code lost when two codes arrive close together, leaving `key_down` set for good) and written JRKEYS, a layer that repairs it. But its build only saw the game's own folder, so it copied `JRKEYS.H` and `JRKEYS.ASM` into each game: three copies within the hour, none in the repo, and the five older games still with the bug.
+
+**Built.**
+- *Keys in JRGFX.* The keyboard interrupt now counts presses (`key_makes`, `key_seq`) and, with `key_heal` (on by default), the release of an arrow frees the opposite arrow, so the older games improve on a rebuild with no source change. JRKEYS is a module of the library (`lib/jrkeys.c`, same calls as CodeJr's version, no second interrupt hook). `key_feed` acts as the keyboard for tests. `test/tkeys.c` plays lost releases, short taps and a repeating keyboard at it, and found a bug in the version from the PCjr side: a key past its hold limit ignored the next press, because it still counted as alive.
+- *One library for every build.* The build tool compiles every `lib/jr*` file, `lib/shared`, and whatever is in the workspace's `JRGFX` folder into a `.lib` per build and links that, so a program only carries the modules it uses and CodeJr can add to the library from the PCjr side without copying files into games. The repo's own modules can't be replaced from the workspace. `apps/save-projects.sh` brings additions back to `lib/shared`.
+- *Music* (`lib/jrmusic.c`, written by a helper agent): a tracker on the retrace interrupt, songs as pattern strings, effects that borrow a voice, a polling mode for programs without the interrupt. Its test records every write to the sound chip through the single-step trap.
+- *Test harness* (`lib/jrtest.c`, a second helper): `/TEST`, `/DEMO:n`, `/SHOT:a,b`, a key script (`R30 RJ20 {ENTER}5`), screenshots, `JT end` and `JT done` lines, and a tick limit so a test can't hang.
+- *The prompt* tells CodeJr about the three headers and to put anything a second program would need in the library, never in two games.
+- *KEYTEST* (`apps/keytest`): records every scan code with its time for 45 seconds and counts presses of keys already down and releases of keys already up.
+
+**Not known.** The cause of the stuck keys is still CodeJr's theory. Nothing here measured the real keyboard: that is what KEYTEST is for, and Steve has to do the mashing. The library's own notes say the keyboard interrupt is an NMI and that disk BIOS calls disable it, which is another way to lose a code.
+
+**The music player misses its time budget.** The brief said well under 1 ms a tick. Measured by instruction count in the emulator: 254 instructions on an average tick of a busy song, 599 at worst, estimated at 0.85 and about 2 ms on a 4.77 MHz 8088 (JRCUBE's own tracker: 570). Every 60th of a second is 16.7 ms, so the worst case is about a tenth of a frame. Left as it is; a cheaper player would mean no 60 Hz arpeggio.
+
+**Found on the way.** `fx_init` waited for the first retrace with an unsigned compare on `tmr_ms`, and a read at a timer wrap can step back 55 ms: the wait then ended at once and the program ran without the retrace interrupt. Seen in DOSBox on every run of one build of the music test. Now a signed compare.
+
+**Wrong turns.** The first rebuild of the bigger games failed to link: they use `lib/jrgfx.lib`, which wasn't built yet while the helpers were still writing. `test/tkeys.c` included `jrgfx.h` the way a game does, but the library's tests are built from inside `test/`.
+
+All of it is emulator-only so far.
+
+**The first landing failed its gate.** Twelve checks in four emulator scenarios, none of them about the library: the three new headers (18 KB) were being sent to the PCjr at the start of every call like any workspace file, and the scenarios' fixed waits ran out. The PCjr has no use for headers or library sources, so the workspace's `JRGFX` folder now stays on the laptop (`session.LibDir`). All 84 native checks pass again.
+

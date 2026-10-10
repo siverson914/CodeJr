@@ -727,6 +727,9 @@ fix fix_div(fix a, fix b)
 /* ---- Keyboard ---------------------------------------------------------- */
 
 volatile unsigned char key_down[128];
+volatile unsigned char key_makes[128];
+volatile unsigned key_seq;
+int key_heal = 1;
 static void (__interrupt __far *old_kb)(void);
 static int kb_on;
 static int is_pcjr;
@@ -736,11 +739,43 @@ static int is_pcjr;
  * other PCs deliver it in port 60h. Record the key, empty the BIOS
  * type-ahead buffer (so it never fills and beeps), then chain to the BIOS,
  * which does the EOI, Ctrl-Alt-Del and the PCjr's own housekeeping. */
+
+/* One scan code, from the interrupt or from key_feed. A press is counted
+ * as well as recorded: the PCjr can lose a key's release code, which
+ * leaves key_down set, and then only the count shows the key pressed
+ * again. With key_heal, letting go of an arrow also frees the opposite
+ * arrow: a release is nearly always lost while the other key of the pair
+ * is being pressed or released. */
+static void kb_code(unsigned char sc)
+{
+	unsigned char k = sc & 0x7F;
+	if (sc == 0xE0 || sc == 0xE1)
+		return;
+	if (!(sc & 0x80)) {
+		key_down[k] = 1;
+		key_makes[k]++;
+		key_seq++;
+		return;
+	}
+	key_down[k] = 0;
+	if (key_heal) {
+		if (k == KEY_LEFT) key_down[KEY_RIGHT] = 0;
+		else if (k == KEY_RIGHT) key_down[KEY_LEFT] = 0;
+		else if (k == KEY_UP) key_down[KEY_DOWN] = 0;
+		else if (k == KEY_DOWN) key_down[KEY_UP] = 0;
+	}
+}
+
+void key_feed(int scancode, int down)
+{
+	_disable();
+	kb_code((unsigned char)((scancode & 0x7F) | (down ? 0 : 0x80)));
+	_enable();
+}
+
 static void __interrupt __far kb_isr(union INTPACK r)
 {
-	unsigned char sc = is_pcjr == 1 ? r.h.al : (unsigned char)inp(0x60);
-	if (sc != 0xE0 && sc != 0xE1)
-		key_down[sc & 0x7F] = (unsigned char)!(sc & 0x80);
+	kb_code(is_pcjr == 1 ? r.h.al : (unsigned char)inp(0x60));
 	*(unsigned short far *)MK_FP(0x40, 0x1C) = *(unsigned short far *)MK_FP(0x40, 0x1A);
 	_chain_intr(old_kb);
 }
@@ -749,6 +784,7 @@ void key_init(void)
 {
 	if (kb_on) return;
 	memset((void *)key_down, 0, sizeof key_down);
+	memset((void *)key_makes, 0, sizeof key_makes);
 	if (!is_pcjr) is_pcjr = *(unsigned char far *)MK_FP(0xF000, 0xFFFE) == 0xFD ? 1 : 2;
 	if (kb_on == 0 && !old_kb) atexit(key_done);
 	old_kb = _dos_getvect(9);

@@ -343,9 +343,14 @@ Assumed from the Tech Ref and BIOS listing, not tried on the real PCjr:
 
 ## Files
 
-- `jrgfx.h`, `jrgfx.c`, `jrfast.c`, `jrtab.c`: the library. `jrgfx.lib`: built from them.
+- `jrgfx.h`, `jrgfx.c`, `jrfast.c`, `jrtab.c`: the core. `jrgfx.lib`: built from every `jr*.c` here.
+- `jrkeys.h`, `jrkeys.c`: game keys that survive lost release codes (the header says how to use them). `test/tkeys.c` plays the failures at it with `key_feed`.
+- `jrmusic.h`, `jrmusic.c`, `MUSIC.md`: a tracker on the 60 Hz retrace interrupt, with sound effects that borrow a voice. `test/tmusic.c`, `test/tmusic.sh`.
+- `jrtest.h`, `jrtest.c`, `TESTING.md`: the `/TEST` mode every game needs: arguments, a key script, screenshots, the standard log lines, a tick limit.
+- `shared/`: what CodeJr added to the library from the PCjr side (the workspace's `JRGFX` folder), saved by `apps/save-projects.sh`. Every build includes it.
+- How a program gets the library: the server's build tool and `apps/build.sh` compile all of the above into a `.lib` for each build, so only the modules a program uses are linked. None of the three new modules has run on the real PCjr yet (2026-10-09).
 - `FAST.md`: the fast path's design, measurements, real-hardware cost model and sources.
-- `build.sh`: builds the lib, the tests and the demo with `-wx`. It builds `jrgfx_n.lib`, runs T1 and T3 headless, and only then renames it to `jrgfx.lib` (atomic). If a test fails, the old library stays.
+- `build.sh`: builds the lib, the tests and the demo with `-wx`. It builds `jrgfx_n.lib`, runs T1, T3, TKEYS, TJT and TMUSIC headless, and only then renames it to `jrgfx.lib` (atomic). If a test fails, the old library stays.
 - `emu.sh`: headless DOSBox runner.
 - `demo.c`, `fastdemo.c` / `DEMO.EXE`: `DEMO F [/F:frames] [/S] [/B] [/N]` runs the fast-path benchmarks (LOG.TXT, `fxbench` lines) and then three scenes with an on-screen fps counter: raycaster, low-detail raycaster, polygons. `/B` = FX_BUFFER, `/N` = FX_NOIRQ. `/S` writes `F*.PPM` from the page actually on screen.
 - `DEMO [8|9] [/F:frames] [/S]`: the old-API demo. It runs the benchmarks, then an animated scene, logging to LOG.TXT. `/S` writes screenshots `D8*.PPM`. ESC quits early.

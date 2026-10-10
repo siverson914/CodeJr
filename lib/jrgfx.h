@@ -222,6 +222,20 @@ extern volatile unsigned char key_down[128];
 void key_init(void);
 void key_done(void);
 
+/* The PCjr's keyboard can lose a scan code (seen as a key that stays
+ * "down" after it was let go). Two helps here, and a whole layer for
+ * games in jrkeys.h (use that for anything played with held keys):
+ * key_makes[] counts every press of a key and key_seq counts all presses,
+ * so a press shows even on a key that key_down already has as down;
+ * key_heal (on by default; set it to 0 before key_init to turn it off)
+ * makes the release of an arrow key free the opposite arrow too. */
+extern volatile unsigned char key_makes[128];
+extern volatile unsigned key_seq;
+extern int key_heal;
+
+/* Acts as if the keyboard had sent this key: for test scripts. */
+void key_feed(int scancode, int down);
+
 #define KEY_ESC   0x01
 #define KEY_ENTER 0x1C
 #define KEY_SPACE 0x39

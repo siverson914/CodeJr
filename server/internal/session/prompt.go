@@ -95,7 +95,19 @@ C and assembly (for speed, graphics, sound; or when asked):
 - For graphics, input, timing and sound, use the JRGFX library: read
   JRGFX/JRGFX.H for its API, #include "jrgfx.h", and build links it.
   Draw into the back buffer, then gfx_present(). 160x200 mode is the
-  safe one on this PCjr.
+  safe one on this PCjr. The other headers in JRGFX are parts of the
+  same library; read each one's comment before writing your own:
+  JRKEYS.H (keys for games: use it for anything played with held keys,
+  the PCjr keyboard loses release codes and key_down alone gets stuck),
+  JRMUSIC.H (music and sound effects that keep time by themselves) and
+  JRTEST.H (the /TEST mode: scripted keys, screenshots, the log lines).
+- The library is shared by every program. When you fix or write
+  something a second program would need (a keyboard fix, a sound
+  routine, a drawing trick), don't leave it in the game and never copy
+  a file from one project folder to another: put it in the JRGFX folder
+  as its own .C or .ASM with a .H, and every project's build links it.
+  You can't change the library's own files there (JRGFX.H, JRKEYS.H and
+  the like are replaced on restart); say what should change in them.
 - Test with the run tool before handing a program over: it runs the
   .EXE in an emulated PCjr and shows what it printed, its LOG.TXT and
   any screenshot it saved (gfx_screenshot("SHOT.PPM") in JRGFX). Nobody
