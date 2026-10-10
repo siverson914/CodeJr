@@ -324,7 +324,7 @@ quest:
     cd apps/jrquest && node tools/mkviews.js game/view && node tools/pack.js game build && node tools/bundle.js build build/jrquest.html && node tools/review.js build build/review.html
 
 # Build the review page (build/review.html): every room, sprite and line of text, with comments.
-# Open the file, or run `just quest-serve` and go to http://127.0.0.1:4861/admin so comments land in apps/jrquest/review/
+# Open the file, or run `just quest-serve` and go to http://127.0.0.1:4850/admin so comments land in apps/jrquest/review/
 quest-review:
     cd apps/jrquest && node tools/mkviews.js game/view && node tools/pack.js game build && node tools/review.js build build/review.html
 
@@ -363,10 +363,11 @@ clean:
 
 chromejr_home := env_var_or_default("CHROMEJR_HOME", env_var("HOME") / ".local/share/chromejr")
 
-# Start ChromeJr's server (port 4861; a hidden browser, no window)
+# Start ChromeJr's server (port 4850; a hidden browser, no window)
 chromejr:
     #!/bin/sh
-    if pgrep -x chromejr >/dev/null; then echo "already running"; exit 0; fi
+    # (not pgrep: this recipe's own script is named chromejr too)
+    if ss -ltn | grep -q ':4850 '; then echo "already running (or port 4850 is taken)"; exit 0; fi
     (cd server && go build -o chromejr ./cmd/chromejr) || exit 1
     mkdir -p "{{chromejr_home}}"
     setsid server/chromejr -profile "{{chromejr_home}}/profile" >> "{{chromejr_home}}/server.log" 2>&1 &
@@ -375,7 +376,7 @@ chromejr:
 
 # Stop ChromeJr's server
 chromejr-stop:
-    @pkill -x chromejr && echo stopped || echo "not running"
+    @pkill -f "server/chromejr -profile" && echo stopped || echo "not running"
 
 # Browse from this terminal, as the PCjr would see it: just chromejr-text wikipedia.org
 [positional-arguments]
@@ -395,6 +396,6 @@ chromejr-install host="":
     [ -n "$h" ] || h=$(ss -tn | awk '$4 ~ /:4860$/ { sub(/^\[::ffff:/, "", $4); sub(/\]?:4860$/, "", $4); print $4; exit }')
     [ -n "$h" ] || { echo "no PCjr call to read this laptop's address from: just chromejr-install 192.168.0.x"; exit 1; }
     mkdir -p "{{ws}}/CHROMEJR"
-    printf '@ECHO OFF\r\nREM ChromeJr: the PCjr dials the browser on the laptop (apps/chromejr).\r\nC:\\CODEJR\\CODEJR.EXE /P:1 /D:%s:4861\r\n' "$h" > "{{ws}}/CHROMEJR/CHROMEJR.BAT"
+    printf '@ECHO OFF\r\nREM ChromeJr: the PCjr dials the browser on the laptop (apps/chromejr).\r\nC:\\CODEJR\\CODEJR.EXE /P:1 /D:%s:4850\r\n' "$h" > "{{ws}}/CHROMEJR/CHROMEJR.BAT"
     cat "{{ws}}/CHROMEJR/CHROMEJR.BAT"; echo "queued: sent on the PCjr's next connection"
 

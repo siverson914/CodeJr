@@ -986,3 +986,5 @@ Steve asked whether any DOS browser could use Amazon, then proposed the answer h
 
 Emulator only on the PCjr side: a search typed in the emulated PCjr came back as a page with paging. The findings and what it would take from here are in `apps/chromejr/README.md`.
 
+**Starting it for real found two things.** `just chromejr` said "already running" on its first run: `just` writes a recipe with a `#!` line to a file named after the recipe, so `pgrep -x chromejr` found the recipe itself. And port 4861 was already taken on this laptop by another program (on the loopback address only, which is still enough to refuse a listener on all addresses). ChromeJr is on 4850 now, and the recipe checks the port, not the process name.
+

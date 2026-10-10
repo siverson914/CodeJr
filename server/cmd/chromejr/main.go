@@ -34,7 +34,7 @@ func (termScreen) Status(s string) { fmt.Fprintln(os.Stderr, "["+s+"]") }
 
 func main() {
 	home, _ := os.UserHomeDir()
-	listen := flag.String("listen", ":4861", "address the PCjr's modem dials")
+	listen := flag.String("listen", ":4850", "address the PCjr's modem dials")
 	profile := flag.String("profile", filepath.Join(home, ".local", "share", "chromejr", "profile"), "the browser's own folder (cookies, logins)")
 	bin := flag.String("browser", "", "the browser to run (default: found by itself)")
 	show := flag.Bool("show", false, "open a real browser window (to sign in to a site by hand)")

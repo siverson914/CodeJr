@@ -17,7 +17,7 @@ going on with.
 
 ## Trying it
 
-    just chromejr            start the server (port 4861, hidden browser)
+    just chromejr            start the server (port 4850, hidden browser)
     just chromejr-install    put CHROMEJR.BAT in the PCjr's CHROMEJR folder
     just chromejr-text wikipedia.org     browse from the laptop's terminal
 
