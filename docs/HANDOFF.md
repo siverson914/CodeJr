@@ -101,6 +101,8 @@ There are two ways in from the PCjr, and the server tells them apart by itself:
 
 **Typed lines and /usage (2026-10-09, client 1.0.26):** a typed line can be 1,000 characters (`pump_line` feeds it to the queue in pieces). `/usage` and `/usage NAME` print counts from `.codejr/usage.json` (all time, per day, per project; `server/internal/session/usage.go`). The record lives in the workspace's state folder on purpose: a file in a project folder would be sent to the PCjr after every turn.
 
+**ChromeJr (2026-10-09, a prototype):** a browser for the PCjr that is not part of CodeJr: headless Chromium on the laptop, pages as numbered text, the PCjr as screen and keyboard. `apps/chromejr/README.md` has the plan, the commands, what was measured and what is next. Code: `server/cmd/chromejr`, `server/internal/web` (the module's first outside dependency, `chromedp`). `just chromejr`, `just chromejr-text URL`, `just chromejr-install`. The PCjr half is still the CodeJr client dialing port 4861. Not run on the real PCjr.
+
 **CodeJr's own screen (1.0.25):** `just pcjr-screen out.png` asks the client for its text screen as it is now (a fetch of `*SCREEN`: video memory plus the ROM's character shapes, nothing written on the screen for it) and `tools/textshot.py` draws it. Emulator-tested; on the real PCjr the same bytes were captured with a stopgap DOS tool before the client could do it.
 
 **Clock (1.8):** the server's greeting carries the laptop's local time (`t=YYYYMMDDhhmmss`) and the client sets DOS's date and time from it at every connect, so files written on the PCjr get real dates. It says "PCjr clock set: ..." only when the clock was off by more than a minute. This is DOS's clock, not the jr-IDE card's battery clock.

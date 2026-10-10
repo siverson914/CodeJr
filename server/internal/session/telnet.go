@@ -59,3 +59,7 @@ func (t *telnetFilter) Read(p []byte) (int, error) {
 		}
 	}
 }
+
+// TelnetFilter is the same filter for other servers that answer the
+// PCjr's modem (ChromeJr).
+func TelnetFilter(r io.Reader) io.Reader { return &telnetFilter{r: r} }

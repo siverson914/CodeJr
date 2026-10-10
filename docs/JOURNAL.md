@@ -972,3 +972,17 @@ Not one file per project folder, as Steve wondered: everything in a project fold
 
 Emulator and unit tests only.
 
+## ChromeJr: is a browser for the PCjr hard? (2026-10-09, late)
+
+Steve asked whether any DOS browser could use Amazon, then proposed the answer himself: render on the laptop, send text, fake the forms. "sure lets build this but plan more first - I dont think it should be part of codejr, but should just be an app/browser. like ChromeJr. sure build a prototype and test."
+
+**The plan.** The browser is real (headless Chromium on the laptop, driven over its debugging protocol with `chromedp`); the PCjr is its screen and keyboard. A script run inside the page turns what a person would see into lines of text and numbers every link, button and field; the PCjr sends back numbers and typed text. Sessions, cookies, scripts and encryption all stay in the real browser, which is why forms and shops can work.
+
+**The prototype.** To test the hard part first (is the text any good, do forms work, does Amazon let it in), the PCjr half is not written yet: the CodeJr terminal program, pointed at ChromeJr's port, already is a scrolling text screen with paging and an input line. The laptop half is `server/cmd/chromejr` and `server/internal/web`, with a `-text` mode that shows pages in a terminal.
+
+**What happened.** The first conversion of a Wikipedia article worked at once and was mostly menus and a donation banner, double spaced. Then, one site at a time: blank lines only between paragraphs; the page's main part first, menus on request; boxes inside a link don't break its line; Amazon's prices were missing (drawn for people in a block marked hidden from screen readers, with a one-pixel copy for screen readers, so the rule "skip what is aria-hidden" was exactly wrong), then came out as "$1899" (the decimal point has opacity 0), then as three lines (spans styled as boxes). Search, product page, Add to cart (the cart count went to 1) and Buy Now (the sign-in page, field numbered) all worked, with no robot check.
+
+**Wrong turns.** The newest `chromedp` has a different, generic interface from the one I know; pinned to v0.11.2 instead of learning it mid-prototype. A made-up product address gave "Page Not Found". Pressing "10" from an earlier look at a page pressed Buy Now instead of Add to cart, because the numbers had shifted between loads: that is why `.add to cart` (press by what it says) exists.
+
+Emulator only on the PCjr side: a search typed in the emulated PCjr came back as a page with paging. The findings and what it would take from here are in `apps/chromejr/README.md`.
+

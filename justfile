@@ -358,3 +358,43 @@ fmt:
 clean:
     find client lib games speech -name '*.o' -type f -delete
     find client lib games speech -name '*.err' -type f -delete
+
+# ---- ChromeJr (apps/chromejr): a browser on the laptop, the PCjr as its screen ----
+
+chromejr_home := env_var_or_default("CHROMEJR_HOME", env_var("HOME") / ".local/share/chromejr")
+
+# Start ChromeJr's server (port 4861; a hidden browser, no window)
+chromejr:
+    #!/bin/sh
+    if pgrep -x chromejr >/dev/null; then echo "already running"; exit 0; fi
+    (cd server && go build -o chromejr ./cmd/chromejr) || exit 1
+    mkdir -p "{{chromejr_home}}"
+    setsid server/chromejr -profile "{{chromejr_home}}/profile" >> "{{chromejr_home}}/server.log" 2>&1 &
+    sleep 2
+    tail -1 "{{chromejr_home}}/server.log"
+
+# Stop ChromeJr's server
+chromejr-stop:
+    @pkill -x chromejr && echo stopped || echo "not running"
+
+# Browse from this terminal, as the PCjr would see it: just chromejr-text wikipedia.org
+[positional-arguments]
+chromejr-text *args:
+    @cd server && go build -o chromejr ./cmd/chromejr && ./chromejr -text -color -profile "{{chromejr_home}}/profile-text" "$@"
+
+# Open ChromeJr's browser as a real window on this laptop, to sign in to a site by hand
+# (stop the server first: one browser per profile). Close the window when done.
+chromejr-login url="https://www.amazon.com":
+    @cd server && go build -o chromejr ./cmd/chromejr && echo "Sign in, then type q and Enter here." && ./chromejr -show -text -profile "{{chromejr_home}}/profile" "{{url}}" >/dev/null
+
+# Put CHROMEJR.BAT in the workspace (the PCjr gets it on its next call): /run, then CHROMEJR.
+# host is this laptop's address as the PCjr dials it.
+chromejr-install host="":
+    #!/bin/sh
+    h="{{host}}"
+    [ -n "$h" ] || h=$(ss -tn | awk '$4 ~ /:4860$/ { sub(/^\[::ffff:/, "", $4); sub(/\]?:4860$/, "", $4); print $4; exit }')
+    [ -n "$h" ] || { echo "no PCjr call to read this laptop's address from: just chromejr-install 192.168.0.x"; exit 1; }
+    mkdir -p "{{ws}}/CHROMEJR"
+    printf '@ECHO OFF\r\nREM ChromeJr: the PCjr dials the browser on the laptop (apps/chromejr).\r\nC:\\CODEJR\\CODEJR.EXE /P:1 /D:%s:4861\r\n' "$h" > "{{ws}}/CHROMEJR/CHROMEJR.BAT"
+    cat "{{ws}}/CHROMEJR/CHROMEJR.BAT"; echo "queued: sent on the PCjr's next connection"
+

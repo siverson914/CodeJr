@@ -1,0 +1,88 @@
+// Command chromejr is ChromeJr's laptop half: it runs a real browser and
+// shows its pages as numbered text to a PCjr that dials in, or, with
+// -text, to this terminal (for trying sites out without a PCjr).
+package main
+
+import (
+	"bufio"
+	"flag"
+	"fmt"
+	"log"
+	"net"
+	"os"
+	"path/filepath"
+	"sync"
+
+	"codejr/internal/web"
+)
+
+type termScreen struct{ color bool }
+
+func (t termScreen) Text(style byte, s string) {
+	if !t.color {
+		fmt.Print(s)
+		return
+	}
+	code := map[byte]string{'h': "1;37", 'l': "33", 'n': "36", 'c': "36"}[style]
+	if code == "" {
+		fmt.Print(s)
+		return
+	}
+	fmt.Printf("\x1b[%sm%s\x1b[0m", code, s)
+}
+func (termScreen) Status(s string) { fmt.Fprintln(os.Stderr, "["+s+"]") }
+
+func main() {
+	home, _ := os.UserHomeDir()
+	listen := flag.String("listen", ":4861", "address the PCjr's modem dials")
+	profile := flag.String("profile", filepath.Join(home, ".local", "share", "chromejr", "profile"), "the browser's own folder (cookies, logins)")
+	bin := flag.String("browser", "", "the browser to run (default: found by itself)")
+	show := flag.Bool("show", false, "open a real browser window (to sign in to a site by hand)")
+	text := flag.Bool("text", false, "browse from this terminal: commands on standard input, pages on standard output")
+	color := flag.Bool("color", false, "with -text: colors")
+	baud := flag.Int("baud", 9600, "serial speed until the client says its own")
+	flag.Parse()
+
+	if err := os.MkdirAll(*profile, 0o700); err != nil {
+		log.Fatal(err)
+	}
+	b, err := web.Open(*profile, *bin, *show)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer b.Close()
+
+	if *text {
+		s := &web.Session{B: b, Out: termScreen{*color}, Logf: log.Printf}
+		for _, a := range flag.Args() {
+			s.Command(a)
+		}
+		sc := bufio.NewScanner(os.Stdin)
+		for sc.Scan() {
+			if sc.Text() == "q" || sc.Text() == "/exit" {
+				break
+			}
+			fmt.Printf("\n>>> %s\n", sc.Text())
+			s.Command(sc.Text())
+		}
+		return
+	}
+
+	l, err := net.Listen("tcp", *listen)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("ChromeJr listening on %s, browser profile %s", l.Addr(), *profile)
+	var one sync.Mutex // one browser, one tab: one caller at a time
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			log.Fatal(err)
+		}
+		go func() {
+			one.Lock()
+			defer one.Unlock()
+			web.Serve(b, conn, *baud, conn.RemoteAddr().String())
+		}()
+	}
+}
