@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -78,7 +79,10 @@ func init() {
 			"description": "Run a program from a project folder on the user's real PCjr (it must be connected). The newest files are sent first. " +
 				"Returns what it printed, its exit code, the text screen it left and its LOG.TXT if it wrote one. " +
 				"Use it after the emulator run passes, to see real speed and hardware behavior. Nobody presses keys: use a /TEST style option " +
-				"that ends by itself (a program that hangs on the PCjr can only be stopped by the user). The user sees the program run. " +
+				"that ends by itself, or script the keys that end it. Never start a game plainly to \"let the user try it\": the user " +
+				"can't reach you while it runs; tell them to type /run. A program still running after the time limit (180 seconds unless you " +
+				"give seconds) gets Esc pressed three times, and the result says so; one that ignores Esc can only be stopped by the user. " +
+				"The user sees the program run. " +
 				"Unless the user turned /trust on, the PCjr asks them to press Y first.",
 			"inputSchema": map[string]any{
 				"type": "object",
@@ -87,6 +91,7 @@ func init() {
 					"command":    map[string]any{"type": "string", "description": "the program and its arguments, e.g. SNAKE.EXE /TEST"},
 					"keys":       map[string]any{"type": "string", "description": `keys to press while it runs: plain characters are keys, {2} or {0.5} pauses that many seconds, {ENTER} {ESC} {SPACE} {UP} {DOWN} {LEFT} {RIGHT} {F1} are named keys. E.g. "{2}{SPACE}{3}q". At most 30 keys and pauses.`},
 					"screenshot": map[string]any{"type": "string", "description": `take a picture of the graphics screen: seconds after the start (e.g. "3"), or "last" for the latest one before it ended. Returned as an image in the standard 16 colors.`},
+					"seconds":    map[string]any{"type": "integer", "description": "the time limit: Esc is pressed if the program is still running then (default 180, at most 600)"},
 				},
 				"required": []string{"project", "command"},
 			},
@@ -167,7 +172,7 @@ func Serve(ctx context.Context, e Env, in io.Reader, out io.Writer) error {
 					arg = p.Arguments.Path
 				}
 				if p.Name == "run_on_pcjr" {
-					op, arg = "run", p.Arguments.Project+"\n"+p.Arguments.Command+"\n"+p.Arguments.Keys+"\n"+p.Arguments.Shot
+					op, arg = "run", p.Arguments.Project+"\n"+p.Arguments.Command+"\n"+p.Arguments.Keys+"\n"+p.Arguments.Shot+"\n"+strconv.Itoa(p.Arguments.Seconds)
 				}
 				out, err := CtlCall(e.Workspace, op, arg)
 				if err != nil {

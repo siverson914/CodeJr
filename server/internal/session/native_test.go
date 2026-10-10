@@ -435,3 +435,39 @@ func TestDescribeWriting(t *testing.T) {
 		t.Errorf("kilo: %s %s %s", kilo(850), kilo(1200), kilo(153163))
 	}
 }
+
+// A run's key script always ends with the way out: Esc three times once
+// the limit has passed.
+func TestWithLimit(t *testing.T) {
+	esc := namedKey["ESC"][0]
+	total := func(ks []scriptKey) (units int) {
+		for _, k := range ks[:len(ks)-2] {
+			units += int(k.delay)
+		}
+		return units
+	}
+	// No keys of its own: pauses up to 180 s, then Esc, Esc, Esc.
+	ks, err := withLimit(nil, 0)
+	if err != nil || len(ks) != 9 || ks[6].scan != esc || ks[7].scan != esc || ks[8].scan != esc || ks[7].delay != 9 {
+		t.Fatalf("default: %v %+v", err, ks)
+	}
+	if got := total(ks); got != 1638 { // 180 s in units of 2 ticks
+		t.Fatalf("default limit comes to %d units", got)
+	}
+	// After a script of its own, the rest of the time.
+	own, _ := parseKeys("{4}{SPACE}{2}q")
+	ks, err = withLimit(own, 30)
+	if err != nil || len(ks) != 5 || ks[0] != own[0] || ks[1] != own[1] || total(ks) != 273 {
+		t.Fatalf("after a script: %v %+v", err, ks)
+	}
+	// A script longer than the limit still gets its 2 seconds.
+	long, _ := parseKeys("{60}x")
+	if ks, _ = withLimit(long, 10); ks[len(ks)-3].delay != 18 {
+		t.Fatalf("past the limit: %+v", ks)
+	}
+	// Too much for the client's table.
+	many, _ := parseKeys("abcdefghijklmnopqrstuvwxyz")
+	if _, err = withLimit(many, 180); err == nil {
+		t.Fatal("26 keys and a 180 s limit fit?")
+	}
+}

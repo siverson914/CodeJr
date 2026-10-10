@@ -100,6 +100,47 @@ func parseKeys(script string) ([]scriptKey, error) {
 	return out, nil
 }
 
+// Limits for a program run on the PCjr for CodeJr: one that waits for a
+// key nobody presses holds the PCjr (and the turn) until a person walks
+// up to it. On 2026-10-09 that was Junris, for 83 minutes.
+const (
+	defaultRunLimit = 180 // seconds
+	maxRunLimit     = 600
+)
+
+// withLimit adds the way out to a key script: once limit seconds have
+// passed since the program started, Esc three times, a second apart. A
+// program that has ended by then never sees them (the client stops
+// pressing keys when the program ends). It is no guarantee, since a
+// program may not end on Esc, but nearly every game here does.
+func withLimit(script []scriptKey, limit int) ([]scriptKey, error) {
+	if limit <= 0 {
+		limit = defaultRunLimit
+	}
+	if limit > maxRunLimit {
+		limit = maxRunLimit
+	}
+	units := 0 // the script's own length, in the client's units (2 ticks)
+	for _, k := range script {
+		units += int(k.delay)
+	}
+	rest := int(math.Round(float64(limit)*18.2/2)) - units
+	if rest < 18 {
+		rest = 18 // at least 2 seconds after the script's last key
+	}
+	out := append([]scriptKey(nil), script...)
+	for rest > 255 {
+		out = append(out, scriptKey{255, 0, 0})
+		rest -= 255
+	}
+	esc := namedKey["ESC"]
+	out = append(out, scriptKey{byte(rest), esc[0], esc[1]}, scriptKey{9, esc[0], esc[1]}, scriptKey{9, esc[0], esc[1]})
+	if len(out) > maxKeys {
+		return nil, fmt.Errorf("the key script and a %d second limit need %d keys and pauses; %d is the most (fewer keys, or a shorter limit)", limit, len(out), maxKeys)
+	}
+	return out, nil
+}
+
 // parseShot reads the screenshot option: "" none, "last" the latest one
 // before the program ended (taken every second), or seconds after start.
 func parseShot(s string) (byte, error) {

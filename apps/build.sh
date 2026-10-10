@@ -11,8 +11,8 @@ exe=$(echo "$1" | tr a-z A-Z).EXE
 objs=""
 for a in *.asm; do
 	[ -f "$a" ] || continue
-	wasm -q -0 -ml -fo="${a%.asm}.o" "$a"
-	objs="$objs ${a%.asm}.o"
+	wasm -q -0 -ml -fo="${a%.asm}_asm.o" "$a"
+	objs="$objs ${a%.asm}_asm.o"
 done
 src=$(ls *.c 2>/dev/null || true)
 # The library's headers: a program that includes one links the library,

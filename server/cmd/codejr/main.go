@@ -51,6 +51,7 @@ func main() {
 		wsDir := fs.String("workspace", "", "Claude's folder for the PCjr")
 		keys := fs.String("keys", "", `run: keys to press, e.g. "{2}{SPACE}{3}q"`)
 		shot := fs.String("shot", "", `run: screenshot after this many seconds, or "last"`)
+		limit := fs.Int("limit", 0, "run: seconds before Esc is pressed to end it (default 180, at most 600)")
 		fs.Parse(os.Args[2:])
 		if fs.NArg() < 2 {
 			log.Fatal("usage: codejr ctl -workspace DIR dos COMMAND... | fetch NAME | run FOLDER COMMAND... | sync now | screen now")
@@ -58,7 +59,7 @@ func main() {
 		w, _ := filepath.Abs(*wsDir)
 		arg := strings.Join(fs.Args()[1:], " ")
 		if fs.Arg(0) == "run" { // run FOLDER COMMAND...
-			arg = fs.Arg(1) + "\n" + strings.Join(fs.Args()[2:], " ") + "\n" + *keys + "\n" + *shot
+			arg = fs.Arg(1) + "\n" + strings.Join(fs.Args()[2:], " ") + "\n" + *keys + "\n" + *shot + "\n" + strconv.Itoa(*limit)
 		}
 		out, err := pcjr.CtlCall(w, fs.Arg(0), arg)
 		fmt.Print(out)

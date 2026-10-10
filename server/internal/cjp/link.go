@@ -28,6 +28,7 @@ type Link struct {
 	next     byte      // next sequence number to send
 	pending  [][]byte  // encoded frames base..next-1
 	sentAt   time.Time // when the oldest pending frame finished going out
+	tries    int       // timer resends since anything was last heard
 	cps      int       // line speed in characters per second, 0 if unknown
 	window   int       // frames that may be unacknowledged (default Window)
 	expected byte      // next sequence number we accept
@@ -199,6 +200,9 @@ func (l *Link) deliverer() {
 func (l *Link) handleAck(a byte) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	// Anything heard at all means the other side is listening: only
+	// silence stretches the resend timer (see deadline).
+	l.tries = 0
 	if a == l.base || !inWindow(l.base, a-1, l.next) {
 		return
 	}
@@ -208,6 +212,11 @@ func (l *Link) handleAck(a byte) {
 	l.sentAt = time.Now()
 	l.cond.Broadcast()
 }
+
+const (
+	maxResendWait = 30 * time.Second
+	quickTries    = 4
+)
 
 func (l *Link) retransmitter() {
 	t := time.NewTicker(l.timeout / 4)
@@ -238,6 +247,7 @@ func (l *Link) retransmitter() {
 			// writer may block while a slow line drains.
 			l.mu.Lock()
 			l.sentAt = time.Now()
+			l.tries++
 			l.mu.Unlock()
 		}
 	}
@@ -254,6 +264,18 @@ func (l *Link) deadline() time.Duration {
 			n += len(fr)
 		}
 		d += time.Duration(n) * time.Second / time.Duration(l.cps)
+	}
+	// A PCjr that says nothing at all is busy with something else (a
+	// program it is running for us): after a few tries each one into the
+	// silence waits twice as long as the one before, up to half a minute. On a noisy
+	// line something still arrives, and the timer stays short.
+	// The first few tries keep the short timer: at the end of an exchange
+	// the other side is silent anyway, and a lost last frame must not wait.
+	for i := quickTries; i < l.tries && d < maxResendWait; i++ {
+		d *= 2
+	}
+	if d > maxResendWait && l.tries > quickTries {
+		d = maxResendWait
 	}
 	return d
 }

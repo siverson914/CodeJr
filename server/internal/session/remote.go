@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -169,7 +170,7 @@ func (n *native) exec(cmd string, trusted bool) (string, error) {
 // keys is a key script to press while it runs (see parseKeys) and shot
 // says when to take a picture of a graphics screen ("" none, seconds
 // after the start, or "last"); the picture is saved as ShotPath.
-func (n *native) run(folder, cmd, keys, shot string) (string, error) {
+func (n *native) run(folder, cmd, keys, shot string, limit int) (string, error) {
 	folder = strings.ToUpper(strings.TrimSpace(folder))
 	cmd = strings.TrimSpace(cmd)
 	if folder == "." {
@@ -197,6 +198,17 @@ func (n *native) run(folder, cmd, keys, shot string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if limit <= 0 {
+		limit = defaultRunLimit
+	}
+	if limit > maxRunLimit {
+		limit = maxRunLimit
+	}
+	if n.keys { // an older client can't press keys: no way out for it
+		if script, err = withLimit(script, limit); err != nil {
+			return "", err
+		}
+	}
 	if len(script) > 0 || when != 0 {
 		if !n.keys {
 			return "", errors.New("this CODEJR.EXE can't press keys or take screenshots yet; it updates itself on the next call")
@@ -216,11 +228,16 @@ func (n *native) run(folder, cmd, keys, shot string) (string, error) {
 	if err := n.link.Send(cjp.Run, payload); err != nil {
 		return "", errors.New("the PCjr hung up")
 	}
-	b, err := n.collect(10 * time.Minute)
+	started := time.Now()
+	b, err := n.collect(time.Duration(limit)*time.Second + 10*time.Minute)
 	if err != nil {
 		return "", err
 	}
 	out := string(fromDOS(b))
+	if secs := int(time.Since(started).Seconds()); n.keys && secs >= limit {
+		out += fmt.Sprintf("\n--- it was still running after %d seconds, so CodeJr pressed Esc to end it (it ended after %d). Give the program an option that ends by itself, or script the keys that end it; a longer limit is the seconds argument (up to %d).\n", limit, secs, maxRunLimit)
+		n.s.logf("native: the program was still running at its %d s limit; Esc ended it after %d s", limit, secs)
+	}
 	if when == 0 {
 		return out, nil
 	}
@@ -358,12 +375,13 @@ func (n *native) handleCtl(r ctlReq) {
 	case "dos":
 		resp.out, resp.err = n.exec(r.arg, false)
 	case "run":
-		// "FOLDER\nCOMMAND", then optionally "\nKEYS\nSHOT"
-		f := strings.SplitN(r.arg, "\n", 4)
-		for len(f) < 4 {
+		// "FOLDER\nCOMMAND", then optionally "\nKEYS\nSHOT\nSECONDS"
+		f := strings.SplitN(r.arg, "\n", 5)
+		for len(f) < 5 {
 			f = append(f, "")
 		}
-		resp.out, resp.err = n.run(f[0], f[1], f[2], f[3])
+		limit, _ := strconv.Atoi(strings.TrimSpace(f[4]))
+		resp.out, resp.err = n.run(f[0], f[1], f[2], f[3], limit)
 	case "restart":
 		// The server is about to exit: the client hangs up and calls back.
 		n.sendPending()

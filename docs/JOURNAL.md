@@ -941,3 +941,20 @@ All of it is emulator-only so far.
 
 **The first landing failed its gate.** Twelve checks in four emulator scenarios, none of them about the library: the three new headers (18 KB) were being sent to the PCjr at the start of every call like any workspace file, and the scenarios' fixed waits ran out. The PCjr has no use for headers or library sources, so the workspace's `JRGFX` folder now stays on the laptop (`session.LibDir`). All 84 native checks pass again.
 
+## 2,194 resent frames, and a game nobody could stop (2026-10-09, evening)
+
+Two long turns ended with "2194 frames resent" and "1000 frames resent" on a link that had shown 0 for days. The line was fine. The link log has `RESEND 1 frames (timer)` every 2.5 seconds for 72 minutes: one frame, the Run request itself, which the client doesn't acknowledge until the program it started has ended. The server log beside it: at 1:31 pm CodeJr ran `JUNRIS.EXE` on the PCjr with no test option and no keys, to let Steve try it, and the game sat at its title screen until 2:54 pm. That was the Junris turn that took 2 hours 18 minutes, and the "sent JUNRIS.C in 1h12m47s, 9 bytes/s" line.
+
+**Fixed (server only).**
+- A program run on the PCjr for CodeJr has a time limit, 180 seconds unless asked (up to 600): the key script that goes with the run always ends with Esc three times at the limit. A program that ended earlier never sees them. If the limit was reached, the result says so and tells CodeJr to give the program a way to end. It is no guarantee (a program may ignore Esc), but every game here ends on it. `LIMIT=n just pcjr-run ...` from the laptop.
+- The tool's description now says not to start a game plainly for the user to try: tell them to type /run.
+- The resend timer doubles, up to 30 seconds, for as long as nothing at all is heard from the PCjr, and goes back to normal at the first frame heard.
+
+**Wrong turn.** The first backoff doubled on every resend until an ack moved on. The noisy-line test (3 bytes in 1,000 damaged) went from 80 seconds to over 360 and failed: there a resend is the cure, and making it rarer is the wrong medicine. Silence is what tells a busy PCjr from a bad line.
+
+**Mandel.** Its build warned "redefinition of main_": `MANDEL.ASM` (an 88-byte stub left from when the inner loop moved to `MLOOP.ASM`; CodeJr can't delete files) assembled to `mandel.o`, and the compiler then wrote `mandel.o` over it, so the same object was linked twice. The stub is gone, and assembly objects are now named `NAME_asm.o` so the two can't collide again.
+
+Emulator and unit tests only; the limit has not fired on the real PCjr yet.
+
+**And the second backoff failed the gate.** Backing off only into silence passed once and then failed the same noisy-line test in the gate: at the end of an exchange the other side is silent because it has nothing more to say, and a lost last frame then waited out a doubled timer. The first four resends now keep the short timer and only later ones double. Three runs of the noisy test in a row pass. I also started the next session before reading this gate's verdict, the same slip as on 2026-10-08.
+

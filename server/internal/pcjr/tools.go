@@ -209,7 +209,9 @@ func (e Env) Build(ctx context.Context, name string) (out string, ok bool, err e
 	}
 	var objs []string
 	for _, a := range asms {
-		o := strings.TrimSuffix(a, filepath.Ext(a)) + ".o"
+		// Its own object name: NAME.ASM beside NAME.C would otherwise
+		// both become name.o, and the compiler's replaces the assembler's.
+		o := strings.TrimSuffix(a, filepath.Ext(a)) + "_asm.o"
 		if !run("wasm", "-q", "-0", "-ml", "-fo="+o, a) {
 			return cleanLog(log.String(), tmp), false, nil
 		}

@@ -135,10 +135,11 @@ pcjr +command:
 # Send pending files, then run a program in its folder on the connected PCjr and show
 # its output, exit code, screen and LOG.TXT: just pcjr-run LEMMJR LEMMJR.EXE /TEST
 # With keys and a picture: KEYS='{2}{SPACE}{3}q' SHOT=last just pcjr-run LEMMJR LEMMJR.EXE
-# (the picture is saved as .codejr/shot.png in the workspace)
+# (the picture is saved as .codejr/shot.png in the workspace). A program still running
+# after 180 seconds (LIMIT=n, up to 600) gets Esc pressed three times.
 [positional-arguments]
 pcjr-run folder +command:
-    @server/codejr ctl -workspace "{{ws}}" -keys "${KEYS:-}" -shot "${SHOT:-}" run "$@"
+    @server/codejr ctl -workspace "{{ws}}" -keys "${KEYS:-}" -shot "${SHOT:-}" -limit "${LIMIT:-0}" run "$@"
 
 # Send pending files to the connected PCjr now
 pcjr-sync:
