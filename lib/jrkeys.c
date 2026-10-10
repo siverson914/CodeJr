@@ -120,7 +120,10 @@ void jk_tick(void)
 		/* Given up on: the next press (or repeat) of it counts as new. */
 		if (on && k->max > 0 && k->held >= k->max)
 			on = k->alive = 0;
-		if (on && jk_repeats && k->quiet >= JK_QUIET)
+		/* Only the newest key held repeats (measured on the PCjr): an
+		 * older one goes quiet as soon as another key is pressed, and
+		 * that says nothing about it. */
+		if (on && jk_repeats && k->stamp == jk_stampc && k->quiet >= JK_QUIET)
 			on = k->alive = 0;
 		if (on && k->held < 32000)
 			k->held++;

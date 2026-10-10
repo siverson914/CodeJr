@@ -998,3 +998,13 @@ Every one of the 110 odd presses is the keyboard repeating, not a lost release: 
 
 What the repeats are good for: a key that is really held says so ten times a second. The key layer already drops a key that stops repeating, once it has seen repeats, but only the newest key repeats, so that rule can only be trusted for the newest.
 
+## KEYTEST G: nothing lost in a game either (2026-10-10, morning)
+
+Steve ran `KEYTEST G`: graphics, page flips, the library's music, 45 seconds of mashing. 331 codes, 169 presses, 162 releases, 7 repeats, none lost, no key left down. (CodeJr on the PCjr side had meanwhile taught the report to say "repeat" or "LOST RELEASE" itself; the workspace copy of `KEYTEST.C` is ahead of the repo's.)
+
+His note: "the keyboard is not super responsive - the yellow boxes were always off a little. maybe the junior is just slow?" The log answers it: 338 frames in 45 seconds, 7.5 a second. My test clears the whole screen, draws text and flips every frame, and the boxes show a key one or two frames late: up to a quarter of a second. That is the test's drawing, not the keyboard. The "retrace interrupt 0" in the log is my mistake too: the line is printed after `gfx_done`, which resets `fx_irq`.
+
+**Where that leaves the stuck keys.** Two runs, 731 codes, none lost, in text mode and under game conditions. The keyboard and the library's handler are not losing releases. What is left is the games' own handling of held keys at 5 to 10 frames a second: a game that runs several logic ticks to catch up after a slow frame repeats a move for each of them, and the release is only seen after the burst. That is a theory, like the last one; the games' input code from before the repair layer is the thing to read.
+
+**One fix from the measurement.** The key layer dropped any key that stopped repeating. Only the newest held key repeats, so an older key still held (fire, with a direction tapped after it) was let go after 60 ticks. The rule now applies to the newest key only, with a test.
+

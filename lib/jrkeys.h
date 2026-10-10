@@ -14,8 +14,10 @@
  *  - Keys in the same group (left/right): the newest press wins, and
  *    letting go of one lets go of them all. A release is nearly always
  *    lost while another key is pressed or let go at the same moment.
- *  - If the keyboard sends repeats while a key is held, a key that stops
- *    repeating counts as let go (found out by itself, never assumed).
+ *  - If the keyboard sends repeats while a key is held (the PCjr's does:
+ *    after 0.6 s, then every 96 ms, for the newest key only), the newest
+ *    key counts as let go once it stops repeating. Found out by itself,
+ *    never assumed.
  *
  * Use:
  *   key_init(); jk_init();

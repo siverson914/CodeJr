@@ -107,6 +107,22 @@ int main(void)
 	ticks(JK_QUIET + 1);
 	check(!jk_down(r), "quiet for long enough counts as let go");
 
+	/* only the newest key repeats: an older held key that has gone quiet
+	 * is still held */
+	key_feed(KEY_SPACE, 1);          /* held throughout, no limit reached */
+	jk_tick();
+	key_feed(KEY_RIGHT, 1);          /* the newer key takes the repeats */
+	for (i = 0; i < 12; i++) {
+		ticks(2);
+		key_feed(KEY_RIGHT, 1);
+	}
+	jk_tick();
+	check(jk_down(f) && jk_down(r), "an older key stays down while the newer one repeats");
+	key_feed(KEY_RIGHT, 0);
+	key_feed(KEY_SPACE, 0);
+	jk_tick();
+	check(!jk_down(f) && !jk_down(r), "both let go");
+
 	dbg_log("TKEYS done: %d failures", fails);
 	printf("TKEYS done: %d failures\n", fails);
 	return fails != 0;
