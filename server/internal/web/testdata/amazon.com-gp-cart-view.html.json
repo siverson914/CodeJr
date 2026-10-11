@@ -1,0 +1,277 @@
+{
+ "Title": "Amazon.com Shopping Cart",
+ "URL": "https://www.amazon.com/gp/cart/view.html",
+ "Lines": [
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 1: Item in your cart)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "$50"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "instant gift card"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Get"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "$50"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "off instantly"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "upon approval of"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Amazon Visa."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Current subtotal:"
+   },
+   {
+    "Style": 112,
+    "Text": "  | "
+   },
+   {
+    "Style": 108,
+    "Text": "$0.00"
+   },
+   {
+    "Style": 112,
+    "Text": "  | "
+   },
+   {
+    "Style": 108,
+    "Text": "Gift Card savings:"
+   },
+   {
+    "Style": 112,
+    "Text": "  | "
+   },
+   {
+    "Style": 108,
+    "Text": "-"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "$50.00"
+   },
+   {
+    "Style": 112,
+    "Text": "  | "
+   },
+   {
+    "Style": 108,
+    "Text": "Cost after savings:"
+   },
+   {
+    "Style": 112,
+    "Text": "  | "
+   },
+   {
+    "Style": 108,
+    "Text": "$0.00"
+   },
+   {
+    "Style": 112,
+    "Text": "  | "
+   },
+   {
+    "Style": 108,
+    "Text": "Savings remaining:"
+   },
+   {
+    "Style": 112,
+    "Text": "  | "
+   },
+   {
+    "Style": 108,
+    "Text": "$50.00"
+   },
+   {
+    "Style": 112,
+    "Text": "  | "
+   },
+   {
+    "Style": 99,
+    "Text": "Learn more"
+   },
+   {
+    "Style": 110,
+    "Text": "[2][3]"
+   }
+  ],
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 4)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Your Amazon Cart is empty"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "Shop today's deals"
+   },
+   {
+    "Style": 110,
+    "Text": "[5]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Sign in to your account"
+   },
+   {
+    "Style": 110,
+    "Text": "[6]"
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Sign up now"
+   },
+   {
+    "Style": 110,
+    "Text": "[7]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The price and availability of items at Amazon.com are subject to change. The Cart is a temporary place to store a list of your items and reflects each item's most recent price. "
+   },
+   {
+    "Style": 108,
+    "Text": "Learn more"
+   },
+   {
+    "Style": 110,
+    "Text": "[8]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Do you have a gift card or promotional code? We'll ask you to enter your claim code when it's time to pay. "
+   }
+  ]
+ ],
+ "Targets": [
+  {
+   "n": 1,
+   "kind": "image",
+   "label": "Item in your cart"
+  },
+  {
+   "n": 2,
+   "kind": "button",
+   "label": "Learn more"
+  },
+  {
+   "n": 3,
+   "kind": "link",
+   "label": "$50 instant gift card Get $50 off instantly upon approval of"
+  },
+  {
+   "n": 4,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 5,
+   "kind": "link",
+   "label": "Shop today's deals"
+  },
+  {
+   "n": 6,
+   "kind": "link",
+   "label": "Sign in to your account"
+  },
+  {
+   "n": 7,
+   "kind": "link",
+   "label": "Sign up now"
+  },
+  {
+   "n": 8,
+   "kind": "link",
+   "label": "Shopping Cart Learn more"
+  }
+ ],
+ "Whole": false
+}

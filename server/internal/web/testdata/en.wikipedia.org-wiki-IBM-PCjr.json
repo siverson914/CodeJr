@@ -1,0 +1,11865 @@
+{
+ "Title": "IBM PCjr - Wikipedia",
+ "URL": "https://en.wikipedia.org/wiki/IBM_PCjr",
+ "Lines": [
+  [
+   {
+    "Style": 112,
+    "Text": "From Wikipedia, the free encyclopedia"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "icon"
+   },
+   {
+    "Style": 110,
+    "Text": "[1]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "This article needs "
+   },
+   {
+    "Style": 108,
+    "Text": "more citations"
+   },
+   {
+    "Style": 110,
+    "Text": "[2]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Please help "
+   },
+   {
+    "Style": 108,
+    "Text": "improve this article"
+   },
+   {
+    "Style": 110,
+    "Text": "[3]"
+   },
+   {
+    "Style": 112,
+    "Text": " by "
+   },
+   {
+    "Style": 108,
+    "Text": "adding citations to reliable sources"
+   },
+   {
+    "Style": 110,
+    "Text": "[4]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Unsourced material may be challenged and "
+   },
+   {
+    "Style": 108,
+    "Text": "removed"
+   },
+   {
+    "Style": 110,
+    "Text": "[5]"
+   },
+   {
+    "Style": 112,
+    "Text": "."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Find sources: "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM PCjr\""
+   },
+   {
+    "Style": 110,
+    "Text": "[6]"
+   },
+   {
+    "Style": 112,
+    "Text": " – "
+   },
+   {
+    "Style": 108,
+    "Text": "news"
+   },
+   {
+    "Style": 110,
+    "Text": "[7]"
+   },
+   {
+    "Style": 112,
+    "Text": " · "
+   },
+   {
+    "Style": 108,
+    "Text": "newspapers"
+   },
+   {
+    "Style": 110,
+    "Text": "[8]"
+   },
+   {
+    "Style": 112,
+    "Text": " · "
+   },
+   {
+    "Style": 108,
+    "Text": "books"
+   },
+   {
+    "Style": 110,
+    "Text": "[9]"
+   },
+   {
+    "Style": 112,
+    "Text": " · "
+   },
+   {
+    "Style": 108,
+    "Text": "scholar"
+   },
+   {
+    "Style": 110,
+    "Text": "[10]"
+   },
+   {
+    "Style": 112,
+    "Text": " · "
+   },
+   {
+    "Style": 108,
+    "Text": "JSTOR"
+   },
+   {
+    "Style": 110,
+    "Text": "[11]"
+   },
+   {
+    "Style": 112,
+    "Text": " (April 2023) ("
+   },
+   {
+    "Style": 108,
+    "Text": "Learn how and when to remove this message"
+   },
+   {
+    "Style": 110,
+    "Text": "[12]"
+   },
+   {
+    "Style": 112,
+    "Text": ")"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "IBM PCjr"
+   }
+  ],
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 13)"
+   },
+   {
+    "Style": 110,
+    "Text": "[14]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 15)"
+   },
+   {
+    "Style": 110,
+    "Text": "[16]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "IBM PCjr with original \"chiclet\" keyboard, PCjr color display, and 64 KB memory expansion card"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Manufacturer | "
+   },
+   {
+    "Style": 108,
+    "Text": "Teledyne"
+   },
+   {
+    "Style": 110,
+    "Text": "[17]"
+   },
+   {
+    "Style": 112,
+    "Text": ", "
+   },
+   {
+    "Style": 108,
+    "Text": "Lewisburg, Tennessee"
+   },
+   {
+    "Style": 110,
+    "Text": "[18]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Type | "
+   },
+   {
+    "Style": 108,
+    "Text": "Personal computer"
+   },
+   {
+    "Style": 110,
+    "Text": "[19]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Released | March 1984; 42 years ago | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Introductory price"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* US$1,269 (equivalent to $3,930 in 2025) with 128 "
+   },
+   {
+    "Style": 108,
+    "Text": "KB"
+   },
+   {
+    "Style": 110,
+    "Text": "[20]"
+   },
+   {
+    "Style": 112,
+    "Text": " memory and without monitor."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* £800 (equivalent to £2,610 in 2025) w/o disk drive."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* CA$1,900"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Discontinued | March 1985 | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Units shipped | 500,000 | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Operating system"
+   },
+   {
+    "Style": 110,
+    "Text": "[21]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "IBM "
+   },
+   {
+    "Style": 108,
+    "Text": "PC DOS"
+   },
+   {
+    "Style": 110,
+    "Text": "[22]"
+   },
+   {
+    "Style": 112,
+    "Text": " 2.10 | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "CPU"
+   },
+   {
+    "Style": 110,
+    "Text": "[23]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "Intel 8088"
+   },
+   {
+    "Style": 110,
+    "Text": "[24]"
+   },
+   {
+    "Style": 112,
+    "Text": " @ 4.77 MHz | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Memory | 64 "
+   },
+   {
+    "Style": 108,
+    "Text": "KB"
+   },
+   {
+    "Style": 110,
+    "Text": "[25]"
+   },
+   {
+    "Style": 112,
+    "Text": " base | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Removable storage"
+   },
+   {
+    "Style": 110,
+    "Text": "[26]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Cartridges, floppy disks | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Display | 12\" TTL RGBI monitor, composite video out (TV); 160 × 200 and 320 × 200 at 16 colors, 640 × 200 at 4 colors | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Graphics | "
+   },
+   {
+    "Style": 108,
+    "Text": "Motorola 6845 CRTC"
+   },
+   {
+    "Style": 110,
+    "Text": "[27]"
+   },
+   {
+    "Style": 112,
+    "Text": ", IBM custom "
+   },
+   {
+    "Style": 108,
+    "Text": "Video Gate Array"
+   },
+   {
+    "Style": 110,
+    "Text": "[28]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Sound | "
+   },
+   {
+    "Style": 108,
+    "Text": "Texas Instruments"
+   },
+   {
+    "Style": 110,
+    "Text": "[29]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "SN76489"
+   },
+   {
+    "Style": 110,
+    "Text": "[30]"
+   },
+   {
+    "Style": 112,
+    "Text": ", PC speaker | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Predecessor | "
+   },
+   {
+    "Style": 108,
+    "Text": "IBM Personal Computer"
+   },
+   {
+    "Style": 110,
+    "Text": "[31]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Successor | "
+   },
+   {
+    "Style": 108,
+    "Text": "IBM PS/1"
+   },
+   {
+    "Style": 110,
+    "Text": "[32]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The IBM PCjr (pronounced \"PC junior\") is a "
+   },
+   {
+    "Style": 108,
+    "Text": "home computer"
+   },
+   {
+    "Style": 110,
+    "Text": "[33]"
+   },
+   {
+    "Style": 112,
+    "Text": " produced and marketed by "
+   },
+   {
+    "Style": 108,
+    "Text": "IBM"
+   },
+   {
+    "Style": 110,
+    "Text": "[34]"
+   },
+   {
+    "Style": 112,
+    "Text": " from March 1984 to May 1985. It was intended as a lower-cost variant of the "
+   },
+   {
+    "Style": 108,
+    "Text": "IBM PC"
+   },
+   {
+    "Style": 110,
+    "Text": "[35]"
+   },
+   {
+    "Style": 112,
+    "Text": ", with hardware capabilities better suited for video games, in order to compete more directly with other home computers such as the "
+   },
+   {
+    "Style": 108,
+    "Text": "Apple II"
+   },
+   {
+    "Style": 110,
+    "Text": "[36]"
+   },
+   {
+    "Style": 112,
+    "Text": " and "
+   },
+   {
+    "Style": 108,
+    "Text": "Commodore 64"
+   },
+   {
+    "Style": 110,
+    "Text": "[37]"
+   },
+   {
+    "Style": 112,
+    "Text": "."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "It retained the IBM PC's "
+   },
+   {
+    "Style": 108,
+    "Text": "8088"
+   },
+   {
+    "Style": 110,
+    "Text": "[38]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "CPU"
+   },
+   {
+    "Style": 110,
+    "Text": "[39]"
+   },
+   {
+    "Style": 112,
+    "Text": " and "
+   },
+   {
+    "Style": 108,
+    "Text": "BIOS"
+   },
+   {
+    "Style": 110,
+    "Text": "[40]"
+   },
+   {
+    "Style": 112,
+    "Text": " interface, but provided enhanced graphics and sound, "
+   },
+   {
+    "Style": 108,
+    "Text": "ROM cartridge"
+   },
+   {
+    "Style": 110,
+    "Text": "[41]"
+   },
+   {
+    "Style": 112,
+    "Text": " slots, built-in joystick ports, and an infrared wireless keyboard. The PCjr supported expansion via \"sidecar\" modules, which could be attached to the side of the unit."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Despite widespread anticipation, the PCjr was ultimately unsuccessful in the market. It was only partially "
+   },
+   {
+    "Style": 108,
+    "Text": "IBM PC compatible"
+   },
+   {
+    "Style": 110,
+    "Text": "[42]"
+   },
+   {
+    "Style": 112,
+    "Text": ", limiting support for IBM's software library. Its "
+   },
+   {
+    "Style": 108,
+    "Text": "chiclet keyboard"
+   },
+   {
+    "Style": 110,
+    "Text": "[43]"
+   },
+   {
+    "Style": 112,
+    "Text": " was widely criticized for its poor quality. The PCjr also suffered from limited expandability; it was initially offered with a maximum of 128 "
+   },
+   {
+    "Style": 108,
+    "Text": "KB"
+   },
+   {
+    "Style": 110,
+    "Text": "[44]"
+   },
+   {
+    "Style": 112,
+    "Text": " of RAM, insufficient for many PC programs."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Models"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[45]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The PCjr came in two models:"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* 4860-004 – 64 KB of memory, priced at US$669 (equivalent to $2,160 in 2025)"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* 4860-067 – 128 KB of memory and a 360 KB, 5.25-inch "
+   },
+   {
+    "Style": 108,
+    "Text": "floppy disk"
+   },
+   {
+    "Style": 110,
+    "Text": "[46]"
+   },
+   {
+    "Style": 112,
+    "Text": " drive, priced at US$1,269 (equivalent to $4,100 in 2025)"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The PCjr was manufactured for IBM in "
+   },
+   {
+    "Style": 108,
+    "Text": "Lewisburg, Tennessee"
+   },
+   {
+    "Style": 110,
+    "Text": "[47]"
+   },
+   {
+    "Style": 112,
+    "Text": " by "
+   },
+   {
+    "Style": 108,
+    "Text": "Teledyne"
+   },
+   {
+    "Style": 110,
+    "Text": "[48]"
+   },
+   {
+    "Style": 112,
+    "Text": "."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "A related machine, the "
+   },
+   {
+    "Style": 108,
+    "Text": "IBM JX"
+   },
+   {
+    "Style": 110,
+    "Text": "[49]"
+   },
+   {
+    "Style": 112,
+    "Text": ", was sold in the Japanese, Australian and New Zealand markets."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Hardware"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[50]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The PCjr chassis is made entirely of plastic, unlike the all-steel chassis of the IBM PC. A 180/360K floppy disk drive can be installed in a 5.25\" front bay. The internal floppy drive is a half-height "
+   },
+   {
+    "Style": 108,
+    "Text": "Qume"
+   },
+   {
+    "Style": 110,
+    "Text": "[51]"
+   },
+   {
+    "Style": 112,
+    "Text": " 5.25\" unit; IBM also used these drives in the PC Portable, but the PCjr units were specially equipped with a small fan to prevent overheating, since the computer did not have a case fan."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Cartridges"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[52]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 53)"
+   },
+   {
+    "Style": 110,
+    "Text": "[54]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "IBM PCjr BASIC cartridge"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The front of the PCjr exposes a pair of cartridge slots in which the user can insert software on ROM cartridges, as was common with other home computers. Each cartridge can contain up to 64 KB of ROM."
+   },
+   {
+    "Style": 108,
+    "Text": "[1]"
+   },
+   {
+    "Style": 110,
+    "Text": "[55]"
+   },
+   {
+    "Style": 112,
+    "Text": " Cartridges can be configured with an auto-restart function; when a cartridge with auto-start enabled is inserted, the machine will restart and boot from the ROM, without requiring the user to reboot manually."
+   },
+   {
+    "Style": 108,
+    "Text": "[1]"
+   },
+   {
+    "Style": 110,
+    "Text": "[56]"
+   },
+   {
+    "Style": 112,
+    "Text": " PCjr cartridges are strictly read-only, unlike the software cartridges of some other contemporary computers and game consoles, which can also be equipped with read/write memory (RAM) or I/O hardware in a straightforward way."
+   },
+   {
+    "Style": 108,
+    "Text": "[2]"
+   },
+   {
+    "Style": 110,
+    "Text": "[57]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Cartridges can also replace the system BIOS and other firmware."
+   },
+   {
+    "Style": 108,
+    "Text": "[3]"
+   },
+   {
+    "Style": 110,
+    "Text": "[58]"
+   },
+   {
+    "Style": 112,
+    "Text": " A number of patches from various vendors are included on a single \"combo-cartridge\", licensed and sold by PC Enterprises, to support add-on hardware, bypass certain limitations of design, and keep up with changing OS requirements."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Processor"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[59]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Like the IBM PC, the PCjr uses an "
+   },
+   {
+    "Style": 108,
+    "Text": "Intel 8088"
+   },
+   {
+    "Style": 110,
+    "Text": "[60]"
+   },
+   {
+    "Style": 112,
+    "Text": " clocked at 4.77 MHz."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Despite using the same CPU and clock speed, performance is often inferior to the PC, because access to system RAM is delayed by "
+   },
+   {
+    "Style": 108,
+    "Text": "wait states"
+   },
+   {
+    "Style": 110,
+    "Text": "[61]"
+   },
+   {
+    "Style": 112,
+    "Text": " added by the "
+   },
+   {
+    "Style": 108,
+    "Text": "Video Gate Array"
+   },
+   {
+    "Style": 110,
+    "Text": "[62]"
+   },
+   {
+    "Style": 112,
+    "Text": " to synchronize shared access to RAM between the CPU and the video hardware. IBM claimed that an average of two wait states are added, but the designers of the "
+   },
+   {
+    "Style": 108,
+    "Text": "Tandy 1000"
+   },
+   {
+    "Style": 110,
+    "Text": "[63]"
+   },
+   {
+    "Style": 112,
+    "Text": ", a clone of the PCjr, claimed that six was a more accurate number."
+   },
+   {
+    "Style": 108,
+    "Text": "[4]"
+   },
+   {
+    "Style": 110,
+    "Text": "[64]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "This delay only applies to software resident in the first 64 KB or 128 KB of RAM inside the system unit itself, and not to programs or data located in ROM – including software on ROM cartridges plugged into the front of the PCjr – or in additional RAM in a sidecar attachment. Under these circumstances the PCjr should run at full speed. The most common instances in which this maximum speed would be achieved are when running games or productivity applications from ROM cartridges. In fact, because the PCjr video subsystem continuously refreshes the system internal DRAM transparently, without disturbing the CPU, programs running from ROM on the PCjr may actually run slightly faster on the PCjr than on an IBM PC or XT."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Video"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[65]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "See also: "
+   },
+   {
+    "Style": 108,
+    "Text": "Tandy Graphics Adapter"
+   },
+   {
+    "Style": 110,
+    "Text": "[66]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 67)"
+   },
+   {
+    "Style": 110,
+    "Text": "[68]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Simulation of PCjr graphics (top) compared to CGA PC graphics of the time (bottom)"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 69)"
+   },
+   {
+    "Style": 110,
+    "Text": "[70]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Simulation of PCjr 160 × 200 mode with 16 colors"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 71)"
+   },
+   {
+    "Style": 110,
+    "Text": "[72]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Simulation of PCjr 320 × 200 mode with 16 colors"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 73)"
+   },
+   {
+    "Style": 110,
+    "Text": "[74]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Simulation of PCjr 640 × 200 mode with 4 colors"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Unlike the IBM PC, which required a separate video card, the PCjr display hardware was built into the system board. At the time, the only cards available from IBM for the PC were the monochrome "
+   },
+   {
+    "Style": 108,
+    "Text": "MDA"
+   },
+   {
+    "Style": 110,
+    "Text": "[75]"
+   },
+   {
+    "Style": 112,
+    "Text": " and color "
+   },
+   {
+    "Style": 108,
+    "Text": "CGA"
+   },
+   {
+    "Style": 110,
+    "Text": "[76]"
+   },
+   {
+    "Style": 112,
+    "Text": " boards. PCjr graphics were similar to CGA, with several new video modes:"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* 160 × 200 at 16 colors"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* 320 × 200 at 16 colors"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* 640 × 200 at 4 colors"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The primary improvement over CGA is the greater color depth. CGA could only display 4 colors in its medium-resolution mode, and 2 colors in high-resolution. The PCjr increases these to 16 and 4 colors respectively."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Video modes on the PCjr use varying amounts of system memory: 40 × 25 text mode uses 1 KB, for instance, while 320 × 200 × 16 and 640 × 200 × 4 use 32 KB. These latter two modes, as well as 80 × 25 text mode, are referred to in documentation as \"high bandwidth modes\" and are unsupported on base models with only 64 KB of memory."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Multiple text or graphics pages can be used for "
+   },
+   {
+    "Style": 108,
+    "Text": "page flipping"
+   },
+   {
+    "Style": 110,
+    "Text": "[77]"
+   },
+   {
+    "Style": 112,
+    "Text": " as long as there is enough memory, a feature missing from the CGA. The CGA also does not provide a "
+   },
+   {
+    "Style": 108,
+    "Text": "VBLANK interrupt"
+   },
+   {
+    "Style": 110,
+    "Text": "[78]"
+   },
+   {
+    "Style": 112,
+    "Text": ", making it hard to detect when the screen was beginning to be drawn, but the PCjr provides this on IRQ 5, an important feature for smooth page flipping."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The video system also has a \"blink\" feature which toggles the palette between the first and second groups of eight palette registers at the same rate used for the PCs blinking text attribute, and a palette bit-masking feature that can be used to switch between palette subsets without reprogramming palette registers."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Unlike CGA, PCjr has palette registers which can be used to choose colors from the full 16-color "
+   },
+   {
+    "Style": 108,
+    "Text": "RGBI palette"
+   },
+   {
+    "Style": 110,
+    "Text": "[79]"
+   },
+   {
+    "Style": 112,
+    "Text": ". When the BIOS is used to set a video mode, it sets up the palette table to emulate the CGA color palette for that mode. Programs specifically written to use PCjr graphics can subsequently reprogram the palette table to use any colors desired. Palette changes must be made during horizontal or "
+   },
+   {
+    "Style": 108,
+    "Text": "vertical blanking"
+   },
+   {
+    "Style": 110,
+    "Text": "[80]"
+   },
+   {
+    "Style": 112,
+    "Text": " periods of a video frame in order to avoid disrupting the display (transiently during the palette change)."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The monitor included with the PCjr is a 12\" TTL RGBI display like those supported by the CGA, but including an internal amplified speaker. Also like CGA, the PCjr supported "
+   },
+   {
+    "Style": 108,
+    "Text": "composite video"
+   },
+   {
+    "Style": 110,
+    "Text": "[81]"
+   },
+   {
+    "Style": 112,
+    "Text": " out for use with a TV or composite monitor."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "A "
+   },
+   {
+    "Style": 108,
+    "Text": "Motorola 6845"
+   },
+   {
+    "Style": 110,
+    "Text": "[82]"
+   },
+   {
+    "Style": 112,
+    "Text": " CRTC like the one used in the MDA and CGA adapters, and a custom IBM chip called the Video Gate Array (VGA) constitute the bulk of the PCjr video hardware."
+   },
+   {
+    "Style": 108,
+    "Text": "[5]"
+   },
+   {
+    "Style": 110,
+    "Text": "[83]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[6]"
+   },
+   {
+    "Style": 110,
+    "Text": "[84]"
+   },
+   {
+    "Style": 112,
+    "Text": " Several discrete standard logic devices complete the video subsystem."
+   },
+   {
+    "Style": 108,
+    "Text": "[7]"
+   },
+   {
+    "Style": 110,
+    "Text": "[85]"
+   },
+   {
+    "Style": 112,
+    "Text": " The 6845 is responsible for the basic raster timing and video-data address sequencing, and the Video Gate Array contains all the additional timing logic, video-data demultiplexing logic, color processing logic, and programmable palette table logic, as well as the logic for multiplexing RAM access between the 8088 CPU and the video-generation circuitry. For programming, the CRTC is generally compatible with the CGA at the hardware register level. Some other CGA programming details, in particular the Mode Control Register and the Color Select Register (at I/O addresses 3D8h and 3D9h respectively), are not compatible, as the PCjr provides the equivalent functionality through different registers inside the Video Gate Array, which are accessed in a completely different manner through a single I/O address (3DAh)."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The 6845 CRTC and the VGA together are responsible for refreshing the internal DRAM of the PCjr, which complicates the process of switching video modes on the PCjr. Resetting the VGA, which must be done during certain video-mode switches, must be done by code not running from the system RAM controlled by the VGA, and if the CRTC or the VGA is disabled for too long, the contents of the internal RAM can be lost. Additional external DRAM (in sidecar expansion modules) is refreshed independently and never affected by a video-mode switch."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Of the three new modes, 160 × 200 × 16 mode has the same layout as CGA graphics modes; the odd and even scanlines are stored in the first and second half of the video buffer, each half being 8k["
+   },
+   {
+    "Style": 108,
+    "Text": "clarification needed"
+   },
+   {
+    "Style": 110,
+    "Text": "[86]"
+   },
+   {
+    "Style": 112,
+    "Text": "] in size, and every four bits represent one pixel. The 320 × 200 × 16 and 640 × 200 × 4 modes have four blocks of scanlines; every four or two bits respectively represent a pixel."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Since the PCjr uses the main system RAM for the video buffer, less memory is available for software than on a standard PC, which has separate dedicated video memory in the A000h–BFFFh segments, above conventional memory."
+   },
+   {
+    "Style": 108,
+    "Text": "[8]"
+   },
+   {
+    "Style": 110,
+    "Text": "[87]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Sound"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[88]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 89)"
+   },
+   {
+    "Style": 110,
+    "Text": "[90]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "IBM PCjr internals"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The PCjr's sound is provided by a "
+   },
+   {
+    "Style": 108,
+    "Text": "Texas Instruments"
+   },
+   {
+    "Style": 110,
+    "Text": "[91]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "SN76496"
+   },
+   {
+    "Style": 110,
+    "Text": "[92]"
+   },
+   {
+    "Style": 112,
+    "Text": ", which can produce three square waves of varying amplitude and frequency along with a noise channel powered by a "
+   },
+   {
+    "Style": 108,
+    "Text": "shift register"
+   },
+   {
+    "Style": 110,
+    "Text": "[93]"
+   },
+   {
+    "Style": 112,
+    "Text": "."
+   },
+   {
+    "Style": 108,
+    "Text": "[9]"
+   },
+   {
+    "Style": 110,
+    "Text": "[94]"
+   },
+   {
+    "Style": 112,
+    "Text": " It is similar to the "
+   },
+   {
+    "Style": 108,
+    "Text": "programmable sound generator"
+   },
+   {
+    "Style": 110,
+    "Text": "[95]"
+   },
+   {
+    "Style": 112,
+    "Text": " chips used in game consoles such as the "
+   },
+   {
+    "Style": 108,
+    "Text": "Master System"
+   },
+   {
+    "Style": 110,
+    "Text": "[96]"
+   },
+   {
+    "Style": 112,
+    "Text": " and the "
+   },
+   {
+    "Style": 108,
+    "Text": "ColecoVision"
+   },
+   {
+    "Style": 110,
+    "Text": "[97]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The PCjr design also allows for an analog sound source in an expansion-bus \"sidecar\" module, and a software-controlled internal analog switch can select the source for the sound output from among the "
+   },
+   {
+    "Style": 108,
+    "Text": "PC speaker"
+   },
+   {
+    "Style": 110,
+    "Text": "[98]"
+   },
+   {
+    "Style": 112,
+    "Text": ", the SN76489, the cassette port, or the expansion-bus sound source. Only one sound source can be selected at a time; the sources cannot be mixed."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Keyboard / lightpen"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[99]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 100)"
+   },
+   {
+    "Style": 110,
+    "Text": "[101]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "The wireless PCjr keyboard"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The original keyboard included with the PCjr was a wireless design using infrared line-of-sight communication, which IBM initially marketed as the \"Freeboard\"."
+   },
+   {
+    "Style": 108,
+    "Text": "[10]"
+   },
+   {
+    "Style": 110,
+    "Text": "[102]"
+   },
+   {
+    "Style": 112,
+    "Text": " This is a "
+   },
+   {
+    "Style": 108,
+    "Text": "chiclet keyboard"
+   },
+   {
+    "Style": 110,
+    "Text": "[103]"
+   },
+   {
+    "Style": 112,
+    "Text": " with small, flat, calculator-style plastic keycaps. The keycaps are blank, with the labels printed between keys, so that "
+   },
+   {
+    "Style": 108,
+    "Text": "overlays"
+   },
+   {
+    "Style": 110,
+    "Text": "[104]"
+   },
+   {
+    "Style": 112,
+    "Text": " can be used."
+   },
+   {
+    "Style": 108,
+    "Text": "[11]"
+   },
+   {
+    "Style": 110,
+    "Text": "[105]"
+   },
+   {
+    "Style": 112,
+    "Text": " The PCjr keyboard has 62 keys rather than the 83 of the PC keyboard, and the remaining keys must be entered by holding a modifier key."
+   },
+   {
+    "Style": 108,
+    "Text": "[11]"
+   },
+   {
+    "Style": 110,
+    "Text": "[106]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[12]"
+   },
+   {
+    "Style": 110,
+    "Text": "[107]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "For infrared wireless operation, the keyboard is powered by four AA cells. Certain types of room lighting can cause interference with the infrared keyboard sensor,"
+   },
+   {
+    "Style": 108,
+    "Text": "[13]"
+   },
+   {
+    "Style": 110,
+    "Text": "[108]"
+   },
+   {
+    "Style": 112,
+    "Text": " and multiple keyboards cannot be used wirelessly in the same room without problems."
+   },
+   {
+    "Style": 108,
+    "Text": "[14]"
+   },
+   {
+    "Style": 110,
+    "Text": "[109]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "IBM sold a cable that could be plugged in between the keyboard and computer if the user wanted a more reliable connection, which also eliminated the need for batteries, since the keyboard IR receiver is automatically disabled when the cord is attached to the computer."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The chiclet design was not well received, and in 1984 IBM began shipping a new design, still wireless, but using more conventionally shaped keycaps."
+   },
+   {
+    "Style": 108,
+    "Text": "[15]"
+   },
+   {
+    "Style": 110,
+    "Text": "[110]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The PCjr also has a light-pen port. Besides being used for a "
+   },
+   {
+    "Style": 108,
+    "Text": "light pen"
+   },
+   {
+    "Style": 110,
+    "Text": "[111]"
+   },
+   {
+    "Style": 112,
+    "Text": " (a rarely purchased option), this port can be used in combination with the serial port to supply voltage to a "
+   },
+   {
+    "Style": 108,
+    "Text": "Mouse Systems"
+   },
+   {
+    "Style": 110,
+    "Text": "[112]"
+   },
+   {
+    "Style": 112,
+    "Text": " optical mouse of the same design as those for "
+   },
+   {
+    "Style": 108,
+    "Text": "Sun workstations"
+   },
+   {
+    "Style": 110,
+    "Text": "[113]"
+   },
+   {
+    "Style": 112,
+    "Text": "."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Expansion"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[114]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 115)"
+   },
+   {
+    "Style": 110,
+    "Text": "[116]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "A PCjr featuring most upgrades available from PC Enterprises, including combo cartridge, dual floppies, twin ST-225 HDDs (bootable via "
+   },
+   {
+    "Style": 108,
+    "Text": "Future Domain"
+   },
+   {
+    "Style": 110,
+    "Text": "[117]"
+   },
+   {
+    "Style": 112,
+    "Text": " firmware hidden under cover on right). Replacement keyboard sits on top of a Taxan RGB monitor displaying "
+   },
+   {
+    "Style": 108,
+    "Text": "Battle Chess"
+   },
+   {
+    "Style": 110,
+    "Text": "[118]"
+   },
+   {
+    "Style": 112,
+    "Text": "."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The back of the machine does not have any expansion slots. Instead, several permanently mounted, proprietary connectors provide attachment to many built-in hardware capabilities, which replaced many of the features that PC expansion cards provided, including:"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* Graphics hardware"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Multichannel sound"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Joystick ports"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Light-pen interface"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Serial port"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Cassette interface"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Internally the PCjr did have expansion slots to support specific upgrades: a RAM upgrade, a modem, and a floppy drive."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "On the right side of the machine, the system bus was exposed for use with \"sidecars\" – upgrade modules which attached to the side of the machine. Third-party manufacturers produced a number of expansion units for the PCjr."
+   },
+   {
+    "Style": 108,
+    "Text": "[16]"
+   },
+   {
+    "Style": 110,
+    "Text": "[119]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Software"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[120]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The primary OS for the PCjr is PC DOS, like the IBM PC, and it supports a large amount of PC software, with some incompatibilities."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "PC DOS 2.10 is the minimum version of DOS required for the PCjr. IBM's OEM versions of MS-DOS supported the machine up to DOS 3.30, but memory expansion was required for DOS 3.20 and 3.30."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Like the original PC, the PCjr has BASIC in ROM, but includes "
+   },
+   {
+    "Style": 108,
+    "Text": "Cartridge BASIC"
+   },
+   {
+    "Style": 110,
+    "Text": "[121]"
+   },
+   {
+    "Style": 112,
+    "Text": " instead of Cassette BASIC. In addition to cartridge support, it extended the standard IBM BASIC with commands to support the new video and audio functionality."
+   },
+   {
+    "Style": 108,
+    "Text": "[6]"
+   },
+   {
+    "Style": 110,
+    "Text": "[122]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[9]"
+   },
+   {
+    "Style": 110,
+    "Text": "[123]"
+   },
+   {
+    "Style": 112,
+    "Text": " The system will boot into Cartridge BASIC if no cartridge or boot disk is present."
+   },
+   {
+    "Style": 108,
+    "Text": "[17]"
+   },
+   {
+    "Style": 110,
+    "Text": "[124]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Compatibility"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[125]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The register mapping of the PCjr's video hardware is different from the IBM CGA card, so software that tries to modify or read registers directly will not work. The PCjr has a \"gate\" register to which software writes the number of the video register to be accessed, followed by the value to be written into it. Alteration of other CRTC registers cannot be assumed to produce the same results from the PCjr video system as from the CGA."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Programs for the CGA that manipulate the CRTC start address and that rely on address wrap-around above address 0xBC000 may not work correctly on the PCjr because it always has a 32 KB contiguous block of RAM in the video area from address 0xB8000 through 0xBFFFF. The PCjr's video memory cannot be moved above 128 KB if expansion memory is added, so some PC software on "
+   },
+   {
+    "Style": 108,
+    "Text": "self-booting disks"
+   },
+   {
+    "Style": 110,
+    "Text": "[126]"
+   },
+   {
+    "Style": 112,
+    "Text": " do not work on a PCjr if the software requires more than 128 KB of RAM."
+   },
+   {
+    "Style": 108,
+    "Text": "[18]"
+   },
+   {
+    "Style": 110,
+    "Text": "[127]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[3]"
+   },
+   {
+    "Style": 110,
+    "Text": "[128]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The floppy controller on the PCjr also maps its I/O registers into different ports from the PC, and since the PCjr does not have DMA, the BIOS routines for handling floppy access are different from and more complex than those on the PC. Software that tries to perform direct, low-level disk access (mainly utilities, but also the occasional game such as Dunzhin: Warrior of Ras) do not work unless rewritten for the PCjr."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "History"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[129]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "IBM's first home computer was the PC, released in 1981. Within two years the PC had created a large new ecosystem of hardware and software, nearly leading the home computer market"
+   },
+   {
+    "Style": 108,
+    "Text": "[19]"
+   },
+   {
+    "Style": 110,
+    "Text": "[130]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[20]"
+   },
+   {
+    "Style": 110,
+    "Text": "[131]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[21]"
+   },
+   {
+    "Style": 110,
+    "Text": "[132]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[22]"
+   },
+   {
+    "Style": 110,
+    "Text": "[133]"
+   },
+   {
+    "Style": 112,
+    "Text": " with 26% of all microcomputers sold in 1983, second only to the much less expensive "
+   },
+   {
+    "Style": 108,
+    "Text": "Commodore 64"
+   },
+   {
+    "Style": 110,
+    "Text": "[134]"
+   },
+   {
+    "Style": 112,
+    "Text": "."
+   },
+   {
+    "Style": 108,
+    "Text": "[23]"
+   },
+   {
+    "Style": 110,
+    "Text": "[135]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "For a year before the PCjr's announcement, the computer industry discussed rumors of a new IBM product, code named \"Peanut\", that would repeat the PC's success. The rumors described Peanut as a home computer with 64 KB of memory that would be "
+   },
+   {
+    "Style": 108,
+    "Text": "IBM PC compatible"
+   },
+   {
+    "Style": 110,
+    "Text": "[136]"
+   },
+   {
+    "Style": 112,
+    "Text": ", benefit from IBM's service network and, at US$600 to US$1,000, be less expensive than the "
+   },
+   {
+    "Style": 108,
+    "Text": "Apple IIe"
+   },
+   {
+    "Style": 110,
+    "Text": "[137]"
+   },
+   {
+    "Style": 112,
+    "Text": ". IBM repeatedly denied these rumors,"
+   },
+   {
+    "Style": 108,
+    "Text": "[24]"
+   },
+   {
+    "Style": 110,
+    "Text": "[138]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[22]"
+   },
+   {
+    "Style": 110,
+    "Text": "[139]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[25]"
+   },
+   {
+    "Style": 110,
+    "Text": "[140]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[26]"
+   },
+   {
+    "Style": 110,
+    "Text": "[141]"
+   },
+   {
+    "Style": 112,
+    "Text": " but customers visited stores attempting to buy the product, and rivals' revenue, product plans, and share prices reacted to the officially nonexistent computer in what the press called \"Peanut Panic\" or \"The Great Peanut Roast\"."
+   },
+   {
+    "Style": 108,
+    "Text": "[19]"
+   },
+   {
+    "Style": 110,
+    "Text": "[142]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[27]"
+   },
+   {
+    "Style": 110,
+    "Text": "[143]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[28]"
+   },
+   {
+    "Style": 110,
+    "Text": "[144]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "By September 1983, books and magazine articles on Peanut were ready for publishing, with only a few changes needed once the still officially nonexistent computer appeared. Software companies prepared to market products as \"Peanut compatible\" with the computer of which, rumors said, IBM would produce 500,000 units in the first year. "
+   },
+   {
+    "Style": 108,
+    "Text": "Adweek"
+   },
+   {
+    "Style": 110,
+    "Text": "[145]"
+   },
+   {
+    "Style": 112,
+    "Text": " estimated that IBM would spend $75 million on marketing, including an alleged license of "
+   },
+   {
+    "Style": 108,
+    "Text": "Charles Schulz"
+   },
+   {
+    "Style": 110,
+    "Text": "[146]"
+   },
+   {
+    "Style": 112,
+    "Text": "'s "
+   },
+   {
+    "Style": 108,
+    "Text": "Peanuts"
+   },
+   {
+    "Style": 110,
+    "Text": "[147]"
+   },
+   {
+    "Style": 112,
+    "Text": " characters. Smalltalk magazine in August published a detailed article on the computer, stating that it would cost $600 plus $400 for a disk drive, use a color TV as a display, and have a standard typewriter keyboard."
+   },
+   {
+    "Style": 108,
+    "Text": "[29]"
+   },
+   {
+    "Style": 110,
+    "Text": "[148]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Announcement"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[149]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "IBM announced the PCjr on November 1, 1983, at its "
+   },
+   {
+    "Style": 108,
+    "Text": "New York City headquarters"
+   },
+   {
+    "Style": 110,
+    "Text": "[150]"
+   },
+   {
+    "Style": 112,
+    "Text": " with an enormous amount of advance publicity, including live news coverage of the event."
+   },
+   {
+    "Style": 108,
+    "Text": "[30]"
+   },
+   {
+    "Style": 110,
+    "Text": "[151]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[11]"
+   },
+   {
+    "Style": 110,
+    "Text": "[152]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Experts predicted, according to "
+   },
+   {
+    "Style": 108,
+    "Text": "The Washington Post"
+   },
+   {
+    "Style": 110,
+    "Text": "[153]"
+   },
+   {
+    "Style": 112,
+    "Text": ", that the PCjr would \"quickly become the standard by which all other home computers are measured\""
+   },
+   {
+    "Style": 108,
+    "Text": "[31]"
+   },
+   {
+    "Style": 110,
+    "Text": "[154]"
+   },
+   {
+    "Style": 112,
+    "Text": " and estimated sales of one million or more in 1984,"
+   },
+   {
+    "Style": 108,
+    "Text": "[12]"
+   },
+   {
+    "Style": 110,
+    "Text": "[155]"
+   },
+   {
+    "Style": 112,
+    "Text": " expecting the PCjr to change the home-computer market in a similar way to how the IBM PC had changed the business-microcomputer market."
+   },
+   {
+    "Style": 108,
+    "Text": "[30]"
+   },
+   {
+    "Style": 110,
+    "Text": "[156]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[32]"
+   },
+   {
+    "Style": 110,
+    "Text": "[157]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[11]"
+   },
+   {
+    "Style": 110,
+    "Text": "[158]"
+   },
+   {
+    "Style": 112,
+    "Text": " They predicted that the PCjr would extend IBM's dominance, with customers able to use the company's computers in the home and in the office."
+   },
+   {
+    "Style": 108,
+    "Text": "[33]"
+   },
+   {
+    "Style": 110,
+    "Text": "[159]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[21]"
+   },
+   {
+    "Style": 110,
+    "Text": "[160]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[31]"
+   },
+   {
+    "Style": 110,
+    "Text": "[161]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Texas Instruments"
+   },
+   {
+    "Style": 110,
+    "Text": "[162]"
+   },
+   {
+    "Style": 112,
+    "Text": " left the market four days before IBM's announcement, after losing US$223 million in nine months against Commodore"
+   },
+   {
+    "Style": 108,
+    "Text": "[20]"
+   },
+   {
+    "Style": 110,
+    "Text": "[163]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[22]"
+   },
+   {
+    "Style": 110,
+    "Text": "[164]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[34]"
+   },
+   {
+    "Style": 110,
+    "Text": "[165]"
+   },
+   {
+    "Style": 112,
+    "Text": " by selling its "
+   },
+   {
+    "Style": 108,
+    "Text": "TI-99/4A"
+   },
+   {
+    "Style": 110,
+    "Text": "[166]"
+   },
+   {
+    "Style": 112,
+    "Text": " for as low as $99."
+   },
+   {
+    "Style": 108,
+    "Text": "[35]"
+   },
+   {
+    "Style": 110,
+    "Text": "[167]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Developers began creating PCjr software in 1982."
+   },
+   {
+    "Style": 108,
+    "Text": "[36]"
+   },
+   {
+    "Style": 110,
+    "Text": "[168]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Sierra On-Line"
+   },
+   {
+    "Style": 110,
+    "Text": "[169]"
+   },
+   {
+    "Style": 112,
+    "Text": ", "
+   },
+   {
+    "Style": 108,
+    "Text": "SPC"
+   },
+   {
+    "Style": 110,
+    "Text": "[170]"
+   },
+   {
+    "Style": 112,
+    "Text": ", and "
+   },
+   {
+    "Style": 108,
+    "Text": "The Learning Company"
+   },
+   {
+    "Style": 110,
+    "Text": "[171]"
+   },
+   {
+    "Style": 112,
+    "Text": " were among those that produced games, productivity, and educational software as "
+   },
+   {
+    "Style": 108,
+    "Text": "launch titles"
+   },
+   {
+    "Style": 110,
+    "Text": "[172]"
+   },
+   {
+    "Style": 112,
+    "Text": ","
+   },
+   {
+    "Style": 108,
+    "Text": "[12]"
+   },
+   {
+    "Style": 110,
+    "Text": "[173]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[37]"
+   },
+   {
+    "Style": 110,
+    "Text": "[174]"
+   },
+   {
+    "Style": 112,
+    "Text": " using detailed IBM production outlines"
+   },
+   {
+    "Style": 108,
+    "Text": "[38]"
+   },
+   {
+    "Style": 110,
+    "Text": "[175]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[39]"
+   },
+   {
+    "Style": 110,
+    "Text": "[176]"
+   },
+   {
+    "Style": 112,
+    "Text": " under a policy of strictly enforced security."
+   },
+   {
+    "Style": 108,
+    "Text": "[38]"
+   },
+   {
+    "Style": 110,
+    "Text": "[177]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The PCjr's graphics and sound features were superior to the PC's,"
+   },
+   {
+    "Style": 108,
+    "Text": "[9]"
+   },
+   {
+    "Style": 110,
+    "Text": "[178]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[40]"
+   },
+   {
+    "Style": 110,
+    "Text": "[179]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[12]"
+   },
+   {
+    "Style": 110,
+    "Text": "[180]"
+   },
+   {
+    "Style": 112,
+    "Text": " and PC Magazine speculated that \"the PCjr might be the best game machine ever designed\"."
+   },
+   {
+    "Style": 108,
+    "Text": "[37]"
+   },
+   {
+    "Style": 110,
+    "Text": "[181]"
+   },
+   {
+    "Style": 112,
+    "Text": " Prominent among launch titles was Sierra's "
+   },
+   {
+    "Style": 108,
+    "Text": "graphical adventure"
+   },
+   {
+    "Style": 110,
+    "Text": "[182]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "King's Quest I"
+   },
+   {
+    "Style": 110,
+    "Text": "[183]"
+   },
+   {
+    "Style": 112,
+    "Text": ", much of whose $850,000 budget was paid by IBM."
+   },
+   {
+    "Style": 108,
+    "Text": "[36]"
+   },
+   {
+    "Style": 110,
+    "Text": "[184]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Release and reception"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[185]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 186)"
+   },
+   {
+    "Style": 110,
+    "Text": "[187]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "The PCjr's chiclet keyboard was unpopular."
+   },
+   {
+    "Style": 108,
+    "Text": "[41]"
+   },
+   {
+    "Style": 110,
+    "Text": "[188]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The PCjr was released in March 1984, missing the 1983 Christmas sales season due to production delays."
+   },
+   {
+    "Style": 108,
+    "Text": "[21]"
+   },
+   {
+    "Style": 110,
+    "Text": "[189]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[42]"
+   },
+   {
+    "Style": 110,
+    "Text": "[190]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[43]"
+   },
+   {
+    "Style": 110,
+    "Text": "[191]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[26]"
+   },
+   {
+    "Style": 110,
+    "Text": "[192]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Even prior to release, anticipation of the machine was mixed. "
+   },
+   {
+    "Style": 108,
+    "Text": "Ziff Davis"
+   },
+   {
+    "Style": 110,
+    "Text": "[193]"
+   },
+   {
+    "Style": 112,
+    "Text": ", publisher of the successful PC Magazine, printed the first issue of PCjr Magazine before the first units shipped, and competing "
+   },
+   {
+    "Style": 108,
+    "Text": "computer magazines"
+   },
+   {
+    "Style": 110,
+    "Text": "[194]"
+   },
+   {
+    "Style": 112,
+    "Text": " included Peanut, PCjr World,"
+   },
+   {
+    "Style": 108,
+    "Text": "[44]"
+   },
+   {
+    "Style": 110,
+    "Text": "[195]"
+   },
+   {
+    "Style": 112,
+    "Text": " jr, and "
+   },
+   {
+    "Style": 108,
+    "Text": "Compute!"
+   },
+   {
+    "Style": 110,
+    "Text": "[196]"
+   },
+   {
+    "Style": 112,
+    "Text": " for the PC and PCjr."
+   },
+   {
+    "Style": 108,
+    "Text": "[45]"
+   },
+   {
+    "Style": 110,
+    "Text": "[197]"
+   },
+   {
+    "Style": 112,
+    "Text": " However, as new information became available about the machine, retailers became deeply concerned about its marketability."
+   },
+   {
+    "Style": 108,
+    "Text": "[46]"
+   },
+   {
+    "Style": 110,
+    "Text": "[198]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "When the PCjr became widely available in March 1984"
+   },
+   {
+    "Style": 108,
+    "Text": "[47]"
+   },
+   {
+    "Style": 110,
+    "Text": "[199]"
+   },
+   {
+    "Style": 112,
+    "Text": " sales were below expectations. Consumer interest was reportedly high until demonstration machines were available, at which point interest dropped steeply."
+   },
+   {
+    "Style": 108,
+    "Text": "[42]"
+   },
+   {
+    "Style": 110,
+    "Text": "[200]"
+   },
+   {
+    "Style": 112,
+    "Text": " Dealers reported that consumers disliked the price, keyboard, and limited memory,"
+   },
+   {
+    "Style": 108,
+    "Text": "[48]"
+   },
+   {
+    "Style": 110,
+    "Text": "[201]"
+   },
+   {
+    "Style": 112,
+    "Text": " and retailers that sold primarily to business customers did not know how to market it."
+   },
+   {
+    "Style": 108,
+    "Text": "[49]"
+   },
+   {
+    "Style": 110,
+    "Text": "[202]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The press soon reported that the PCjr could embarrass IBM, with executives reportedly worrying about demand. Stores began discounts while vendors slowed plans to release products."
+   },
+   {
+    "Style": 108,
+    "Text": "[50]"
+   },
+   {
+    "Style": 110,
+    "Text": "[203]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[51]"
+   },
+   {
+    "Style": 110,
+    "Text": "[204]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[52]"
+   },
+   {
+    "Style": 110,
+    "Text": "[205]"
+   },
+   {
+    "Style": 112,
+    "Text": " IBM admitted that demand for the PCjr was not growing as rapidly as expected."
+   },
+   {
+    "Style": 108,
+    "Text": "[48]"
+   },
+   {
+    "Style": 110,
+    "Text": "[206]"
+   },
+   {
+    "Style": 112,
+    "Text": " By May 1984 it had only sold 10,000 units, while other companies were reported to be slow in developing software for the system."
+   },
+   {
+    "Style": 108,
+    "Text": "[53]"
+   },
+   {
+    "Style": 110,
+    "Text": "[207]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "In response to the surprising lack of interest, IBM began early discounts of up to US$370"
+   },
+   {
+    "Style": 108,
+    "Text": "[54]"
+   },
+   {
+    "Style": 110,
+    "Text": "[208]"
+   },
+   {
+    "Style": 112,
+    "Text": " in June, lowering the two models' prices to $599 and $999,"
+   },
+   {
+    "Style": 108,
+    "Text": "[55]"
+   },
+   {
+    "Style": 110,
+    "Text": "[209]"
+   },
+   {
+    "Style": 112,
+    "Text": " but many of its dealers could not sell their initial shipments of 25 computers each."
+   },
+   {
+    "Style": 108,
+    "Text": "[42]"
+   },
+   {
+    "Style": 110,
+    "Text": "[210]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[55]"
+   },
+   {
+    "Style": 110,
+    "Text": "[211]"
+   },
+   {
+    "Style": 112,
+    "Text": " IBM allowed them to postpone paying for inventory for 180 days,"
+   },
+   {
+    "Style": 108,
+    "Text": "[56]"
+   },
+   {
+    "Style": 110,
+    "Text": "[212]"
+   },
+   {
+    "Style": 112,
+    "Text": " but inventory continued to pile up."
+   },
+   {
+    "Style": 108,
+    "Text": "[43]"
+   },
+   {
+    "Style": 110,
+    "Text": "[213]"
+   },
+   {
+    "Style": 112,
+    "Text": " By August the PCjr was being described as a flop."
+   },
+   {
+    "Style": 108,
+    "Text": "[57]"
+   },
+   {
+    "Style": 110,
+    "Text": "[214]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[32]"
+   },
+   {
+    "Style": 110,
+    "Text": "[215]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "In 2006 "
+   },
+   {
+    "Style": 108,
+    "Text": "PCWorld"
+   },
+   {
+    "Style": 110,
+    "Text": "[216]"
+   },
+   {
+    "Style": 112,
+    "Text": " ranked the IBM PCjr as 13th \"worst tech products of all time\"."
+   },
+   {
+    "Style": 108,
+    "Text": "[58]"
+   },
+   {
+    "Style": 110,
+    "Text": "[217]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Issues"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[218]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "One of the most significant complaints about the PCjr was its chiclet keyboard,"
+   },
+   {
+    "Style": 108,
+    "Text": "[12]"
+   },
+   {
+    "Style": 110,
+    "Text": "[219]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[39]"
+   },
+   {
+    "Style": 110,
+    "Text": "[220]"
+   },
+   {
+    "Style": 112,
+    "Text": " which was described as unsuitable for serious typing"
+   },
+   {
+    "Style": 108,
+    "Text": "[12]"
+   },
+   {
+    "Style": 110,
+    "Text": "[221]"
+   },
+   {
+    "Style": 112,
+    "Text": " and \"nearly useless\"."
+   },
+   {
+    "Style": 108,
+    "Text": "[59]"
+   },
+   {
+    "Style": 110,
+    "Text": "[222]"
+   },
+   {
+    "Style": 112,
+    "Text": " The lack of direct function keys was a pain point for word processing."
+   },
+   {
+    "Style": 108,
+    "Text": "[60]"
+   },
+   {
+    "Style": 110,
+    "Text": "[223]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Cost"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[224]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The PCjr's cost was its biggest disadvantage, even more so than the keyboard."
+   },
+   {
+    "Style": 108,
+    "Text": "[43]"
+   },
+   {
+    "Style": 110,
+    "Text": "[225]"
+   },
+   {
+    "Style": 112,
+    "Text": " The price was perceived as too high for a home computer, yet the PCjr was not powerful enough to be a business machine."
+   },
+   {
+    "Style": 108,
+    "Text": "[42]"
+   },
+   {
+    "Style": 110,
+    "Text": "[226]"
+   },
+   {
+    "Style": 112,
+    "Text": " IBM's lack of clear messaging on their target market (home, schools, or executives working at home) made it difficult for software developers, consumers,"
+   },
+   {
+    "Style": 108,
+    "Text": "[61]"
+   },
+   {
+    "Style": 110,
+    "Text": "[227]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[62]"
+   },
+   {
+    "Style": 110,
+    "Text": "[228]"
+   },
+   {
+    "Style": 112,
+    "Text": " and dealers"
+   },
+   {
+    "Style": 108,
+    "Text": "[49]"
+   },
+   {
+    "Style": 110,
+    "Text": "[229]"
+   },
+   {
+    "Style": 112,
+    "Text": " to prepare for the product. The price was perceived as targeting a market that did not exist."
+   },
+   {
+    "Style": 108,
+    "Text": "[52]"
+   },
+   {
+    "Style": 110,
+    "Text": "[230]"
+   },
+   {
+    "Style": 112,
+    "Text": " IBM was surprised to learn that many of the initial customers for the PCjr were not home users, as they assumed, but instead businesses who wanted a cheaper PC that took less space on a desk."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "IBM failed to recognize that many consumers wanted a computer more sophisticated than those that cost less than $500, but did not want to spend more than $1,000."
+   },
+   {
+    "Style": 108,
+    "Text": "[62]"
+   },
+   {
+    "Style": 110,
+    "Text": "[231]"
+   },
+   {
+    "Style": 112,
+    "Text": " The PCjr offered no compelling reason to spend that much."
+   },
+   {
+    "Style": 108,
+    "Text": "[63]"
+   },
+   {
+    "Style": 110,
+    "Text": "[232]"
+   },
+   {
+    "Style": 112,
+    "Text": " The PCjr cost more than twice as much as the C64 and the "
+   },
+   {
+    "Style": 108,
+    "Text": "Atari 8-bit computers"
+   },
+   {
+    "Style": 110,
+    "Text": "[233]"
+   },
+   {
+    "Style": 112,
+    "Text": ", while inferior to both for videogames."
+   },
+   {
+    "Style": 108,
+    "Text": "[12]"
+   },
+   {
+    "Style": 110,
+    "Text": "[234]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[64]"
+   },
+   {
+    "Style": 110,
+    "Text": "[235]"
+   },
+   {
+    "Style": 112,
+    "Text": " Spinnaker, a game developer, stated that they discontinued development for the PCjr when they learned of the actual price."
+   },
+   {
+    "Style": 108,
+    "Text": "[62]"
+   },
+   {
+    "Style": 110,
+    "Text": "[236]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Consumers were reportedly much more excited about the also-new "
+   },
+   {
+    "Style": 108,
+    "Text": "Macintosh 128K"
+   },
+   {
+    "Style": 110,
+    "Text": "[237]"
+   },
+   {
+    "Style": 112,
+    "Text": ", which was more sophisticated but only cost US$300 more, with accessories and software."
+   },
+   {
+    "Style": 108,
+    "Text": "[43]"
+   },
+   {
+    "Style": 110,
+    "Text": "[238]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[42]"
+   },
+   {
+    "Style": 110,
+    "Text": "[239]"
+   },
+   {
+    "Style": 112,
+    "Text": " The Macintosh reportedly outsold the IBM product during their first two months on the market."
+   },
+   {
+    "Style": 108,
+    "Text": "[50]"
+   },
+   {
+    "Style": 110,
+    "Text": "[240]"
+   },
+   {
+    "Style": 112,
+    "Text": " The PCjr's price was close to that of the Coleco Adam, but the Adam also included a "
+   },
+   {
+    "Style": 108,
+    "Text": "tape drive"
+   },
+   {
+    "Style": 110,
+    "Text": "[241]"
+   },
+   {
+    "Style": 112,
+    "Text": ", a printer, and software."
+   },
+   {
+    "Style": 108,
+    "Text": "[22]"
+   },
+   {
+    "Style": 110,
+    "Text": "[242]"
+   },
+   {
+    "Style": 112,
+    "Text": " A realistic cost including peripherals was $2,000"
+   },
+   {
+    "Style": 108,
+    "Text": "[65]"
+   },
+   {
+    "Style": 110,
+    "Text": "[243]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[17]"
+   },
+   {
+    "Style": 110,
+    "Text": "[244]"
+   },
+   {
+    "Style": 112,
+    "Text": " and other configurations cost $3,000 or more."
+   },
+   {
+    "Style": 108,
+    "Text": "[30]"
+   },
+   {
+    "Style": 110,
+    "Text": "[245]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[66]"
+   },
+   {
+    "Style": 110,
+    "Text": "[246]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[17]"
+   },
+   {
+    "Style": 110,
+    "Text": "[247]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Apple IIe was the PCjr's most direct competition."
+   },
+   {
+    "Style": 108,
+    "Text": "[50]"
+   },
+   {
+    "Style": 110,
+    "Text": "[248]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[51]"
+   },
+   {
+    "Style": 110,
+    "Text": "[249]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[67]"
+   },
+   {
+    "Style": 110,
+    "Text": "[250]"
+   },
+   {
+    "Style": 112,
+    "Text": " Although the PC outsold it,"
+   },
+   {
+    "Style": 108,
+    "Text": "[25]"
+   },
+   {
+    "Style": 110,
+    "Text": "[251]"
+   },
+   {
+    "Style": 112,
+    "Text": " Apple sold almost 110,000 units in December 1983, in part to customers who had waited until details of the PCjr became available."
+   },
+   {
+    "Style": 108,
+    "Text": "[68]"
+   },
+   {
+    "Style": 110,
+    "Text": "[252]"
+   },
+   {
+    "Style": 112,
+    "Text": " Apple estimated that 80% of its dealers sold IBM and Apple computers, and many visitors who were disappointed by the PCjr, or curious about the Macintosh, reportedly left with a IIe instead. The latter was so popular that a shortage occurred in early 1984."
+   },
+   {
+    "Style": 108,
+    "Text": "[25]"
+   },
+   {
+    "Style": 110,
+    "Text": "[253]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The US$669 PCjr model compared favorably to a $1,400 IIe also with 64 KB and no floppy drive,"
+   },
+   {
+    "Style": 108,
+    "Text": "[12]"
+   },
+   {
+    "Style": 110,
+    "Text": "[254]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[61]"
+   },
+   {
+    "Style": 110,
+    "Text": "[255]"
+   },
+   {
+    "Style": 112,
+    "Text": " but Apple lowered their computer's price"
+   },
+   {
+    "Style": 108,
+    "Text": "[43]"
+   },
+   {
+    "Style": 110,
+    "Text": "[256]"
+   },
+   {
+    "Style": 112,
+    "Text": " as part of a \"Starter System\" package, with monitor and floppy drive, to a price as low as $1,300,"
+   },
+   {
+    "Style": 108,
+    "Text": "[25]"
+   },
+   {
+    "Style": 110,
+    "Text": "[257]"
+   },
+   {
+    "Style": 112,
+    "Text": " plus a 30% discount for the important education market."
+   },
+   {
+    "Style": 108,
+    "Text": "[69]"
+   },
+   {
+    "Style": 110,
+    "Text": "[258]"
+   },
+   {
+    "Style": 112,
+    "Text": " In April 1984 Apple introduced the "
+   },
+   {
+    "Style": 108,
+    "Text": "Apple IIc"
+   },
+   {
+    "Style": 110,
+    "Text": "[259]"
+   },
+   {
+    "Style": 112,
+    "Text": ", a portable version with a more compact form factor, 128 KB of RAM, and a floppy drive. Although the PCjr's CPU was superior, the IIc—which Apple did not describe as a home computer, to avoid the \"game machine\" connotation—had an excellent keyboard and was compatible with the Apple II's enormous software library."
+   },
+   {
+    "Style": 108,
+    "Text": "[70]"
+   },
+   {
+    "Style": 110,
+    "Text": "[260]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[52]"
+   },
+   {
+    "Style": 110,
+    "Text": "[261]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[71]"
+   },
+   {
+    "Style": 110,
+    "Text": "[262]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[72]"
+   },
+   {
+    "Style": 110,
+    "Text": "[263]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[73]"
+   },
+   {
+    "Style": 110,
+    "Text": "[264]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Not completely PC compatible"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[265]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "By early 1984, PC compatibility was vital for any new, non-Apple computer's success."
+   },
+   {
+    "Style": 108,
+    "Text": "[74]"
+   },
+   {
+    "Style": 110,
+    "Text": "[266]"
+   },
+   {
+    "Style": 112,
+    "Text": " IBM had expected that most customers in the market would be new to computers, but 75% of PCjr customers used an IBM PC at work."
+   },
+   {
+    "Style": 108,
+    "Text": "[15]"
+   },
+   {
+    "Style": 110,
+    "Text": "[267]"
+   },
+   {
+    "Style": 112,
+    "Text": " Three quarters of the market were familiar with computers and wanted to run business software on the PCjr."
+   },
+   {
+    "Style": 108,
+    "Text": "[75]"
+   },
+   {
+    "Style": 110,
+    "Text": "[268]"
+   },
+   {
+    "Style": 112,
+    "Text": " An important market was executives who took data home to work on applications such as "
+   },
+   {
+    "Style": 108,
+    "Text": "Lotus 1-2-3"
+   },
+   {
+    "Style": 110,
+    "Text": "[269]"
+   },
+   {
+    "Style": 112,
+    "Text": ", and Peanut had been rumored to be fully PC compatible,"
+   },
+   {
+    "Style": 108,
+    "Text": "[28]"
+   },
+   {
+    "Style": 110,
+    "Text": "[270]"
+   },
+   {
+    "Style": 112,
+    "Text": " so many customers visited stores believing that the PCjr could run most PC software."
+   },
+   {
+    "Style": 108,
+    "Text": "[42]"
+   },
+   {
+    "Style": 110,
+    "Text": "[271]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[43]"
+   },
+   {
+    "Style": 110,
+    "Text": "[272]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[52]"
+   },
+   {
+    "Style": 110,
+    "Text": "[273]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[21]"
+   },
+   {
+    "Style": 110,
+    "Text": "[274]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[76]"
+   },
+   {
+    "Style": 110,
+    "Text": "[275]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "IBM's intent was for the PCjr to be perceived as a unique platform, like most other home computers, and their documentation stated it was \"a different computer than the PC\", but with \"a high level of programming compatibility\"."
+   },
+   {
+    "Style": 108,
+    "Text": "[77]"
+   },
+   {
+    "Style": 110,
+    "Text": "[276]"
+   },
+   {
+    "Style": 112,
+    "Text": " Nonetheless, potential customers perceived it as a variant of the PC, not a unique platform."
+   },
+   {
+    "Style": 108,
+    "Text": "[78]"
+   },
+   {
+    "Style": 110,
+    "Text": "[277]"
+   },
+   {
+    "Style": 112,
+    "Text": " While many PC applications do run on PCjr, compatibility issues exist with software that use more than 128 KB of RAM or require more than one floppy disk drive."
+   },
+   {
+    "Style": 108,
+    "Text": "[79]"
+   },
+   {
+    "Style": 110,
+    "Text": "[278]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Thousands of PC applications do require more than 128 KB of memory"
+   },
+   {
+    "Style": 108,
+    "Text": "[80]"
+   },
+   {
+    "Style": 110,
+    "Text": "[279]"
+   },
+   {
+    "Style": 112,
+    "Text": " and two disk drives,"
+   },
+   {
+    "Style": 108,
+    "Text": "[65]"
+   },
+   {
+    "Style": 110,
+    "Text": "[280]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[17]"
+   },
+   {
+    "Style": 110,
+    "Text": "[281]"
+   },
+   {
+    "Style": 112,
+    "Text": " making the PCjr incompatible with about 60% of software by some measures, including the popular word-processing program "
+   },
+   {
+    "Style": 108,
+    "Text": "WordStar"
+   },
+   {
+    "Style": 110,
+    "Text": "[282]"
+   },
+   {
+    "Style": 112,
+    "Text": " and Lotus 1-2-3,"
+   },
+   {
+    "Style": 108,
+    "Text": "[43]"
+   },
+   {
+    "Style": 110,
+    "Text": "[283]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[32]"
+   },
+   {
+    "Style": 110,
+    "Text": "[284]"
+   },
+   {
+    "Style": 112,
+    "Text": " common applications used to test PC compatibility."
+   },
+   {
+    "Style": 108,
+    "Text": "[81]"
+   },
+   {
+    "Style": 110,
+    "Text": "[285]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[40]"
+   },
+   {
+    "Style": 110,
+    "Text": "[286]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[82]"
+   },
+   {
+    "Style": 110,
+    "Text": "[287]"
+   },
+   {
+    "Style": 112,
+    "Text": " IBM's own DisplayWrite was released as a unique PCjr version."
+   },
+   {
+    "Style": 108,
+    "Text": "[60]"
+   },
+   {
+    "Style": 110,
+    "Text": "[288]"
+   },
+   {
+    "Style": 112,
+    "Text": " A four-line BASIC program that runs on the IBM PC can crash PCjr, mystifying even "
+   },
+   {
+    "Style": 108,
+    "Text": "Peter Norton"
+   },
+   {
+    "Style": 110,
+    "Text": "[289]"
+   },
+   {
+    "Style": 112,
+    "Text": "."
+   },
+   {
+    "Style": 108,
+    "Text": "[83]"
+   },
+   {
+    "Style": 110,
+    "Text": "[290]"
+   },
+   {
+    "Style": 112,
+    "Text": " These compatibility limitations made the computer unsuitable for taking work home,"
+   },
+   {
+    "Style": 108,
+    "Text": "[17]"
+   },
+   {
+    "Style": 110,
+    "Text": "[291]"
+   },
+   {
+    "Style": 112,
+    "Text": " although a PCjr variant of 1-2-3 was eventually released."
+   },
+   {
+    "Style": 108,
+    "Text": "[82]"
+   },
+   {
+    "Style": 110,
+    "Text": "[292]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Ultimately, the PCjr was perceived as not having a "
+   },
+   {
+    "Style": 108,
+    "Text": "killer app"
+   },
+   {
+    "Style": 110,
+    "Text": "[293]"
+   },
+   {
+    "Style": 112,
+    "Text": " to make up for these limitations."
+   },
+   {
+    "Style": 108,
+    "Text": "[17]"
+   },
+   {
+    "Style": 110,
+    "Text": "[294]"
+   },
+   {
+    "Style": 112,
+    "Text": " Software incompatibility made it inadequate as a business machine,"
+   },
+   {
+    "Style": 108,
+    "Text": "[73]"
+   },
+   {
+    "Style": 110,
+    "Text": "[295]"
+   },
+   {
+    "Style": 112,
+    "Text": " but poor performance with arcade-style games made it inadequate as a games machine."
+   },
+   {
+    "Style": 108,
+    "Text": "[64]"
+   },
+   {
+    "Style": 110,
+    "Text": "[296]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Limited hardware expansion"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[297]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Computer dealers quickly identified the PCjr's limited hardware expansion capability as another major disadvantage."
+   },
+   {
+    "Style": 108,
+    "Text": "[51]"
+   },
+   {
+    "Style": 110,
+    "Text": "[298]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[43]"
+   },
+   {
+    "Style": 110,
+    "Text": "[299]"
+   },
+   {
+    "Style": 112,
+    "Text": " ROM cartridges have small storage capacity,"
+   },
+   {
+    "Style": 108,
+    "Text": "[35]"
+   },
+   {
+    "Style": 110,
+    "Text": "[300]"
+   },
+   {
+    "Style": 112,
+    "Text": " requiring, for instance, two cartridges and a floppy disk for the PCjr version of Lotus 1-2-3, which also has difficulty fitting complex spreadsheets into 128 KB of RAM."
+   },
+   {
+    "Style": 108,
+    "Text": "[82]"
+   },
+   {
+    "Style": 110,
+    "Text": "[301]"
+   },
+   {
+    "Style": 112,
+    "Text": " IBM published technical details for the PCjr, as it had done for the IBM PC, to encourage third parties to develop accessories, but did not offer a second floppy drive, hard drive,"
+   },
+   {
+    "Style": 108,
+    "Text": "[31]"
+   },
+   {
+    "Style": 110,
+    "Text": "[302]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[30]"
+   },
+   {
+    "Style": 110,
+    "Text": "[303]"
+   },
+   {
+    "Style": 112,
+    "Text": " or memory beyond 128 KB."
+   },
+   {
+    "Style": 108,
+    "Text": "[84]"
+   },
+   {
+    "Style": 110,
+    "Text": "[304]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[15]"
+   },
+   {
+    "Style": 110,
+    "Text": "[305]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "While multiple sidecar expansion units can be attached, they are bulky, and the computer requires additional power supplies to support a second floppy drive or more than one sidecar. IBM advised against adding more than four sidecars."
+   },
+   {
+    "Style": 108,
+    "Text": "[30]"
+   },
+   {
+    "Style": 110,
+    "Text": "[306]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[32]"
+   },
+   {
+    "Style": 110,
+    "Text": "[307]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[17]"
+   },
+   {
+    "Style": 110,
+    "Text": "[308]"
+   },
+   {
+    "Style": 112,
+    "Text": " The PCjr also lacks a "
+   },
+   {
+    "Style": 108,
+    "Text": "DMA"
+   },
+   {
+    "Style": 110,
+    "Text": "[309]"
+   },
+   {
+    "Style": 112,
+    "Text": " controller, so the 8088 CPU has to service floppy disk transfers directly, causing the system to momentarily freeze while accessing a disk. The PCjr also cannot use modems faster than 2400 baud."
+   },
+   {
+    "Style": 108,
+    "Text": "[84]"
+   },
+   {
+    "Style": 110,
+    "Text": "[310]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[17]"
+   },
+   {
+    "Style": 110,
+    "Text": "[311]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[66]"
+   },
+   {
+    "Style": 110,
+    "Text": "[312]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Response to poor sales"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[313]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "By mid-1984, the PCjr had experienced months of bad publicity, and dealers were panicking."
+   },
+   {
+    "Style": 108,
+    "Text": "[32]"
+   },
+   {
+    "Style": 110,
+    "Text": "[314]"
+   },
+   {
+    "Style": 112,
+    "Text": " Sales were poor and falling each month before rising slightly with the June discounts, and each dealer sold an average of 15 units total in the first half of the year."
+   },
+   {
+    "Style": 108,
+    "Text": "[55]"
+   },
+   {
+    "Style": 110,
+    "Text": "[315]"
+   },
+   {
+    "Style": 112,
+    "Text": " Apple sold almost as many IIc computers on its first day as PCjr since introduction."
+   },
+   {
+    "Style": 108,
+    "Text": "[17]"
+   },
+   {
+    "Style": 110,
+    "Text": "[316]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "IBM downplayed complaints about the keyboard,"
+   },
+   {
+    "Style": 108,
+    "Text": "[39]"
+   },
+   {
+    "Style": 110,
+    "Text": "[317]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[17]"
+   },
+   {
+    "Style": 110,
+    "Text": "[318]"
+   },
+   {
+    "Style": 112,
+    "Text": " but in July announced that it would replace the chiclet keyboards, for free, with a new model with conventional typewriter-style keys."
+   },
+   {
+    "Style": 108,
+    "Text": "[80]"
+   },
+   {
+    "Style": 110,
+    "Text": "[319]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[17]"
+   },
+   {
+    "Style": 110,
+    "Text": "[320]"
+   },
+   {
+    "Style": 112,
+    "Text": " This was perceived as unusually generous even for IBM, especially within the computer industry."
+   },
+   {
+    "Style": 108,
+    "Text": "[15]"
+   },
+   {
+    "Style": 110,
+    "Text": "[321]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[32]"
+   },
+   {
+    "Style": 110,
+    "Text": "[322]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[64]"
+   },
+   {
+    "Style": 110,
+    "Text": "[323]"
+   },
+   {
+    "Style": 112,
+    "Text": " By spending $5 million to replace 60,000 keyboards, IBM acknowledged that the original models were a mistake and confirmed the computer's poor sales compared to original estimates."
+   },
+   {
+    "Style": 108,
+    "Text": "[15]"
+   },
+   {
+    "Style": 110,
+    "Text": "[324]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[13]"
+   },
+   {
+    "Style": 110,
+    "Text": "[325]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "In August 1984, IBM began a massive advertising campaign, which ran through the end of the year."
+   },
+   {
+    "Style": 108,
+    "Text": "[55]"
+   },
+   {
+    "Style": 110,
+    "Text": "[326]"
+   },
+   {
+    "Style": 112,
+    "Text": " They reduced the PCjr's list price, offering a US$999 package meant to be superior to the comparably priced Apple IIe and IIc, and they introduced new IBM-made memory expansion options to bring the machine to 512 KB."
+   },
+   {
+    "Style": 108,
+    "Text": "[15]"
+   },
+   {
+    "Style": 110,
+    "Text": "[327]"
+   },
+   {
+    "Style": 112,
+    "Text": " As part of $32.5 million in advertising for the computer during 1984,"
+   },
+   {
+    "Style": 108,
+    "Text": "[85]"
+   },
+   {
+    "Style": 110,
+    "Text": "[328]"
+   },
+   {
+    "Style": 112,
+    "Text": " it began what the company described as the most extensive marketing campaign in IBM history, in which 98% of Americans would see at least 30 PCjr advertisements in the last four months of the year. Three simultaneous "
+   },
+   {
+    "Style": 108,
+    "Text": "bundled software"
+   },
+   {
+    "Style": 110,
+    "Text": "[329]"
+   },
+   {
+    "Style": 112,
+    "Text": " promotions, a sweepstakes with "
+   },
+   {
+    "Style": 108,
+    "Text": "Procter \u0026 Gamble"
+   },
+   {
+    "Style": 110,
+    "Text": "[330]"
+   },
+   {
+    "Style": 112,
+    "Text": ", and direct mail to more than 10 million people marketed the redesigned computer,"
+   },
+   {
+    "Style": 108,
+    "Text": "[86]"
+   },
+   {
+    "Style": 110,
+    "Text": "[331]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[87]"
+   },
+   {
+    "Style": 110,
+    "Text": "[332]"
+   },
+   {
+    "Style": 112,
+    "Text": " while deemphasizing the PCjr's role as a home computer and emphasizing PC compatibility."
+   },
+   {
+    "Style": 108,
+    "Text": "[15]"
+   },
+   {
+    "Style": 110,
+    "Text": "[333]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[17]"
+   },
+   {
+    "Style": 110,
+    "Text": "[334]"
+   },
+   {
+    "Style": 112,
+    "Text": " Advertisements listed the new price, \"new typewriter-style keyboard\", standard 128 KB of memory and expansion options, the PCjr version of 1-2-3, and the ability to \"run over a thousand of the most popular programs written for the IBM PC\"."
+   },
+   {
+    "Style": 108,
+    "Text": "[88]"
+   },
+   {
+    "Style": 110,
+    "Text": "[335]"
+   },
+   {
+    "Style": 112,
+    "Text": " A $500 rebate to dealers let them include a free color monitor with the discounted PCjr."
+   },
+   {
+    "Style": 108,
+    "Text": "[89]"
+   },
+   {
+    "Style": 110,
+    "Text": "[336]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[54]"
+   },
+   {
+    "Style": 110,
+    "Text": "[337]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Despite widespread skepticism,"
+   },
+   {
+    "Style": 108,
+    "Text": "[90]"
+   },
+   {
+    "Style": 110,
+    "Text": "[338]"
+   },
+   {
+    "Style": 112,
+    "Text": " what became known as the \"Save-the-Junior campaign\""
+   },
+   {
+    "Style": 108,
+    "Text": "[87]"
+   },
+   {
+    "Style": 110,
+    "Text": "[339]"
+   },
+   {
+    "Style": 112,
+    "Text": " succeeded in the short term. Sales rose every month from June (1.9 units sold per store) to September (4.2),"
+   },
+   {
+    "Style": 108,
+    "Text": "[55]"
+   },
+   {
+    "Style": 110,
+    "Text": "[340]"
+   },
+   {
+    "Style": 112,
+    "Text": " and many dealers reported selling more in the weeks following the changes than in the previous seven months."
+   },
+   {
+    "Style": 108,
+    "Text": "[32]"
+   },
+   {
+    "Style": 110,
+    "Text": "[341]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[91]"
+   },
+   {
+    "Style": 110,
+    "Text": "[342]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[87]"
+   },
+   {
+    "Style": 110,
+    "Text": "[343]"
+   },
+   {
+    "Style": 112,
+    "Text": " The more expensive model now cost the $800 to 900 that had originally been expected prior to release."
+   },
+   {
+    "Style": 108,
+    "Text": "[62]"
+   },
+   {
+    "Style": 110,
+    "Text": "[344]"
+   },
+   {
+    "Style": 112,
+    "Text": " With the new hardware options and lower prices, consumers could buy a PCjr for $1,000 less than a comparable PC, and slightly less than an Apple IIe."
+   },
+   {
+    "Style": 108,
+    "Text": "[80]"
+   },
+   {
+    "Style": 110,
+    "Text": "[345]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[15]"
+   },
+   {
+    "Style": 110,
+    "Text": "[346]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The PCjr reportedly became the best-selling computer,"
+   },
+   {
+    "Style": 108,
+    "Text": "[92]"
+   },
+   {
+    "Style": 110,
+    "Text": "[347]"
+   },
+   {
+    "Style": 112,
+    "Text": " outselling the Apple IIe and IIc by four to one in some stores"
+   },
+   {
+    "Style": 108,
+    "Text": "[89]"
+   },
+   {
+    "Style": 110,
+    "Text": "[348]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[93]"
+   },
+   {
+    "Style": 110,
+    "Text": "[349]"
+   },
+   {
+    "Style": 112,
+    "Text": " and even the C64."
+   },
+   {
+    "Style": 108,
+    "Text": "[32]"
+   },
+   {
+    "Style": 110,
+    "Text": "[350]"
+   },
+   {
+    "Style": 112,
+    "Text": " As sales reached an estimated 50 per store in December,"
+   },
+   {
+    "Style": 108,
+    "Text": "[94]"
+   },
+   {
+    "Style": 110,
+    "Text": "[351]"
+   },
+   {
+    "Style": 112,
+    "Text": " dealers increased inventories,"
+   },
+   {
+    "Style": 108,
+    "Text": "[62]"
+   },
+   {
+    "Style": 110,
+    "Text": "[352]"
+   },
+   {
+    "Style": 112,
+    "Text": " and Tecmar resumed production of PCjr peripherals after retailers suddenly began ordering its products again."
+   },
+   {
+    "Style": 108,
+    "Text": "[87]"
+   },
+   {
+    "Style": 110,
+    "Text": "[353]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Discontinuation"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[354]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "By January 1985, IBM had sold an estimated 240,000–275,000 PCjrs, 200,000 of which were sold in the fourth quarter of 1984. When the discounts ended, however, sales decreased abruptly,"
+   },
+   {
+    "Style": 108,
+    "Text": "[92]"
+   },
+   {
+    "Style": 110,
+    "Text": "[355]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[94]"
+   },
+   {
+    "Style": 110,
+    "Text": "[356]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[26]"
+   },
+   {
+    "Style": 110,
+    "Text": "[357]"
+   },
+   {
+    "Style": 112,
+    "Text": " and inventories began to stack up again."
+   },
+   {
+    "Style": 108,
+    "Text": "[62]"
+   },
+   {
+    "Style": 110,
+    "Text": "[358]"
+   },
+   {
+    "Style": 112,
+    "Text": " By this time, three PCjr-specific magazines had ended their publications"
+   },
+   {
+    "Style": 108,
+    "Text": "[45]"
+   },
+   {
+    "Style": 110,
+    "Text": "[359]"
+   },
+   {
+    "Style": 112,
+    "Text": " with significant losses."
+   },
+   {
+    "Style": 108,
+    "Text": "[95]"
+   },
+   {
+    "Style": 110,
+    "Text": "[360]"
+   },
+   {
+    "Style": 112,
+    "Text": " IBM was unable to meet the demand for its new "
+   },
+   {
+    "Style": 108,
+    "Text": "PC AT"
+   },
+   {
+    "Style": 110,
+    "Text": "[361]"
+   },
+   {
+    "Style": 112,
+    "Text": " business microcomputer, but the home-computer market was in decline,"
+   },
+   {
+    "Style": 108,
+    "Text": "[78]"
+   },
+   {
+    "Style": 110,
+    "Text": "[362]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[26]"
+   },
+   {
+    "Style": 110,
+    "Text": "[363]"
+   },
+   {
+    "Style": 112,
+    "Text": " and the company was likely unable to make a sufficient profit when selling the PCjr at a discount."
+   },
+   {
+    "Style": 108,
+    "Text": "[56]"
+   },
+   {
+    "Style": 110,
+    "Text": "[364]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[94]"
+   },
+   {
+    "Style": 110,
+    "Text": "[365]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[62]"
+   },
+   {
+    "Style": 110,
+    "Text": "[366]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[26]"
+   },
+   {
+    "Style": 110,
+    "Text": "[367]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "IBM discontinued the PCjr on March 19, 1985, stating that \"The home market didn't expand to the degree I.B.M. and many observers thought it would\". The surprise decision"
+   },
+   {
+    "Style": 108,
+    "Text": "[94]"
+   },
+   {
+    "Style": 110,
+    "Text": "[368]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[26]"
+   },
+   {
+    "Style": 110,
+    "Text": "[369]"
+   },
+   {
+    "Style": 112,
+    "Text": " by IBM's CEO "
+   },
+   {
+    "Style": 108,
+    "Text": "John Akers"
+   },
+   {
+    "Style": 110,
+    "Text": "[370]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[75]"
+   },
+   {
+    "Style": 110,
+    "Text": "[371]"
+   },
+   {
+    "Style": 112,
+    "Text": " astounded software developers, some of which only made PCjr products."
+   },
+   {
+    "Style": 108,
+    "Text": "[92]"
+   },
+   {
+    "Style": 110,
+    "Text": "[372]"
+   },
+   {
+    "Style": 112,
+    "Text": " Rumored to have 100,000 to 400,000 unsold PCjrs"
+   },
+   {
+    "Style": 108,
+    "Text": "[92]"
+   },
+   {
+    "Style": 110,
+    "Text": "[373]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[96]"
+   },
+   {
+    "Style": 110,
+    "Text": "[374]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[97]"
+   },
+   {
+    "Style": 110,
+    "Text": "[375]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[98]"
+   },
+   {
+    "Style": 110,
+    "Text": "[376]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "[99]"
+   },
+   {
+    "Style": 110,
+    "Text": "[377]"
+   },
+   {
+    "Style": 112,
+    "Text": " despite not having ordered new microprocessors from Intel since summer 1984,"
+   },
+   {
+    "Style": 108,
+    "Text": "[100]"
+   },
+   {
+    "Style": 110,
+    "Text": "[378]"
+   },
+   {
+    "Style": 112,
+    "Text": " the company offered large discounts to its employees,"
+   },
+   {
+    "Style": 108,
+    "Text": "[101]"
+   },
+   {
+    "Style": 110,
+    "Text": "[379]"
+   },
+   {
+    "Style": 112,
+    "Text": " schools, and the public."
+   },
+   {
+    "Style": 108,
+    "Text": "[98]"
+   },
+   {
+    "Style": 110,
+    "Text": "[380]"
+   },
+   {
+    "Style": 112,
+    "Text": " Inventory remained through Christmas 1985, and IBM used discounts as well as radio and full-page print ads to try to sell off remaining stock."
+   },
+   {
+    "Style": 108,
+    "Text": "[99]"
+   },
+   {
+    "Style": 110,
+    "Text": "[381]"
+   },
+   {
+    "Style": 112,
+    "Text": " Dealers said that they would not accept IBM's unusually attractive "
+   },
+   {
+    "Style": 108,
+    "Text": "payment terms"
+   },
+   {
+    "Style": 110,
+    "Text": "[382]"
+   },
+   {
+    "Style": 112,
+    "Text": ", because stores already had large inventory they were unable to sell."
+   },
+   {
+    "Style": 108,
+    "Text": "[98]"
+   },
+   {
+    "Style": 110,
+    "Text": "[383]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Legacy"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[384]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The PCjr was a successful product. The problem was that it only sold a few hundred thousand a year. Anybody else would love to have a product that sells a few hundred thousand a year. But that's a disaster when you plan to sell a million, million and a half a year."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "— "
+   },
+   {
+    "Style": 108,
+    "Text": "John V. Roach"
+   },
+   {
+    "Style": 110,
+    "Text": "[385]"
+   },
+   {
+    "Style": 112,
+    "Text": ", "
+   },
+   {
+    "Style": 108,
+    "Text": "Tandy Corporation"
+   },
+   {
+    "Style": 110,
+    "Text": "[386]"
+   },
+   {
+    "Style": 112,
+    "Text": " CEO, 1988"
+   },
+   {
+    "Style": 108,
+    "Text": "[102]"
+   },
+   {
+    "Style": 110,
+    "Text": "[387]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "The press widely covered the failure of the PCjr."
+   },
+   {
+    "Style": 108,
+    "Text": "[75]"
+   },
+   {
+    "Style": 110,
+    "Text": "[388]"
+   },
+   {
+    "Style": 112,
+    "Text": " Although the machine's failure had little effect on IBM's revenue ($46 billion in 1984), discontinuing such a prominent product embarrassed IBM."
+   },
+   {
+    "Style": 108,
+    "Text": "[62]"
+   },
+   {
+    "Style": 110,
+    "Text": "[389]"
+   },
+   {
+    "Style": 112,
+    "Text": " The failure was so great that it was compared to the "
+   },
+   {
+    "Style": 108,
+    "Text": "Edsel"
+   },
+   {
+    "Style": 110,
+    "Text": "[390]"
+   },
+   {
+    "Style": 112,
+    "Text": " and "
+   },
+   {
+    "Style": 108,
+    "Text": "New Coke"
+   },
+   {
+    "Style": 110,
+    "Text": "[391]"
+   },
+   {
+    "Style": 112,
+    "Text": ","
+   },
+   {
+    "Style": 108,
+    "Text": "[103]"
+   },
+   {
+    "Style": 110,
+    "Text": "[392]"
+   },
+   {
+    "Style": 112,
+    "Text": " and "
+   },
+   {
+    "Style": 108,
+    "Text": "Oracle Corporation"
+   },
+   {
+    "Style": 110,
+    "Text": "[393]"
+   },
+   {
+    "Style": 112,
+    "Text": " mocked a rival's product as being PCjr compatible."
+   },
+   {
+    "Style": 108,
+    "Text": "[104]"
+   },
+   {
+    "Style": 110,
+    "Text": "[394]"
+   },
+   {
+    "Style": 112,
+    "Text": " IBM reportedly created a Chiclet rule, requiring "
+   },
+   {
+    "Style": 108,
+    "Text": "human factors"
+   },
+   {
+    "Style": 110,
+    "Text": "[395]"
+   },
+   {
+    "Style": 112,
+    "Text": " testing for future products."
+   },
+   {
+    "Style": 108,
+    "Text": "[105]"
+   },
+   {
+    "Style": 110,
+    "Text": "[396]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Some analysts speculated that IBM's bureaucratic culture, so different from that of the less-rigid Boca Raton division that created the PC, had resulted in the failure, while others thought that the absence of IBM's cautious and thorough bureaucrats had caused it. "
+   },
+   {
+    "Style": 108,
+    "Text": "Don Estridge"
+   },
+   {
+    "Style": 110,
+    "Text": "[397]"
+   },
+   {
+    "Style": 112,
+    "Text": " said that their mistake had been to expect that first-time computer users would buy a PCjr."
+   },
+   {
+    "Style": 108,
+    "Text": "[75]"
+   },
+   {
+    "Style": 110,
+    "Text": "[398]"
+   },
+   {
+    "Style": 112,
+    "Text": " It was perceived by developers that IBM had entered the market without doing any research."
+   },
+   {
+    "Style": 108,
+    "Text": "[62]"
+   },
+   {
+    "Style": 110,
+    "Text": "[399]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "Tandy Corporation"
+   },
+   {
+    "Style": 110,
+    "Text": "[400]"
+   },
+   {
+    "Style": 112,
+    "Text": " released a clone, the "
+   },
+   {
+    "Style": 108,
+    "Text": "Tandy 1000"
+   },
+   {
+    "Style": 110,
+    "Text": "[401]"
+   },
+   {
+    "Style": 112,
+    "Text": ", in November 1984,"
+   },
+   {
+    "Style": 108,
+    "Text": "[106]"
+   },
+   {
+    "Style": 110,
+    "Text": "[402]"
+   },
+   {
+    "Style": 112,
+    "Text": " describing it as \"what the PCjr should have been\"."
+   },
+   {
+    "Style": 108,
+    "Text": "[107]"
+   },
+   {
+    "Style": 110,
+    "Text": "[403]"
+   },
+   {
+    "Style": 112,
+    "Text": " After the PCjr's discontinuation, Tandy quickly removed any mention of it in advertising, while emphasizing the 1000's PC compatibility. The machine and its many successors sold well, unlike the PCjr, partly because the Tandy 1000 was sold in ubiquitous "
+   },
+   {
+    "Style": 108,
+    "Text": "Radio Shack"
+   },
+   {
+    "Style": 110,
+    "Text": "[404]"
+   },
+   {
+    "Style": 112,
+    "Text": " stores and partly because it was less costly, easier to expand, and almost entirely compatible with the IBM PC. The PCjr's enhanced graphics and sound standards became known as \""
+   },
+   {
+    "Style": 108,
+    "Text": "Tandy-compatible"
+   },
+   {
+    "Style": 110,
+    "Text": "[405]"
+   },
+   {
+    "Style": 112,
+    "Text": "\", and many PC games advertised their Tandy support. One company developed a PCjr modification that made it compatible with Tandy software."
+   },
+   {
+    "Style": 108,
+    "Text": "[108]"
+   },
+   {
+    "Style": 110,
+    "Text": "[406]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Ultimately, the PCjr's failure was attributed to its lack of PC compatibility."
+   },
+   {
+    "Style": 108,
+    "Text": "[109]"
+   },
+   {
+    "Style": 110,
+    "Text": "[407]"
+   },
+   {
+    "Style": 112,
+    "Text": " As PC clones became widely available at prices as low as $600, less than the price of the Apple IIc, consumers began purchasing DOS computers for the home in large numbers, and these inexpensive clones succeeded with consumers where the PCjr had failed, by being as fast as, or faster than the IBM PC while still being highly compatible."
+   },
+   {
+    "Style": 108,
+    "Text": "[110]"
+   },
+   {
+    "Style": 110,
+    "Text": "[408]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Several upgrades for the PCjr were designed by IBM/Teledyne but never reached store shelves before the PCjr was canceled. These included a wireless joystick and various memory and drive upgrades. PC Enterprises became the last of the major third-party vendors to supply full service, parts, and add-ons, extending the functional life of the PCjr to about 10 years, often buying out inventory and rights for PCjr support."
+   },
+   {
+    "Style": 108,
+    "Text": "[111]"
+   },
+   {
+    "Style": 110,
+    "Text": "[409]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Other manufacturers provided support items for PCjr fans, such as hard-drive attachments and specialized sidecars that the user could use to enhance the system. The PCjr was able to run other software designed for the PC, such as word processor, database and spreadsheet programs ran well on the PCjr with 128 KB of memory. When fully expanded to over 600 KB memory, the PCjr would run most IBM PC software."
+   },
+   {
+    "Style": 108,
+    "Text": "[112]"
+   },
+   {
+    "Style": 110,
+    "Text": "[410]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "IBM returned to the home market in 1990 with the "
+   },
+   {
+    "Style": 108,
+    "Text": "PS/1"
+   },
+   {
+    "Style": 110,
+    "Text": "[411]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Unlike the PCjr, the PS/1 offered full PC compatibility, a low price, and a conventional keyboard."
+   },
+   {
+    "Style": 108,
+    "Text": "[103]"
+   },
+   {
+    "Style": 110,
+    "Text": "[412]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Timeline"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[413]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Timeline of the IBM Personal Computer "
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "v"
+   },
+   {
+    "Style": 110,
+    "Text": "[414]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "t"
+   },
+   {
+    "Style": 110,
+    "Text": "[415]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "e"
+   },
+   {
+    "Style": 110,
+    "Text": "[416]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 417)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "Asterisk (*) denotes a model released in Japan only | "
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "References"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[418]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* PCjr Technical Reference, IBM Corporation."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[419]"
+   },
+   {
+    "Style": 112,
+    "Text": " Examples of such other machines are the "
+   },
+   {
+    "Style": 108,
+    "Text": "Commodore 64"
+   },
+   {
+    "Style": 110,
+    "Text": "[420]"
+   },
+   {
+    "Style": 112,
+    "Text": " and the "
+   },
+   {
+    "Style": 108,
+    "Text": "Atari 2600"
+   },
+   {
+    "Style": 110,
+    "Text": "[421]"
+   },
+   {
+    "Style": 112,
+    "Text": " (aka VCS), and all or almost all later cartridge-based game consoles."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Norton, Peter (March 20, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Unearthing The PCjr's Secrets\""
+   },
+   {
+    "Style": 110,
+    "Text": "[422]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC Magazine. p. 111. Retrieved October 24, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[423]"
+   },
+   {
+    "Style": 112,
+    "Text": " Vose, G. Michael (December 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Tandy 1000\""
+   },
+   {
+    "Style": 110,
+    "Text": "[424]"
+   },
+   {
+    "Style": 112,
+    "Text": ". BYTE. pp. 98–104."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[425]"
+   },
+   {
+    "Style": 112,
+    "Text": " VGA should not be confused with the later "
+   },
+   {
+    "Style": 108,
+    "Text": "Video Graphics Array"
+   },
+   {
+    "Style": 110,
+    "Text": "[426]"
+   },
+   {
+    "Style": 112,
+    "Text": " standard that IBM released with the "
+   },
+   {
+    "Style": 108,
+    "Text": "PS/2"
+   },
+   {
+    "Style": 110,
+    "Text": "[427]"
+   },
+   {
+    "Style": 112,
+    "Text": " line in 1987."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Norton, Peter (January 24, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Screening the PCjr's Color, Video, And Memory Options\""
+   },
+   {
+    "Style": 110,
+    "Text": "[428]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC Magazine. p. 128. Retrieved October 23, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[429]"
+   },
+   {
+    "Style": 112,
+    "Text": " In comparison, the circuitry of the IBM CGA consists of an MC6845 and dozens of standard logic devices; the VGA replaces most of those and a good number more that would have been required to implement the enhanced features, so that the PCjr video subsystem could not have fit on a single-board IBM PC adapter card."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[430]"
+   },
+   {
+    "Style": 112,
+    "Text": " In other words, an IBM PC XT system with 128 KB of main RAM and a CGA installed actually has a total of 128 + 16 = 144 KB of RAM overall, while a PCjr with 128 KB RAM actually has exactly 128 KB of RAM overall, some part of which must be used for the video (in normal use, where the video is not turned off). The CGA standard graphics modes and 160 × 200 16-color graphics mode each need (almost) 16 KB of RAM, while the text modes need only 2000 (for 40 × 25) or 4000 (for 80 × 25) bytes of RAM, but the two enhanced graphics modes each use (nearly) 32 KB of RAM. This means that a 128 KB PCjr in an enhanced graphics mode is like a PC XT with 96 KB of main RAM and an enhanced CGA card (such as the Plantronics card, which also has 32 KB of RAM). If the PCjr video is double-buffered for page flipping (not a possibility on the CGA in normal modes, except text modes), then both 32 KB video buffers are subtracted from the available system RAM, making the 128 KB PCjr like a PC XT with only 64 KB of main RAM."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Norton, Peter (January 24, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Sound Abilities: The PCjr\""
+   },
+   {
+    "Style": 110,
+    "Text": "[431]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC Magazine. p. 137. Retrieved October 23, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[432]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "PC Mag"
+   },
+   {
+    "Style": 110,
+    "Text": "[433]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Ziff Davis, Inc. April 17, 1984."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Halfhill, Tom R. (January 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM's New PCjr\""
+   },
+   {
+    "Style": 110,
+    "Text": "[434]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Compute!. p. 44. Retrieved October 30, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Pollack, Andrew (November 2, 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Debut of I.B.M.'S Junior\""
+   },
+   {
+    "Style": 110,
+    "Text": "[435]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Nichols, Shaun (March 22, 2014). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM PCjr STRIPPED BARE: We tear down the machine Big Blue would rather you forgot\""
+   },
+   {
+    "Style": 110,
+    "Text": "[436]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The Register. Retrieved April 1, 2014."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[437]"
+   },
+   {
+    "Style": 112,
+    "Text": " Lazy Game Reviews (January 17, 2011). "
+   },
+   {
+    "Style": 108,
+    "Text": "LGR – Experiencing The IBM PCjr Chiclet Keyboard"
+   },
+   {
+    "Style": 110,
+    "Text": "[438]"
+   },
+   {
+    "Style": 112,
+    "Text": ". YouTube. "
+   },
+   {
+    "Style": 108,
+    "Text": "Archived"
+   },
+   {
+    "Style": 110,
+    "Text": "[439]"
+   },
+   {
+    "Style": 112,
+    "Text": " from the original on December 12, 2021."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Halfhill, Tom R. (October 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM's New \u0026 Improved PCjr\""
+   },
+   {
+    "Style": 110,
+    "Text": "[440]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Compute!. p. 50. Retrieved February 24, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[441]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM PCjr Options and Accessories\""
+   },
+   {
+    "Style": 110,
+    "Text": "[442]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Brutman.com. Retrieved October 4, 2020."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Levy, Steven (January 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Life and Times of PC junior\""
+   },
+   {
+    "Style": 110,
+    "Text": "[443]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Popular Computing. p. 92. Retrieved March 12, 2020."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[444]"
+   },
+   {
+    "Style": 112,
+    "Text": " Norton, Peter (June 26, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Adding to Junior's Memory\""
+   },
+   {
+    "Style": 110,
+    "Text": "[445]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC Magazine. p. 98. Retrieved October 24, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Pollack, Andrew (March 27, 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Big I.B.M. Has Done It Again\""
+   },
+   {
+    "Style": 110,
+    "Text": "[446]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. p. Section 3, Page 1. "
+   },
+   {
+    "Style": 108,
+    "Text": "ISSN"
+   },
+   {
+    "Style": 110,
+    "Text": "[447]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "0362-4331"
+   },
+   {
+    "Style": 110,
+    "Text": "[448]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Retrieved March 16, 2020."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Analysts say: IBM's PCjr won't disrupt Christmas for competitors\""
+   },
+   {
+    "Style": 110,
+    "Text": "[449]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Santa Cruz Sentinel. Associated Press. November 2, 1983. pp. B-5. Retrieved October 6, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "\"I.B.M.'S Speedy Redirection\""
+   },
+   {
+    "Style": 110,
+    "Text": "[450]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. November 2, 1983. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Moritz, Michael; John Greenwald; Frederick Ungeheuer (November 7, 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"D-Day for the Home Computer\""
+   },
+   {
+    "Style": 110,
+    "Text": "[451]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Time. Archived from "
+   },
+   {
+    "Style": 108,
+    "Text": "the original"
+   },
+   {
+    "Style": 110,
+    "Text": "[452]"
+   },
+   {
+    "Style": 112,
+    "Text": " on November 22, 2008. Retrieved February 23, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[453]"
+   },
+   {
+    "Style": 112,
+    "Text": " Reimer, Jeremy (November 2, 2009). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Total Share: Personal Computer Market Share 1975–2005\""
+   },
+   {
+    "Style": 110,
+    "Text": "[454]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Jeremy Reimer's Blog. Retrieved March 15, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[455]"
+   },
+   {
+    "Style": 112,
+    "Text": " Curran, Lawrence J.; Shuford, Richard S. (November 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM's Estridge\""
+   },
+   {
+    "Style": 110,
+    "Text": "[456]"
+   },
+   {
+    "Style": 112,
+    "Text": ". BYTE. pp. 88–97. Retrieved March 19, 2016."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Mace, Scott (April 9, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Apple IIe Sales Surge as IIc is Readied\""
+   },
+   {
+    "Style": 110,
+    "Text": "[457]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. pp. 54–55. Retrieved February 4, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Castro, Janice; Bob Buderi; Thomas McCarroll (April 1, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Kicking Junior Out of the Family\""
+   },
+   {
+    "Style": 110,
+    "Text": "[458]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Time. Archived from "
+   },
+   {
+    "Style": 108,
+    "Text": "the original"
+   },
+   {
+    "Style": 110,
+    "Text": "[459]"
+   },
+   {
+    "Style": 112,
+    "Text": " on June 25, 2009. Retrieved February 23, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[460]"
+   },
+   {
+    "Style": 112,
+    "Text": " Pollack, Andrew (June 19, 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Coming Crisis in Home Computers\""
+   },
+   {
+    "Style": 110,
+    "Text": "[461]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. Retrieved January 19, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Greenwald, John (July 11, 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Colossus That Works\""
+   },
+   {
+    "Style": 110,
+    "Text": "[462]"
+   },
+   {
+    "Style": 112,
+    "Text": ". TIME. "
+   },
+   {
+    "Style": 108,
+    "Text": "Archived"
+   },
+   {
+    "Style": 110,
+    "Text": "[463]"
+   },
+   {
+    "Style": 112,
+    "Text": " from the original on May 14, 2008. Retrieved May 18, 2019."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[464]"
+   },
+   {
+    "Style": 112,
+    "Text": " Sandberg-Diment, Erik (September 27, 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Personal Computers; Is the I.B.M. Peanut Really in the Wings?\""
+   },
+   {
+    "Style": 110,
+    "Text": "[465]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. p. C5. "
+   },
+   {
+    "Style": 108,
+    "Text": "ISSN"
+   },
+   {
+    "Style": 110,
+    "Text": "[466]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "0362-4331"
+   },
+   {
+    "Style": 110,
+    "Text": "[467]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Retrieved December 14, 2017."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Ruby, Daniel (February 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM's PCjr—was it worth the wait?\""
+   },
+   {
+    "Style": 110,
+    "Text": "[468]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Popular Science. pp. 68–71. Retrieved February 24, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM PCjr leads the way for industry\""
+   },
+   {
+    "Style": 110,
+    "Text": "[469]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The Pantagraph. The Washington Post. November 6, 1983. pp. E6. Retrieved October 6, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* McCarroll, Thomas; Philip Elmer-DeWitt (December 24, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"A Flop Becomes a Hit\""
+   },
+   {
+    "Style": 110,
+    "Text": "[470]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Time. Archived from "
+   },
+   {
+    "Style": 108,
+    "Text": "the original"
+   },
+   {
+    "Style": 110,
+    "Text": "[471]"
+   },
+   {
+    "Style": 112,
+    "Text": " on May 14, 2009. Retrieved February 23, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[472]"
+   },
+   {
+    "Style": 112,
+    "Text": " Burton, Kathleen (March 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Anatomy of a Colossus, Part III\""
+   },
+   {
+    "Style": 110,
+    "Text": "[473]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC. p. 467. Retrieved March 30, 2014."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[474]"
+   },
+   {
+    "Style": 112,
+    "Text": " Mace, Scott (November 21, 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"TI retires from home-computer market\""
+   },
+   {
+    "Style": 110,
+    "Text": "[475]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. pp. 22, 27. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Cook, Karen (March 6, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Jr. Sneaks PC into Home\""
+   },
+   {
+    "Style": 110,
+    "Text": "[476]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC Magazine. p. 35. Retrieved October 24, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Maher, Jimmy (July 18, 2013). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Unmaking and Remaking of Sierra On-Line\""
+   },
+   {
+    "Style": 110,
+    "Text": "[477]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The Digital Antiquarian. Retrieved February 5, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Wiswell, Phil (January 24, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Coming Soon: Games For The PCjr\""
+   },
+   {
+    "Style": 110,
+    "Text": "[478]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC. pp. 142–145. Retrieved January 26, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Rosenberg, Ronald (April 24, 1984). \"The Secret World of IBM\". The Boston Globe."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Sanger, David E."
+   },
+   {
+    "Style": 110,
+    "Text": "[479]"
+   },
+   {
+    "Style": 112,
+    "Text": " (April 22, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Heady World of I.B.M. Suppliers\""
+   },
+   {
+    "Style": 110,
+    "Text": "[480]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. p. Section 3, Page 1. "
+   },
+   {
+    "Style": 108,
+    "Text": "ISSN"
+   },
+   {
+    "Style": 110,
+    "Text": "[481]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "0362-4331"
+   },
+   {
+    "Style": 110,
+    "Text": "[482]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Retrieved July 2, 2017."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Shea, Tom (March 12, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"PCjr users wait for packages\""
+   },
+   {
+    "Style": 110,
+    "Text": "[483]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. pp. 37–39. Retrieved February 24, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[484]"
+   },
+   {
+    "Style": 112,
+    "Text": " Sandler, Corey (February 21, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"A Secret Inside The ROM\""
+   },
+   {
+    "Style": 110,
+    "Text": "[485]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC Magazine. p. 323. Retrieved October 24, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Marcom, John Jr. (February 22, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM's PCjr receives a cool reception\""
+   },
+   {
+    "Style": 110,
+    "Text": "[486]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Santa Cruz Sentinel. Wall Street Journal. pp. B-5. Retrieved October 6, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* McCarroll, Thomas; Michael Moritz; Philip Elmer-DeWitt (April 2, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Peanut Meets the Mac\""
+   },
+   {
+    "Style": 110,
+    "Text": "[487]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Time. Archived from "
+   },
+   {
+    "Style": 108,
+    "Text": "the original"
+   },
+   {
+    "Style": 110,
+    "Text": "[488]"
+   },
+   {
+    "Style": 112,
+    "Text": " on June 9, 2008. Retrieved February 23, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[489]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Boom in Computer Magazines\""
+   },
+   {
+    "Style": 110,
+    "Text": "[490]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. November 9, 1983. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Bartimo, Jim (December 10, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Magazines Woo Users\""
+   },
+   {
+    "Style": 110,
+    "Text": "[491]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. pp. 35–36. Retrieved March 14, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[492]"
+   },
+   {
+    "Style": 112,
+    "Text": " Dvorak, John C. (November 28, 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Inside Track\""
+   },
+   {
+    "Style": 110,
+    "Text": "[493]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. p. 188. Retrieved March 23, 2016."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[494]"
+   },
+   {
+    "Style": 112,
+    "Text": " Freiberger, Paul (January 9–16, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM indicates March as likely PCjr delivery date\""
+   },
+   {
+    "Style": 110,
+    "Text": "[495]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. p. 20. Retrieved February 4, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "\"PCjr Sales Less Than Expected\""
+   },
+   {
+    "Style": 110,
+    "Text": "[496]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. April 20, 1984. p. D3. "
+   },
+   {
+    "Style": 108,
+    "Text": "ISSN"
+   },
+   {
+    "Style": 110,
+    "Text": "[497]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "0362-4331"
+   },
+   {
+    "Style": 110,
+    "Text": "[498]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Retrieved March 11, 2020."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* McMullen, Barbara E. and John F. (February 21, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Apple Charts The Course For IBM\""
+   },
+   {
+    "Style": 110,
+    "Text": "[499]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC Magazine. p. 122. Retrieved October 24, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Richter, Paul (March 28, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Macintosh Takes Lead In Sales Race\""
+   },
+   {
+    "Style": 110,
+    "Text": "[500]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The Cincinnati Enquirer. Los Angeles Times. pp. B-1, B-2. Retrieved May 5, 2019."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Zientara, Marguerite (April 9, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"PCjr sales below expectations, dealers say\""
+   },
+   {
+    "Style": 110,
+    "Text": "[501]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. IDG. Retrieved April 3, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Sanger, David E. (May 17, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"I.B.M.'s Problems with Junior\""
+   },
+   {
+    "Style": 110,
+    "Text": "[502]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[503]"
+   },
+   {
+    "Style": 112,
+    "Text": " \"IBM's Peanut getting lukewarm response\". MicroTimes. Vol. 1, no. 1. BAM Publications Inc. May 1984. p. 5."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Winter, Christine (March 24, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Behind the short, unhappy life of IBM's Junior\""
+   },
+   {
+    "Style": 110,
+    "Text": "[504]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Chicago Tribune. pp. Section 7, Page 3. Retrieved April 29, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Bulman, Philip (November 5, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Big time: IBM skillfully revives lackluster sales of PCjr\""
+   },
+   {
+    "Style": 110,
+    "Text": "[505]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Fort Lauderdale News. p. 47. Retrieved May 5, 2019."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Pollack, Andrew (January 20, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Daunting Power of I.B.M.\""
+   },
+   {
+    "Style": 110,
+    "Text": "[506]"
+   },
+   {
+    "Style": 112,
+    "Text": " The New York Times. p. A1. "
+   },
+   {
+    "Style": 108,
+    "Text": "ISSN"
+   },
+   {
+    "Style": 110,
+    "Text": "[507]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "0362-4331"
+   },
+   {
+    "Style": 110,
+    "Text": "[508]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Retrieved July 3, 2017."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[509]"
+   },
+   {
+    "Style": 112,
+    "Text": " Mace, Scott (August 13, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"PCjr: Back to Basics\""
+   },
+   {
+    "Style": 110,
+    "Text": "[510]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. p. 38. Retrieved January 13, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[511]"
+   },
+   {
+    "Style": 112,
+    "Text": " Tynan, Dan (May 26, 2006). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The 25 Worst Tech Products of All Time\""
+   },
+   {
+    "Style": 110,
+    "Text": "[512]"
+   },
+   {
+    "Style": 112,
+    "Text": ". "
+   },
+   {
+    "Style": 108,
+    "Text": "PCWorld"
+   },
+   {
+    "Style": 110,
+    "Text": "[513]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Retrieved March 16, 2025."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[514]"
+   },
+   {
+    "Style": 112,
+    "Text": " Sandberg-Diment, Erik (August 21, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Keyboard is a Stroke of Genius\""
+   },
+   {
+    "Style": 110,
+    "Text": "[515]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. Retrieved July 31, 2014."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Dickinson, John (September 18, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM's Displaywriter Begets a Family of PC Software\""
+   },
+   {
+    "Style": 110,
+    "Text": "[516]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC. p. 238. Retrieved January 29, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Wierzbicki, Barbara (December 19, 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Developers embrace PCjr despite drawbacks\""
+   },
+   {
+    "Style": 110,
+    "Text": "[517]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The runner stumbles: IBM pulls back from troubled PCjr\""
+   },
+   {
+    "Style": 110,
+    "Text": "[518]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Poughkeepsie Journal. Associated Press. March 21, 1985. p. 7. Retrieved May 5, 2019."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[519]"
+   },
+   {
+    "Style": 112,
+    "Text": " Rosenberg, Ronald (February 28, 1984). \"Doubts Raised About PCjr\". The Boston Globe."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Lima, Tony (December 3, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"New PC Jr\""
+   },
+   {
+    "Style": 110,
+    "Text": "[520]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. pp. 60–61. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Sandberg-Diment, Erik (December 27, 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Personal Computers: The Little I.B.M. Finally Arrives for a Test\""
+   },
+   {
+    "Style": 110,
+    "Text": "[521]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. "
+   },
+   {
+    "Style": 108,
+    "Text": "ISSN"
+   },
+   {
+    "Style": 110,
+    "Text": "[522]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "0362-4331"
+   },
+   {
+    "Style": 110,
+    "Text": "[523]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Retrieved July 2, 2017."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Manes, Stephen (May 28, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Junior and Edsel: Two of A Kind Together At Last!\""
+   },
+   {
+    "Style": 110,
+    "Text": "[524]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC Magazine. p. 67. Retrieved October 28, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[525]"
+   },
+   {
+    "Style": 112,
+    "Text": " Ryan, Bob (July 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The newest member of the family goes head to head with the PCjr\""
+   },
+   {
+    "Style": 110,
+    "Text": "[526]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InCider. pp. 60–63."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[527]"
+   },
+   {
+    "Style": 112,
+    "Text": " Pollack, Andrew (January 16, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Apple Expands Product Line\""
+   },
+   {
+    "Style": 110,
+    "Text": "[528]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. "
+   },
+   {
+    "Style": 108,
+    "Text": "ISSN"
+   },
+   {
+    "Style": 110,
+    "Text": "[529]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "0362-4331"
+   },
+   {
+    "Style": 110,
+    "Text": "[530]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Retrieved July 2, 2017."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[531]"
+   },
+   {
+    "Style": 112,
+    "Text": " Mace, Scott; Paul Freiberger (November 21, 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Industry reacts to PCjr\""
+   },
+   {
+    "Style": 110,
+    "Text": "[532]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. pp. 21–22. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[533]"
+   },
+   {
+    "Style": 112,
+    "Text": " Winter, Christine (April 24, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Apple aiming to take bite out of IBM\""
+   },
+   {
+    "Style": 110,
+    "Text": "[534]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Chicago Tribune. pp. Section 3, Page 1. Retrieved April 29, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[535]"
+   },
+   {
+    "Style": 112,
+    "Text": " Miller, George A. (July 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Apple announces the IIc\""
+   },
+   {
+    "Style": 110,
+    "Text": "[536]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Creative Computing. p. 116. Retrieved March 17, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[537]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Apple IIc\""
+   },
+   {
+    "Style": 110,
+    "Text": "[538]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Apple II History. June 23, 2010. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Hayes, Thomas C. (April 24, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Apple is Banking on New Portable: The IIc Computer\""
+   },
+   {
+    "Style": 110,
+    "Text": "[539]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. Retrieved January 5, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[540]"
+   },
+   {
+    "Style": 112,
+    "Text": " Clapp, Doug (February 27, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"PC compatibility\""
+   },
+   {
+    "Style": 110,
+    "Text": "[541]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. p. 22. Retrieved January 18, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Sanger, David E. (July 7, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Changing Image of I.B.M.\""
+   },
+   {
+    "Style": 110,
+    "Text": "[542]"
+   },
+   {
+    "Style": 112,
+    "Text": " The New York Times. p. Section 6, Page 13. "
+   },
+   {
+    "Style": 108,
+    "Text": "ISSN"
+   },
+   {
+    "Style": 110,
+    "Text": "[543]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "0362-4331"
+   },
+   {
+    "Style": 110,
+    "Text": "[544]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Retrieved March 11, 2020."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[545]"
+   },
+   {
+    "Style": 112,
+    "Text": " Gantz, John (November 28, 1983). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Heard on Tech Street\""
+   },
+   {
+    "Style": 110,
+    "Text": "[546]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. p. 186. Retrieved January 13, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[547]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "IBM Personal Computer PCjr Hardware Reference Library / Technical Reference"
+   },
+   {
+    "Style": 110,
+    "Text": "[548]"
+   },
+   {
+    "Style": 112,
+    "Text": ". IBM. 1983. pp. 4–1 to 4–11."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Sanger, David E. (January 18, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Computer Giant Finds Problems in Success\""
+   },
+   {
+    "Style": 110,
+    "Text": "[549]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[550]"
+   },
+   {
+    "Style": 112,
+    "Text": " Norton, Peter (January 24, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Developing PCjr Software\""
+   },
+   {
+    "Style": 110,
+    "Text": "[551]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC Magazine. p. 144. Retrieved October 23, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Diamond, Stuart (August 1, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"I.B.M. Raises Dividend, Offers a Free Keyboard\""
+   },
+   {
+    "Style": 110,
+    "Text": "[552]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. Retrieved February 4, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[553]"
+   },
+   {
+    "Style": 112,
+    "Text": " Alsop, Stewart (January 31, 1994). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"A public Windows pane to make compatibility clearer\""
+   },
+   {
+    "Style": 110,
+    "Text": "[554]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. p. 102. Retrieved February 28, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Trivette, Donald B. (April 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Lotus 1-2-3 For IBM PCjr\""
+   },
+   {
+    "Style": 110,
+    "Text": "[555]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Compute!. p. 63. Retrieved October 6, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[556]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Norton, Peter"
+   },
+   {
+    "Style": 110,
+    "Text": "[557]"
+   },
+   {
+    "Style": 112,
+    "Text": " (1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "The Peter Norton Programmer's Guide for the IBM PC"
+   },
+   {
+    "Style": 110,
+    "Text": "[558]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Microsoft Press. p. 37. "
+   },
+   {
+    "Style": 108,
+    "Text": "ISBN"
+   },
+   {
+    "Style": 110,
+    "Text": "[559]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "0-914845-46-2"
+   },
+   {
+    "Style": 110,
+    "Text": "[560]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Retrieved April 12, 2025."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Hoffmann, Thomas V. (March 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM PCjr\""
+   },
+   {
+    "Style": 110,
+    "Text": "[561]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Creative Computing. p. 74. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[562]"
+   },
+   {
+    "Style": 112,
+    "Text": " Shiver, Jube Jr. (September 26, 1985). \"Advertising Age Report Spending by Top 100 U.S. Advertisers Up 16% in '84\". Los Angeles Times. p. 2."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[563]"
+   },
+   {
+    "Style": 112,
+    "Text": " Sandler, Corey (November 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM: Colossus of Armonk\""
+   },
+   {
+    "Style": 110,
+    "Text": "[564]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Creative Computing. p. 298. Retrieved February 26, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Rosch, Winn L. (November 13, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Jr's Growth Spurts Sales\""
+   },
+   {
+    "Style": 110,
+    "Text": "[565]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC. pp. 33, 35. Retrieved March 15, 2020."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[566]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Now picture this\""
+   },
+   {
+    "Style": 110,
+    "Text": "[567]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Black Enterprise (advertisement). December 1984. p. 47. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Fastie, Will (February 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"An old friend takes a hard look at the IBM product line\""
+   },
+   {
+    "Style": 110,
+    "Text": "[568]"
+   },
+   {
+    "Style": 112,
+    "Text": ". IBM Images. Creative Computing. p. 150. Retrieved September 3, 2018."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[569]"
+   },
+   {
+    "Style": 112,
+    "Text": " Dudek, Virginia (October 2, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Is jr 'Likely to Succeed'? Friends Gloat, Foes Groan\""
+   },
+   {
+    "Style": 110,
+    "Text": "[570]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC Magazine. p. 35. Retrieved October 25, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[571]"
+   },
+   {
+    "Style": 112,
+    "Text": " Sanger, David E. (November 15, 1984). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"At Computer Show, Many Retrenching\""
+   },
+   {
+    "Style": 110,
+    "Text": "[572]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. Retrieved October 24, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Kennedy, Don (May 14, 1985). \"Junior Axed By IBM\". PC. p. 33."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[573]"
+   },
+   {
+    "Style": 112,
+    "Text": " Machrone, Bill (April 2, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"PCjr Renaissance\""
+   },
+   {
+    "Style": 110,
+    "Text": "[574]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC Magazine. p. 81. Retrieved October 28, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Pollack, Andrew (March 20, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"I.B.M. Drops PCjr Production\""
+   },
+   {
+    "Style": 110,
+    "Text": "[575]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[576]"
+   },
+   {
+    "Style": 112,
+    "Text": " Tuller, David (November 16, 1986). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"ABC'S AXE-WIELDING PUBLISHER: ROBERT G. BURTON; Championing Print in a TV World\""
+   },
+   {
+    "Style": 110,
+    "Text": "[577]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[578]"
+   },
+   {
+    "Style": 112,
+    "Text": " Werner, Edward (May 20, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Fire sale seen for last PCjrs\""
+   },
+   {
+    "Style": 110,
+    "Text": "[579]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Computerworld. Vol. XIX, no. 20. pp. 47, 55. Retrieved June 7, 2025."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[580]"
+   },
+   {
+    "Style": 112,
+    "Text": " Steele, William (July 9, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"COMDEX: Nothing New Under the Georgia Sun\""
+   },
+   {
+    "Style": 110,
+    "Text": "[581]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC Magazine. p. 34. Retrieved October 28, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Burke, Steven (September 16, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM Will Offer the PCjr for Further Education in Schools\""
+   },
+   {
+    "Style": 110,
+    "Text": "[582]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. Vol. 7, no. 37. p. 6. Retrieved September 12, 2025."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Mintzer, Jane, ed. (January 14, 1986). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"News in Brief\""
+   },
+   {
+    "Style": 110,
+    "Text": "[583]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC. p. 38. Retrieved January 21, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[584]"
+   },
+   {
+    "Style": 112,
+    "Text": " McCarthy, Michael, ed. (April 15, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Death of the PCjr: Insiders Foresaw It\""
+   },
+   {
+    "Style": 110,
+    "Text": "[585]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. p. 13. Retrieved February 4, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[586]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "\"I.B.M. Offers a PCjr Deal\""
+   },
+   {
+    "Style": 110,
+    "Text": "[587]"
+   },
+   {
+    "Style": 112,
+    "Text": ". The New York Times. September 19, 1985. Retrieved February 25, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[588]"
+   },
+   {
+    "Style": 112,
+    "Text": " Ferrell, Keith (July 1988). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Windows on John Roach\""
+   },
+   {
+    "Style": 110,
+    "Text": "[589]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Compute!. pp. 88–89. Retrieved September 5, 2016."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* Lynch, Dennis (October 26, 1990). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Pros, Cons Of Buying An IBM PS/1\""
+   },
+   {
+    "Style": 110,
+    "Text": "[590]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Chicago Tribune. Archived from "
+   },
+   {
+    "Style": 108,
+    "Text": "the original"
+   },
+   {
+    "Style": 110,
+    "Text": "[591]"
+   },
+   {
+    "Style": 112,
+    "Text": " on July 14, 2014. Retrieved February 4, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[592]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Last DBMS\""
+   },
+   {
+    "Style": 110,
+    "Text": "[593]"
+   },
+   {
+    "Style": 112,
+    "Text": ". "
+   },
+   {
+    "Style": 108,
+    "Text": "InfoWorld"
+   },
+   {
+    "Style": 110,
+    "Text": "[594]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Vol. 10, no. 3. January 18, 1988. p. 9. Retrieved May 25, 2025."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[595]"
+   },
+   {
+    "Style": 112,
+    "Text": " Strehlo, Kevin (June 17, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The Chiclet Rule and the Green Dragon\""
+   },
+   {
+    "Style": 110,
+    "Text": "[596]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. p. 8. Retrieved May 31, 2016."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[597]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "\"BRIEFS\""
+   },
+   {
+    "Style": 110,
+    "Text": "[598]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. February 12, 1985. p. 23. Retrieved February 27, 2011."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[599]"
+   },
+   {
+    "Style": 112,
+    "Text": " Bartimo, Jim (March 11, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Tandy Revamps Product Line\""
+   },
+   {
+    "Style": 110,
+    "Text": "[600]"
+   },
+   {
+    "Style": 112,
+    "Text": ". InfoWorld. pp. 28–29. Retrieved January 21, 2015."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[601]"
+   },
+   {
+    "Style": 112,
+    "Text": " Loguidice, Bill; Barton, Matt (2014). "
+   },
+   {
+    "Style": 108,
+    "Text": "Vintage Game Consoles: An Inside Look at Apple, Atari, Commodore, Nintendo, and the Greatest Gaming Platforms of All Time"
+   },
+   {
+    "Style": 110,
+    "Text": "[602]"
+   },
+   {
+    "Style": 112,
+    "Text": ". CRC Press. pp. 95–97. "
+   },
+   {
+    "Style": 108,
+    "Text": "ISBN"
+   },
+   {
+    "Style": 110,
+    "Text": "[603]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "978-1135006518"
+   },
+   {
+    "Style": 110,
+    "Text": "[604]"
+   },
+   {
+    "Style": 112,
+    "Text": "."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[605]"
+   },
+   {
+    "Style": 112,
+    "Text": " Machrone, Bill (November 26, 1985). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Compatibility Wars—Here and Abroad\""
+   },
+   {
+    "Style": 110,
+    "Text": "[606]"
+   },
+   {
+    "Style": 112,
+    "Text": ". PC Magazine. p. 59. Retrieved October 29, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[607]"
+   },
+   {
+    "Style": 112,
+    "Text": " Halfhill, Tom R. (December 1986). "
+   },
+   {
+    "Style": 108,
+    "Text": "\"The MS-DOS Invasion / IBM Compatibles Are Coming Home\""
+   },
+   {
+    "Style": 110,
+    "Text": "[608]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Compute!. p. 32. Retrieved November 9, 2013."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[609]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "\"Company History Page\""
+   },
+   {
+    "Style": 110,
+    "Text": "[610]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Pccomponents.com. Retrieved October 16, 2020."
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Jump up"
+   },
+   {
+    "Style": 110,
+    "Text": "[611]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "\"IBM PCjr computer\""
+   },
+   {
+    "Style": 110,
+    "Text": "[612]"
+   },
+   {
+    "Style": 112,
+    "Text": ". Oldcomputers.net. Retrieved June 8, 2026."
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "External links"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "edit"
+   },
+   {
+    "Style": 110,
+    "Text": "[613]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Christmas 1984: The Great Apple //c vs. PCjr Battle"
+   },
+   {
+    "Style": 110,
+    "Text": "[614]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "The IBM PCjr User's Guide"
+   },
+   {
+    "Style": 110,
+    "Text": "[615]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "Categories"
+   },
+   {
+    "Style": 110,
+    "Text": "[616]"
+   },
+   {
+    "Style": 112,
+    "Text": ": "
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "8086-based home computers"
+   },
+   {
+    "Style": 110,
+    "Text": "[617]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Home computers"
+   },
+   {
+    "Style": 110,
+    "Text": "[618]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "X86 IBM personal computers"
+   },
+   {
+    "Style": 110,
+    "Text": "[619]"
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "Computer-related introductions in 1984"
+   },
+   {
+    "Style": 110,
+    "Text": "[620]"
+   }
+  ]
+ ],
+ "Targets": [
+  {
+   "n": 1,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 2,
+   "kind": "link",
+   "label": "more citations"
+  },
+  {
+   "n": 3,
+   "kind": "link",
+   "label": "improve this article"
+  },
+  {
+   "n": 4,
+   "kind": "link",
+   "label": "adding citations to reliable sources"
+  },
+  {
+   "n": 5,
+   "kind": "link",
+   "label": "removed"
+  },
+  {
+   "n": 6,
+   "kind": "link",
+   "label": "\"IBM PCjr\""
+  },
+  {
+   "n": 7,
+   "kind": "link",
+   "label": "news"
+  },
+  {
+   "n": 8,
+   "kind": "link",
+   "label": "newspapers"
+  },
+  {
+   "n": 9,
+   "kind": "link",
+   "label": "books"
+  },
+  {
+   "n": 10,
+   "kind": "link",
+   "label": "scholar"
+  },
+  {
+   "n": 11,
+   "kind": "link",
+   "label": "JSTOR"
+  },
+  {
+   "n": 12,
+   "kind": "link",
+   "label": "Learn how and when to remove this message"
+  },
+  {
+   "n": 13,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 14,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 15,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 16,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 17,
+   "kind": "link",
+   "label": "Teledyne"
+  },
+  {
+   "n": 18,
+   "kind": "link",
+   "label": "Lewisburg, Tennessee"
+  },
+  {
+   "n": 19,
+   "kind": "link",
+   "label": "Personal computer"
+  },
+  {
+   "n": 20,
+   "kind": "link",
+   "label": "KB"
+  },
+  {
+   "n": 21,
+   "kind": "link",
+   "label": "Operating system"
+  },
+  {
+   "n": 22,
+   "kind": "link",
+   "label": "PC DOS"
+  },
+  {
+   "n": 23,
+   "kind": "link",
+   "label": "CPU"
+  },
+  {
+   "n": 24,
+   "kind": "link",
+   "label": "Intel 8088"
+  },
+  {
+   "n": 25,
+   "kind": "link",
+   "label": "KB"
+  },
+  {
+   "n": 26,
+   "kind": "link",
+   "label": "Removable storage"
+  },
+  {
+   "n": 27,
+   "kind": "link",
+   "label": "Motorola 6845 CRTC"
+  },
+  {
+   "n": 28,
+   "kind": "link",
+   "label": "Video Gate Array"
+  },
+  {
+   "n": 29,
+   "kind": "link",
+   "label": "Texas Instruments"
+  },
+  {
+   "n": 30,
+   "kind": "link",
+   "label": "SN76489"
+  },
+  {
+   "n": 31,
+   "kind": "link",
+   "label": "IBM Personal Computer"
+  },
+  {
+   "n": 32,
+   "kind": "link",
+   "label": "IBM PS/1"
+  },
+  {
+   "n": 33,
+   "kind": "link",
+   "label": "home computer"
+  },
+  {
+   "n": 34,
+   "kind": "link",
+   "label": "IBM"
+  },
+  {
+   "n": 35,
+   "kind": "link",
+   "label": "IBM PC"
+  },
+  {
+   "n": 36,
+   "kind": "link",
+   "label": "Apple II"
+  },
+  {
+   "n": 37,
+   "kind": "link",
+   "label": "Commodore 64"
+  },
+  {
+   "n": 38,
+   "kind": "link",
+   "label": "8088"
+  },
+  {
+   "n": 39,
+   "kind": "link",
+   "label": "CPU"
+  },
+  {
+   "n": 40,
+   "kind": "link",
+   "label": "BIOS"
+  },
+  {
+   "n": 41,
+   "kind": "link",
+   "label": "ROM cartridge"
+  },
+  {
+   "n": 42,
+   "kind": "link",
+   "label": "IBM PC compatible"
+  },
+  {
+   "n": 43,
+   "kind": "link",
+   "label": "chiclet keyboard"
+  },
+  {
+   "n": 44,
+   "kind": "link",
+   "label": "KB"
+  },
+  {
+   "n": 45,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 46,
+   "kind": "link",
+   "label": "floppy disk"
+  },
+  {
+   "n": 47,
+   "kind": "link",
+   "label": "Lewisburg, Tennessee"
+  },
+  {
+   "n": 48,
+   "kind": "link",
+   "label": "Teledyne"
+  },
+  {
+   "n": 49,
+   "kind": "link",
+   "label": "IBM JX"
+  },
+  {
+   "n": 50,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 51,
+   "kind": "link",
+   "label": "Qume"
+  },
+  {
+   "n": 52,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 53,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 54,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 55,
+   "kind": "link",
+   "label": "[1]"
+  },
+  {
+   "n": 56,
+   "kind": "link",
+   "label": "[1]"
+  },
+  {
+   "n": 57,
+   "kind": "link",
+   "label": "[2]"
+  },
+  {
+   "n": 58,
+   "kind": "link",
+   "label": "[3]"
+  },
+  {
+   "n": 59,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 60,
+   "kind": "link",
+   "label": "Intel 8088"
+  },
+  {
+   "n": 61,
+   "kind": "link",
+   "label": "wait states"
+  },
+  {
+   "n": 62,
+   "kind": "link",
+   "label": "Video Gate Array"
+  },
+  {
+   "n": 63,
+   "kind": "link",
+   "label": "Tandy 1000"
+  },
+  {
+   "n": 64,
+   "kind": "link",
+   "label": "[4]"
+  },
+  {
+   "n": 65,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 66,
+   "kind": "link",
+   "label": "Tandy Graphics Adapter"
+  },
+  {
+   "n": 67,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 68,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 69,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 70,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 71,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 72,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 73,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 74,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 75,
+   "kind": "link",
+   "label": "MDA"
+  },
+  {
+   "n": 76,
+   "kind": "link",
+   "label": "CGA"
+  },
+  {
+   "n": 77,
+   "kind": "link",
+   "label": "page flipping"
+  },
+  {
+   "n": 78,
+   "kind": "link",
+   "label": "VBLANK interrupt"
+  },
+  {
+   "n": 79,
+   "kind": "link",
+   "label": "RGBI palette"
+  },
+  {
+   "n": 80,
+   "kind": "link",
+   "label": "vertical blanking"
+  },
+  {
+   "n": 81,
+   "kind": "link",
+   "label": "composite video"
+  },
+  {
+   "n": 82,
+   "kind": "link",
+   "label": "Motorola 6845"
+  },
+  {
+   "n": 83,
+   "kind": "link",
+   "label": "[5]"
+  },
+  {
+   "n": 84,
+   "kind": "link",
+   "label": "[6]"
+  },
+  {
+   "n": 85,
+   "kind": "link",
+   "label": "[7]"
+  },
+  {
+   "n": 86,
+   "kind": "link",
+   "label": "clarification needed"
+  },
+  {
+   "n": 87,
+   "kind": "link",
+   "label": "[8]"
+  },
+  {
+   "n": 88,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 89,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 90,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 91,
+   "kind": "link",
+   "label": "Texas Instruments"
+  },
+  {
+   "n": 92,
+   "kind": "link",
+   "label": "SN76496"
+  },
+  {
+   "n": 93,
+   "kind": "link",
+   "label": "shift register"
+  },
+  {
+   "n": 94,
+   "kind": "link",
+   "label": "[9]"
+  },
+  {
+   "n": 95,
+   "kind": "link",
+   "label": "programmable sound generator"
+  },
+  {
+   "n": 96,
+   "kind": "link",
+   "label": "Master System"
+  },
+  {
+   "n": 97,
+   "kind": "link",
+   "label": "ColecoVision"
+  },
+  {
+   "n": 98,
+   "kind": "link",
+   "label": "PC speaker"
+  },
+  {
+   "n": 99,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 100,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 101,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 102,
+   "kind": "link",
+   "label": "[10]"
+  },
+  {
+   "n": 103,
+   "kind": "link",
+   "label": "chiclet keyboard"
+  },
+  {
+   "n": 104,
+   "kind": "link",
+   "label": "overlays"
+  },
+  {
+   "n": 105,
+   "kind": "link",
+   "label": "[11]"
+  },
+  {
+   "n": 106,
+   "kind": "link",
+   "label": "[11]"
+  },
+  {
+   "n": 107,
+   "kind": "link",
+   "label": "[12]"
+  },
+  {
+   "n": 108,
+   "kind": "link",
+   "label": "[13]"
+  },
+  {
+   "n": 109,
+   "kind": "link",
+   "label": "[14]"
+  },
+  {
+   "n": 110,
+   "kind": "link",
+   "label": "[15]"
+  },
+  {
+   "n": 111,
+   "kind": "link",
+   "label": "light pen"
+  },
+  {
+   "n": 112,
+   "kind": "link",
+   "label": "Mouse Systems"
+  },
+  {
+   "n": 113,
+   "kind": "link",
+   "label": "Sun workstations"
+  },
+  {
+   "n": 114,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 115,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 116,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 117,
+   "kind": "link",
+   "label": "Future Domain"
+  },
+  {
+   "n": 118,
+   "kind": "link",
+   "label": "Battle Chess"
+  },
+  {
+   "n": 119,
+   "kind": "link",
+   "label": "[16]"
+  },
+  {
+   "n": 120,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 121,
+   "kind": "link",
+   "label": "Cartridge BASIC"
+  },
+  {
+   "n": 122,
+   "kind": "link",
+   "label": "[6]"
+  },
+  {
+   "n": 123,
+   "kind": "link",
+   "label": "[9]"
+  },
+  {
+   "n": 124,
+   "kind": "link",
+   "label": "[17]"
+  },
+  {
+   "n": 125,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 126,
+   "kind": "link",
+   "label": "self-booting disks"
+  },
+  {
+   "n": 127,
+   "kind": "link",
+   "label": "[18]"
+  },
+  {
+   "n": 128,
+   "kind": "link",
+   "label": "[3]"
+  },
+  {
+   "n": 129,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 130,
+   "kind": "link",
+   "label": "[19]"
+  },
+  {
+   "n": 131,
+   "kind": "link",
+   "label": "[20]"
+  },
+  {
+   "n": 132,
+   "kind": "link",
+   "label": "[21]"
+  },
+  {
+   "n": 133,
+   "kind": "link",
+   "label": "[22]"
+  },
+  {
+   "n": 134,
+   "kind": "link",
+   "label": "Commodore 64"
+  },
+  {
+   "n": 135,
+   "kind": "link",
+   "label": "[23]"
+  },
+  {
+   "n": 136,
+   "kind": "link",
+   "label": "IBM PC compatible"
+  },
+  {
+   "n": 137,
+   "kind": "link",
+   "label": "Apple IIe"
+  },
+  {
+   "n": 138,
+   "kind": "link",
+   "label": "[24]"
+  },
+  {
+   "n": 139,
+   "kind": "link",
+   "label": "[22]"
+  },
+  {
+   "n": 140,
+   "kind": "link",
+   "label": "[25]"
+  },
+  {
+   "n": 141,
+   "kind": "link",
+   "label": "[26]"
+  },
+  {
+   "n": 142,
+   "kind": "link",
+   "label": "[19]"
+  },
+  {
+   "n": 143,
+   "kind": "link",
+   "label": "[27]"
+  },
+  {
+   "n": 144,
+   "kind": "link",
+   "label": "[28]"
+  },
+  {
+   "n": 145,
+   "kind": "link",
+   "label": "Adweek"
+  },
+  {
+   "n": 146,
+   "kind": "link",
+   "label": "Charles Schulz"
+  },
+  {
+   "n": 147,
+   "kind": "link",
+   "label": "Peanuts"
+  },
+  {
+   "n": 148,
+   "kind": "link",
+   "label": "[29]"
+  },
+  {
+   "n": 149,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 150,
+   "kind": "link",
+   "label": "New York City headquarters"
+  },
+  {
+   "n": 151,
+   "kind": "link",
+   "label": "[30]"
+  },
+  {
+   "n": 152,
+   "kind": "link",
+   "label": "[11]"
+  },
+  {
+   "n": 153,
+   "kind": "link",
+   "label": "The Washington Post"
+  },
+  {
+   "n": 154,
+   "kind": "link",
+   "label": "[31]"
+  },
+  {
+   "n": 155,
+   "kind": "link",
+   "label": "[12]"
+  },
+  {
+   "n": 156,
+   "kind": "link",
+   "label": "[30]"
+  },
+  {
+   "n": 157,
+   "kind": "link",
+   "label": "[32]"
+  },
+  {
+   "n": 158,
+   "kind": "link",
+   "label": "[11]"
+  },
+  {
+   "n": 159,
+   "kind": "link",
+   "label": "[33]"
+  },
+  {
+   "n": 160,
+   "kind": "link",
+   "label": "[21]"
+  },
+  {
+   "n": 161,
+   "kind": "link",
+   "label": "[31]"
+  },
+  {
+   "n": 162,
+   "kind": "link",
+   "label": "Texas Instruments"
+  },
+  {
+   "n": 163,
+   "kind": "link",
+   "label": "[20]"
+  },
+  {
+   "n": 164,
+   "kind": "link",
+   "label": "[22]"
+  },
+  {
+   "n": 165,
+   "kind": "link",
+   "label": "[34]"
+  },
+  {
+   "n": 166,
+   "kind": "link",
+   "label": "TI-99/4A"
+  },
+  {
+   "n": 167,
+   "kind": "link",
+   "label": "[35]"
+  },
+  {
+   "n": 168,
+   "kind": "link",
+   "label": "[36]"
+  },
+  {
+   "n": 169,
+   "kind": "link",
+   "label": "Sierra On-Line"
+  },
+  {
+   "n": 170,
+   "kind": "link",
+   "label": "SPC"
+  },
+  {
+   "n": 171,
+   "kind": "link",
+   "label": "The Learning Company"
+  },
+  {
+   "n": 172,
+   "kind": "link",
+   "label": "launch titles"
+  },
+  {
+   "n": 173,
+   "kind": "link",
+   "label": "[12]"
+  },
+  {
+   "n": 174,
+   "kind": "link",
+   "label": "[37]"
+  },
+  {
+   "n": 175,
+   "kind": "link",
+   "label": "[38]"
+  },
+  {
+   "n": 176,
+   "kind": "link",
+   "label": "[39]"
+  },
+  {
+   "n": 177,
+   "kind": "link",
+   "label": "[38]"
+  },
+  {
+   "n": 178,
+   "kind": "link",
+   "label": "[9]"
+  },
+  {
+   "n": 179,
+   "kind": "link",
+   "label": "[40]"
+  },
+  {
+   "n": 180,
+   "kind": "link",
+   "label": "[12]"
+  },
+  {
+   "n": 181,
+   "kind": "link",
+   "label": "[37]"
+  },
+  {
+   "n": 182,
+   "kind": "link",
+   "label": "graphical adventure"
+  },
+  {
+   "n": 183,
+   "kind": "link",
+   "label": "King's Quest I"
+  },
+  {
+   "n": 184,
+   "kind": "link",
+   "label": "[36]"
+  },
+  {
+   "n": 185,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 186,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 187,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 188,
+   "kind": "link",
+   "label": "[41]"
+  },
+  {
+   "n": 189,
+   "kind": "link",
+   "label": "[21]"
+  },
+  {
+   "n": 190,
+   "kind": "link",
+   "label": "[42]"
+  },
+  {
+   "n": 191,
+   "kind": "link",
+   "label": "[43]"
+  },
+  {
+   "n": 192,
+   "kind": "link",
+   "label": "[26]"
+  },
+  {
+   "n": 193,
+   "kind": "link",
+   "label": "Ziff Davis"
+  },
+  {
+   "n": 194,
+   "kind": "link",
+   "label": "computer magazines"
+  },
+  {
+   "n": 195,
+   "kind": "link",
+   "label": "[44]"
+  },
+  {
+   "n": 196,
+   "kind": "link",
+   "label": "Compute!"
+  },
+  {
+   "n": 197,
+   "kind": "link",
+   "label": "[45]"
+  },
+  {
+   "n": 198,
+   "kind": "link",
+   "label": "[46]"
+  },
+  {
+   "n": 199,
+   "kind": "link",
+   "label": "[47]"
+  },
+  {
+   "n": 200,
+   "kind": "link",
+   "label": "[42]"
+  },
+  {
+   "n": 201,
+   "kind": "link",
+   "label": "[48]"
+  },
+  {
+   "n": 202,
+   "kind": "link",
+   "label": "[49]"
+  },
+  {
+   "n": 203,
+   "kind": "link",
+   "label": "[50]"
+  },
+  {
+   "n": 204,
+   "kind": "link",
+   "label": "[51]"
+  },
+  {
+   "n": 205,
+   "kind": "link",
+   "label": "[52]"
+  },
+  {
+   "n": 206,
+   "kind": "link",
+   "label": "[48]"
+  },
+  {
+   "n": 207,
+   "kind": "link",
+   "label": "[53]"
+  },
+  {
+   "n": 208,
+   "kind": "link",
+   "label": "[54]"
+  },
+  {
+   "n": 209,
+   "kind": "link",
+   "label": "[55]"
+  },
+  {
+   "n": 210,
+   "kind": "link",
+   "label": "[42]"
+  },
+  {
+   "n": 211,
+   "kind": "link",
+   "label": "[55]"
+  },
+  {
+   "n": 212,
+   "kind": "link",
+   "label": "[56]"
+  },
+  {
+   "n": 213,
+   "kind": "link",
+   "label": "[43]"
+  },
+  {
+   "n": 214,
+   "kind": "link",
+   "label": "[57]"
+  },
+  {
+   "n": 215,
+   "kind": "link",
+   "label": "[32]"
+  },
+  {
+   "n": 216,
+   "kind": "link",
+   "label": "PCWorld"
+  },
+  {
+   "n": 217,
+   "kind": "link",
+   "label": "[58]"
+  },
+  {
+   "n": 218,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 219,
+   "kind": "link",
+   "label": "[12]"
+  },
+  {
+   "n": 220,
+   "kind": "link",
+   "label": "[39]"
+  },
+  {
+   "n": 221,
+   "kind": "link",
+   "label": "[12]"
+  },
+  {
+   "n": 222,
+   "kind": "link",
+   "label": "[59]"
+  },
+  {
+   "n": 223,
+   "kind": "link",
+   "label": "[60]"
+  },
+  {
+   "n": 224,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 225,
+   "kind": "link",
+   "label": "[43]"
+  },
+  {
+   "n": 226,
+   "kind": "link",
+   "label": "[42]"
+  },
+  {
+   "n": 227,
+   "kind": "link",
+   "label": "[61]"
+  },
+  {
+   "n": 228,
+   "kind": "link",
+   "label": "[62]"
+  },
+  {
+   "n": 229,
+   "kind": "link",
+   "label": "[49]"
+  },
+  {
+   "n": 230,
+   "kind": "link",
+   "label": "[52]"
+  },
+  {
+   "n": 231,
+   "kind": "link",
+   "label": "[62]"
+  },
+  {
+   "n": 232,
+   "kind": "link",
+   "label": "[63]"
+  },
+  {
+   "n": 233,
+   "kind": "link",
+   "label": "Atari 8-bit computers"
+  },
+  {
+   "n": 234,
+   "kind": "link",
+   "label": "[12]"
+  },
+  {
+   "n": 235,
+   "kind": "link",
+   "label": "[64]"
+  },
+  {
+   "n": 236,
+   "kind": "link",
+   "label": "[62]"
+  },
+  {
+   "n": 237,
+   "kind": "link",
+   "label": "Macintosh 128K"
+  },
+  {
+   "n": 238,
+   "kind": "link",
+   "label": "[43]"
+  },
+  {
+   "n": 239,
+   "kind": "link",
+   "label": "[42]"
+  },
+  {
+   "n": 240,
+   "kind": "link",
+   "label": "[50]"
+  },
+  {
+   "n": 241,
+   "kind": "link",
+   "label": "tape drive"
+  },
+  {
+   "n": 242,
+   "kind": "link",
+   "label": "[22]"
+  },
+  {
+   "n": 243,
+   "kind": "link",
+   "label": "[65]"
+  },
+  {
+   "n": 244,
+   "kind": "link",
+   "label": "[17]"
+  },
+  {
+   "n": 245,
+   "kind": "link",
+   "label": "[30]"
+  },
+  {
+   "n": 246,
+   "kind": "link",
+   "label": "[66]"
+  },
+  {
+   "n": 247,
+   "kind": "link",
+   "label": "[17]"
+  },
+  {
+   "n": 248,
+   "kind": "link",
+   "label": "[50]"
+  },
+  {
+   "n": 249,
+   "kind": "link",
+   "label": "[51]"
+  },
+  {
+   "n": 250,
+   "kind": "link",
+   "label": "[67]"
+  },
+  {
+   "n": 251,
+   "kind": "link",
+   "label": "[25]"
+  },
+  {
+   "n": 252,
+   "kind": "link",
+   "label": "[68]"
+  },
+  {
+   "n": 253,
+   "kind": "link",
+   "label": "[25]"
+  },
+  {
+   "n": 254,
+   "kind": "link",
+   "label": "[12]"
+  },
+  {
+   "n": 255,
+   "kind": "link",
+   "label": "[61]"
+  },
+  {
+   "n": 256,
+   "kind": "link",
+   "label": "[43]"
+  },
+  {
+   "n": 257,
+   "kind": "link",
+   "label": "[25]"
+  },
+  {
+   "n": 258,
+   "kind": "link",
+   "label": "[69]"
+  },
+  {
+   "n": 259,
+   "kind": "link",
+   "label": "Apple IIc"
+  },
+  {
+   "n": 260,
+   "kind": "link",
+   "label": "[70]"
+  },
+  {
+   "n": 261,
+   "kind": "link",
+   "label": "[52]"
+  },
+  {
+   "n": 262,
+   "kind": "link",
+   "label": "[71]"
+  },
+  {
+   "n": 263,
+   "kind": "link",
+   "label": "[72]"
+  },
+  {
+   "n": 264,
+   "kind": "link",
+   "label": "[73]"
+  },
+  {
+   "n": 265,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 266,
+   "kind": "link",
+   "label": "[74]"
+  },
+  {
+   "n": 267,
+   "kind": "link",
+   "label": "[15]"
+  },
+  {
+   "n": 268,
+   "kind": "link",
+   "label": "[75]"
+  },
+  {
+   "n": 269,
+   "kind": "link",
+   "label": "Lotus 1-2-3"
+  },
+  {
+   "n": 270,
+   "kind": "link",
+   "label": "[28]"
+  },
+  {
+   "n": 271,
+   "kind": "link",
+   "label": "[42]"
+  },
+  {
+   "n": 272,
+   "kind": "link",
+   "label": "[43]"
+  },
+  {
+   "n": 273,
+   "kind": "link",
+   "label": "[52]"
+  },
+  {
+   "n": 274,
+   "kind": "link",
+   "label": "[21]"
+  },
+  {
+   "n": 275,
+   "kind": "link",
+   "label": "[76]"
+  },
+  {
+   "n": 276,
+   "kind": "link",
+   "label": "[77]"
+  },
+  {
+   "n": 277,
+   "kind": "link",
+   "label": "[78]"
+  },
+  {
+   "n": 278,
+   "kind": "link",
+   "label": "[79]"
+  },
+  {
+   "n": 279,
+   "kind": "link",
+   "label": "[80]"
+  },
+  {
+   "n": 280,
+   "kind": "link",
+   "label": "[65]"
+  },
+  {
+   "n": 281,
+   "kind": "link",
+   "label": "[17]"
+  },
+  {
+   "n": 282,
+   "kind": "link",
+   "label": "WordStar"
+  },
+  {
+   "n": 283,
+   "kind": "link",
+   "label": "[43]"
+  },
+  {
+   "n": 284,
+   "kind": "link",
+   "label": "[32]"
+  },
+  {
+   "n": 285,
+   "kind": "link",
+   "label": "[81]"
+  },
+  {
+   "n": 286,
+   "kind": "link",
+   "label": "[40]"
+  },
+  {
+   "n": 287,
+   "kind": "link",
+   "label": "[82]"
+  },
+  {
+   "n": 288,
+   "kind": "link",
+   "label": "[60]"
+  },
+  {
+   "n": 289,
+   "kind": "link",
+   "label": "Peter Norton"
+  },
+  {
+   "n": 290,
+   "kind": "link",
+   "label": "[83]"
+  },
+  {
+   "n": 291,
+   "kind": "link",
+   "label": "[17]"
+  },
+  {
+   "n": 292,
+   "kind": "link",
+   "label": "[82]"
+  },
+  {
+   "n": 293,
+   "kind": "link",
+   "label": "killer app"
+  },
+  {
+   "n": 294,
+   "kind": "link",
+   "label": "[17]"
+  },
+  {
+   "n": 295,
+   "kind": "link",
+   "label": "[73]"
+  },
+  {
+   "n": 296,
+   "kind": "link",
+   "label": "[64]"
+  },
+  {
+   "n": 297,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 298,
+   "kind": "link",
+   "label": "[51]"
+  },
+  {
+   "n": 299,
+   "kind": "link",
+   "label": "[43]"
+  },
+  {
+   "n": 300,
+   "kind": "link",
+   "label": "[35]"
+  },
+  {
+   "n": 301,
+   "kind": "link",
+   "label": "[82]"
+  },
+  {
+   "n": 302,
+   "kind": "link",
+   "label": "[31]"
+  },
+  {
+   "n": 303,
+   "kind": "link",
+   "label": "[30]"
+  },
+  {
+   "n": 304,
+   "kind": "link",
+   "label": "[84]"
+  },
+  {
+   "n": 305,
+   "kind": "link",
+   "label": "[15]"
+  },
+  {
+   "n": 306,
+   "kind": "link",
+   "label": "[30]"
+  },
+  {
+   "n": 307,
+   "kind": "link",
+   "label": "[32]"
+  },
+  {
+   "n": 308,
+   "kind": "link",
+   "label": "[17]"
+  },
+  {
+   "n": 309,
+   "kind": "link",
+   "label": "DMA"
+  },
+  {
+   "n": 310,
+   "kind": "link",
+   "label": "[84]"
+  },
+  {
+   "n": 311,
+   "kind": "link",
+   "label": "[17]"
+  },
+  {
+   "n": 312,
+   "kind": "link",
+   "label": "[66]"
+  },
+  {
+   "n": 313,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 314,
+   "kind": "link",
+   "label": "[32]"
+  },
+  {
+   "n": 315,
+   "kind": "link",
+   "label": "[55]"
+  },
+  {
+   "n": 316,
+   "kind": "link",
+   "label": "[17]"
+  },
+  {
+   "n": 317,
+   "kind": "link",
+   "label": "[39]"
+  },
+  {
+   "n": 318,
+   "kind": "link",
+   "label": "[17]"
+  },
+  {
+   "n": 319,
+   "kind": "link",
+   "label": "[80]"
+  },
+  {
+   "n": 320,
+   "kind": "link",
+   "label": "[17]"
+  },
+  {
+   "n": 321,
+   "kind": "link",
+   "label": "[15]"
+  },
+  {
+   "n": 322,
+   "kind": "link",
+   "label": "[32]"
+  },
+  {
+   "n": 323,
+   "kind": "link",
+   "label": "[64]"
+  },
+  {
+   "n": 324,
+   "kind": "link",
+   "label": "[15]"
+  },
+  {
+   "n": 325,
+   "kind": "link",
+   "label": "[13]"
+  },
+  {
+   "n": 326,
+   "kind": "link",
+   "label": "[55]"
+  },
+  {
+   "n": 327,
+   "kind": "link",
+   "label": "[15]"
+  },
+  {
+   "n": 328,
+   "kind": "link",
+   "label": "[85]"
+  },
+  {
+   "n": 329,
+   "kind": "link",
+   "label": "bundled software"
+  },
+  {
+   "n": 330,
+   "kind": "link",
+   "label": "Procter \u0026 Gamble"
+  },
+  {
+   "n": 331,
+   "kind": "link",
+   "label": "[86]"
+  },
+  {
+   "n": 332,
+   "kind": "link",
+   "label": "[87]"
+  },
+  {
+   "n": 333,
+   "kind": "link",
+   "label": "[15]"
+  },
+  {
+   "n": 334,
+   "kind": "link",
+   "label": "[17]"
+  },
+  {
+   "n": 335,
+   "kind": "link",
+   "label": "[88]"
+  },
+  {
+   "n": 336,
+   "kind": "link",
+   "label": "[89]"
+  },
+  {
+   "n": 337,
+   "kind": "link",
+   "label": "[54]"
+  },
+  {
+   "n": 338,
+   "kind": "link",
+   "label": "[90]"
+  },
+  {
+   "n": 339,
+   "kind": "link",
+   "label": "[87]"
+  },
+  {
+   "n": 340,
+   "kind": "link",
+   "label": "[55]"
+  },
+  {
+   "n": 341,
+   "kind": "link",
+   "label": "[32]"
+  },
+  {
+   "n": 342,
+   "kind": "link",
+   "label": "[91]"
+  },
+  {
+   "n": 343,
+   "kind": "link",
+   "label": "[87]"
+  },
+  {
+   "n": 344,
+   "kind": "link",
+   "label": "[62]"
+  },
+  {
+   "n": 345,
+   "kind": "link",
+   "label": "[80]"
+  },
+  {
+   "n": 346,
+   "kind": "link",
+   "label": "[15]"
+  },
+  {
+   "n": 347,
+   "kind": "link",
+   "label": "[92]"
+  },
+  {
+   "n": 348,
+   "kind": "link",
+   "label": "[89]"
+  },
+  {
+   "n": 349,
+   "kind": "link",
+   "label": "[93]"
+  },
+  {
+   "n": 350,
+   "kind": "link",
+   "label": "[32]"
+  },
+  {
+   "n": 351,
+   "kind": "link",
+   "label": "[94]"
+  },
+  {
+   "n": 352,
+   "kind": "link",
+   "label": "[62]"
+  },
+  {
+   "n": 353,
+   "kind": "link",
+   "label": "[87]"
+  },
+  {
+   "n": 354,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 355,
+   "kind": "link",
+   "label": "[92]"
+  },
+  {
+   "n": 356,
+   "kind": "link",
+   "label": "[94]"
+  },
+  {
+   "n": 357,
+   "kind": "link",
+   "label": "[26]"
+  },
+  {
+   "n": 358,
+   "kind": "link",
+   "label": "[62]"
+  },
+  {
+   "n": 359,
+   "kind": "link",
+   "label": "[45]"
+  },
+  {
+   "n": 360,
+   "kind": "link",
+   "label": "[95]"
+  },
+  {
+   "n": 361,
+   "kind": "link",
+   "label": "PC AT"
+  },
+  {
+   "n": 362,
+   "kind": "link",
+   "label": "[78]"
+  },
+  {
+   "n": 363,
+   "kind": "link",
+   "label": "[26]"
+  },
+  {
+   "n": 364,
+   "kind": "link",
+   "label": "[56]"
+  },
+  {
+   "n": 365,
+   "kind": "link",
+   "label": "[94]"
+  },
+  {
+   "n": 366,
+   "kind": "link",
+   "label": "[62]"
+  },
+  {
+   "n": 367,
+   "kind": "link",
+   "label": "[26]"
+  },
+  {
+   "n": 368,
+   "kind": "link",
+   "label": "[94]"
+  },
+  {
+   "n": 369,
+   "kind": "link",
+   "label": "[26]"
+  },
+  {
+   "n": 370,
+   "kind": "link",
+   "label": "John Akers"
+  },
+  {
+   "n": 371,
+   "kind": "link",
+   "label": "[75]"
+  },
+  {
+   "n": 372,
+   "kind": "link",
+   "label": "[92]"
+  },
+  {
+   "n": 373,
+   "kind": "link",
+   "label": "[92]"
+  },
+  {
+   "n": 374,
+   "kind": "link",
+   "label": "[96]"
+  },
+  {
+   "n": 375,
+   "kind": "link",
+   "label": "[97]"
+  },
+  {
+   "n": 376,
+   "kind": "link",
+   "label": "[98]"
+  },
+  {
+   "n": 377,
+   "kind": "link",
+   "label": "[99]"
+  },
+  {
+   "n": 378,
+   "kind": "link",
+   "label": "[100]"
+  },
+  {
+   "n": 379,
+   "kind": "link",
+   "label": "[101]"
+  },
+  {
+   "n": 380,
+   "kind": "link",
+   "label": "[98]"
+  },
+  {
+   "n": 381,
+   "kind": "link",
+   "label": "[99]"
+  },
+  {
+   "n": 382,
+   "kind": "link",
+   "label": "payment terms"
+  },
+  {
+   "n": 383,
+   "kind": "link",
+   "label": "[98]"
+  },
+  {
+   "n": 384,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 385,
+   "kind": "link",
+   "label": "John V. Roach"
+  },
+  {
+   "n": 386,
+   "kind": "link",
+   "label": "Tandy Corporation"
+  },
+  {
+   "n": 387,
+   "kind": "link",
+   "label": "[102]"
+  },
+  {
+   "n": 388,
+   "kind": "link",
+   "label": "[75]"
+  },
+  {
+   "n": 389,
+   "kind": "link",
+   "label": "[62]"
+  },
+  {
+   "n": 390,
+   "kind": "link",
+   "label": "Edsel"
+  },
+  {
+   "n": 391,
+   "kind": "link",
+   "label": "New Coke"
+  },
+  {
+   "n": 392,
+   "kind": "link",
+   "label": "[103]"
+  },
+  {
+   "n": 393,
+   "kind": "link",
+   "label": "Oracle Corporation"
+  },
+  {
+   "n": 394,
+   "kind": "link",
+   "label": "[104]"
+  },
+  {
+   "n": 395,
+   "kind": "link",
+   "label": "human factors"
+  },
+  {
+   "n": 396,
+   "kind": "link",
+   "label": "[105]"
+  },
+  {
+   "n": 397,
+   "kind": "link",
+   "label": "Don Estridge"
+  },
+  {
+   "n": 398,
+   "kind": "link",
+   "label": "[75]"
+  },
+  {
+   "n": 399,
+   "kind": "link",
+   "label": "[62]"
+  },
+  {
+   "n": 400,
+   "kind": "link",
+   "label": "Tandy Corporation"
+  },
+  {
+   "n": 401,
+   "kind": "link",
+   "label": "Tandy 1000"
+  },
+  {
+   "n": 402,
+   "kind": "link",
+   "label": "[106]"
+  },
+  {
+   "n": 403,
+   "kind": "link",
+   "label": "[107]"
+  },
+  {
+   "n": 404,
+   "kind": "link",
+   "label": "Radio Shack"
+  },
+  {
+   "n": 405,
+   "kind": "link",
+   "label": "Tandy-compatible"
+  },
+  {
+   "n": 406,
+   "kind": "link",
+   "label": "[108]"
+  },
+  {
+   "n": 407,
+   "kind": "link",
+   "label": "[109]"
+  },
+  {
+   "n": 408,
+   "kind": "link",
+   "label": "[110]"
+  },
+  {
+   "n": 409,
+   "kind": "link",
+   "label": "[111]"
+  },
+  {
+   "n": 410,
+   "kind": "link",
+   "label": "[112]"
+  },
+  {
+   "n": 411,
+   "kind": "link",
+   "label": "PS/1"
+  },
+  {
+   "n": 412,
+   "kind": "link",
+   "label": "[103]"
+  },
+  {
+   "n": 413,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 414,
+   "kind": "link",
+   "label": "v"
+  },
+  {
+   "n": 415,
+   "kind": "link",
+   "label": "t"
+  },
+  {
+   "n": 416,
+   "kind": "link",
+   "label": "e"
+  },
+  {
+   "n": 417,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 418,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 419,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 420,
+   "kind": "link",
+   "label": "Commodore 64"
+  },
+  {
+   "n": 421,
+   "kind": "link",
+   "label": "Atari 2600"
+  },
+  {
+   "n": 422,
+   "kind": "link",
+   "label": "\"Unearthing The PCjr's Secrets\""
+  },
+  {
+   "n": 423,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 424,
+   "kind": "link",
+   "label": "\"The Tandy 1000\""
+  },
+  {
+   "n": 425,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 426,
+   "kind": "link",
+   "label": "Video Graphics Array"
+  },
+  {
+   "n": 427,
+   "kind": "link",
+   "label": "PS/2"
+  },
+  {
+   "n": 428,
+   "kind": "link",
+   "label": "\"Screening the PCjr's Color, Video, And Memory Options\""
+  },
+  {
+   "n": 429,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 430,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 431,
+   "kind": "link",
+   "label": "\"Sound Abilities: The PCjr\""
+  },
+  {
+   "n": 432,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 433,
+   "kind": "link",
+   "label": "PC Mag"
+  },
+  {
+   "n": 434,
+   "kind": "link",
+   "label": "\"IBM's New PCjr\""
+  },
+  {
+   "n": 435,
+   "kind": "link",
+   "label": "\"The Debut of I.B.M.'S Junior\""
+  },
+  {
+   "n": 436,
+   "kind": "link",
+   "label": "\"IBM PCjr STRIPPED BARE: We tear down the machine Big Blue w"
+  },
+  {
+   "n": 437,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 438,
+   "kind": "link",
+   "label": "LGR – Experiencing The IBM PCjr Chiclet Keyboard"
+  },
+  {
+   "n": 439,
+   "kind": "link",
+   "label": "Archived"
+  },
+  {
+   "n": 440,
+   "kind": "link",
+   "label": "\"IBM's New \u0026 Improved PCjr\""
+  },
+  {
+   "n": 441,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 442,
+   "kind": "link",
+   "label": "\"IBM PCjr Options and Accessories\""
+  },
+  {
+   "n": 443,
+   "kind": "link",
+   "label": "\"The Life and Times of PC junior\""
+  },
+  {
+   "n": 444,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 445,
+   "kind": "link",
+   "label": "\"Adding to Junior's Memory\""
+  },
+  {
+   "n": 446,
+   "kind": "link",
+   "label": "\"Big I.B.M. Has Done It Again\""
+  },
+  {
+   "n": 447,
+   "kind": "link",
+   "label": "ISSN"
+  },
+  {
+   "n": 448,
+   "kind": "link",
+   "label": "0362-4331"
+  },
+  {
+   "n": 449,
+   "kind": "link",
+   "label": "\"Analysts say: IBM's PCjr won't disrupt Christmas for compet"
+  },
+  {
+   "n": 450,
+   "kind": "link",
+   "label": "\"I.B.M.'S Speedy Redirection\""
+  },
+  {
+   "n": 451,
+   "kind": "link",
+   "label": "\"D-Day for the Home Computer\""
+  },
+  {
+   "n": 452,
+   "kind": "link",
+   "label": "the original"
+  },
+  {
+   "n": 453,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 454,
+   "kind": "link",
+   "label": "\"Total Share: Personal Computer Market Share 1975–2005\""
+  },
+  {
+   "n": 455,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 456,
+   "kind": "link",
+   "label": "\"IBM's Estridge\""
+  },
+  {
+   "n": 457,
+   "kind": "link",
+   "label": "\"Apple IIe Sales Surge as IIc is Readied\""
+  },
+  {
+   "n": 458,
+   "kind": "link",
+   "label": "\"Kicking Junior Out of the Family\""
+  },
+  {
+   "n": 459,
+   "kind": "link",
+   "label": "the original"
+  },
+  {
+   "n": 460,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 461,
+   "kind": "link",
+   "label": "\"The Coming Crisis in Home Computers\""
+  },
+  {
+   "n": 462,
+   "kind": "link",
+   "label": "\"The Colossus That Works\""
+  },
+  {
+   "n": 463,
+   "kind": "link",
+   "label": "Archived"
+  },
+  {
+   "n": 464,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 465,
+   "kind": "link",
+   "label": "\"Personal Computers; Is the I.B.M. Peanut Really in the Wing"
+  },
+  {
+   "n": 466,
+   "kind": "link",
+   "label": "ISSN"
+  },
+  {
+   "n": 467,
+   "kind": "link",
+   "label": "0362-4331"
+  },
+  {
+   "n": 468,
+   "kind": "link",
+   "label": "\"IBM's PCjr—was it worth the wait?\""
+  },
+  {
+   "n": 469,
+   "kind": "link",
+   "label": "\"IBM PCjr leads the way for industry\""
+  },
+  {
+   "n": 470,
+   "kind": "link",
+   "label": "\"A Flop Becomes a Hit\""
+  },
+  {
+   "n": 471,
+   "kind": "link",
+   "label": "the original"
+  },
+  {
+   "n": 472,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 473,
+   "kind": "link",
+   "label": "\"Anatomy of a Colossus, Part III\""
+  },
+  {
+   "n": 474,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 475,
+   "kind": "link",
+   "label": "\"TI retires from home-computer market\""
+  },
+  {
+   "n": 476,
+   "kind": "link",
+   "label": "\"Jr. Sneaks PC into Home\""
+  },
+  {
+   "n": 477,
+   "kind": "link",
+   "label": "\"The Unmaking and Remaking of Sierra On-Line\""
+  },
+  {
+   "n": 478,
+   "kind": "link",
+   "label": "\"Coming Soon: Games For The PCjr\""
+  },
+  {
+   "n": 479,
+   "kind": "link",
+   "label": "Sanger, David E."
+  },
+  {
+   "n": 480,
+   "kind": "link",
+   "label": "\"The Heady World of I.B.M. Suppliers\""
+  },
+  {
+   "n": 481,
+   "kind": "link",
+   "label": "ISSN"
+  },
+  {
+   "n": 482,
+   "kind": "link",
+   "label": "0362-4331"
+  },
+  {
+   "n": 483,
+   "kind": "link",
+   "label": "\"PCjr users wait for packages\""
+  },
+  {
+   "n": 484,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 485,
+   "kind": "link",
+   "label": "\"A Secret Inside The ROM\""
+  },
+  {
+   "n": 486,
+   "kind": "link",
+   "label": "\"IBM's PCjr receives a cool reception\""
+  },
+  {
+   "n": 487,
+   "kind": "link",
+   "label": "\"The Peanut Meets the Mac\""
+  },
+  {
+   "n": 488,
+   "kind": "link",
+   "label": "the original"
+  },
+  {
+   "n": 489,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 490,
+   "kind": "link",
+   "label": "\"Boom in Computer Magazines\""
+  },
+  {
+   "n": 491,
+   "kind": "link",
+   "label": "\"Magazines Woo Users\""
+  },
+  {
+   "n": 492,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 493,
+   "kind": "link",
+   "label": "\"Inside Track\""
+  },
+  {
+   "n": 494,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 495,
+   "kind": "link",
+   "label": "\"IBM indicates March as likely PCjr delivery date\""
+  },
+  {
+   "n": 496,
+   "kind": "link",
+   "label": "\"PCjr Sales Less Than Expected\""
+  },
+  {
+   "n": 497,
+   "kind": "link",
+   "label": "ISSN"
+  },
+  {
+   "n": 498,
+   "kind": "link",
+   "label": "0362-4331"
+  },
+  {
+   "n": 499,
+   "kind": "link",
+   "label": "\"Apple Charts The Course For IBM\""
+  },
+  {
+   "n": 500,
+   "kind": "link",
+   "label": "\"Macintosh Takes Lead In Sales Race\""
+  },
+  {
+   "n": 501,
+   "kind": "link",
+   "label": "\"PCjr sales below expectations, dealers say\""
+  },
+  {
+   "n": 502,
+   "kind": "link",
+   "label": "\"I.B.M.'s Problems with Junior\""
+  },
+  {
+   "n": 503,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 504,
+   "kind": "link",
+   "label": "\"Behind the short, unhappy life of IBM's Junior\""
+  },
+  {
+   "n": 505,
+   "kind": "link",
+   "label": "\"Big time: IBM skillfully revives lackluster sales of PCjr\""
+  },
+  {
+   "n": 506,
+   "kind": "link",
+   "label": "\"The Daunting Power of I.B.M.\""
+  },
+  {
+   "n": 507,
+   "kind": "link",
+   "label": "ISSN"
+  },
+  {
+   "n": 508,
+   "kind": "link",
+   "label": "0362-4331"
+  },
+  {
+   "n": 509,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 510,
+   "kind": "link",
+   "label": "\"PCjr: Back to Basics\""
+  },
+  {
+   "n": 511,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 512,
+   "kind": "link",
+   "label": "\"The 25 Worst Tech Products of All Time\""
+  },
+  {
+   "n": 513,
+   "kind": "link",
+   "label": "PCWorld"
+  },
+  {
+   "n": 514,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 515,
+   "kind": "link",
+   "label": "\"Keyboard is a Stroke of Genius\""
+  },
+  {
+   "n": 516,
+   "kind": "link",
+   "label": "\"IBM's Displaywriter Begets a Family of PC Software\""
+  },
+  {
+   "n": 517,
+   "kind": "link",
+   "label": "\"Developers embrace PCjr despite drawbacks\""
+  },
+  {
+   "n": 518,
+   "kind": "link",
+   "label": "\"The runner stumbles: IBM pulls back from troubled PCjr\""
+  },
+  {
+   "n": 519,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 520,
+   "kind": "link",
+   "label": "\"New PC Jr\""
+  },
+  {
+   "n": 521,
+   "kind": "link",
+   "label": "\"Personal Computers: The Little I.B.M. Finally Arrives for a"
+  },
+  {
+   "n": 522,
+   "kind": "link",
+   "label": "ISSN"
+  },
+  {
+   "n": 523,
+   "kind": "link",
+   "label": "0362-4331"
+  },
+  {
+   "n": 524,
+   "kind": "link",
+   "label": "\"Junior and Edsel: Two of A Kind Together At Last!\""
+  },
+  {
+   "n": 525,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 526,
+   "kind": "link",
+   "label": "\"The newest member of the family goes head to head with the "
+  },
+  {
+   "n": 527,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 528,
+   "kind": "link",
+   "label": "\"Apple Expands Product Line\""
+  },
+  {
+   "n": 529,
+   "kind": "link",
+   "label": "ISSN"
+  },
+  {
+   "n": 530,
+   "kind": "link",
+   "label": "0362-4331"
+  },
+  {
+   "n": 531,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 532,
+   "kind": "link",
+   "label": "\"Industry reacts to PCjr\""
+  },
+  {
+   "n": 533,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 534,
+   "kind": "link",
+   "label": "\"Apple aiming to take bite out of IBM\""
+  },
+  {
+   "n": 535,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 536,
+   "kind": "link",
+   "label": "\"Apple announces the IIc\""
+  },
+  {
+   "n": 537,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 538,
+   "kind": "link",
+   "label": "\"The Apple IIc\""
+  },
+  {
+   "n": 539,
+   "kind": "link",
+   "label": "\"Apple is Banking on New Portable: The IIc Computer\""
+  },
+  {
+   "n": 540,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 541,
+   "kind": "link",
+   "label": "\"PC compatibility\""
+  },
+  {
+   "n": 542,
+   "kind": "link",
+   "label": "\"The Changing Image of I.B.M.\""
+  },
+  {
+   "n": 543,
+   "kind": "link",
+   "label": "ISSN"
+  },
+  {
+   "n": 544,
+   "kind": "link",
+   "label": "0362-4331"
+  },
+  {
+   "n": 545,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 546,
+   "kind": "link",
+   "label": "\"Heard on Tech Street\""
+  },
+  {
+   "n": 547,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 548,
+   "kind": "link",
+   "label": "IBM Personal Computer PCjr Hardware Reference Library / Tech"
+  },
+  {
+   "n": 549,
+   "kind": "link",
+   "label": "\"Computer Giant Finds Problems in Success\""
+  },
+  {
+   "n": 550,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 551,
+   "kind": "link",
+   "label": "\"Developing PCjr Software\""
+  },
+  {
+   "n": 552,
+   "kind": "link",
+   "label": "\"I.B.M. Raises Dividend, Offers a Free Keyboard\""
+  },
+  {
+   "n": 553,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 554,
+   "kind": "link",
+   "label": "\"A public Windows pane to make compatibility clearer\""
+  },
+  {
+   "n": 555,
+   "kind": "link",
+   "label": "\"Lotus 1-2-3 For IBM PCjr\""
+  },
+  {
+   "n": 556,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 557,
+   "kind": "link",
+   "label": "Norton, Peter"
+  },
+  {
+   "n": 558,
+   "kind": "link",
+   "label": "The Peter Norton Programmer's Guide for the IBM PC"
+  },
+  {
+   "n": 559,
+   "kind": "link",
+   "label": "ISBN"
+  },
+  {
+   "n": 560,
+   "kind": "link",
+   "label": "0-914845-46-2"
+  },
+  {
+   "n": 561,
+   "kind": "link",
+   "label": "\"IBM PCjr\""
+  },
+  {
+   "n": 562,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 563,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 564,
+   "kind": "link",
+   "label": "\"IBM: Colossus of Armonk\""
+  },
+  {
+   "n": 565,
+   "kind": "link",
+   "label": "\"Jr's Growth Spurts Sales\""
+  },
+  {
+   "n": 566,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 567,
+   "kind": "link",
+   "label": "\"Now picture this\""
+  },
+  {
+   "n": 568,
+   "kind": "link",
+   "label": "\"An old friend takes a hard look at the IBM product line\""
+  },
+  {
+   "n": 569,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 570,
+   "kind": "link",
+   "label": "\"Is jr 'Likely to Succeed'? Friends Gloat, Foes Groan\""
+  },
+  {
+   "n": 571,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 572,
+   "kind": "link",
+   "label": "\"At Computer Show, Many Retrenching\""
+  },
+  {
+   "n": 573,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 574,
+   "kind": "link",
+   "label": "\"PCjr Renaissance\""
+  },
+  {
+   "n": 575,
+   "kind": "link",
+   "label": "\"I.B.M. Drops PCjr Production\""
+  },
+  {
+   "n": 576,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 577,
+   "kind": "link",
+   "label": "\"ABC'S AXE-WIELDING PUBLISHER: ROBERT G. BURTON; Championing"
+  },
+  {
+   "n": 578,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 579,
+   "kind": "link",
+   "label": "\"Fire sale seen for last PCjrs\""
+  },
+  {
+   "n": 580,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 581,
+   "kind": "link",
+   "label": "\"COMDEX: Nothing New Under the Georgia Sun\""
+  },
+  {
+   "n": 582,
+   "kind": "link",
+   "label": "\"IBM Will Offer the PCjr for Further Education in Schools\""
+  },
+  {
+   "n": 583,
+   "kind": "link",
+   "label": "\"News in Brief\""
+  },
+  {
+   "n": 584,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 585,
+   "kind": "link",
+   "label": "\"Death of the PCjr: Insiders Foresaw It\""
+  },
+  {
+   "n": 586,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 587,
+   "kind": "link",
+   "label": "\"I.B.M. Offers a PCjr Deal\""
+  },
+  {
+   "n": 588,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 589,
+   "kind": "link",
+   "label": "\"Windows on John Roach\""
+  },
+  {
+   "n": 590,
+   "kind": "link",
+   "label": "\"The Pros, Cons Of Buying An IBM PS/1\""
+  },
+  {
+   "n": 591,
+   "kind": "link",
+   "label": "the original"
+  },
+  {
+   "n": 592,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 593,
+   "kind": "link",
+   "label": "\"The Last DBMS\""
+  },
+  {
+   "n": 594,
+   "kind": "link",
+   "label": "InfoWorld"
+  },
+  {
+   "n": 595,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 596,
+   "kind": "link",
+   "label": "\"The Chiclet Rule and the Green Dragon\""
+  },
+  {
+   "n": 597,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 598,
+   "kind": "link",
+   "label": "\"BRIEFS\""
+  },
+  {
+   "n": 599,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 600,
+   "kind": "link",
+   "label": "\"Tandy Revamps Product Line\""
+  },
+  {
+   "n": 601,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 602,
+   "kind": "link",
+   "label": "Vintage Game Consoles: An Inside Look at Apple, Atari, Commo"
+  },
+  {
+   "n": 603,
+   "kind": "link",
+   "label": "ISBN"
+  },
+  {
+   "n": 604,
+   "kind": "link",
+   "label": "978-1135006518"
+  },
+  {
+   "n": 605,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 606,
+   "kind": "link",
+   "label": "\"Compatibility Wars—Here and Abroad\""
+  },
+  {
+   "n": 607,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 608,
+   "kind": "link",
+   "label": "\"The MS-DOS Invasion / IBM Compatibles Are Coming Home\""
+  },
+  {
+   "n": 609,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 610,
+   "kind": "link",
+   "label": "\"Company History Page\""
+  },
+  {
+   "n": 611,
+   "kind": "link",
+   "label": "Jump up"
+  },
+  {
+   "n": 612,
+   "kind": "link",
+   "label": "\"IBM PCjr computer\""
+  },
+  {
+   "n": 613,
+   "kind": "link",
+   "label": "edit"
+  },
+  {
+   "n": 614,
+   "kind": "link",
+   "label": "Christmas 1984: The Great Apple //c vs. PCjr Battle"
+  },
+  {
+   "n": 615,
+   "kind": "link",
+   "label": "The IBM PCjr User's Guide"
+  },
+  {
+   "n": 616,
+   "kind": "link",
+   "label": "Categories"
+  },
+  {
+   "n": 617,
+   "kind": "link",
+   "label": "8086-based home computers"
+  },
+  {
+   "n": 618,
+   "kind": "link",
+   "label": "Home computers"
+  },
+  {
+   "n": 619,
+   "kind": "link",
+   "label": "X86 IBM personal computers"
+  },
+  {
+   "n": 620,
+   "kind": "link",
+   "label": "Computer-related introductions in 1984"
+  }
+ ],
+ "Whole": false
+}

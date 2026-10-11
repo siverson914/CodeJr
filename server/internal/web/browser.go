@@ -11,6 +11,9 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
+	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -235,4 +238,38 @@ func (b *Browser) Shot(n int) ([]byte, error) {
 	return png, b.run(20*time.Second,
 		chromedp.ScrollIntoView(sel(n), chromedp.ByQuery),
 		chromedp.Screenshot(sel(n), &png, chromedp.ByQuery))
+}
+
+// SavePage writes a page as JSON into dir, named after its address, and
+// returns the file's path.
+func SavePage(dir string, p *Page) (string, error) {
+	name := p.URL
+	if u, err := url.Parse(p.URL); err == nil {
+		name = u.Host + u.Path
+		if u.RawQuery != "" {
+			name += "_" + u.RawQuery
+		}
+	}
+	name = strings.Trim(slug.ReplaceAllString(strings.TrimPrefix(name, "www."), "-"), "-")
+	if len(name) > 80 {
+		name = name[:80]
+	}
+	b, err := json.MarshalIndent(p, "", " ")
+	if err != nil {
+		return "", err
+	}
+	f := filepath.Join(dir, name+".json")
+	return f, os.WriteFile(f, b, 0o644)
+}
+
+var slug = regexp.MustCompile(`[^A-Za-z0-9.]+`)
+
+// LoadPage reads a page SavePage wrote.
+func LoadPage(file string) (*Page, error) {
+	b, err := os.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	p := &Page{}
+	return p, json.Unmarshal(b, p)
 }

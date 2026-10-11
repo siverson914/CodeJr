@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -23,24 +24,35 @@ type Session struct {
 	B    *Browser
 	Out  Screen
 	Logf func(format string, a ...any)
+	// SaveDir, when set, keeps every page read there as JSON (for trying
+	// the page filter on saved pages: chromejr -filter).
+	SaveDir string
+	// Filter, when set, lays each page out simply (a View) before it is
+	// shown; nil shows every page as numbered text.
+	Filter *Filterer
 
 	page  *Page
-	lines [][]Seg // the page, wrapped
+	view  *View   // the page laid out, or nil
+	raw   bool    // showing the page itself (its own numbers), not the view
+	off   bool    // the filter is turned off ("f")
+	lines [][]Seg // what is being shown, wrapped
 	shown int     // lines of it shown so far
+	end   string  // said after the last line
 	whole bool    // the next read takes the whole page
 }
 
 const help = `ChromeJr: a real browser on the laptop, shown as text.
   an address        amazon.com   en.wikipedia.org/wiki/IBM_PCjr
   anything else     searches the web for it
-  12                follow link 12, or press button <12>
-  12 some text      type into field {12} and press Enter
-  12= some text     type into field {12} without pressing Enter
+  3                 pick 3: follow it, press it, or open that section
+  3 some text       type into box 3 and press Enter
+  3= some text      type into box 3 without pressing Enter
   .add to cart      press the first button or link that says so
   m                 more of this page        t   this page from the top
   b                 back                     r   load the page again
+  w                 the page itself, every link numbered (w again: menus too)
+  v                 the simple view again    f   simple views off/on
   l                 list the page's fields and buttons
-  w                 the whole page: menus, side bars, the search box
   ?                 this help                /exit   leave
 `
 
@@ -67,6 +79,27 @@ func (s *Session) Command(line string) {
 		return
 	case lower == "l":
 		s.list()
+		return
+	case lower == "v":
+		if s.view == nil {
+			s.Out.Text('c', "This page has no simple view. w shows it all.\n")
+			return
+		}
+		s.raw = false
+		s.showView()
+		return
+	case lower == "f":
+		s.off = !s.off
+		if s.off {
+			s.Out.Text('c', "Simple views off: pages come as numbered text. f turns them on.\n")
+		} else {
+			s.Out.Text('c', "Simple views on (from the next page; v shows this one's).\n")
+		}
+		return
+	case lower == "w" && s.page != nil && !s.raw:
+		// The page itself, as it was read: its own numbers.
+		s.raw = true
+		s.showRaw()
 		return
 	case lower == "w":
 		// The same page with its menus and side bars.
@@ -100,6 +133,10 @@ func (s *Session) Command(line string) {
 	}
 	// A number, with or without text: something on the page.
 	setOnly := strings.HasSuffix(first, "=")
+	if n, err := strconv.Atoi(strings.TrimSuffix(first, "=")); err == nil && s.page != nil && s.view != nil && !s.raw {
+		s.pick(n, rest, setOnly, start)
+		return
+	}
 	if n, err := strconv.Atoi(strings.TrimSuffix(first, "=")); err == nil && s.page != nil {
 		t, ok := s.page.Find(n)
 		if !ok {
@@ -153,6 +190,7 @@ func (s *Session) did(err error, start time.Time, what string) {
 	if err != nil {
 		s.Out.Text('c', "That didn't work: "+short(err.Error(), 120)+"\n")
 	}
+	asked := s.whole // "w": the whole page, as it is
 	p, rerr := s.B.Read(s.whole)
 	s.whole = false
 	if rerr != nil {
@@ -161,16 +199,104 @@ func (s *Session) did(err error, start time.Time, what string) {
 		return
 	}
 	s.page = p
-	s.lines = Wrap(p.Lines, Width)
-	s.shown = 0
+	s.view = nil
+	s.raw = true
+	if s.SaveDir != "" {
+		if f, err := SavePage(s.SaveDir, p); err != nil {
+			s.Logf("saving the page: %v", err)
+		} else {
+			s.Logf("saved %s", f)
+		}
+	}
+	lines := Wrap(p.Lines, Width)
 	chars := 0
-	for _, l := range s.lines {
+	for _, l := range lines {
 		chars += len(Plain(l)) + 1
 	}
-	s.Logf("%s: %q %s, %d lines, %d chars, %d numbered, %.1fs", what, p.Title, p.URL, len(s.lines), chars, len(p.Targets), time.Since(start).Seconds())
-	s.Out.Text('h', "\n== "+short(toASCII(p.Title), 70)+"\n")
-	s.Out.Text('n', short(toASCII(p.URL), 78)+"\n")
+	s.Logf("%s: %q %s, %d lines, %d chars, %d numbered, %.1fs", what, p.Title, p.URL, len(lines), chars, len(p.Targets), time.Since(start).Seconds())
+	if s.Filter != nil && !s.off && !asked {
+		s.Out.Status("Simplifying the page...")
+		v, st, err := s.Filter.Filter(context.Background(), p)
+		if err != nil {
+			s.Logf("filter: %v (%s)", err, st)
+			s.Out.Text('c', "(No simple view: "+short(err.Error(), 100)+")\n")
+		} else {
+			s.Logf("filter: %s, %d choices, %s, %.1fs in all", v.Kind, choices(v), st, time.Since(start).Seconds())
+			s.view, s.raw = v, false
+			s.showView()
+			return
+		}
+	}
+	s.showRaw()
+}
+
+func choices(v *View) int {
+	n := 0
+	for _, b := range v.Blocks {
+		if b.N > 0 {
+			n++
+		}
+	}
+	return n
+}
+
+// showRaw shows the page itself from the top: its text with its own
+// numbers.
+func (s *Session) showRaw() {
+	s.lines = Wrap(s.page.Lines, Width)
+	s.shown = 0
+	s.end = "-- end of the page's main part. w shows the whole page (menus, search box) --"
+	if s.page.Whole {
+		s.end = "-- end of page --"
+	}
+	if s.view != nil {
+		s.end += "\n-- v: the simple view --"
+	}
+	s.Out.Text('h', "\n== "+short(toASCII(s.page.Title), 70)+"\n")
+	s.Out.Text('n', short(toASCII(s.page.URL), 78)+"\n")
 	s.more()
+}
+
+// showView shows the page as the filter laid it out.
+func (s *Session) showView() {
+	s.lines = RenderMarkup(Markup(s.view), Width)
+	s.shown = 0
+	s.end = "-- type a number to pick it. w: the whole page, numbered --"
+	s.Out.Text('p', "\n")
+	s.more()
+}
+
+// pick does the view's choice n.
+func (s *Session) pick(n int, rest string, setOnly bool, start time.Time) {
+	b, ok := s.view.Choice(n)
+	if !ok {
+		s.Out.Text('c', fmt.Sprintf("There is no %d here. w shows the whole page, numbered.\n", n))
+		return
+	}
+	switch b.Type {
+	case 'S':
+		s.lines = Wrap(Section(s.page, s.view, n), Width)
+		s.shown = 0
+		s.end = "-- end of the section. v: back to the page --"
+		s.Out.Text('p', "\n")
+		s.more()
+	case 'F':
+		if rest == "" && !setOnly {
+			s.Out.Text('c', fmt.Sprintf("%d is a box to type in (%s). Type: %d your words\n", n, b.Text, n))
+			return
+		}
+		t, _ := s.page.Find(b.Target)
+		if t.Kind == "select" {
+			s.Out.Status("Choosing...")
+			s.did(s.B.Choose(b.Target, rest), start, fmt.Sprintf("choose %d (view %d)", b.Target, n))
+			return
+		}
+		s.Out.Status("Typing into " + short(b.Text, 40) + "...")
+		s.did(s.B.Fill(b.Target, rest, !setOnly), start, fmt.Sprintf("fill %d (view %d)", b.Target, n))
+	default:
+		s.Out.Status("Opening " + short(b.Text, 40) + "...")
+		s.did(s.B.Press(b.Target), start, fmt.Sprintf("press %d (view %d, %q)", b.Target, n, b.Text))
+	}
 }
 
 // more shows the next part of the page.
@@ -194,11 +320,7 @@ func (s *Session) more() {
 		s.Out.Text('c', fmt.Sprintf("-- %d of %d lines. m for more --\n", end, len(s.lines)))
 		s.Out.Status(fmt.Sprintf("%s   line %d of %d   m = more, ? = help", short(toASCII(s.page.Title), 34), end, len(s.lines)))
 	} else {
-		if s.page.Whole {
-			s.Out.Text('c', "-- end of page --\n")
-		} else {
-			s.Out.Text('c', "-- end of the page's main part. w shows the whole page (menus, search box) --\n")
-		}
+		s.Out.Text('c', s.end+"\n")
 		s.Out.Status(short(toASCII(s.page.Title), 50) + "   ? = help")
 	}
 }

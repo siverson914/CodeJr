@@ -1,0 +1,2077 @@
+{
+ "Title": "BBC News - Breaking news, video and the latest top stories from the U.S. and around the world",
+ "URL": "https://www.bbc.com/news",
+ "Lines": [
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 1: trump and zelensky composite)"
+   },
+   {
+    "Style": 110,
+    "Text": "[2]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "'Time for Ukraine to get new president,' says Trump after Zelensky condemns diesel deal"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Ukraine's leader had said the deal with Russia to release diesel into the US would help Moscow fund the war."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "3 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "World"
+   },
+   {
+    "Style": 110,
+    "Text": "[3]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 4: A woman with red hair wears a white top with a red)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "US murderer Christa Pike discharged from hospital 10 days after failed execution"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Pike's lawyers say she is \"grateful\" to the medical team who cared for her after she survived two lethal injections last month."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "5 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "US \u0026 Canada"
+   },
+   {
+    "Style": 110,
+    "Text": "[5]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Two children and pregnant woman among 8 shot dead at Pennsylvania house"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "All but one of those who died, including the gunman, were related, police say. A motive for the shooting is not yet known."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "1 hr ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "US \u0026 Canada"
+   },
+   {
+    "Style": 110,
+    "Text": "[6]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Young men live in fear of being snatched off the streets and sold to Myanmar's army"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "A desperate junta is in a war of attrition against ethnic militias and and civilian resistance."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "15 mins ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Asia"
+   },
+   {
+    "Style": 110,
+    "Text": "[7]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 8: An apartment complex is seen from above, after the)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Four dead and thousands without power after Hurricane Isaias lashes US"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Roofs were ripped off buildings after Isaias barrelled into the US on Friday evening, before it weakened to a post-tropical cyclone."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "26 mins ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "US \u0026 Canada"
+   },
+   {
+    "Style": 110,
+    "Text": "[9]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 10: file image of cars outside King Khalid airport in )"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Several injured in attack on airport in Saudi capital Riyadh"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "The US embassy says it is \"aware of attacks on King Khalid International Airport\", which come days after Yemen's Houthis said they had struck it."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "1 hr ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Middle East"
+   },
+   {
+    "Style": 110,
+    "Text": "[11]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 12: satellite image)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Expedition hopes to find aviator Amelia Earhart's plane on remote island"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "The team en route to the suspected crash site aim finally to solve the mystery of her 1937 disappearance."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "4 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "World"
+   },
+   {
+    "Style": 110,
+    "Text": "[13]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 14: Navi Pillay, wearing an orange top and white jacke)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Nobel peace laureate says US sanctions on ICC 'unacceptable'"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Navi Pillay says the Trump administrations' sweeping penalties on the international tribunal were \"unheard of\"."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "7 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "World"
+   },
+   {
+    "Style": 110,
+    "Text": "[15]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Why have hundreds of 'cockroach' protesters been detained in Delhi"
+   },
+   {
+    "Style": 110,
+    "Text": "[16]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Man dies after tiger attack at wildlife park"
+   },
+   {
+    "Style": 110,
+    "Text": "[17]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Headmaster detained after BBC investigation into alleged sexual abuse of students"
+   },
+   {
+    "Style": 110,
+    "Text": "[18]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Russian glide bomb attack on Zaporizhzhia kills at least 20 people"
+   },
+   {
+    "Style": 110,
+    "Text": "[19]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Woman injures three people in third Poland school knife attack in a week"
+   },
+   {
+    "Style": 110,
+    "Text": "[20]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "----------------------------------------"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "More to explore"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 21: Men stand on wooden gallows, as another man is esc)"
+   },
+   {
+    "Style": 110,
+    "Text": "[22]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Public executions in the US stopped nearly a century ago - why are they resuming now?"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "The Pentagon says the execution of Fort Hood shooter Nidal Hasan will be livestreamed, but experts suggest officials are reading the country wrong."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "13 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "World"
+   },
+   {
+    "Style": 110,
+    "Text": "[23]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 24: A screen grab from Danish Defense shows a gas leak)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Nord Stream trial: How German police followed the evidence - to Ukraine"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "After four years, a Ukrainian man is set to stand trial in Hamburg accused of sabotaging the Nord Stream pipelines."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "18 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Europe"
+   },
+   {
+    "Style": 110,
+    "Text": "[25]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Questions remain over Ebola patient who travelled across three nations undetected"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Fresh details reveal how the 40-year-old businessman flew and crossed regional borders while seriously ill."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "22 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Africa"
+   },
+   {
+    "Style": 110,
+    "Text": "[26]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Who is Nidal Hasan? What to know about US plans to livestream an execution"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "The planned firing-squad execution on 3 December has led to questions about legality and purpose."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "20 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "US \u0026 Canada"
+   },
+   {
+    "Style": 110,
+    "Text": "[27]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 28: Ashe poses in a wedding dress on the set of her vi)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Ashe was too scared to cancel her wedding - the story became a hit song"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "The US singer-songwriter reveals the story behind her international smash hit, Stop The Wedding."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "23 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Culture"
+   },
+   {
+    "Style": 110,
+    "Text": "[29]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 30: A protestor in a black hoodie jumps over a wheelie)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "'Everyone hates the police': What France's school protests reveal about a divided nation"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Students taking to the streets have become a focal point in the country's increasingly polarised politics."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "23 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Europe"
+   },
+   {
+    "Style": 110,
+    "Text": "[31]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 32: Donald Trump speaking at lecturn.)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Analysis: Trump's shock Russia deal highlights mounting pressure to curb fuel prices"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "The US president hopes to ease his party's pain before next month's midterm elections, writes the BBC's North America correspondent."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "24 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "US \u0026 Canada"
+   },
+   {
+    "Style": 110,
+    "Text": "[33]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "----------------------------------------"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Most watched"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "1"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Which emergency foods should you stock up on?"
+   },
+   {
+    "Style": 110,
+    "Text": "[34]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "2"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Watch: 'Time for Ukraine to get a new president', says Trump"
+   },
+   {
+    "Style": 110,
+    "Text": "[35]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "3"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Why have hundreds of 'cockroach' protesters been detained in Delhi"
+   },
+   {
+    "Style": 110,
+    "Text": "[36]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "4"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "BBC breaks down video of the aftermath of New York City ICE shooting"
+   },
+   {
+    "Style": 110,
+    "Text": "[37]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "5"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Thai Queen makes first solo flight in fighter jet"
+   },
+   {
+    "Style": 110,
+    "Text": "[38]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "----------------------------------------"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Also in news"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 39)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 99,
+    "Text": "(picture 40: US President Donald Trump speaks during a rally in)"
+   },
+   {
+    "Style": 110,
+    "Text": "[41]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "'Stain on the country': Trump criticises Norway over Nobel Peace Prize"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "The US president told a rally he had \"never heard of\" the winner, former International Criminal Court judge Navi Pillay."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "18 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "World"
+   },
+   {
+    "Style": 110,
+    "Text": "[42]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 43)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 99,
+    "Text": "(picture 44: File photo of a defector from the RSF standing in )"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Drone strike by Sudan paramilitary kills 41 near Ethiopian border, rights group says"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Eight children are said to be among those killed by the strike, which hit a gathering of displaced people."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "8 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Africa"
+   },
+   {
+    "Style": 110,
+    "Text": "[45]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 46)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 99,
+    "Text": "(picture 47: A 10-year-old with dark hair and eyhes looks forwa)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Sara Sharif's grandfather granted guardianship of her siblings in Pakistan"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "All five children have been living with him in Pakistan since 2023, when 10-year-old Sara was murdered."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "8 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "UK"
+   },
+   {
+    "Style": 110,
+    "Text": "[48]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 49)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 99,
+    "Text": "(picture 50: Anthropic logo on a smarthphone which is lying fla)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Rogue Anthropic AI agent gave police fake tip in unsolved murder case"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Philadelphia police said the tip was \"flagged as spam\", but criticised the tech company for taking more than two months to detect and report the breach."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "12 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "US \u0026 Canada"
+   },
+   {
+    "Style": 110,
+    "Text": "[51]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 52)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 99,
+    "Text": "(picture 53: King Charles III during a visit to the new Great B)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "King Charles warns malicious online actors are evolving tactics"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "The King spoke of \"threats to our international order\" in a letter marking the 10th anniversary of the National Cyber Security Centre."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "7 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Technology"
+   },
+   {
+    "Style": 110,
+    "Text": "[54]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "----------------------------------------"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Most read"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "1"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "'Time for Ukraine to get new president,' says Trump after Zelensky condemns diesel deal"
+   },
+   {
+    "Style": 110,
+    "Text": "[55]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "2"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Man dies after tiger attack at wildlife park"
+   },
+   {
+    "Style": 110,
+    "Text": "[56]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "3"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Firing squad execution to be livestreamed, Pentagon says"
+   },
+   {
+    "Style": 110,
+    "Text": "[57]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "4"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "US murderer Christa Pike discharged from hospital 10 days after failed execution"
+   },
+   {
+    "Style": 110,
+    "Text": "[58]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "5"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Expedition hopes to find aviator Amelia Earhart's plane on remote island"
+   },
+   {
+    "Style": 110,
+    "Text": "[59]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "6"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Two children and pregnant woman among 8 shot dead at Pennsylvania house"
+   },
+   {
+    "Style": 110,
+    "Text": "[60]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "7"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Several injured in attack on airport in Saudi capital Riyadh"
+   },
+   {
+    "Style": 110,
+    "Text": "[61]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "8"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Nobel peace laureate says US sanctions on ICC 'unacceptable'"
+   },
+   {
+    "Style": 110,
+    "Text": "[62]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "9"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Four dead and thousands without power after Hurricane Isaias lashes US"
+   },
+   {
+    "Style": 110,
+    "Text": "[63]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "* "
+   },
+   {
+    "Style": 108,
+    "Text": "10"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Man attacked by tiger at Yorkshire Wildlife Park"
+   },
+   {
+    "Style": 110,
+    "Text": "[64]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "----------------------------------------"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Sport"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 65)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 99,
+    "Text": "(picture 66: Michael Carrick after Manchester United's 1-1 draw)"
+   },
+   {
+    "Style": 110,
+    "Text": "[67]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Boos, anguish \u0026 fading belief -'worrying day' for under-pressure Carrick"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "It couldn't happen again could it? Another failure to beat 10 men increases pressure on Man Utd boss Michael Carrick after a 1-1 draw against Tottenham Hotspur."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "2 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Man Utd"
+   },
+   {
+    "Style": 110,
+    "Text": "[68]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 69)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 99,
+    "Text": "(picture 70: Jordan Henderson applauding the Chelsea fans after)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "The rock behind Chelsea's entertainers: Midfield duo key for Blues"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "The performances of Jordan Henderson and Moises Caicedo underpinned Chelsea's 5-1 victory at home to Bournemouth on Saturday afternoon."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "4 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Premier League"
+   },
+   {
+    "Style": 110,
+    "Text": "[71]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Ronaldo provisionally suspended by Portuguese FA"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Cristiano Ronaldo has been provisionally suspended by the Portuguese Football Federation (FPF) after leaving his country's international camp last month."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "5 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Football"
+   },
+   {
+    "Style": 110,
+    "Text": "[72]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 104,
+    "Text": "Gordon opens goal account as Barca equal best start"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Anthony Gordon scores his first competitive goal for Barcelona as they equal their best start to a La Liga season with a comfortable victory over Getafe."
+   },
+   {
+    "Style": 110,
+    "Text": "[73]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 74)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 99,
+    "Text": "(picture 75: Bruno Guimaraes celebrates scoring his second Arse)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Hincapie injury adds to Arsenal issues after Guimaraes rescue act"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Heroics and battling performances have already become a theme of Arsenal's season with Bruno Guimaraes coming to the rescue again."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "7 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Arsenal"
+   },
+   {
+    "Style": 110,
+    "Text": "[76]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 77)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 99,
+    "Text": "(picture 78: Max Verstappen smiling after taking pole position )"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "Verstappen building major momentum as 'no-one very happy' at McLaren"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Max Verstappen's revival might not be a serious issue for Kimi Antonelli but it is for McLaren, who had a bad Saturday in Singapore, writes Andrew Benson."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "5 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Formula 1"
+   },
+   {
+    "Style": 110,
+    "Text": "[79]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 99,
+    "Text": "(picture 80)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 99,
+    "Text": "(picture 81: Matt Renshaw raises his bat after being dismissed)"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 104,
+    "Text": "'What this team has been crying out for' - Renshaw 190 lifts Australia"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "After nine years and 280 days, Matt Renshaw scores epic century to put Australia on top against South Africa and push his own case for a regular place."
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "6 hrs ago"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Cricket"
+   },
+   {
+    "Style": 110,
+    "Text": "[82]"
+   }
+  ]
+ ],
+ "Targets": [
+  {
+   "n": 1,
+   "kind": "image",
+   "label": "trump and zelensky composite"
+  },
+  {
+   "n": 2,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 3,
+   "kind": "link",
+   "label": "'Time for Ukraine to get new president,' says Trump after Ze"
+  },
+  {
+   "n": 4,
+   "kind": "image",
+   "label": "A woman with red hair wears a white top with a red top on to"
+  },
+  {
+   "n": 5,
+   "kind": "link",
+   "label": "US murderer Christa Pike discharged from hospital 10 days af"
+  },
+  {
+   "n": 6,
+   "kind": "link",
+   "label": "Two children and pregnant woman among 8 shot dead at Pennsyl"
+  },
+  {
+   "n": 7,
+   "kind": "link",
+   "label": "Young men live in fear of being snatched off the streets and"
+  },
+  {
+   "n": 8,
+   "kind": "image",
+   "label": "An apartment complex is seen from above, after the roof was "
+  },
+  {
+   "n": 9,
+   "kind": "link",
+   "label": "Four dead and thousands without power after Hurricane Isaias"
+  },
+  {
+   "n": 10,
+   "kind": "image",
+   "label": "file image of cars outside King Khalid airport in Riyadh"
+  },
+  {
+   "n": 11,
+   "kind": "link",
+   "label": "Several injured in attack on airport in Saudi capital Riyadh"
+  },
+  {
+   "n": 12,
+   "kind": "image",
+   "label": "satellite image"
+  },
+  {
+   "n": 13,
+   "kind": "link",
+   "label": "Expedition hopes to find aviator Amelia Earhart's plane on r"
+  },
+  {
+   "n": 14,
+   "kind": "image",
+   "label": "Navi Pillay, wearing an orange top and white jacket, points "
+  },
+  {
+   "n": 15,
+   "kind": "link",
+   "label": "Nobel peace laureate says US sanctions on ICC 'unacceptable'"
+  },
+  {
+   "n": 16,
+   "kind": "link",
+   "label": "Why have hundreds of 'cockroach' protesters been detained in"
+  },
+  {
+   "n": 17,
+   "kind": "link",
+   "label": "Man dies after tiger attack at wildlife park"
+  },
+  {
+   "n": 18,
+   "kind": "link",
+   "label": "Headmaster detained after BBC investigation into alleged sex"
+  },
+  {
+   "n": 19,
+   "kind": "link",
+   "label": "Russian glide bomb attack on Zaporizhzhia kills at least 20 "
+  },
+  {
+   "n": 20,
+   "kind": "link",
+   "label": "Woman injures three people in third Poland school knife atta"
+  },
+  {
+   "n": 21,
+   "kind": "image",
+   "label": "Men stand on wooden gallows, as another man is escorted up s"
+  },
+  {
+   "n": 22,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 23,
+   "kind": "link",
+   "label": "Public executions in the US stopped nearly a century ago - w"
+  },
+  {
+   "n": 24,
+   "kind": "image",
+   "label": "A screen grab from Danish Defense shows a gas leak causes bu"
+  },
+  {
+   "n": 25,
+   "kind": "link",
+   "label": "Nord Stream trial: How German police followed the evidence -"
+  },
+  {
+   "n": 26,
+   "kind": "link",
+   "label": "Questions remain over Ebola patient who travelled across thr"
+  },
+  {
+   "n": 27,
+   "kind": "link",
+   "label": "Who is Nidal Hasan? What to know about US plans to livestrea"
+  },
+  {
+   "n": 28,
+   "kind": "image",
+   "label": "Ashe poses in a wedding dress on the set of her video for St"
+  },
+  {
+   "n": 29,
+   "kind": "link",
+   "label": "Ashe was too scared to cancel her wedding - the story became"
+  },
+  {
+   "n": 30,
+   "kind": "image",
+   "label": "A protestor in a black hoodie jumps over a wheelie bin on fi"
+  },
+  {
+   "n": 31,
+   "kind": "link",
+   "label": "'Everyone hates the police': What France's school protests r"
+  },
+  {
+   "n": 32,
+   "kind": "image",
+   "label": "Donald Trump speaking at lecturn."
+  },
+  {
+   "n": 33,
+   "kind": "link",
+   "label": "Analysis: Trump's shock Russia deal highlights mounting pres"
+  },
+  {
+   "n": 34,
+   "kind": "link",
+   "label": "1 Which emergency foods should you stock up on?"
+  },
+  {
+   "n": 35,
+   "kind": "link",
+   "label": "2 Watch: 'Time for Ukraine to get a new president', says Tru"
+  },
+  {
+   "n": 36,
+   "kind": "link",
+   "label": "3 Why have hundreds of 'cockroach' protesters been detained "
+  },
+  {
+   "n": 37,
+   "kind": "link",
+   "label": "4 BBC breaks down video of the aftermath of New York City IC"
+  },
+  {
+   "n": 38,
+   "kind": "link",
+   "label": "5 Thai Queen makes first solo flight in fighter jet"
+  },
+  {
+   "n": 39,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 40,
+   "kind": "image",
+   "label": "US President Donald Trump speaks during a rally in Syracuse,"
+  },
+  {
+   "n": 41,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 42,
+   "kind": "link",
+   "label": "'Stain on the country': Trump criticises Norway over Nobel P"
+  },
+  {
+   "n": 43,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 44,
+   "kind": "image",
+   "label": "File photo of a defector from the RSF standing in an armed v"
+  },
+  {
+   "n": 45,
+   "kind": "link",
+   "label": "Drone strike by Sudan paramilitary kills 41 near Ethiopian b"
+  },
+  {
+   "n": 46,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 47,
+   "kind": "image",
+   "label": "A 10-year-old with dark hair and eyhes looks forward, smilin"
+  },
+  {
+   "n": 48,
+   "kind": "link",
+   "label": "Sara Sharif's grandfather granted guardianship of her siblin"
+  },
+  {
+   "n": 49,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 50,
+   "kind": "image",
+   "label": "Anthropic logo on a smarthphone which is lying flat on the m"
+  },
+  {
+   "n": 51,
+   "kind": "link",
+   "label": "Rogue Anthropic AI agent gave police fake tip in unsolved mu"
+  },
+  {
+   "n": 52,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 53,
+   "kind": "image",
+   "label": "King Charles III during a visit to the new Great British Ene"
+  },
+  {
+   "n": 54,
+   "kind": "link",
+   "label": "King Charles warns malicious online actors are evolving tact"
+  },
+  {
+   "n": 55,
+   "kind": "link",
+   "label": "1 'Time for Ukraine to get new president,' says Trump after "
+  },
+  {
+   "n": 56,
+   "kind": "link",
+   "label": "2 Man dies after tiger attack at wildlife park"
+  },
+  {
+   "n": 57,
+   "kind": "link",
+   "label": "3 Firing squad execution to be livestreamed, Pentagon says"
+  },
+  {
+   "n": 58,
+   "kind": "link",
+   "label": "4 US murderer Christa Pike discharged from hospital 10 days "
+  },
+  {
+   "n": 59,
+   "kind": "link",
+   "label": "5 Expedition hopes to find aviator Amelia Earhart's plane on"
+  },
+  {
+   "n": 60,
+   "kind": "link",
+   "label": "6 Two children and pregnant woman among 8 shot dead at Penns"
+  },
+  {
+   "n": 61,
+   "kind": "link",
+   "label": "7 Several injured in attack on airport in Saudi capital Riya"
+  },
+  {
+   "n": 62,
+   "kind": "link",
+   "label": "8 Nobel peace laureate says US sanctions on ICC 'unacceptabl"
+  },
+  {
+   "n": 63,
+   "kind": "link",
+   "label": "9 Four dead and thousands without power after Hurricane Isai"
+  },
+  {
+   "n": 64,
+   "kind": "link",
+   "label": "10 Man attacked by tiger at Yorkshire Wildlife Park"
+  },
+  {
+   "n": 65,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 66,
+   "kind": "image",
+   "label": "Michael Carrick after Manchester United's 1-1 draw with Tott"
+  },
+  {
+   "n": 67,
+   "kind": "link",
+   "label": ""
+  },
+  {
+   "n": 68,
+   "kind": "link",
+   "label": "Boos, anguish \u0026 fading belief -'worrying day' for under-pres"
+  },
+  {
+   "n": 69,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 70,
+   "kind": "image",
+   "label": "Jordan Henderson applauding the Chelsea fans after their 5-1"
+  },
+  {
+   "n": 71,
+   "kind": "link",
+   "label": "The rock behind Chelsea's entertainers: Midfield duo key for"
+  },
+  {
+   "n": 72,
+   "kind": "link",
+   "label": "Ronaldo provisionally suspended by Portuguese FA Cristiano R"
+  },
+  {
+   "n": 73,
+   "kind": "link",
+   "label": "Gordon opens goal account as Barca equal best start Anthony "
+  },
+  {
+   "n": 74,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 75,
+   "kind": "image",
+   "label": "Bruno Guimaraes celebrates scoring his second Arsenal goal w"
+  },
+  {
+   "n": 76,
+   "kind": "link",
+   "label": "Hincapie injury adds to Arsenal issues after Guimaraes rescu"
+  },
+  {
+   "n": 77,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 78,
+   "kind": "image",
+   "label": "Max Verstappen smiling after taking pole position for the Si"
+  },
+  {
+   "n": 79,
+   "kind": "link",
+   "label": "Verstappen building major momentum as 'no-one very happy' at"
+  },
+  {
+   "n": 80,
+   "kind": "image",
+   "label": ""
+  },
+  {
+   "n": 81,
+   "kind": "image",
+   "label": "Matt Renshaw raises his bat after being dismissed"
+  },
+  {
+   "n": 82,
+   "kind": "link",
+   "label": "'What this team has been crying out for' - Renshaw 190 lifts"
+  }
+ ],
+ "Whole": false
+}

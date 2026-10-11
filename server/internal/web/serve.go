@@ -17,7 +17,7 @@ import (
 // CodeJr client program (CODEJR.EXE dialing this server's port): it gives
 // a screen with scrollback and paging, a status bar and an input line,
 // which is all a text browser needs to be tried out.
-func Serve(b *Browser, conn io.ReadWriteCloser, baud int, name string) {
+func Serve(b *Browser, filter *Filterer, conn io.ReadWriteCloser, baud int, name string) {
 	defer conn.Close()
 	logf := func(f string, a ...any) { log.Printf(name+": "+f, a...) }
 	out := term.NewPacer(conn, baud)
@@ -72,7 +72,7 @@ func Serve(b *Browser, conn io.ReadWriteCloser, baud int, name string) {
 	link.Send(cjp.Hello, []byte("CODEJR/2 server ui t="+time.Now().Format("20060102150405")))
 
 	scr := &linkScreen{link: link}
-	s := &Session{B: b, Out: scr, Logf: logf}
+	s := &Session{B: b, Out: scr, Logf: logf, Filter: filter}
 	scr.Text('h', "ChromeJr prototype: the web on a PCjr.\n")
 	scr.Text('c', "Type an address (wikipedia.org), or words to search for. ? for help.\n")
 	scr.Status("ChromeJr ready.   ? = help")

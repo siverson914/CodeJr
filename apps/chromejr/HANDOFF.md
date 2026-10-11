@@ -26,6 +26,49 @@ A working prototype, landed and running:
   Port 4850 is open in the laptop's firewall for 192.168.0.0/24 (ufw);
   a new port needs a new rule, which needs Steve's sudo.
 
+## Done 2026-10-10: the LLM page filter
+
+Built as designed below, with three changes found by measuring (the
+README's "The page filter" has the details and the timings):
+
+- **Lines, not JSON, from the model** (`I 12 | title | detail | price`):
+  half the output tokens, and output tokens are the time.
+- **`--effort low`**: Haiku through `claude -p` thought for 900 to 1,800
+  tokens a page by default (8 to 11 s). Low effort brings most pages to
+  3 to 4 s. No flag turns thinking off entirely; the 6 to 9 s pages are
+  the ones it still thinks on.
+- **The view's own numbers (1, 2, 3)**, mapped to the page's `data-cj`
+  numbers on the laptop. `w` is now the raw page (`w` again: the whole
+  page), `v` the simple view, `f` the filter off and on.
+
+Code: `server/internal/web/filter.go` (running the model, checking each
+line against the page, the cache, sections), `prompt.go`, `markup.go`
+(Junior markup and how the CodeJr client draws it), `filter_test.go`.
+Saved pages for tuning: `server/internal/web/testdata/` (11 pages),
+`just chromejr-try`.
+
+**Not tried yet:** any of it on the real PCjr or in the emulator. The
+server's `Serve` passes the filter in, so `just chromejr` (restart it)
+then CHROMEJR on the PCjr is the next test. Expect 3 to 5 s on the
+laptop per new page before the first byte goes down the line, where
+there used to be about 2.
+
+## Next, in order
+
+1. **Try it on the real PCjr** through the CodeJr client. Watch whether
+   the 3 to 5 s wait feels long; the client shows the status line
+   ("Simplifying the page...") but no progress. If it does feel long:
+   stream the model's reply (`--output-format stream-json`) and send
+   each block as soon as its line is complete.
+2. **Tune the views on the showcase sites** with the saved pages. Known
+   rough spots: Wikipedia offers subsections as sections (Hardware stops
+   at Cartridges); the model paraphrases leads a little; Amazon's color
+   buttons are labeled 0, 1, 2 on the page and the model names them
+   from the text around them; Google search gets a robot check.
+3. **The PCjr program** (item 6 of the design below), reading Junior
+   markup directly: arrow keys between the numbered blocks, Enter to
+   pick, its own colors.
+
 ## What Steve thought after trying it on the real PCjr
 
 > "It's tolerable. It's kind of cool that it seems to sort of work. But

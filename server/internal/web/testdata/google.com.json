@@ -1,0 +1,112 @@
+{
+ "Title": "Google",
+ "URL": "https://www.google.com/",
+ "Lines": [
+  [
+   {
+    "Style": 99,
+    "Text": "Add files and tools"
+   },
+   {
+    "Style": 110,
+    "Text": "[1]"
+   }
+  ],
+  [
+   {
+    "Style": 99,
+    "Text": "{2:Search____}"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   }
+  ],
+  [
+   {
+    "Style": 99,
+    "Text": "Search by voice"
+   },
+   {
+    "Style": 110,
+    "Text": "[3]"
+   }
+  ],
+  [
+   {
+    "Style": 99,
+    "Text": "Search by image"
+   },
+   {
+    "Style": 110,
+    "Text": "[4]"
+   }
+  ],
+  [
+   {
+    "Style": 99,
+    "Text": "AI Mode"
+   },
+   {
+    "Style": 110,
+    "Text": "[5]"
+   }
+  ],
+  [
+   {
+    "Style": 99,
+    "Text": "\u003c6:Google Search\u003e"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 99,
+    "Text": "\u003c7:I'm Feeling Lucky\u003e"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   }
+  ]
+ ],
+ "Targets": [
+  {
+   "n": 1,
+   "kind": "button",
+   "label": "Add files and tools"
+  },
+  {
+   "n": 2,
+   "kind": "field",
+   "label": "Search"
+  },
+  {
+   "n": 3,
+   "kind": "button",
+   "label": "Search by voice"
+  },
+  {
+   "n": 4,
+   "kind": "button",
+   "label": "Search by image"
+  },
+  {
+   "n": 5,
+   "kind": "button",
+   "label": "AI Mode"
+  },
+  {
+   "n": 6,
+   "kind": "button",
+   "label": "Google Search"
+  },
+  {
+   "n": 7,
+   "kind": "button",
+   "label": "I'm Feeling Lucky"
+  }
+ ],
+ "Whole": false
+}

@@ -383,6 +383,15 @@ chromejr-stop:
 chromejr-text *args:
     @cd server && go build -o chromejr ./cmd/chromejr && ./chromejr -text -color -profile "{{chromejr_home}}/profile-text" "$@"
 
+# (Save more pages with: just chromejr-text -save internal/web/testdata some.site)
+# Lay out saved pages with the page filter and print them (no browser): just chromejr-try [files]
+[positional-arguments]
+chromejr-try *files:
+    #!/bin/sh
+    cd server && go build -o chromejr ./cmd/chromejr || exit 1
+    if [ $# -eq 0 ]; then set -- internal/web/testdata/*.json; else set -- $(for f in "$@"; do echo "../$f"; done); fi
+    ./chromejr -try -color "$@"
+
 # Open ChromeJr's browser as a real window on this laptop, to sign in to a site by hand
 # (stop the server first: one browser per profile). Close the window when done.
 chromejr-login url="https://www.amazon.com":

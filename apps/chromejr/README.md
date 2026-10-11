@@ -8,7 +8,7 @@ holds the session, the cookies and the encryption, modern sites work,
 forms and logins included. This is its own app, not part of CodeJr; it
 borrows CodeJr's serial link and nothing else.
 
-**Next: `HANDOFF.md` here** (an LLM on the laptop that picks out what matters on each page). **State: a prototype (2026-10-09), to find out how hard this is.** The
+**Next: `HANDOFF.md` here.** **State: a prototype (2026-10-09), to find out how hard this is; since 2026-10-10 each page goes through an LLM page filter first (below).** The
 laptop half exists (`server/cmd/chromejr`, `server/internal/web`). The
 PCjr half is for now the CodeJr terminal program pointed at ChromeJr's
 port, which gives a scrolling text screen, paging, a status bar and an
@@ -26,16 +26,79 @@ dials ChromeJr, and after `/exit` there it goes back to CodeJr.
 
     an address        amazon.com   en.wikipedia.org/wiki/IBM_PCjr
     anything else     searches the web for it
-    12                follow link 12, or press button <12>
-    12 some text      type into field {12} and press Enter
-    12= some text     type into field {12} without pressing Enter
+    3                 pick 3: follow it, press it, or open that section
+    3 some text       type into box 3 and press Enter
+    3= some text      type into box 3 without pressing Enter
     .add to cart      press the first button or link that says so
     m   more of the page      t   from the top      b   back      r   again
+    w   the page itself, every link numbered (w again: menus and side bars too)
+    v   the simple view again     f   simple views off and on
     l   list the page's fields and buttons
-    w   the whole page: menus, side bars, the search box
     ?   help                  /exit   leave
 
-On the page: `words[12]` is a link, `<12:Go>` a button, `{12:Search____}`
+## The page filter (2026-10-10)
+
+Every page goes through a small, fast model on the laptop before the
+PCjr sees it (`server/internal/web/filter.go`, the prompt in
+`prompt.go`). It reads the numbered text below and picks out what
+matters: a search box, ten results or products with their prices, an
+article's lead and its sections, at most five actions. The PCjr gets a
+short "simple view" numbered 1, 2, 3 instead of a hundred numbers.
+
+- **The page stays the truth.** The model answers in lines like
+  `I 12 | title | detail | $19.99`, where 12 is the page's own number.
+  Every line is checked against the page: a number that isn't a link or
+  button there, a box that is really a password, a section heading the
+  page doesn't have, is dropped. So pressing 3 is always a real click on
+  a real element. Buttons that spend money (Buy Now, checkout, place
+  order) are never in the simple view; `w` shows the raw page with them.
+- **The model** is Haiku through `claude -p` (`--model haiku`, which is
+  `claude-haiku-5-5` today), on the laptop's Claude subscription: no API
+  key. `--effort low` (no thinking: a page took 8 to 11 s with it, 3 to
+  4 s without) and lines instead of JSON (half the tokens). It runs with
+  no tools, no settings and no CLAUDE.md.
+- **Same page, no second call:** views are kept by address and a hash of
+  the page's text, so Back and reloading an unchanged page are instant.
+- **When it fails** (over 40 s, a reply with nothing usable) the raw page
+  is shown, with a line saying why.
+- **Junior markup** is what a view is sent as: one block per line, its
+  first character the type (`T` title, `H` heading, `P` text,
+  `I<n>` item with title, detail and price, `A<n>` action, `F<n>` box,
+  `S<n>` section, `-` divider), fields split by tabs. For now the laptop
+  draws it into the CodeJr client's text styles; a PCjr program of its
+  own would get the markup itself (`markup.go` has the format).
+
+Measured on the laptop (`just chromejr-try`, saved pages, 2026-10-10):
+
+| Page | Choices | Time | Tokens in / out |
+|---|---|---|---|
+| Google home | search box + 3 | 2.7 s | 1,800 / 50 |
+| DuckDuckGo results | box + 11 results | 3.9 s | 3,600 / 390 |
+| Wikipedia, IBM PCjr (53 KB) | lead + 16 to 20 sections | 3.3 s | 23,200 / 230 |
+| Wikipedia main page | 5 parts + links | 5.0 s | 5,500 / 760 |
+| Hacker News | 10 stories | 3.9 s | 4,300 / 500 |
+| Amazon home | 8 items + 3 | 3.6 to 6.8 s | 2,600 / 300 to 1,100 |
+| Amazon search | 10 products with prices | 4.4 to 6.3 s | 16,300 / 600 to 1,400 |
+| Amazon product | text + Add to cart, colors | 3 s | 4,100 / 230 |
+| Amazon cart (empty) | text + 1 to 3 | 3 s | 2,000 / 130 |
+| BBC News, NPR | 10 to 12 stories | 4 to 9 s | 5,300 to 6,100 / 500 to 2,000 |
+
+The model still thinks sometimes even at low effort (the 6 to 9 s
+ones). Cost, as Claude Code reports it, is under a cent a page.
+
+Live in the terminal (`just chromejr-text`): a search typed into
+DuckDuckGo's box, result 2 opening Wikipedia's article as a lead and
+sections, a section opened and `v` back, Back from the cache in 1.2 s,
+an Amazon search and a product. **Google's own search answers the hidden
+browser with a robot check**; the home page works, but searches go to
+DuckDuckGo (anything typed that isn't an address). Nothing of the
+filter has run on the real PCjr or the emulator yet.
+
+    just chromejr-try                    every saved page, as the PCjr would see it
+    just chromejr-text -save internal/web/testdata some.site     save more pages
+    SHOW_MARKUP=1 SHOW_REPLY=1 just chromejr-try ...   the markup and the model's reply too
+
+On the raw page (`w`, or with `-nofilter`): `words[12]` is a link, `<12:Go>` a button, `{12:Search____}`
 a field, `{12:Sort by=Featured v}` a list of choices, `(12:X)` a
 checkbox, `(picture 12: ...)` a picture.
 

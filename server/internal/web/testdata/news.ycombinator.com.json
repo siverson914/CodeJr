@@ -1,0 +1,3850 @@
+{
+ "Title": "Hacker News",
+ "URL": "https://news.ycombinator.com/",
+ "Lines": [
+  [
+   {
+    "Style": 108,
+    "Text": "Hacker News"
+   },
+   {
+    "Style": 110,
+    "Text": "[1]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "new"
+   },
+   {
+    "Style": 110,
+    "Text": "[2]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "past"
+   },
+   {
+    "Style": 110,
+    "Text": "[3]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[4]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "ask"
+   },
+   {
+    "Style": 110,
+    "Text": "[5]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "show"
+   },
+   {
+    "Style": 110,
+    "Text": "[6]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "jobs"
+   },
+   {
+    "Style": 110,
+    "Text": "[7]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "submit"
+   },
+   {
+    "Style": 110,
+    "Text": "[8]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "login"
+   },
+   {
+    "Style": 110,
+    "Text": "[9]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "1. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "2D Vehicles"
+   },
+   {
+    "Style": 110,
+    "Text": "[10]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "patkerr.co.uk"
+   },
+   {
+    "Style": 110,
+    "Text": "[11]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "272 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "Michelangelo11"
+   },
+   {
+    "Style": 110,
+    "Text": "[12]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "5 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[13]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[14]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "62 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[15]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "2. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "A city-building game in which the city would prefer you didn't"
+   },
+   {
+    "Style": 110,
+    "Text": "[16]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "over.pizza"
+   },
+   {
+    "Style": 110,
+    "Text": "[17]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "53 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "JumpCrisscross"
+   },
+   {
+    "Style": 110,
+    "Text": "[18]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "1 hour ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[19]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[20]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "12 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[21]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "3. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Why DuckDB 2.0 is faster"
+   },
+   {
+    "Style": 110,
+    "Text": "[22]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "motherduck.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[23]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "98 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "tosh"
+   },
+   {
+    "Style": 110,
+    "Text": "[24]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "4 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[25]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[26]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "30 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[27]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "4. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Knuth reward check"
+   },
+   {
+    "Style": 110,
+    "Text": "[28]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "thomas-huehn.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[29]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "117 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "Curiositry"
+   },
+   {
+    "Style": 110,
+    "Text": "[30]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "6 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[31]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[32]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "46 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[33]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "5. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Nix wrote half of my debugger"
+   },
+   {
+    "Style": 110,
+    "Text": "[34]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "fzakaria.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[35]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "71 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "ingve"
+   },
+   {
+    "Style": 110,
+    "Text": "[36]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "4 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[37]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[38]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "3 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[39]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "6. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "The Lightbulb Computer"
+   },
+   {
+    "Style": 110,
+    "Text": "[40]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "lightbulbcomputer.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[41]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "131 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "oskarth"
+   },
+   {
+    "Style": 110,
+    "Text": "[42]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "6 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[43]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[44]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "34 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[45]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "7. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Talorys – A self-hosted personal AI agent on Cloudflare's free tier"
+   },
+   {
+    "Style": 110,
+    "Text": "[46]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "github.com/rociiu"
+   },
+   {
+    "Style": 110,
+    "Text": "[47]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "222 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "rociiu"
+   },
+   {
+    "Style": 110,
+    "Text": "[48]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "11 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[49]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[50]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "112 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[51]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "8. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Mxc: Microsoft Execution Containers version 1.0.0"
+   },
+   {
+    "Style": 110,
+    "Text": "[52]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "windows.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[53]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "140 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "smokel"
+   },
+   {
+    "Style": 110,
+    "Text": "[54]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "11 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[55]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[56]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "30 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[57]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "9. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Nvidia in talks to acquire US 'open' model startup Reflection AI"
+   },
+   {
+    "Style": 110,
+    "Text": "[58]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "ft.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[59]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "87 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "arkj"
+   },
+   {
+    "Style": 110,
+    "Text": "[60]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "3 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[61]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[62]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "54 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[63]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "10. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Apple/macOS removed from official Unix registry"
+   },
+   {
+    "Style": 110,
+    "Text": "[64]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "opengroup.org"
+   },
+   {
+    "Style": 110,
+    "Text": "[65]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "223 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "john_alan"
+   },
+   {
+    "Style": 110,
+    "Text": "[66]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "11 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[67]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[68]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "200 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[69]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "11. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "REA Reverse – Engineer Anything"
+   },
+   {
+    "Style": 110,
+    "Text": "[70]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "rea.tools"
+   },
+   {
+    "Style": 110,
+    "Text": "[71]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "662 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "modinfo"
+   },
+   {
+    "Style": 110,
+    "Text": "[72]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "21 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[73]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[74]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "291 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[75]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "12. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Recent AI models struggled to match a human algorithmic innovation"
+   },
+   {
+    "Style": 110,
+    "Text": "[76]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "epoch.ai"
+   },
+   {
+    "Style": 110,
+    "Text": "[77]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "53 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "merksittich"
+   },
+   {
+    "Style": 110,
+    "Text": "[78]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "5 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[79]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[80]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "47 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[81]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "13. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Grieving the loss of details"
+   },
+   {
+    "Style": 110,
+    "Text": "[82]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "purplesyringa.moe"
+   },
+   {
+    "Style": 110,
+    "Text": "[83]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "289 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "signa11"
+   },
+   {
+    "Style": 110,
+    "Text": "[84]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "6 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[85]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[86]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "236 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[87]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "14. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Unikernels were hard. key word: were"
+   },
+   {
+    "Style": 110,
+    "Text": "[88]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "ghuntley.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[89]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "58 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "ghuntley"
+   },
+   {
+    "Style": 110,
+    "Text": "[90]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "8 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[91]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[92]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "26 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[93]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "15. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "OpenSCAD the Programmers Solid 3D CAD Modeller"
+   },
+   {
+    "Style": 110,
+    "Text": "[94]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "openscad.org"
+   },
+   {
+    "Style": 110,
+    "Text": "[95]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "76 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "b-man"
+   },
+   {
+    "Style": 110,
+    "Text": "[96]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "6 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[97]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[98]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "68 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[99]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "16. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Rampart: Browser native on-device PII radaction"
+   },
+   {
+    "Style": 110,
+    "Text": "[100]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "ndstudio.gov"
+   },
+   {
+    "Style": 110,
+    "Text": "[101]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "58 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "nateb2022"
+   },
+   {
+    "Style": 110,
+    "Text": "[102]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "8 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[103]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[104]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "25 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[105]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "17. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Telegram Desktop vulnerability allowed any user's file to be stolen"
+   },
+   {
+    "Style": 110,
+    "Text": "[106]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "beaksec.github.io"
+   },
+   {
+    "Style": 110,
+    "Text": "[107]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "391 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "g-b-r"
+   },
+   {
+    "Style": 110,
+    "Text": "[108]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "19 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[109]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[110]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "237 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[111]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "18. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "How strong is the strong interaction?"
+   },
+   {
+    "Style": 110,
+    "Text": "[112]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "cerncourier.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[113]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "39 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "EA-3167"
+   },
+   {
+    "Style": 110,
+    "Text": "[114]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "5 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[115]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[116]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "8 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[117]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "19. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Bitwarden Dual License Model"
+   },
+   {
+    "Style": 110,
+    "Text": "[118]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "bitwarden.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[119]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "320 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "Cider9986"
+   },
+   {
+    "Style": 110,
+    "Text": "[120]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "7 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[121]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[122]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "236 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[123]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "20. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Hackers abuse Google Ads, Bing redirects to push Claude ClickFix attacks"
+   },
+   {
+    "Style": 110,
+    "Text": "[124]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "bleepingcomputer.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[125]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "16 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "PicardManeuver"
+   },
+   {
+    "Style": 110,
+    "Text": "[126]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "1 hour ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[127]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[128]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "6 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[129]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "21. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "I would like the value of my home to rise, while my property taxes fall"
+   },
+   {
+    "Style": 110,
+    "Text": "[130]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "conversableeconomist.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[131]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "181 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "colinprince"
+   },
+   {
+    "Style": 110,
+    "Text": "[132]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "8 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[133]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[134]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "445 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[135]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "22. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Whooping Cranes Learned to Migrate by Following Costumed Pilots"
+   },
+   {
+    "Style": 110,
+    "Text": "[136]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "theverifiedpost.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[137]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "48 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "kgolubic"
+   },
+   {
+    "Style": 110,
+    "Text": "[138]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "9 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[139]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[140]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "6 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[141]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "23. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Takeshi's Castle"
+   },
+   {
+    "Style": 110,
+    "Text": "[142]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "wikipedia.org"
+   },
+   {
+    "Style": 110,
+    "Text": "[143]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "72 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "tosh"
+   },
+   {
+    "Style": 110,
+    "Text": "[144]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "3 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[145]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[146]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "24 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[147]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "24. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "A nuclear clock synchronized to 229Th"
+   },
+   {
+    "Style": 110,
+    "Text": "[148]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "nature.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[149]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "8 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "sbulaev"
+   },
+   {
+    "Style": 110,
+    "Text": "[150]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "2 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[151]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[152]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "2 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[153]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "25. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Chip-hex:cost-benefit, energy efficiency and hexagonal"
+   },
+   {
+    "Style": 110,
+    "Text": "[154]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "github.com/lzprograma"
+   },
+   {
+    "Style": 110,
+    "Text": "[155]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "4 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "Engineercom"
+   },
+   {
+    "Style": 110,
+    "Text": "[156]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "2 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[157]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[158]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "2 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[159]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "26. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Eye of Sauron: Long-Range Hidden Spy Camera Detection (2024)"
+   },
+   {
+    "Style": 110,
+    "Text": "[160]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "usenix.org"
+   },
+   {
+    "Style": 110,
+    "Text": "[161]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "292 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "ortusdux"
+   },
+   {
+    "Style": 110,
+    "Text": "[162]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "21 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[163]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[164]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "69 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[165]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "27. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Chernobyl particles reveal unexpectedly stable nuclear fuel after 40 years"
+   },
+   {
+    "Style": 110,
+    "Text": "[166]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "phys.org"
+   },
+   {
+    "Style": 110,
+    "Text": "[167]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "118 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "geox"
+   },
+   {
+    "Style": 110,
+    "Text": "[168]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "16 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[169]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[170]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "43 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[171]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "28. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "50MB operating system can resurrect your old PC"
+   },
+   {
+    "Style": 110,
+    "Text": "[172]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "makeuseof.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[173]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "21 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "makerdiety"
+   },
+   {
+    "Style": 110,
+    "Text": "[174]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "2 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[175]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[176]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "6 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[177]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "29. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "`123456' password used in Danish CPR data breach"
+   },
+   {
+    "Style": 110,
+    "Text": "[178]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "cphpost.dk"
+   },
+   {
+    "Style": 110,
+    "Text": "[179]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "369 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "baal80spam"
+   },
+   {
+    "Style": 110,
+    "Text": "[180]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "12 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[181]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[182]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "190 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[183]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "30. | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "How Protein Took over the World"
+   },
+   {
+    "Style": 110,
+    "Text": "[184]"
+   },
+   {
+    "Style": 112,
+    "Text": " ("
+   },
+   {
+    "Style": 108,
+    "Text": "ft.com"
+   },
+   {
+    "Style": 110,
+    "Text": "[185]"
+   },
+   {
+    "Style": 112,
+    "Text": ") | "
+   }
+  ],
+  [
+   {
+    "Style": 112,
+    "Text": "47 points by "
+   },
+   {
+    "Style": 108,
+    "Text": "thm"
+   },
+   {
+    "Style": 110,
+    "Text": "[186]"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "6 hours ago"
+   },
+   {
+    "Style": 110,
+    "Text": "[187]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "hide"
+   },
+   {
+    "Style": 110,
+    "Text": "[188]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "113 comments"
+   },
+   {
+    "Style": 110,
+    "Text": "[189]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "More"
+   },
+   {
+    "Style": 110,
+    "Text": "[190]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 108,
+    "Text": "Consider applying for YC's Winter 2027 batch!"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "Applications"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   },
+   {
+    "Style": 108,
+    "Text": "are open till November 2."
+   },
+   {
+    "Style": 110,
+    "Text": "[191]"
+   }
+  ],
+  [
+   {
+    "Style": 108,
+    "Text": "Guidelines"
+   },
+   {
+    "Style": 110,
+    "Text": "[192]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "FAQ"
+   },
+   {
+    "Style": 110,
+    "Text": "[193]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "Lists"
+   },
+   {
+    "Style": 110,
+    "Text": "[194]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "API"
+   },
+   {
+    "Style": 110,
+    "Text": "[195]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "Security"
+   },
+   {
+    "Style": 110,
+    "Text": "[196]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "Legal"
+   },
+   {
+    "Style": 110,
+    "Text": "[197]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "Apply to YC"
+   },
+   {
+    "Style": 110,
+    "Text": "[198]"
+   },
+   {
+    "Style": 112,
+    "Text": " | "
+   },
+   {
+    "Style": 108,
+    "Text": "Contact"
+   },
+   {
+    "Style": 110,
+    "Text": "[199]"
+   }
+  ],
+  null,
+  [
+   {
+    "Style": 112,
+    "Text": "Search: "
+   },
+   {
+    "Style": 99,
+    "Text": "{200:q____}"
+   },
+   {
+    "Style": 112,
+    "Text": " "
+   }
+  ]
+ ],
+ "Targets": [
+  {
+   "n": 1,
+   "kind": "link",
+   "label": "Hacker News"
+  },
+  {
+   "n": 2,
+   "kind": "link",
+   "label": "new"
+  },
+  {
+   "n": 3,
+   "kind": "link",
+   "label": "past"
+  },
+  {
+   "n": 4,
+   "kind": "link",
+   "label": "comments"
+  },
+  {
+   "n": 5,
+   "kind": "link",
+   "label": "ask"
+  },
+  {
+   "n": 6,
+   "kind": "link",
+   "label": "show"
+  },
+  {
+   "n": 7,
+   "kind": "link",
+   "label": "jobs"
+  },
+  {
+   "n": 8,
+   "kind": "link",
+   "label": "submit"
+  },
+  {
+   "n": 9,
+   "kind": "link",
+   "label": "login"
+  },
+  {
+   "n": 10,
+   "kind": "link",
+   "label": "2D Vehicles"
+  },
+  {
+   "n": 11,
+   "kind": "link",
+   "label": "patkerr.co.uk"
+  },
+  {
+   "n": 12,
+   "kind": "link",
+   "label": "Michelangelo11"
+  },
+  {
+   "n": 13,
+   "kind": "link",
+   "label": "5 hours ago"
+  },
+  {
+   "n": 14,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 15,
+   "kind": "link",
+   "label": "62 comments"
+  },
+  {
+   "n": 16,
+   "kind": "link",
+   "label": "A city-building game in which the city would prefer you didn"
+  },
+  {
+   "n": 17,
+   "kind": "link",
+   "label": "over.pizza"
+  },
+  {
+   "n": 18,
+   "kind": "link",
+   "label": "JumpCrisscross"
+  },
+  {
+   "n": 19,
+   "kind": "link",
+   "label": "1 hour ago"
+  },
+  {
+   "n": 20,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 21,
+   "kind": "link",
+   "label": "12 comments"
+  },
+  {
+   "n": 22,
+   "kind": "link",
+   "label": "Why DuckDB 2.0 is faster"
+  },
+  {
+   "n": 23,
+   "kind": "link",
+   "label": "motherduck.com"
+  },
+  {
+   "n": 24,
+   "kind": "link",
+   "label": "tosh"
+  },
+  {
+   "n": 25,
+   "kind": "link",
+   "label": "4 hours ago"
+  },
+  {
+   "n": 26,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 27,
+   "kind": "link",
+   "label": "30 comments"
+  },
+  {
+   "n": 28,
+   "kind": "link",
+   "label": "Knuth reward check"
+  },
+  {
+   "n": 29,
+   "kind": "link",
+   "label": "thomas-huehn.com"
+  },
+  {
+   "n": 30,
+   "kind": "link",
+   "label": "Curiositry"
+  },
+  {
+   "n": 31,
+   "kind": "link",
+   "label": "6 hours ago"
+  },
+  {
+   "n": 32,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 33,
+   "kind": "link",
+   "label": "46 comments"
+  },
+  {
+   "n": 34,
+   "kind": "link",
+   "label": "Nix wrote half of my debugger"
+  },
+  {
+   "n": 35,
+   "kind": "link",
+   "label": "fzakaria.com"
+  },
+  {
+   "n": 36,
+   "kind": "link",
+   "label": "ingve"
+  },
+  {
+   "n": 37,
+   "kind": "link",
+   "label": "4 hours ago"
+  },
+  {
+   "n": 38,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 39,
+   "kind": "link",
+   "label": "3 comments"
+  },
+  {
+   "n": 40,
+   "kind": "link",
+   "label": "The Lightbulb Computer"
+  },
+  {
+   "n": 41,
+   "kind": "link",
+   "label": "lightbulbcomputer.com"
+  },
+  {
+   "n": 42,
+   "kind": "link",
+   "label": "oskarth"
+  },
+  {
+   "n": 43,
+   "kind": "link",
+   "label": "6 hours ago"
+  },
+  {
+   "n": 44,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 45,
+   "kind": "link",
+   "label": "34 comments"
+  },
+  {
+   "n": 46,
+   "kind": "link",
+   "label": "Talorys – A self-hosted personal AI agent on Cloudflare's fr"
+  },
+  {
+   "n": 47,
+   "kind": "link",
+   "label": "github.com/rociiu"
+  },
+  {
+   "n": 48,
+   "kind": "link",
+   "label": "rociiu"
+  },
+  {
+   "n": 49,
+   "kind": "link",
+   "label": "11 hours ago"
+  },
+  {
+   "n": 50,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 51,
+   "kind": "link",
+   "label": "112 comments"
+  },
+  {
+   "n": 52,
+   "kind": "link",
+   "label": "Mxc: Microsoft Execution Containers version 1.0.0"
+  },
+  {
+   "n": 53,
+   "kind": "link",
+   "label": "windows.com"
+  },
+  {
+   "n": 54,
+   "kind": "link",
+   "label": "smokel"
+  },
+  {
+   "n": 55,
+   "kind": "link",
+   "label": "11 hours ago"
+  },
+  {
+   "n": 56,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 57,
+   "kind": "link",
+   "label": "30 comments"
+  },
+  {
+   "n": 58,
+   "kind": "link",
+   "label": "Nvidia in talks to acquire US 'open' model startup Reflectio"
+  },
+  {
+   "n": 59,
+   "kind": "link",
+   "label": "ft.com"
+  },
+  {
+   "n": 60,
+   "kind": "link",
+   "label": "arkj"
+  },
+  {
+   "n": 61,
+   "kind": "link",
+   "label": "3 hours ago"
+  },
+  {
+   "n": 62,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 63,
+   "kind": "link",
+   "label": "54 comments"
+  },
+  {
+   "n": 64,
+   "kind": "link",
+   "label": "Apple/macOS removed from official Unix registry"
+  },
+  {
+   "n": 65,
+   "kind": "link",
+   "label": "opengroup.org"
+  },
+  {
+   "n": 66,
+   "kind": "link",
+   "label": "john_alan"
+  },
+  {
+   "n": 67,
+   "kind": "link",
+   "label": "11 hours ago"
+  },
+  {
+   "n": 68,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 69,
+   "kind": "link",
+   "label": "200 comments"
+  },
+  {
+   "n": 70,
+   "kind": "link",
+   "label": "REA Reverse – Engineer Anything"
+  },
+  {
+   "n": 71,
+   "kind": "link",
+   "label": "rea.tools"
+  },
+  {
+   "n": 72,
+   "kind": "link",
+   "label": "modinfo"
+  },
+  {
+   "n": 73,
+   "kind": "link",
+   "label": "21 hours ago"
+  },
+  {
+   "n": 74,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 75,
+   "kind": "link",
+   "label": "291 comments"
+  },
+  {
+   "n": 76,
+   "kind": "link",
+   "label": "Recent AI models struggled to match a human algorithmic inno"
+  },
+  {
+   "n": 77,
+   "kind": "link",
+   "label": "epoch.ai"
+  },
+  {
+   "n": 78,
+   "kind": "link",
+   "label": "merksittich"
+  },
+  {
+   "n": 79,
+   "kind": "link",
+   "label": "5 hours ago"
+  },
+  {
+   "n": 80,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 81,
+   "kind": "link",
+   "label": "47 comments"
+  },
+  {
+   "n": 82,
+   "kind": "link",
+   "label": "Grieving the loss of details"
+  },
+  {
+   "n": 83,
+   "kind": "link",
+   "label": "purplesyringa.moe"
+  },
+  {
+   "n": 84,
+   "kind": "link",
+   "label": "signa11"
+  },
+  {
+   "n": 85,
+   "kind": "link",
+   "label": "6 hours ago"
+  },
+  {
+   "n": 86,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 87,
+   "kind": "link",
+   "label": "236 comments"
+  },
+  {
+   "n": 88,
+   "kind": "link",
+   "label": "Unikernels were hard. key word: were"
+  },
+  {
+   "n": 89,
+   "kind": "link",
+   "label": "ghuntley.com"
+  },
+  {
+   "n": 90,
+   "kind": "link",
+   "label": "ghuntley"
+  },
+  {
+   "n": 91,
+   "kind": "link",
+   "label": "8 hours ago"
+  },
+  {
+   "n": 92,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 93,
+   "kind": "link",
+   "label": "26 comments"
+  },
+  {
+   "n": 94,
+   "kind": "link",
+   "label": "OpenSCAD the Programmers Solid 3D CAD Modeller"
+  },
+  {
+   "n": 95,
+   "kind": "link",
+   "label": "openscad.org"
+  },
+  {
+   "n": 96,
+   "kind": "link",
+   "label": "b-man"
+  },
+  {
+   "n": 97,
+   "kind": "link",
+   "label": "6 hours ago"
+  },
+  {
+   "n": 98,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 99,
+   "kind": "link",
+   "label": "68 comments"
+  },
+  {
+   "n": 100,
+   "kind": "link",
+   "label": "Rampart: Browser native on-device PII radaction"
+  },
+  {
+   "n": 101,
+   "kind": "link",
+   "label": "ndstudio.gov"
+  },
+  {
+   "n": 102,
+   "kind": "link",
+   "label": "nateb2022"
+  },
+  {
+   "n": 103,
+   "kind": "link",
+   "label": "8 hours ago"
+  },
+  {
+   "n": 104,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 105,
+   "kind": "link",
+   "label": "25 comments"
+  },
+  {
+   "n": 106,
+   "kind": "link",
+   "label": "Telegram Desktop vulnerability allowed any user's file to be"
+  },
+  {
+   "n": 107,
+   "kind": "link",
+   "label": "beaksec.github.io"
+  },
+  {
+   "n": 108,
+   "kind": "link",
+   "label": "g-b-r"
+  },
+  {
+   "n": 109,
+   "kind": "link",
+   "label": "19 hours ago"
+  },
+  {
+   "n": 110,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 111,
+   "kind": "link",
+   "label": "237 comments"
+  },
+  {
+   "n": 112,
+   "kind": "link",
+   "label": "How strong is the strong interaction?"
+  },
+  {
+   "n": 113,
+   "kind": "link",
+   "label": "cerncourier.com"
+  },
+  {
+   "n": 114,
+   "kind": "link",
+   "label": "EA-3167"
+  },
+  {
+   "n": 115,
+   "kind": "link",
+   "label": "5 hours ago"
+  },
+  {
+   "n": 116,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 117,
+   "kind": "link",
+   "label": "8 comments"
+  },
+  {
+   "n": 118,
+   "kind": "link",
+   "label": "Bitwarden Dual License Model"
+  },
+  {
+   "n": 119,
+   "kind": "link",
+   "label": "bitwarden.com"
+  },
+  {
+   "n": 120,
+   "kind": "link",
+   "label": "Cider9986"
+  },
+  {
+   "n": 121,
+   "kind": "link",
+   "label": "7 hours ago"
+  },
+  {
+   "n": 122,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 123,
+   "kind": "link",
+   "label": "236 comments"
+  },
+  {
+   "n": 124,
+   "kind": "link",
+   "label": "Hackers abuse Google Ads, Bing redirects to push Claude Clic"
+  },
+  {
+   "n": 125,
+   "kind": "link",
+   "label": "bleepingcomputer.com"
+  },
+  {
+   "n": 126,
+   "kind": "link",
+   "label": "PicardManeuver"
+  },
+  {
+   "n": 127,
+   "kind": "link",
+   "label": "1 hour ago"
+  },
+  {
+   "n": 128,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 129,
+   "kind": "link",
+   "label": "6 comments"
+  },
+  {
+   "n": 130,
+   "kind": "link",
+   "label": "I would like the value of my home to rise, while my property"
+  },
+  {
+   "n": 131,
+   "kind": "link",
+   "label": "conversableeconomist.com"
+  },
+  {
+   "n": 132,
+   "kind": "link",
+   "label": "colinprince"
+  },
+  {
+   "n": 133,
+   "kind": "link",
+   "label": "8 hours ago"
+  },
+  {
+   "n": 134,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 135,
+   "kind": "link",
+   "label": "445 comments"
+  },
+  {
+   "n": 136,
+   "kind": "link",
+   "label": "Whooping Cranes Learned to Migrate by Following Costumed Pil"
+  },
+  {
+   "n": 137,
+   "kind": "link",
+   "label": "theverifiedpost.com"
+  },
+  {
+   "n": 138,
+   "kind": "link",
+   "label": "kgolubic"
+  },
+  {
+   "n": 139,
+   "kind": "link",
+   "label": "9 hours ago"
+  },
+  {
+   "n": 140,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 141,
+   "kind": "link",
+   "label": "6 comments"
+  },
+  {
+   "n": 142,
+   "kind": "link",
+   "label": "Takeshi's Castle"
+  },
+  {
+   "n": 143,
+   "kind": "link",
+   "label": "wikipedia.org"
+  },
+  {
+   "n": 144,
+   "kind": "link",
+   "label": "tosh"
+  },
+  {
+   "n": 145,
+   "kind": "link",
+   "label": "3 hours ago"
+  },
+  {
+   "n": 146,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 147,
+   "kind": "link",
+   "label": "24 comments"
+  },
+  {
+   "n": 148,
+   "kind": "link",
+   "label": "A nuclear clock synchronized to 229Th"
+  },
+  {
+   "n": 149,
+   "kind": "link",
+   "label": "nature.com"
+  },
+  {
+   "n": 150,
+   "kind": "link",
+   "label": "sbulaev"
+  },
+  {
+   "n": 151,
+   "kind": "link",
+   "label": "2 hours ago"
+  },
+  {
+   "n": 152,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 153,
+   "kind": "link",
+   "label": "2 comments"
+  },
+  {
+   "n": 154,
+   "kind": "link",
+   "label": "Chip-hex:cost-benefit, energy efficiency and hexagonal"
+  },
+  {
+   "n": 155,
+   "kind": "link",
+   "label": "github.com/lzprograma"
+  },
+  {
+   "n": 156,
+   "kind": "link",
+   "label": "Engineercom"
+  },
+  {
+   "n": 157,
+   "kind": "link",
+   "label": "2 hours ago"
+  },
+  {
+   "n": 158,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 159,
+   "kind": "link",
+   "label": "2 comments"
+  },
+  {
+   "n": 160,
+   "kind": "link",
+   "label": "Eye of Sauron: Long-Range Hidden Spy Camera Detection (2024)"
+  },
+  {
+   "n": 161,
+   "kind": "link",
+   "label": "usenix.org"
+  },
+  {
+   "n": 162,
+   "kind": "link",
+   "label": "ortusdux"
+  },
+  {
+   "n": 163,
+   "kind": "link",
+   "label": "21 hours ago"
+  },
+  {
+   "n": 164,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 165,
+   "kind": "link",
+   "label": "69 comments"
+  },
+  {
+   "n": 166,
+   "kind": "link",
+   "label": "Chernobyl particles reveal unexpectedly stable nuclear fuel "
+  },
+  {
+   "n": 167,
+   "kind": "link",
+   "label": "phys.org"
+  },
+  {
+   "n": 168,
+   "kind": "link",
+   "label": "geox"
+  },
+  {
+   "n": 169,
+   "kind": "link",
+   "label": "16 hours ago"
+  },
+  {
+   "n": 170,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 171,
+   "kind": "link",
+   "label": "43 comments"
+  },
+  {
+   "n": 172,
+   "kind": "link",
+   "label": "50MB operating system can resurrect your old PC"
+  },
+  {
+   "n": 173,
+   "kind": "link",
+   "label": "makeuseof.com"
+  },
+  {
+   "n": 174,
+   "kind": "link",
+   "label": "makerdiety"
+  },
+  {
+   "n": 175,
+   "kind": "link",
+   "label": "2 hours ago"
+  },
+  {
+   "n": 176,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 177,
+   "kind": "link",
+   "label": "6 comments"
+  },
+  {
+   "n": 178,
+   "kind": "link",
+   "label": "`123456' password used in Danish CPR data breach"
+  },
+  {
+   "n": 179,
+   "kind": "link",
+   "label": "cphpost.dk"
+  },
+  {
+   "n": 180,
+   "kind": "link",
+   "label": "baal80spam"
+  },
+  {
+   "n": 181,
+   "kind": "link",
+   "label": "12 hours ago"
+  },
+  {
+   "n": 182,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 183,
+   "kind": "link",
+   "label": "190 comments"
+  },
+  {
+   "n": 184,
+   "kind": "link",
+   "label": "How Protein Took over the World"
+  },
+  {
+   "n": 185,
+   "kind": "link",
+   "label": "ft.com"
+  },
+  {
+   "n": 186,
+   "kind": "link",
+   "label": "thm"
+  },
+  {
+   "n": 187,
+   "kind": "link",
+   "label": "6 hours ago"
+  },
+  {
+   "n": 188,
+   "kind": "link",
+   "label": "hide"
+  },
+  {
+   "n": 189,
+   "kind": "link",
+   "label": "113 comments"
+  },
+  {
+   "n": 190,
+   "kind": "link",
+   "label": "More"
+  },
+  {
+   "n": 191,
+   "kind": "link",
+   "label": "Consider applying for YC's Winter 2027 batch! Applications a"
+  },
+  {
+   "n": 192,
+   "kind": "link",
+   "label": "Guidelines"
+  },
+  {
+   "n": 193,
+   "kind": "link",
+   "label": "FAQ"
+  },
+  {
+   "n": 194,
+   "kind": "link",
+   "label": "Lists"
+  },
+  {
+   "n": 195,
+   "kind": "link",
+   "label": "API"
+  },
+  {
+   "n": 196,
+   "kind": "link",
+   "label": "Security"
+  },
+  {
+   "n": 197,
+   "kind": "link",
+   "label": "Legal"
+  },
+  {
+   "n": 198,
+   "kind": "link",
+   "label": "Apply to YC"
+  },
+  {
+   "n": 199,
+   "kind": "link",
+   "label": "Contact"
+  },
+  {
+   "n": 200,
+   "kind": "field",
+   "label": "q"
+  }
+ ],
+ "Whole": true
+}

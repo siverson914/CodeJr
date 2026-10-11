@@ -1025,3 +1025,22 @@ The repo's KEYTEST is now the version CodeJr improved on the PCjr side (it names
 
 So the stuck keys in Xonix and Junris have no known cause yet. The games as rebuilt now have none of the repairs, which makes them the honest test: if a key sticks again, it is in the game's own code.
 
+## ChromeJr: the LLM page filter (2026-10-10, afternoon)
+
+The brief was `apps/chromejr/HANDOFF.md`: put a model between the page and the PCjr that picks what matters. No API key on the laptop, so it runs `claude -p` on Steve's subscription, the way CodeJr does, with `--model haiku` (today `claude-haiku-5-5`), no tools, `--setting-sources ""` so no settings or CLAUDE.md come along (checked: asked what it had been told about dashes, it said NONE). A bare call takes 1.9 s.
+
+First I saved ten showcase pages with a new `-save` flag (Google, DuckDuckGo, two Wikipedia pages, Hacker News, Amazon home, search and cart, BBC, NPR) and built `-try`, which lays saved pages out without a browser, so the prompt could be tuned in seconds.
+
+**First version: JSON out, 3 to 11 s a page.** The views were good from the start (Hacker News as ten stories with points, Amazon search as ten products with prices, Wikipedia as its lead and twelve sections), but slow, and the output tokens were twice what the views needed. Looking at the usage: 1,483 of 2,213 output tokens on Hacker News were thinking. `--effort low` cut the API time from 8.6 s to 2.3 s on that page. `MAX_THINKING_TOKENS=0` and `alwaysThinkingEnabled: false` did nothing. Even at low effort the harder pages still thought (Wikipedia's main page: 900 to 1,400 thinking tokens).
+
+**Second change: lines instead of JSON.** `I 12 | title | detail | price` instead of `{"t":"item","text":...,"target":12}`. Nine of ten pages went to 2.5 to 4.4 s. `--json-schema` was never a candidate: it costs a second turn.
+
+**What the checking catches.** Every line names one of the page's own numbers, and it is checked: the kind must fit (a box must be a field, not a password), a section must be a real heading, nothing twice. In the tuning runs it dropped 0 to 3 lines a page. Amazon's "Buy Now" got through the prompt's "nothing that pays" every time, so buttons that spend money are now dropped in code. One Amazon product run dropped all nine lines and fell back to the raw page; I couldn't make it happen again in 19 more runs, and made the line reader accept `A 11: label` without the bars, which is my best guess at what it wrote. The raw page is shown whenever the view comes out empty.
+
+**A bug of mine found live:** pages where `extract.js` finds no main part are marked "whole", and I skipped the filter for whole pages, meaning "the person typed w". Google's robot check page came through raw because of it. Fixed: only an asked-for `w` skips the filter.
+
+**A scare that was my own grep:** the Amazon product view seemed to lose its actions live. I had filtered status lines out of the output with `grep -v '^\['`, and the action bar starts with `[1] Add to cart`.
+
+**Live in the terminal:** a search in DuckDuckGo's box, result 2 to Wikipedia's article (lead and 20 sections in 2.8 s), a section opened, `v` back, Back to the results from the cache in 1.2 s, an Amazon search and a product with Add to cart. Google's home page works, but a Google search from the hidden browser gets "unusual traffic", so searches stay on DuckDuckGo.
+
+Nothing of this has run on the real PCjr or in the emulator.
