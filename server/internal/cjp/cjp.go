@@ -87,6 +87,9 @@ const (
 	StyleNote   byte = 2
 	StyleWarn   byte = 3
 	StyleBanner byte = 4
+	// ChromeJr: lines of Junior markup (server/internal/web/markup.go),
+	// each ending in a new line. Only to a client that asked (markup=1).
+	StyleMarkup byte = 9
 )
 
 // Keys sent in Key messages.

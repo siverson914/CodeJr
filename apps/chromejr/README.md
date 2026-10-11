@@ -8,21 +8,49 @@ holds the session, the cookies and the encryption, modern sites work,
 forms and logins included. This is its own app, not part of CodeJr; it
 borrows CodeJr's serial link and nothing else.
 
-**Next: `HANDOFF.md` here.** **State: a prototype (2026-10-09), to find out how hard this is; since 2026-10-10 each page goes through an LLM page filter first (below).** The
-laptop half exists (`server/cmd/chromejr`, `server/internal/web`). The
-PCjr half is for now the CodeJr terminal program pointed at ChromeJr's
-port, which gives a scrolling text screen, paging, a status bar and an
-input line. A DOS program of its own comes next, if this is worth
-going on with.
+**Next: `HANDOFF.md` here.** **State: a prototype (2026-10-09), to find out how hard this is. Since 2026-10-10 each page goes through an LLM page filter (below), and since 2026-10-11 the PCjr has its own program, `CHROMEJR.EXE`, tried only in the emulator so far.** The
+laptop half is `server/cmd/chromejr` and `server/internal/web`; the
+PCjr half is `apps/chromejr/chromejr.c`.
 
 ## Trying it
 
     just chromejr            start the server (port 4850, hidden browser)
-    just chromejr-install    put CHROMEJR.BAT in the PCjr's CHROMEJR folder
+    just chromejr-install    put CHROMEJR.EXE and CHROMEJR.BAT in the PCjr's CHROMEJR folder
     just chromejr-text wikipedia.org     browse from the laptop's terminal
+    just emu-chromejr        CHROMEJR.EXE in the emulator, on local test pages
 
 On the PCjr, in CodeJr: `/run`, pick CHROMEJR. CodeJr hangs up, the PCjr
-dials ChromeJr, and after `/exit` there it goes back to CodeJr.
+dials ChromeJr, and after Alt-X there it goes back to CodeJr.
+
+## CHROMEJR.EXE (2026-10-11)
+
+The PCjr's own screen for ChromeJr: the page's title on a blue bar, an
+address bar, the page, and a status line with a spinner while the
+laptop works. It asks the laptop for Junior markup (`markup=1` in its
+HELLO) and draws each view itself: items in yellow with prices in green
+at the right, details in cyan, actions as gray buttons side by side,
+the search box as a gray field, sections with a small triangle.
+
+    type, Enter       an address (wikipedia.org) or words to search for
+    Up, Down, Tab     move between the numbered things on the page
+    Enter             open the one picked (or type its number, Enter)
+    a box picked      what you type goes into it ("Search:" in the address bar)
+    Backspace         back (out of a section or the raw page: back to the view)
+    PgUp, PgDn, Home, End    scroll
+    Esc               clear what you typed; again: leave the box
+    F1 help   F5 load again   Alt-W the page as it is, numbered   Alt-X hang up
+
+It is 26 KB: CodeJr's serial port and link code (`client/serial.c`,
+`cjp.c`), CodeJr's way of dialing, copied, and a page of up to 300 rows
+in far memory. Words typed while a page is loading wait and go when it
+is in; Enter on a pick while loading says to wait, since the thing
+picked may not be there on the next page. `/T`, `/X`, `/S` and `/L`
+(a log of every frame) are for tests.
+
+The old way still works: CODEJR.EXE dialing port 4850 gets the same
+views drawn as text by the laptop.
+
+These commands work from the address bar too (and in CODEJR.EXE):
 
     an address        amazon.com   en.wikipedia.org/wiki/IBM_PCjr
     anything else     searches the web for it

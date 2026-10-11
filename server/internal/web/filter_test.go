@@ -59,20 +59,43 @@ func TestBuildPasswordsAndPrices(t *testing.T) {
 }
 
 func TestReplyWithoutBars(t *testing.T) {
-	r := parseReply("A 11: Add to cart\nI [12] Thing\nA twelve | x\n")
-	if len(r.Blocks) != 3 || r.Blocks[0].Target != 11 || r.Blocks[0].Text != "Add to cart" || r.Blocks[1].Target != 12 || !r.Blocks[2].Bad {
-		t.Errorf("%+v", r.Blocks)
+	var got []replyBlock
+	for _, l := range []string{"A 11: Add to cart", "I [12] Thing", "A twelve | x"} {
+		_, b, _ := parseLine(l)
+		got = append(got, b)
+	}
+	if got[0].Target != 11 || got[0].Text != "Add to cart" || got[1].Target != 12 || !got[2].Bad {
+		t.Errorf("%+v", got)
+	}
+}
+
+// Streaming: lines come out as soon as they are checked, the title
+// first, a divider only once something follows it.
+func TestBuilderStreams(t *testing.T) {
+	p := load(t, "google.com.json")
+	b := newBuilder(p)
+	var got []string
+	for _, l := range []string{"KIND search", "-", "F 2 | Search", "-", "A 999 | Nothing", "A 3 | Voice", "-"} {
+		got = append(got, b.add(l)...)
+	}
+	want := "TGoogle|F1\tSearch|-|A2\tVoice"
+	if strings.Join(got, "|") != want {
+		t.Errorf("got %q, want %q", strings.Join(got, "|"), want)
+	}
+	v, err := b.done()
+	if err != nil || Markup(v) != strings.ReplaceAll(want, "|", "\n")+"\n" {
+		t.Errorf("view %q, %v", Markup(v), err)
 	}
 }
 
 func TestSections(t *testing.T) {
 	p := load(t, "en.wikipedia.org-wiki-IBM-PCjr.json")
-	v, dropped, err := Build("KIND article\nTITLE IBM PCjr\nP The PCjr.\nS Hardware\nS Software\nS No such heading\n", p)
+	v, dropped, err := Build("KIND article\nTITLE IBM PCjr\nP The PCjr.\nS Hardware\nS Video\nS Software\nS No such heading\n", p)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if dropped != 1 {
-		t.Errorf("dropped %d, want 1", dropped)
+	if dropped != 2 { // Video is a part of Hardware
+		t.Errorf("dropped %d, want 2", dropped)
 	}
 	sec := Section(p, v, 1)
 	if len(sec) < 10 || Plain(sec[0]) != "Hardware" {

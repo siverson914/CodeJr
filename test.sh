@@ -5,7 +5,9 @@
 #  2. The PCjr client builds cleanly with Open Watcom (all warnings as errors).
 #  3. Headless emulator runs: the real MS-Kermit 3.14 path and the native
 #     CODEJR.EXE path, both against a fake Claude, and SAY.EXE playing
-#     both kinds of speech clip. No windows are opened.
+#     both kinds of speech clip, and ChromeJr's CHROMEJR.EXE browsing
+#     local test pages (a real hidden Chromium, a fake model). No windows
+#     are opened.
 # Set QUICK=1 to skip the emulator runs.
 set -e
 cd "$(dirname "$0")"
@@ -15,6 +17,7 @@ echo "== Go tests"
 
 echo "== PCjr client build"
 client/build.sh
+apps/chromejr/build.sh
 
 [ -n "${QUICK:-}" ] && exit 0
 
@@ -26,5 +29,8 @@ emu/native_e2e.sh
 
 echo "== Emulator: SAY speech player"
 apps/say/test.sh | grep -E '^(PASS|FAIL)'
+
+echo "== Emulator: ChromeJr"
+emu/chromejr_e2e.sh | grep -E '^(ok|FAIL|==)'
 
 echo "== All tests passed"

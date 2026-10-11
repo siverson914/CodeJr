@@ -51,6 +51,7 @@
 #define CJP_STYLE_NOTE   2
 #define CJP_STYLE_WARN   3
 #define CJP_STYLE_BANNER 4
+#define CJP_STYLE_MARKUP 9 /* ChromeJr: Junior markup lines (CHROMEJR.EXE asks for them) */
 
 #define CJP_KEY_CTRLC 3
 

@@ -48,6 +48,7 @@ func Serve(b *Browser, filter *Filterer, conn io.ReadWriteCloser, baud int, name
 	link.SetWindow(1) // as CodeJr: this PCjr can't hear while it sends
 	defer link.Close()
 
+	markup := false
 	select {
 	case m := <-link.Recv():
 		if m.Type != cjp.Hello {
@@ -56,6 +57,9 @@ func Serve(b *Browser, filter *Filterer, conn io.ReadWriteCloser, baud int, name
 		}
 		logf("client says %q", m.Payload)
 		for _, f := range strings.Fields(string(m.Payload)) {
+			if f == "markup=1" {
+				markup = true // CHROMEJR.EXE: it draws views itself
+			}
 			if v, ok := strings.CutPrefix(f, "baud="); ok {
 				if n, err := strconv.Atoi(v); err == nil && n >= 300 && n <= 115200 {
 					out.Set(n*97/100, true)
@@ -71,10 +75,16 @@ func Serve(b *Browser, filter *Filterer, conn io.ReadWriteCloser, baud int, name
 	}
 	link.Send(cjp.Hello, []byte("CODEJR/2 server ui t="+time.Now().Format("20060102150405")))
 
-	scr := &linkScreen{link: link}
+	scr := &linkScreen{link: link, markup: markup}
 	s := &Session{B: b, Out: scr, Logf: logf, Filter: filter}
-	scr.Text('h', "ChromeJr prototype: the web on a PCjr.\n")
-	scr.Text('c', "Type an address (wikipedia.org), or words to search for. ? for help.\n")
+	if markup {
+		scr.Markup("TChromeJr: the web on a PCjr")
+		scr.Markup("PType an address (wikipedia.org) and press Enter, or words to search the web for.")
+		scr.Markup("POn a page, the arrow keys pick a numbered thing and Enter opens it. Backspace goes back, F1 is help, Alt-X hangs up.")
+	} else {
+		scr.Text('h', "ChromeJr prototype: the web on a PCjr.\n")
+		scr.Text('c', "Type an address (wikipedia.org), or words to search for. ? for help.\n")
+	}
 	scr.Status("ChromeJr ready.   ? = help")
 	scr.flush()
 	link.Send(cjp.Ready, nil)
@@ -115,15 +125,37 @@ func Serve(b *Browser, filter *Filterer, conn io.ReadWriteCloser, baud int, name
 // linkScreen shows a session on the CodeJr client: text in frames of one
 // style each, and the status bar.
 type linkScreen struct {
-	link  *cjp.Link
-	pend  []byte
-	style byte
+	link   *cjp.Link
+	pend   []byte
+	style  byte
+	markup bool // the client draws Junior markup (CHROMEJR.EXE)
+}
+
+func (l *linkScreen) WantsMarkup() bool { return l.markup }
+
+// Markup sends one line of Junior markup.
+func (l *linkScreen) Markup(line string) {
+	if l.style != cjp.StyleMarkup {
+		l.flush()
+		l.style = cjp.StyleMarkup
+	}
+	f := strings.Split(line, "\t") // (toASCII makes a tab a space)
+	for i := range f {
+		f[i] = toASCII(f[i])
+	}
+	l.add(strings.Join(f, "\t") + "\n")
+}
+
+// Clear starts a new page on the client's screen.
+func (l *linkScreen) Clear() {
+	l.flush()
+	l.link.Send(cjp.Clear, nil)
 }
 
 // The client's five styles, for a page's kinds of text.
 func cjpStyle(s byte) byte {
 	switch s {
-	case 'h':
+	case 'h', 'g':
 		return cjp.StyleBanner
 	case 'l':
 		return cjp.StyleUser // yellow: what a link says
@@ -141,12 +173,19 @@ func (l *linkScreen) Text(style byte, s string) {
 		l.flush()
 		l.style = st
 	}
-	l.pend = append(l.pend, toASCII2(s)...)
+	l.add(toASCII2(s))
+}
+
+func (l *linkScreen) add(s string) {
+	l.pend = append(l.pend, s...)
 	for len(l.pend) >= cjp.MaxPayload-1 {
 		l.link.Send(cjp.Text, append([]byte{l.style}, l.pend[:cjp.MaxPayload-1]...))
 		l.pend = l.pend[cjp.MaxPayload-1:]
 	}
 }
+
+// Flush sends the text held back, so a page shows as it is made.
+func (l *linkScreen) Flush() { l.flush() }
 
 func (l *linkScreen) flush() {
 	if len(l.pend) > 0 {

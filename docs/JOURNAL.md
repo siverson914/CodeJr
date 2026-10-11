@@ -1044,3 +1044,23 @@ First I saved ten showcase pages with a new `-save` flag (Google, DuckDuckGo, tw
 **Live in the terminal:** a search in DuckDuckGo's box, result 2 to Wikipedia's article (lead and 20 sections in 2.8 s), a section opened, `v` back, Back to the results from the cache in 1.2 s, an Amazon search and a product with Add to cart. Google's home page works, but a Google search from the hidden browser gets "unusual traffic", so searches stay on DuckDuckGo.
 
 Nothing of this has run on the real PCjr or in the emulator.
+
+## ChromeJr: streaming, rough spots, and CHROMEJR.EXE (2026-10-11)
+
+Steve, after the page filter landed: "do all 4": try it on the PCjr, stream it, fix the rough spots, build the PCjr program. The first needs Steve at the PCjr, so the server was restarted with the filter (12:48 pm) for him to try, and the rest went on.
+
+**Restarting found a bug in `just chromejr-stop`:** `pkill -f "server/chromejr -profile"` killed the recipe's own shell, whose command line holds that text (the same trap the journal tells of for `pgrep`). The pattern is `server/[c]hromejr` now.
+
+**Streaming.** `claude -p --output-format stream-json --include-partial-messages` gives the reply a few characters at a time. A line is checked against the page as soon as it is complete and goes to the PCjr at once; the title goes first, a divider only once something comes below it (a builder that does a line at a time replaced the whole-reply check). First line: 1.2 to 2.4 s on ten of the eleven saved pages. On the link, the text was held until the command ended; the session now flushes after each block.
+
+**Wikipedia's sections.** Telling the model "only the ## headings" did nothing: it still listed subsections. So `extract.js` now marks H3 and H4 as smaller headings, and the check drops a smaller heading when its main one is offered. The first rule ("no smaller headings when the page has main ones") was too strict: a blog whose only H2 is its date lost all its sections, found on a live run in the emulator. The lead: "copy sentences, never reword" in the prompt, and it does now.
+
+**Amazon's color buttons** were `<input type=submit value="0">`. Their names are in `aria-labelledby`, pointing at a span that holds a picture (alt "Beige"), the price, and a style sheet: the first try put CSS into the label ("/* Temporary CSS overrides for"), the second the price only. Text nodes plus picture alt text gives "Beige $39.99". A throwaway chromedp tool to look at the live markup found it; it isn't kept.
+
+**Back took 51 s on the test pages:** Chromium brought the page back from its back-forward cache, which sends no load event, and chromedp's NavigateBack waited 30 s for one, then `settle` 20 more. Yesterday's 51 s Back from Google's robot check was the same thing. The cache is off now: 1.2 s.
+
+**CHROMEJR.EXE.** About 1,100 lines of C, small model, 26 KB: CodeJr's serial and link code linked in, its dialing copied (with a note to keep them alike), and its own screen. It says `markup=1` in its HELLO; the server then sends views as Junior markup in Text frames of a new style (9), a Clear before each page, and a `U` line with the address (new; renderers skip types they don't know). Everything else (raw pages, help, messages) still comes as styled text, which the program adds to the page. It worked the first time it was built, but showed an empty page in the emulator: the server's `toASCII` turns tabs into spaces, and tabs split the markup's fields.
+
+**One fault that wasn't one:** in the first emulator test the program never exited. A long test address (this worktree's path) made the DOS command line longer than 127 characters, so `/X` and `/S` were cut off the end. The test pages come from a local web server now, with a short address. A `/L:file` log of every frame found it, and stays.
+
+**The emulator test** (`emu/chromejr_e2e.sh`, in `just test`) runs a real ChromeJr server with a real hidden Chromium on local pages, and a stand-in for the model that answers in stream-json. 20 checks, all pass: the layout read off the saved screen, the first item lit, Down and Enter pressing the right element, Backspace back from the cache, typing into the picked box, Alt-W. By hand with the real model: Wikipedia's lead and sections, and a DuckDuckGo search, Down, Down, Enter into a blog post. All emulator only; CHROMEJR.EXE has not run on the real PCjr.

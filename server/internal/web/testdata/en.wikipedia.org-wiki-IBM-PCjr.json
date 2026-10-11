@@ -799,7 +799,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Cartridges"
    }
   ],
@@ -892,7 +892,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Processor"
    }
   ],
@@ -987,7 +987,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Video"
    }
   ],
@@ -1335,7 +1335,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Sound"
    }
   ],
@@ -1473,7 +1473,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Keyboard / lightpen"
    }
   ],
@@ -1675,7 +1675,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Expansion"
    }
   ],
@@ -1883,7 +1883,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Compatibility"
    }
   ],
@@ -2209,7 +2209,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Announcement"
    }
   ],
@@ -2659,7 +2659,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Release and reception"
    }
   ],
@@ -3068,7 +3068,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Issues"
    }
   ],
@@ -3149,7 +3149,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Cost"
    }
   ],
@@ -3666,7 +3666,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Not completely PC compatible"
    }
   ],
@@ -4068,7 +4068,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Limited hardware expansion"
    }
   ],
@@ -4272,7 +4272,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Response to poor sales"
    }
   ],
@@ -4785,7 +4785,7 @@
   null,
   [
    {
-    "Style": 104,
+    "Style": 103,
     "Text": "Discontinuation"
    }
   ],
@@ -8763,7 +8763,7 @@
   {
    "n": 1,
    "kind": "link",
-   "label": ""
+   "label": "icon"
   },
   {
    "n": 2,

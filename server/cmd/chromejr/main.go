@@ -12,6 +12,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"codejr/internal/web"
@@ -24,7 +25,7 @@ func (t termScreen) Text(style byte, s string) {
 		fmt.Print(s)
 		return
 	}
-	code := map[byte]string{'h': "1;37", 'l': "33", 'n': "36", 'c': "36"}[style]
+	code := map[byte]string{'h': "1;37", 'g': "1;37", 'l': "33", 'n': "36", 'c': "36"}[style]
 	if code == "" {
 		fmt.Print(s)
 		return
@@ -44,13 +45,21 @@ func main() {
 	save := flag.String("save", "", "with -text: keep every page read in this folder, as JSON")
 	nofilter := flag.Bool("nofilter", false, "show pages as numbered text, without the page filter")
 	model := flag.String("model", "haiku", "the model that lays pages out")
+	claudeBin := flag.String("claude", "claude", "Claude Code, which runs the model (tests give a stand-in)")
 	try := flag.Bool("try", false, "lay out saved pages (the files named, from -save) and print them; no browser")
 	baud := flag.Int("baud", 9600, "serial speed until the client says its own")
 	flag.Parse()
 
 	var filter *web.Filterer
 	if !*nofilter {
-		filter = &web.Filterer{Model: *model}
+		bin := *claudeBin
+		if strings.Contains(bin, "/") {
+			// the model runs from a temporary folder
+			if abs, err := filepath.Abs(bin); err == nil {
+				bin = abs
+			}
+		}
+		filter = &web.Filterer{Model: *model, Bin: bin}
 	}
 	if *try {
 		tryPages(filter, *color, flag.Args())
@@ -115,7 +124,7 @@ func tryPages(f *web.Filterer, color bool, files []string) {
 			log.Fatal(err)
 		}
 		fmt.Printf("\n######## %s (%d lines, %d numbered)\n", file, len(p.Lines), len(p.Targets))
-		v, st, err := f.Filter(context.Background(), p)
+		v, st, err := f.Filter(context.Background(), p, nil)
 		if err != nil {
 			fmt.Printf("FAILED (%s): %v\n", st, err)
 			if os.Getenv("SHOW_MARKUP") != "" {

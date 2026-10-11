@@ -26,6 +26,45 @@ A working prototype, landed and running:
   Port 4850 is open in the laptop's firewall for 192.168.0.0/24 (ufw);
   a new port needs a new rule, which needs Steve's sudo.
 
+## Done 2026-10-11: streaming, the rough spots, CHROMEJR.EXE
+
+- **Streaming.** The model's reply is read as it is written
+  (`--output-format stream-json`); each line is checked and sent as
+  soon as it is complete. The first line of a page now reaches the PCjr
+  about 2 s after the page loads (1.2 to 2.4 s on ten of the eleven
+  saved pages; BBC, where the model still thinks, 8 s). The whole view
+  takes 3 to 5 s as before.
+- **Wikipedia sections:** `extract.js` now marks H3 and H4 as smaller
+  headings ('g'); a smaller heading is offered as a section only when
+  its main section isn't (so Hardware includes Video, but a blog whose
+  only main heading is its date still gets its parts). The model copies
+  the lead word for word now (the prompt says so; it was rewording).
+- **Amazon's color buttons** are named from what they say to screen
+  readers (`aria-labelledby`, a picture's alt text), not their "0" and
+  "1": "Beige $39.99". A label element holding a style sheet had leaked
+  CSS into the name; text nodes only now.
+- **Back took 51 s** on pages the browser restored from its
+  back-forward cache (no load event for chromedp to wait for). The cache
+  is off; Back takes 1.2 s.
+- **CHROMEJR.EXE** (`apps/chromejr/chromejr.c`, README section): the
+  PCjr's own program, drawing Junior markup itself. The server sends
+  markup only to a client that asks (`markup=1`), as Text frames of a
+  new style (9), and a Clear before each page.
+- **`emu/chromejr_e2e.sh`** (in `just test`, about 2 minutes): the
+  emulated PCjr runs CHROMEJR.EXE against a real ChromeJr server and a
+  real hidden Chromium on local test pages, with a stand-in for the
+  model (`apps/chromejr/test/fakeclaude.py`, `-claude` flag). Checks the
+  screen and the server's log: the layout, the arrow keys, Enter, Back,
+  typing into a box, the raw page. All pass. Also run by hand with the
+  real model on live pages: Wikipedia, and a DuckDuckGo search where
+  Down, Down, Enter opened a result. Emulator only.
+
+**Not tried:** CHROMEJR.EXE on the real PCjr. `just chromejr-install`
+puts it and a new CHROMEJR.BAT in the workspace (the BAT now runs
+CHROMEJR.EXE, not CODEJR.EXE). Things to watch there: the colors on the
+real monitor, whether the 2 s to the first line feels quick enough,
+and the link counters (Alt-S) after a long page.
+
 ## Done 2026-10-10: the LLM page filter
 
 Built as designed below, with three changes found by measuring (the
@@ -55,19 +94,16 @@ there used to be about 2.
 
 ## Next, in order
 
-1. **Try it on the real PCjr** through the CodeJr client. Watch whether
-   the 3 to 5 s wait feels long; the client shows the status line
-   ("Simplifying the page...") but no progress. If it does feel long:
-   stream the model's reply (`--output-format stream-json`) and send
-   each block as soon as its line is complete.
-2. **Tune the views on the showcase sites** with the saved pages. Known
-   rough spots: Wikipedia offers subsections as sections (Hardware stops
-   at Cartridges); the model paraphrases leads a little; Amazon's color
-   buttons are labeled 0, 1, 2 on the page and the model names them
-   from the text around them; Google search gets a robot check.
-3. **The PCjr program** (item 6 of the design below), reading Junior
-   markup directly: arrow keys between the numbered blocks, Enter to
-   pick, its own colors.
+1. **CHROMEJR.EXE on the real PCjr.** `just chromejr-install`, then
+   `/run`, CHROMEJR. Fix what the real machine shows.
+2. **Pictures** (item 6 of the design below): the laptop cuts a picture
+   out with `Browser.Shot`, dithers it to 160x200 in 16 colors, and the
+   PCjr shows it in graphics mode on a key. A product photo on Amazon is
+   the showcase.
+3. **Rough spots left:** Google search gets a robot check (searches go
+   to DuckDuckGo); the BBC front page still makes the model think (8 s);
+   a page whose headings are bold text, not heading tags, gets no
+   sections and usually falls back to the raw page.
 
 ## What Steve thought after trying it on the real PCjr
 

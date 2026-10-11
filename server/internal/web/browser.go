@@ -23,7 +23,8 @@ import (
 //go:embed extract.js
 var extractJS string
 
-// Seg is a run of text in one style: 'p' plain, 'h' heading, 'l' link
+// Seg is a run of text in one style: 'p' plain, 'h' heading, 'g' a
+// smaller heading (a part inside the one above), 'l' link
 // text, 'n' a link's number, 'c' a control (field, button, picture).
 type Seg struct {
 	Style byte
@@ -63,6 +64,9 @@ func Open(profile, bin string, show bool) (*Browser, error) {
 		// some sites turn away.
 		chromedp.UserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"),
 		chromedp.Flag("disable-blink-features", "AutomationControlled"),
+		// Back from the back-forward cache sends no load event, and
+		// NavigateBack waited 30 s for one (then 20 more in settle).
+		chromedp.Flag("disable-features", "BackForwardCache"),
 	)
 	if bin != "" {
 		opts = append(opts, chromedp.ExecPath(bin))

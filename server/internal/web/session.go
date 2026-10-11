@@ -38,6 +38,7 @@ type Session struct {
 	lines [][]Seg // what is being shown, wrapped
 	shown int     // lines of it shown so far
 	end   string  // said after the last line
+	part  bool    // showing a section of the view, or its page raw: b goes back to the view
 	whole bool    // the next read takes the whole page
 }
 
@@ -99,13 +100,19 @@ func (s *Session) Command(line string) {
 	case lower == "w" && s.page != nil && !s.raw:
 		// The page itself, as it was read: its own numbers.
 		s.raw = true
-		s.showRaw()
+		s.showRaw("")
+		s.part = true
 		return
 	case lower == "w":
 		// The same page with its menus and side bars.
 		s.whole = true
 		s.Out.Status("Reading the whole page...")
 		s.did(nil, start, "whole page")
+		return
+	case lower == "b" && s.part && s.view != nil:
+		// out of a section (or the raw page) back to the view
+		s.raw = false
+		s.showView()
 		return
 	case lower == "b":
 		s.Out.Status("Going back...")
@@ -187,6 +194,8 @@ func short(s string, n int) string {
 
 // did reads the page after an action and shows it from the top.
 func (s *Session) did(err error, start time.Time, what string) {
+	s.part = false
+	s.clear()
 	if err != nil {
 		s.Out.Text('c', "That didn't work: "+short(err.Error(), 120)+"\n")
 	}
@@ -216,18 +225,89 @@ func (s *Session) did(err error, start time.Time, what string) {
 	s.Logf("%s: %q %s, %d lines, %d chars, %d numbered, %.1fs", what, p.Title, p.URL, len(lines), chars, len(p.Targets), time.Since(start).Seconds())
 	if s.Filter != nil && !s.off && !asked {
 		s.Out.Status("Simplifying the page...")
-		v, st, err := s.Filter.Filter(context.Background(), p)
-		if err != nil {
-			s.Logf("filter: %v (%s)", err, st)
-			s.Out.Text('c', "(No simple view: "+short(err.Error(), 100)+")\n")
-		} else {
+		// Each block is drawn and sent as soon as the model has written
+		// it: the top of the page shows while the rest is on its way.
+		d := Drawer{Width: Width}
+		s.lines, s.shown = nil, 0
+		mk, _ := s.markup()
+		if mk != nil {
+			mk.Markup("U" + field(p.URL))
+		}
+		draw := func(ls [][]Seg) {
+			if len(s.lines) == 0 && len(ls) > 0 {
+				s.Out.Text('p', "\n")
+			}
+			for _, l := range ls {
+				s.line(l)
+				s.lines = append(s.lines, l)
+			}
+			s.flush()
+		}
+		v, st, err := s.Filter.Filter(context.Background(), p, func(m string) {
+			if mk != nil {
+				// the PCjr draws it itself; s.lines stays empty
+				mk.Markup(m)
+				s.flush()
+				return
+			}
+			draw(d.Line(m))
+		})
+		if err == nil {
+			draw(d.End())
 			s.Logf("filter: %s, %d choices, %s, %.1fs in all", v.Kind, choices(v), st, time.Since(start).Seconds())
 			s.view, s.raw = v, false
-			s.showView()
+			s.shown = len(s.lines)
+			s.end = viewEnd
+			s.more() // (the end of it: the note and the status line)
 			return
 		}
+		s.Logf("filter: %v (%s)", err, st)
+		// (why is in the log: on the screen it is only noise)
+		s.showRaw("(No simple view for this page: here it is as it is.)")
+		return
 	}
-	s.showRaw()
+	s.showRaw("")
+}
+
+const viewEnd = "-- type a number to pick it. w: the whole page, numbered --"
+
+// MarkupScreen is a screen that draws Junior markup itself (CHROMEJR.EXE
+// on the PCjr): views go to it as markup lines, and each new page starts
+// on a cleared screen.
+type MarkupScreen interface {
+	Markup(line string)
+	Clear()
+	WantsMarkup() bool
+}
+
+func (s *Session) markup() (MarkupScreen, bool) {
+	if m, ok := s.Out.(MarkupScreen); ok && m.WantsMarkup() {
+		return m, true
+	}
+	return nil, false
+}
+
+// clear starts a new page on a screen that draws markup.
+func (s *Session) clear() {
+	if m, ok := s.markup(); ok {
+		m.Clear()
+	}
+}
+
+// line shows one line.
+func (s *Session) line(l []Seg) {
+	for _, seg := range l {
+		s.Out.Text(seg.Style, seg.Text)
+	}
+	s.Out.Text('p', "\n")
+}
+
+// flush sends what is waiting to be shown, on a screen that holds text
+// back (the PCjr's link sends it in frames).
+func (s *Session) flush() {
+	if f, ok := s.Out.(interface{ Flush() }); ok {
+		f.Flush()
+	}
 }
 
 func choices(v *View) int {
@@ -241,8 +321,24 @@ func choices(v *View) int {
 }
 
 // showRaw shows the page itself from the top: its text with its own
-// numbers.
-func (s *Session) showRaw() {
+// numbers, after a note if there is one.
+func (s *Session) showRaw(note string) {
+	if mk, ok := s.markup(); ok {
+		mk.Clear()
+		mk.Markup("T" + field(s.page.Title))
+		mk.Markup("U" + field(s.page.URL))
+		for _, l := range Wrap([][]Seg{{{'c', note}}}, Width) {
+			s.line(l)
+		}
+		s.lines = Wrap(s.page.Lines, Width)
+		s.shown = 0
+		s.end = "-- end of the page. Backspace: the simple view --"
+		if s.view == nil {
+			s.end = "-- end of the page --"
+		}
+		s.more()
+		return
+	}
 	s.lines = Wrap(s.page.Lines, Width)
 	s.shown = 0
 	s.end = "-- end of the page's main part. w shows the whole page (menus, search box) --"
@@ -252,6 +348,9 @@ func (s *Session) showRaw() {
 	if s.view != nil {
 		s.end += "\n-- v: the simple view --"
 	}
+	if note != "" {
+		s.Out.Text('c', note+"\n")
+	}
 	s.Out.Text('h', "\n== "+short(toASCII(s.page.Title), 70)+"\n")
 	s.Out.Text('n', short(toASCII(s.page.URL), 78)+"\n")
 	s.more()
@@ -259,9 +358,20 @@ func (s *Session) showRaw() {
 
 // showView shows the page as the filter laid it out.
 func (s *Session) showView() {
+	s.part = false
+	if mk, ok := s.markup(); ok {
+		mk.Clear()
+		mk.Markup("U" + field(s.page.URL))
+		for _, l := range strings.Split(strings.TrimSuffix(Markup(s.view), "\n"), "\n") {
+			mk.Markup(l)
+		}
+		s.lines, s.shown, s.end = nil, 0, viewEnd
+		s.more()
+		return
+	}
 	s.lines = RenderMarkup(Markup(s.view), Width)
 	s.shown = 0
-	s.end = "-- type a number to pick it. w: the whole page, numbered --"
+	s.end = viewEnd
 	s.Out.Text('p', "\n")
 	s.more()
 }
@@ -278,7 +388,15 @@ func (s *Session) pick(n int, rest string, setOnly bool, start time.Time) {
 		s.lines = Wrap(Section(s.page, s.view, n), Width)
 		s.shown = 0
 		s.end = "-- end of the section. v: back to the page --"
-		s.Out.Text('p', "\n")
+		s.part = true
+		if mk, ok := s.markup(); ok {
+			mk.Clear()
+			mk.Markup("T" + field(s.view.Title))
+			mk.Markup("U" + field(s.page.URL))
+			s.end = "-- end of the section. Backspace: back to the page --"
+		} else {
+			s.Out.Text('p', "\n")
+		}
 		s.more()
 	case 'F':
 		if rest == "" && !setOnly {
@@ -310,17 +428,16 @@ func (s *Session) more() {
 		end = len(s.lines)
 	}
 	for _, l := range s.lines[s.shown:end] {
-		for _, seg := range l {
-			s.Out.Text(seg.Style, seg.Text)
-		}
-		s.Out.Text('p', "\n")
+		s.line(l)
 	}
 	s.shown = end
 	if end < len(s.lines) {
 		s.Out.Text('c', fmt.Sprintf("-- %d of %d lines. m for more --\n", end, len(s.lines)))
 		s.Out.Status(fmt.Sprintf("%s   line %d of %d   m = more, ? = help", short(toASCII(s.page.Title), 34), end, len(s.lines)))
 	} else {
-		s.Out.Text('c', s.end+"\n")
+		if _, ok := s.markup(); !ok || s.end != viewEnd {
+			s.Out.Text('c', s.end+"\n")
+		}
 		s.Out.Status(short(toASCII(s.page.Title), 50) + "   ? = help")
 	}
 }

@@ -313,6 +313,10 @@ test-go:
 emu-native:
     emu/native_e2e.sh
 
+# CHROMEJR.EXE in the emulated PCjr, browsing local test pages (about 2 minutes)
+emu-chromejr:
+    emu/chromejr_e2e.sh
+
 # The real MS-Kermit path in the emulated PCjr
 emu-kermit:
     emu/e2e.sh "make hello" CODEJR/PROGS/HELLO.BAS "$PWD/server/internal/session/testdata/fakeclaude.sh"
@@ -376,7 +380,8 @@ chromejr:
 
 # Stop ChromeJr's server
 chromejr-stop:
-    @pkill -f "server/chromejr -profile" && echo stopped || echo "not running"
+    @# ([c]: the pattern must not match this recipe's own shell, whose command line holds it)
+    @pkill -f "server/[c]hromejr -profile" && echo stopped || echo "not running"
 
 # Browse from this terminal, as the PCjr would see it: just chromejr-text wikipedia.org
 [positional-arguments]
@@ -397,14 +402,16 @@ chromejr-try *files:
 chromejr-login url="https://www.amazon.com":
     @cd server && go build -o chromejr ./cmd/chromejr && echo "Sign in, then type q and Enter here." && ./chromejr -show -text -profile "{{chromejr_home}}/profile" "{{url}}" >/dev/null
 
-# Put CHROMEJR.BAT in the workspace (the PCjr gets it on its next call): /run, then CHROMEJR.
+# Put CHROMEJR.EXE and CHROMEJR.BAT in the workspace (the PCjr gets them on its next call): /run, then CHROMEJR.
 # host is this laptop's address as the PCjr dials it.
 chromejr-install host="":
     #!/bin/sh
     h="{{host}}"
     [ -n "$h" ] || h=$(ss -tn | awk '$4 ~ /:4860$/ { sub(/^\[::ffff:/, "", $4); sub(/\]?:4860$/, "", $4); print $4; exit }')
     [ -n "$h" ] || { echo "no PCjr call to read this laptop's address from: just chromejr-install 192.168.0.x"; exit 1; }
+    apps/chromejr/build.sh >/dev/null || exit 1
     mkdir -p "{{ws}}/CHROMEJR"
-    printf '@ECHO OFF\r\nREM ChromeJr: the PCjr dials the browser on the laptop (apps/chromejr).\r\nC:\\CODEJR\\CODEJR.EXE /P:1 /D:%s:4850\r\n' "$h" > "{{ws}}/CHROMEJR/CHROMEJR.BAT"
+    cp apps/chromejr/CHROMEJR.EXE "{{ws}}/CHROMEJR/"
+    printf '@ECHO OFF\r\nREM ChromeJr: the PCjr dials the browser on the laptop (apps/chromejr).\r\nCHROMEJR.EXE /P:1 /D:%s:4850\r\n' "$h" > "{{ws}}/CHROMEJR/CHROMEJR.BAT"
     cat "{{ws}}/CHROMEJR/CHROMEJR.BAT"; echo "queued: sent on the PCjr's next connection"
 

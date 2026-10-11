@@ -44,8 +44,25 @@
     targets.push({ n, kind, label: clean(label).trim().slice(0, 60) });
     return n;
   };
+  // what aria-labelledby points at, said in words
+  // (text only: the element may hold a style sheet, which textContent reads)
+  const textOf = e => { let t = ''; for (const c of e.childNodes) {
+    if (c.nodeType === 3) t += c.nodeValue + ' ';
+    else if (c.nodeType === 1 && c.tagName === 'IMG') t += (c.alt || '') + ' ';
+    else if (c.nodeType === 1 && !/^(STYLE|SCRIPT|TEMPLATE|NOSCRIPT)$/.test(c.tagName)) t += textOf(c);
+  } return t; };
+  const labelledBy = el => (el.getAttribute('aria-labelledby') || '').split(/\s+/).filter(Boolean)
+    .map(id => { const e = document.getElementById(id); return e ? textOf(e) : ''; }).join(' ');
+  // A button whose own text is only a number or nothing (a color swatch
+  // labeled "0") is named by what it says to screen readers instead.
+  const nameOf = (el, own) => {
+    own = clean(own).trim();
+    if (own && !/^\d{0,2}$/.test(own)) return own;
+    const img = el.querySelector && el.querySelector('img[alt]');
+    return clean(el.getAttribute('aria-label') || labelledBy(el) || el.title || (img && img.alt) || own).trim();
+  };
   const labelOf = el => {
-    let t = el.getAttribute('aria-label') || el.getAttribute('placeholder') || '';
+    let t = el.getAttribute('aria-label') || labelledBy(el) || el.getAttribute('placeholder') || '';
     if (!t && el.id) {
       const l = document.querySelector('label[for="' + CSS.escape(el.id) + '"]');
       if (l) t = l.innerText;
@@ -103,8 +120,9 @@
       const type = (el.type || 'text').toLowerCase();
       if (type === 'hidden') return;
       if (type === 'submit' || type === 'button' || type === 'image' || type === 'reset') {
-        const k = target(el, 'button', el.value || el.alt || labelOf(el) || 'button');
-        push('c', '<' + k + ':' + (clean(el.value || el.alt || labelOf(el) || 'button').trim().slice(0, 30)) + '>');
+        const name = nameOf(el, el.value || el.alt) || labelOf(el) || 'button';
+        const k = target(el, 'button', name);
+        push('c', '<' + k + ':' + name.slice(0, 30) + '>');
       } else if (type === 'checkbox' || type === 'radio') {
         const k = target(el, 'check', labelOf(el));
         push('c', '(' + k + ':' + (el.checked ? 'X' : ' ') + ')');
@@ -134,7 +152,9 @@
     // price is often three spans styled as boxes)
     const block = !/^(SPAN|B|I|EM|STRONG|SUP|SUB|SMALL|U|LABEL|FONT)$/.test(tag) && (BLOCK.has(cs.display) || /^(P|DIV|H[1-6]|LI|TR|UL|OL|SECTION|ARTICLE|HEADER|FOOTER|NAV|FORM|TABLE|BLOCKQUOTE|PRE|DT|DD|FIGURE|MAIN|ASIDE)$/.test(tag));
     let st = style;
-    if (/^H[1-4]$/.test(tag)) st = 'h';
+    // h: a heading; g: a smaller one (H3, H4), a part inside the one above
+    if (/^H[12]$/.test(tag)) st = 'h';
+    else if (/^H[34]$/.test(tag)) st = 'g';
     const isPara = /^(P|H[1-6]|UL|OL|TABLE|BLOCKQUOTE|PRE|FIGURE|SECTION|ARTICLE|FORM|DL)$/.test(tag);
     if (!WHOLE && (cs.position === 'fixed' || cs.position === 'sticky') && el !== root) return; // bars that float over the page
     // Menus, the site's header and its footer wait for "w" too.
@@ -154,7 +174,7 @@
       // no space left hanging between the words and the number
       while (line.length && line[line.length - 1][0] === 'p' && !line[line.length - 1][1].trim()) line.pop();
       let said = out.length === outBefore ? lineText().length > before : true;
-      const label = el.innerText || el.getAttribute('aria-label') || el.title || '';
+      const label = nameOf(el, el.innerText);
       if (!said) {
         const t = clean(el.getAttribute('aria-label') || el.title || '').trim().slice(0, 40);
         if (!t) return;   // a link with nothing to show: leave it out
