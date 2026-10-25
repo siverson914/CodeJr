@@ -16,7 +16,14 @@
  * only the pixels are packed differently: 4 to a byte, 2 bits each, high
  * bits = left pixel.
  *
+ * Sound: the ride's sound (tire hiss, wind, freehub, takeoffs, landings),
+ * worked out on the laptop as the sound chip's registers for every 60 Hz
+ * tick (Knuckle's tools/pcjr/sound.mjs). The retrace interrupt writes the
+ * ones that changed; the main loop tells it where the picture's clock is,
+ * so the sound keeps time even when frames are skipped.
+ *
  * SHREDDY [file]        play until a key
+ *   /Q                  quiet: no sound
  *   /DEMO:n             quit after n frames drawn (tests; nobody at the keys)
  *   /SHOT:a,b,...       draw every frame in order (no skipping), and save the
  *                       page after frame a, b... as SHOT1.PPM, SHOT2.PPM...
@@ -24,8 +31,13 @@
  *                       the times to LOG.TXT
  *
  * File format (SHR1, little endian), written by export.mjs:
- *   16-byte header: "SHR1", u16 frames, u8 fps, u8 names, u8 palette[4], 4 x 0
+ *   16-byte header: "SHR1", u16 frames, u8 fps, u8 names, u8 palette[4],
+ *   u8 sound bytes per tick (7, or 0: none), u8 sound ticks per frame, 2 x 0
  *   the trick names: per name a length byte, then the letters
+ *   the sound: frames x ticks-per-frame records of 7 bytes: tone 1-3
+ *   dividers (low 8 bits each, then their high 2 bits in one byte), the
+ *   noise control, then the 4 attenuations as nibbles (tone 1 | tone 2 << 4,
+ *   tone 3 | noise << 4)
  *   per frame: u16 n, then n bytes: a label byte (0: no name up, else 1 +
  *   the name's index), with a label its color (1-3, the fade) and its top
  *   row (signed: above the screen while it slides in); then the shapes.
@@ -96,6 +108,62 @@ static unsigned char cpat;           /* the color in all 4 pixel slots */
  * first > last means nothing on that row. The next erase of the page
  * clears just these spans. */
 static unsigned char ext[2][400];
+
+/* ---- Sound --------------------------------------------------------------- */
+
+static const unsigned char far *snd_tab; /* 7 bytes a tick */
+static unsigned snd_T, snd_rate;         /* ticks in the loop, ticks a second */
+static volatile unsigned snd_want, snd_vbl0; /* the tick due at retrace snd_vbl0 */
+static unsigned snd_last = 0xFFFF;
+static unsigned char snd_sh[11];         /* what the chip has: 3 x 2 divider bytes, noise, 4 att */
+static int snd_fresh;                    /* 1: write everything next time */
+
+static void sn(unsigned char b) { outp(0xC0, b); }
+
+/* The retrace interrupt (60 Hz): put the chip in the state of the tick that
+ * is due. Only changed registers are written: writing the noise control
+ * restarts the noise. No DOS, no BIOS, short. */
+static void snd_irq(void)
+{
+	unsigned idx = snd_want + (unsigned)(fx_vbl - snd_vbl0), v;
+	const unsigned char far *p;
+	unsigned char hi, b[11];
+	while (idx >= snd_T) idx -= snd_T;
+	if (idx == snd_last) return;
+	snd_last = idx;
+	p = snd_tab + idx * 7u;
+	hi = p[3];
+	for (v = 0; v < 3; v++) { /* divider n: latch 1vv0 + low 4 bits, then the high 6 */
+		unsigned n = p[v] | ((unsigned)((hi >> (2 * v)) & 3) << 8);
+		b[2 * v] = (unsigned char)(0x80 | (v << 5) | (n & 15));
+		b[2 * v + 1] = (unsigned char)(n >> 4);
+	}
+	b[6] = (unsigned char)(0xE0 | (p[4] & 7));
+	b[7] = (unsigned char)(0x90 | (p[5] & 15));
+	b[8] = (unsigned char)(0xB0 | (p[5] >> 4));
+	b[9] = (unsigned char)(0xD0 | (p[6] & 15));
+	b[10] = (unsigned char)(0xF0 | (p[6] >> 4));
+	for (v = 0; v < 3; v++)
+		if (snd_fresh || b[2 * v] != snd_sh[2 * v] || b[2 * v + 1] != snd_sh[2 * v + 1]) {
+			sn(b[2 * v]); sn(b[2 * v + 1]);
+			snd_sh[2 * v] = b[2 * v]; snd_sh[2 * v + 1] = b[2 * v + 1];
+		}
+	for (v = 6; v < 11; v++)
+		if (snd_fresh || b[v] != snd_sh[v]) { sn(b[v]); snd_sh[v] = b[v]; }
+	snd_fresh = 0;
+}
+
+/* The main loop: the picture's clock is at ms. */
+static void snd_clock(unsigned long ms)
+{
+	unsigned idx;
+	if (!snd_T) return;
+	idx = (unsigned)((ms * snd_rate / 1000UL) % snd_T);
+	_disable();
+	snd_want = idx;
+	snd_vbl0 = fx_vbl;
+	_enable();
+}
 static int pg;                       /* which extents slot is the hidden page */
 static int npg;                      /* 2 with page flipping, 1 with one buffer */
 
@@ -384,6 +452,16 @@ static int load(const char *path)
 		names[i] = q;
 		at += 1 + q[0];
 	}
+	if (b[12]) { /* the sound table */
+		unsigned long n = (unsigned long)nframes * b[13], bytes = n * b[12];
+		if (at + bytes > size) { strcpy(err, "file ends in the sound"); return -1; }
+		if (b[12] == 7 && b[13] && b[13] * fps <= 120 && bytes <= 65535UL) {
+			snd_tab = (const unsigned char far *)MK_FP(seg + (unsigned)(at >> 4), (unsigned)(at & 15));
+			snd_T = (unsigned)n;
+			snd_rate = b[13] * fps;
+		}
+		at += bytes;
+	}
 	for (i = 0; i < nframes; i++) {
 		unsigned char far *q;
 		unsigned len;
@@ -425,17 +503,18 @@ int main(int argc, char **argv)
 {
 	const char *path = "SHREDDY.DAT";
 	unsigned long demo = 0, drawn = 0, t0, t;
-	int bench = 0, i;
+	int bench = 0, quiet = 0, i;
 	unsigned f;
 	for (i = 1; i < argc; i++) {
 		char *a = argv[i];
 		if (a[0] == '/' || a[0] == '-') {
 			if (!strnicmp(a + 1, "DEMO", 4)) demo = a[5] == ':' ? strtoul(a + 6, 0, 10) : 300;
 			else if (!strnicmp(a + 1, "BENCH", 5)) bench = 1;
+			else if (!stricmp(a + 1, "Q")) quiet = 1;
 			else if (!strnicmp(a + 1, "SHOT:", 5)) {
 				char *s = a + 6;
 				while (*s && nshots < 16) { shots[nshots++] = (unsigned)strtoul(s, &s, 10); if (*s == ',') s++; else break; }
-			} else { printf("SHREDDY [file] [/DEMO:n] [/SHOT:a,b,...] [/BENCH]\n"); return 1; }
+			} else { printf("SHREDDY [file] [/Q] [/DEMO:n] [/SHOT:a,b,...] [/BENCH]\n"); return 1; }
 		} else path = a;
 	}
 	for (i = 0; i < 256; i++) { /* font byte -> pixel masks, left 4 pixels in the high byte */
@@ -465,7 +544,8 @@ int main(int argc, char **argv)
 	for (i = 0; i < 2; i++) { fx_begin(); fx_clear(0); fx_flip(); }
 	key_init();
 	tmr_init();
-	dbg_log("SHREDDY: %u frames at %u fps, %d pages, irq %d", nframes, fps, fx_pages, fx_irq);
+	dbg_log("SHREDDY: %u frames at %u fps, %d pages, irq %d, sound %u ticks at %u Hz%s", nframes, fps, fx_pages, fx_irq,
+		snd_T, snd_rate, quiet ? " (off: /Q)" : fx_irq ? "" : " (off: no retrace interrupt)");
 
 	if (bench || nshots) {
 		/* every frame in order, no waiting */
@@ -499,12 +579,19 @@ int main(int argc, char **argv)
 		 * due (a skip), which beats dropping to a slower stride for good. */
 		unsigned long tick, g, lastg = 0xFFFFFFFFUL, tb;
 		unsigned stride = 1, want, over = 0, under = 0, avg = 0, period = 1000 / fps;
+		if (snd_T && fx_irq && !quiet) {
+			snd_init();
+			snd_fresh = 1;
+			snd_clock(0);
+			fx_irq_hook(snd_irq);
+		} else snd_T = 0;
 		t0 = tmr_ms();
 		for (;;) {
 			int k;
 			for (k = 1; k < 128; k++) if (key_down[k]) break;
 			if (k < 128) break;
 			t = tmr_ms() - t0;
+			snd_clock(t);
 			tick = t * fps / 1000UL;
 			g = tick - tick % stride;
 			if (g == lastg) continue;
@@ -529,6 +616,8 @@ int main(int argc, char **argv)
 		dbg_log("played %lu frames in %lu ms: %lu.%lu fps drawn", drawn, t,
 			drawn * 1000UL / t, (drawn * 10000UL / t) % 10);
 	}
+	fx_irq_hook(0);
+	if (snd_T) snd_done();
 	gfx_done();
 	_dos_freemem(data_seg);
 	return 0;

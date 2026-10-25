@@ -15,7 +15,18 @@ PCjr can't run Knuckle's simulation (3D rider, joint solving, physics; one
 frame is about 1.5 ms on the laptop, roughly 20 s on an 8088), so the laptop
 rides it and saves the lines of every frame, and the PCjr only draws them.
 
-- **`SHREDDY.DAT`**: 1,167 frames, 20 a second, 58.4 s, 267 KB. Made by
+- **Sound (2026-10-25):** the ride sound of Knuckle's Tune page (tire hiss,
+  wind in the air, freehub buzz while coasting, takeoff swish, landing crunch
+  and thump, chain slap on big hits), redone for the sound chip. The laptop
+  (`tools/pcjr/sound.mjs` in Knuckle) works out all the chip's registers for
+  every 60 Hz tick, 7 bytes a tick, 24 KB for the loop. The retrace
+  interrupt writes only the registers that changed; the main loop tells it
+  the picture's clock, so the sound keeps time when frames are skipped. The
+  thump is periodic noise (the chip can't play a tone below 110 Hz). The
+  exporter also writes `preview/sound.wav` and `preview/shreddy.mp4` (the
+  PCjr's frames with the chip's sound, from a small emulation of the chip)
+  in the Dropbox media folder. `SHREDDY /Q` plays without sound.
+- **`SHREDDY.DAT`**: 1,167 frames, 20 a second, 58.4 s, 291 KB with the sound. Made by
   Knuckle's `tools/pcjr/export.mjs` (the file format is at the top of it and
   of `shreddy.c`). Polylines, ellipses (wheels, head) and dots (eyes), with
   short steps packed one per byte.
