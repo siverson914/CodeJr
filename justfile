@@ -207,6 +207,27 @@ deploy-games: games
     cp apps/jrcube/JRCUBE.EXE "{{ws}}/JRCUBE/"
     @echo "queued: sent on the PCjr's next connection"
 
+# Build SHREDDY (apps/shreddy) and check frames headless against the exporter's previews
+shreddy:
+    #!/usr/bin/env sh
+    set -e
+    apps/shreddy/build.sh
+    out=$(mktemp -d)
+    EMU_FILES=apps/shreddy/SHREDDY.DAT lib/emu.sh "$out" 3000 apps/shreddy/SHREDDY.EXE /SHOT:292,584
+    for p in "1 0292" "2 0584"; do set -- $p
+        magick "$out/SHOT$1.PPM" -filter point -resize 640x480! "$out/s$1.png"
+        n=$(magick compare -metric AE "$out/s$1.png" "apps/shreddy/shots/frame-$2.png" null: 2>&1 | cut -d' ' -f1)
+        echo "frame $2: $n pixels differ"; [ "$n" = "0" ]
+    done
+    rm -rf "$out"
+
+# Build SHREDDY and queue it with its ride for the PCjr
+deploy-shreddy:
+    apps/shreddy/build.sh
+    mkdir -p "{{ws}}/SHREDDY"
+    cp apps/shreddy/SHREDDY.EXE apps/shreddy/SHREDDY.DAT "{{ws}}/SHREDDY/"
+    @echo "queued: sent on the PCjr's next connection"
+
 # Build Sopwith 2 from source (apps/sopwith)
 sopwith:
     apps/sopwith/build.sh
