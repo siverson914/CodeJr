@@ -316,6 +316,34 @@ static void show(unsigned f, int shot)
 	if (npg == 2) pg ^= 1;
 }
 
+/* The largest block DOS could give now, in KB (for LOG.TXT). */
+static unsigned largest_kb(void)
+{
+	unsigned seg;
+	if (_dos_allocmem(0xFFFF, &seg) == 0) { _dos_freemem(seg); return 1023; }
+	return seg >> 6;
+}
+
+static char err[80]; /* why load failed: printed once graphics are off */
+
+/* The loading screen: "LOADING" and a bar, redrawn on the hidden page. */
+static void load_screen(unsigned long done, unsigned long size)
+{
+	static const unsigned char word[] = "\7LOADING";
+	unsigned w = size ? (unsigned)(done * 60UL / size) : 0, y, b;
+	fx_begin();
+	vid = (unsigned char far *)MK_FP(fx_seg, 0);
+	fx_clear(0);
+	text(word, 80, 3);
+	for (y = 104; y < 112; y++) {
+		unsigned char far *row = vid + jr_rowoff[y];
+		for (b = 0; b < 60; b++) row[10 + b] = b < w ? 0xFF : (y == 104 || y == 111 ? 0x55 : 0);
+		row[10] |= 0x40; row[69] |= 0x01; /* the bar's ends */
+	}
+	if (npg == 1) fx_dirty(0, 0, 159, 199);
+	fx_flip();
+}
+
 static int load(const char *path)
 {
 	int fd;
@@ -323,44 +351,47 @@ static int load(const char *path)
 	unsigned long size, done = 0;
 	unsigned char far *b;
 	unsigned long at;
-	if (_dos_open(path, 0, &fd)) { printf("SHREDDY: can't open %s\n", path); return -1; }
+	if (_dos_open(path, 0, &fd)) { sprintf(err, "can't open %.40s", path); return -1; }
 	size = (unsigned long)lseek(fd, 0L, SEEK_END);
 	lseek(fd, 0L, SEEK_SET);
-	if (size < 16 || size > 600000UL) { printf("SHREDDY: %s is %lu bytes\n", path, size); _dos_close(fd); return -1; }
+	if (size < 16 || size > 600000UL) { sprintf(err, "%.40s is %lu bytes", path, size); _dos_close(fd); return -1; }
 	paras = (unsigned)((size + 15) >> 4);
-	if (_dos_allocmem(paras, &seg)) { printf("SHREDDY: not enough memory (%lu KB needed)\n", (size + 1023) >> 10); _dos_close(fd); return -1; }
+	if (_dos_allocmem(paras, &seg)) {
+		sprintf(err, "not enough memory: %lu KB needed, %u KB free in one piece", (size + 1023) >> 10, seg >> 6);
+		_dos_close(fd); return -1;
+	}
 	data_seg = seg;
-	printf("Loading %s, %lu KB ", path, (size + 1023) >> 10);
+	dbg_log("SHREDDY: %lu bytes at %04X, %u KB left in one piece", size, seg, largest_kb());
+	load_screen(0, size);
 	while (done < size) {
-		unsigned want = size - done > 32768UL ? 32768u : (unsigned)(size - done);
+		unsigned want = size - done > 8192UL ? 8192u : (unsigned)(size - done);
 		b = (unsigned char far *)MK_FP(seg + (unsigned)(done >> 4), 0);
-		if (_dos_read(fd, b, want, &got) || got != want) { printf("\nSHREDDY: read error\n"); _dos_close(fd); return -1; }
+		if (_dos_read(fd, b, want, &got) || got != want) { strcpy(err, "read error"); _dos_close(fd); return -1; }
 		done += want;
-		putchar('.');
+		load_screen(done, size);
 	}
 	_dos_close(fd);
-	putchar('\n');
 	b = (unsigned char far *)MK_FP(seg, 0);
-	if (b[0] != 'S' || b[1] != 'H' || b[2] != 'R' || b[3] != '1') { printf("SHREDDY: %s is not a Shreddy ride (SHR1)\n", path); return -1; }
+	if (b[0] != 'S' || b[1] != 'H' || b[2] != 'R' || b[3] != '1') { sprintf(err, "%.40s is not a Shreddy ride (SHR1)", path); return -1; }
 	nframes = b[4] | (b[5] << 8);
 	fps = b[6];
 	for (i = 0; i < 4; i++) pal4[i] = b[8 + i];
-	if (!nframes || nframes > MAXF || !fps || fps > 60) { printf("SHREDDY: bad header (%u frames, %u fps)\n", nframes, fps); return -1; }
+	if (!nframes || nframes > MAXF || !fps || fps > 60) { sprintf(err, "bad header (%u frames, %u fps)", nframes, fps); return -1; }
 	at = 16;
 	for (i = 0; i < b[7]; i++) { /* the trick names */
 		unsigned char far *q = (unsigned char far *)MK_FP(seg + (unsigned)(at >> 4), (unsigned)(at & 15));
-		if (at + 1 + q[0] > size) { printf("SHREDDY: file ends in the names\n"); return -1; }
+		if (at + 1 + q[0] > size) { strcpy(err, "file ends in the names"); return -1; }
 		names[i] = q;
 		at += 1 + q[0];
 	}
 	for (i = 0; i < nframes; i++) {
 		unsigned char far *q;
 		unsigned len;
-		if (at + 2 > size) { printf("SHREDDY: file ends at frame %u\n", i); return -1; }
+		if (at + 2 > size) { sprintf(err, "file ends at frame %u", i); return -1; }
 		q = (unsigned char far *)MK_FP(seg + (unsigned)(at >> 4), (unsigned)(at & 15));
 		len = q[0] | (q[1] << 8);
 		at += 2;
-		if (at + len > size) { printf("SHREDDY: file ends in frame %u\n", i); return -1; }
+		if (at + len > size) { sprintf(err, "file ends in frame %u", i); return -1; }
 		fseg[i] = seg + (unsigned)(at >> 4);
 		foff[i] = (unsigned)(at & 15);
 		flen[i] = len;
@@ -407,16 +438,30 @@ int main(int argc, char **argv)
 			} else { printf("SHREDDY [file] [/DEMO:n] [/SHOT:a,b,...] [/BENCH]\n"); return 1; }
 		} else path = a;
 	}
-	if (load(path)) return 1;
 	for (i = 0; i < 256; i++) { /* font byte -> pixel masks, left 4 pixels in the high byte */
 		unsigned m = 0, b;
 		for (b = 0; b < 8; b++) if (i & (0x80 >> b)) m |= 0xC000u >> (2 * b);
 		wide[i] = m;
 	}
-	if (fx_init(0)) { printf("SHREDDY: no graphics (error %d)\n", gfx_err); return 1; }
+	/* Graphics first, then the ride: fx_init claims a second video page in
+	 * the low 128 KB, and a 268 KB ride loaded first can sit right there
+	 * (on the real PCjr it did: "no graphics (error 2)"). The library's
+	 * 64 KB back buffer isn't used by the fast path, so it goes back to DOS
+	 * for the ride. */
+	if (fx_init(0)) { printf("SHREDDY: no graphics (error %d), %u KB free in one piece\n", gfx_err, largest_kb()); return 1; }
+	gfx_free_back();
 	npg = fx_pages == 2 ? 2 : 1;
-	for (i = 0; i < 2; i++) { memset(ext[i], 255, 200); memset(ext[i] + 200, 0, 200); }
+	dbg_log("SHREDDY: graphics up, %d pages, %u KB free in one piece", fx_pages, largest_kb());
+	pal4[0] = 0; pal4[1] = 8; pal4[2] = 7; pal4[3] = 15; /* until the ride's own colors are read */
 	mode_320x4();
+	if (load(path)) {
+		gfx_done();
+		if (data_seg) _dos_freemem(data_seg);
+		printf("SHREDDY: %s\n", err);
+		return 1;
+	}
+	mode_320x4();
+	for (i = 0; i < 2; i++) { memset(ext[i], 255, 200); memset(ext[i] + 200, 0, 200); }
 	for (i = 0; i < 2; i++) { fx_begin(); fx_clear(0); fx_flip(); }
 	key_init();
 	tmr_init();

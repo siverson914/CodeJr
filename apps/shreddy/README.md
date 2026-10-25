@@ -72,7 +72,16 @@ line algorithm.
 
 ## Status (2026-10-25)
 
-**Emulator only.** Not run on the real PCjr yet.
+**First run on the real PCjr (2026-10-25):** it plays. CodeJr's screenshot
+shows the rider, the ground and the trick name where they should be. Loading
+the 268 KB ride takes about 10 s; then it played at 6.6 fps (every 3rd
+frame, 107 ms a frame), slower than DOSBox's 8.5. Nobody has looked at the
+4-color picture on the real monitor yet (the screenshot reads video memory).
+Memory: graphics start first, then the library's unused 64 KB back buffer
+goes back to DOS, and the ride is loaded; with CodeJr waiting behind it,
+58 KB is left over.
+
+The rest of this section is from the emulator:
 
 - Correct in DOSBox: frames drawn by `SHREDDY.EXE`, trick name included,
   are pixel for pixel the exporter's previews. The assembly was also checked

@@ -233,6 +233,11 @@ void gfx_done(void)
 	gfx_mode = 0;
 }
 
+void gfx_free_back(void)
+{
+	if (back_seg) { dos_free(back_seg); back_seg = 0; gfx_back = 0; }
+}
+
 /* ---- Drawing ----------------------------------------------------------- */
 
 void gfx_clear(unsigned char c)

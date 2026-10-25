@@ -33,6 +33,10 @@ extern unsigned gfx_vseg;                /* video segment gfx_present writes */
 extern unsigned jr_rowoff[200];          /* video offset of row y in gfx_vseg:
                        mode 8: (y&1)*0x2000 + (y>>1)*80; mode 9: (y&3)*0x2000 + (y>>2)*160 */
 void gfx_done(void);                     /* back to 80x25 text         */
+/* Give the 64 KB back buffer back to DOS, for a program that only uses
+ * the fast path (fx_*). gfx_back is 0 afterwards; gfx_done won't free it
+ * again. Call it after fx_init. */
+void gfx_free_back(void);
 /* gfx_init, key_init, tmr_init and snd_init register their *_done with
  * atexit(), so a normal exit() restores the machine. */
 
