@@ -207,3 +207,26 @@ func TestDecodeShot(t *testing.T) {
 		t.Fatal("junk accepted")
 	}
 }
+
+func TestFileSizeCap(t *testing.T) {
+	w := &Workspace{Dir: t.TempDir()}
+	if err := w.Init(); err != nil {
+		t.Fatal(err)
+	}
+	os.WriteFile(filepath.Join(w.Dir, "BIG.DAT"), make([]byte, 300<<10), 0o644)
+	os.WriteFile(filepath.Join(w.Dir, "HUGE.DAT"), make([]byte, maxFile+1), 0o644)
+	entries, data, err := w.Scan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, e := range entries {
+		got[e.Name] = e.Problem
+	}
+	if got["BIG.DAT"] != "" || len(data["BIG.DAT"]) != 300<<10 {
+		t.Errorf("a 300 KB file should be sent, got problem %q", got["BIG.DAT"])
+	}
+	if !strings.HasPrefix(got["HUGE.DAT"], "too big") {
+		t.Errorf("a file over the cap should be refused, got %q", got["HUGE.DAT"])
+	}
+}

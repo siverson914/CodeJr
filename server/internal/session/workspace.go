@@ -24,7 +24,9 @@ type Workspace struct {
 }
 
 // maxFile keeps one runaway file from tying up the line for an hour.
-const maxFile = 256 << 10
+// 512 KB is about 4 minutes at the native client's 2,100 bytes/s and
+// leaves room for SHREDDY.DAT (267 KB).
+const maxFile = 512 << 10
 
 // DOS 8.3 names: letters, digits and the punctuation DOS allows. No
 // spaces, dots beyond the one separator, commas or braces, which also
