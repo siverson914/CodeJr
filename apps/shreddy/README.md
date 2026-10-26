@@ -4,13 +4,15 @@ A dirt jump rider doing random tricks on the PCjr: a one-minute loop that
 repeats with no seam, each trick's name at the top, in 320x200 with four
 colors (black, dark grey, light grey, white). A tech demo. Any key quits.
 
-The ride comes from Knuckle; on the PCjr it is called Shreddy.
+The ride comes from Knuckle, Steve's separate bike trick app, which is not
+in this repo; on the PCjr it is called Shreddy. The exported ride,
+`SHREDDY.DAT`, is checked in here, so nothing else is needed to run it.
 
 ![a frame](shots/frame-0292.png)
 
 ## How it works
 
-The ride comes from Knuckle (`~/Github/Knuckle`, the bike trick app). The
+The ride comes from Knuckle. The
 PCjr can't run Knuckle's simulation (3D rider, joint solving, physics; one
 frame is about 1.5 ms on the laptop, roughly 20 s on an 8088), so the laptop
 rides it and saves the lines of every frame, and the PCjr only draws them.
@@ -25,7 +27,7 @@ rides it and saves the lines of every frame, and the PCjr only draws them.
   thump is periodic noise (the chip can't play a tone below 110 Hz). The
   exporter also writes `preview/sound.wav` and `preview/shreddy.mp4` (the
   PCjr's frames with the chip's sound, from a small emulation of the chip)
-  in the Dropbox media folder. `SHREDDY /Q` plays without sound.
+  beside the ride it exports. `SHREDDY /Q` plays without sound.
 - **`SHREDDY.DAT`**: 1,167 frames, 20 a second, 58.4 s, 291 KB with the sound. Made by
   Knuckle's `tools/pcjr/export.mjs` (the file format is at the top of it and
   of `shreddy.c`). Polylines, ellipses (wheels, head) and dots (eyes), with
@@ -46,7 +48,7 @@ rides it and saves the lines of every frame, and the PCjr only draws them.
   and bike parts dark grey (Knuckle's faded back side). Rider lines are
   drawn 2 pixels wide.
 - **Video:** JRGFX's `fx_init` sets up two 16 KB pages and the retrace flip
-  in mode 8, then `knuckle.c` switches the gate array to 320x200x4 (mode
+  in mode 8, then `shreddy.c` switches the gate array to 320x200x4 (mode
   control 0Ah, palette mask 3). Mode 8 and 320x200x4 have the same memory
   layout, only the pixel packing differs. The BIOS mode byte is set to 4 so
   CodeJr's screenshots decode the right format.
@@ -76,10 +78,11 @@ just shreddy            build, and check frames against the exporter's previews
 just deploy-shreddy     build and queue SHREDDY.EXE + SHREDDY.DAT for the PCjr
 ```
 
-To make a new ride: in Knuckle, `node tools/pcjr/export.mjs [--seed 7]
-[--secs 60] [--view 8]`, then copy `SHREDDY.DAT` from the Dropbox media
-folder (`pcjr/`) here, with the preview PNGs that `just shreddy` compares. It also writes preview PNGs drawn with the PCjr's own
-line algorithm.
+To make a new ride (this needs Knuckle, which is not public): its
+exporter, `node tools/pcjr/export.mjs [--seed 7] [--secs 60] [--view 8]`,
+writes `SHREDDY.DAT` and preview PNGs drawn with the PCjr's own line
+algorithm. Copy the `.DAT` here, with the previews that `just shreddy`
+compares (`shots/`).
 
 ## Status (2026-10-25)
 

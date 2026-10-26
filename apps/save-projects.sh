@@ -7,7 +7,7 @@
 set -e
 cd "$(dirname "$0")"
 ws=${1:-${CODEJR_HOME:-$HOME/.local/share/codejr}/workspace}
-skip=" JRAI JRCUBE JRDOOM JRFLIGHT SAY SOPWITH JRGFX VOICE UTILS "
+skip=" JRAI JRCUBE JRDOOM JRFLIGHT SAY SOPWITH SOP26 CHROMEJR JRGFX VOICE UTILS "
 n=0
 for d in "$ws"/*/; do
 	name=$(basename "$d")

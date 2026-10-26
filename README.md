@@ -1,15 +1,27 @@
 # CodeJr
 
-Claude Code for a real 1984 IBM PCjr. Sit at the PCjr, type "write me a snake game", and Claude writes it, builds it, and puts it on the PCjr's own disk, ready to run.
+**An AI coding agent for a real 1984 IBM PCjr.** Sit at the PCjr, type "write me a Lemmings game", and Claude writes it, compiles it for the 8088, tests it in an emulated PCjr, sends it down a serial line onto the PCjr's own disk, runs it on the real machine, looks at a picture of its screen, and fixes what's wrong.
+
+![JRDOOM on a real PCjr](docs/shots/jrdoom-play.png) ![Lemmings Junior](docs/shots/lemmjr-play.png) ![JRFLIGHT](docs/shots/jrflight-play.png) ![Sopwith26](docs/shots/sop26-play.png)
+
+The PCjr is a 4.77 MHz 8088 with 16 colors, a three-voice sound chip, and no network. It dials a Go server on a modern machine through a WiFi modem on its serial port. Over that line, in about three weeks, it got:
+
+- **A Doom-style shooter** at 4.5 frames a second: zombiemen, imps, doors, a red key and a status bar with a face. Doom came out in December 1993; this machine shipped almost ten years earlier.
+- **Sopwith (1984), 60% faster** on the same hardware, rebuilt from its released source without changing a single thing the game does, plus bugs that had been in it since 1984.
+- **A flight simulator, a demoscene demo with speech, a shaded 3D cube with real-time shadows, a Mandelbrot zoom, a dirt jump bike demo,** and arcade games written by asking for them at the PCjr's own keyboard.
+- **Speech** from a sound chip that was never meant to talk, and **a web browser** whose pages are cut down by an LLM to fit a 1984 screen.
+- **Its own protocol stack:** a reliable link over a modem that loses bytes, LZ4 compression, and changes-only updates that send a 4 KB edit script instead of a 64 KB program.
+
+**[The software wasn't there](docs/ESSAY.md):** a short note on what this says about 1984, and about today.
 
 ```
 PCjr ──serial── WiFi modem ──TCP 4860── codejr (Go server on a modern machine)
                                           └─ claude -p (headless Claude Code)
 ```
 
-The PCjr is a 4.77 MHz 8088 with no network. It dials the server through a WiFi modem on its serial port. The server keeps the chat going, runs Claude in a workspace folder, compiles what Claude writes with Open Watcom, tests it in an emulated PCjr, and sends the result down the line to `C:\CODEJR\PROGS`. Claude can also run the program on the real machine, press keys for it, read its log and look at a picture of its screen, so it can fix what the emulator got wrong.
+The server keeps the chat going, runs Claude in a workspace folder, compiles what Claude writes with Open Watcom, tests it in an emulated PCjr, and sends the result down the line to `C:\CODEJR\PROGS`. Claude can also run the program on the real machine, press keys for it, read its log and look at a picture of its screen, so it can fix what the emulator got wrong.
 
-Every picture on this page came off the real PCjr that way: the client copied video memory while the program ran and sent it up the serial line. They are shown in the standard 16 colors, because the PCjr's palette can't be read back.
+Unless a caption says "emulator", every picture on this page came off the real PCjr that way: the client copied video memory while the program ran and sent it up the serial line. They are shown in the standard 16 colors, because the PCjr's palette can't be read back.
 
 ## What is here
 
@@ -48,6 +60,20 @@ A Mandelbrot zoom with an assembly inner loop in fixed point (the 8088 has no fl
 
 ![MANDEL seahorse valley](docs/shots/mandel-play.png)
 
+#### Junris (`apps/junris`)
+
+Falling-block puzzles in front of the Kremlin, with Russian-style music on the sound chip. Asked for at the PCjr in one sentence ("a great tetris clone, colorful Moscow buildings in the background"). [More about Junris](apps/junris/README.md).
+
+![Junris title](docs/shots/junris-title.png) ![Junris (emulator)](docs/shots/junris-play.png)
+
+#### Xonix Junior (`apps/xonixjr`)
+
+A Xonix clone: cut the sea into land without getting hit, written in a single reply. [More about Xonix Junior](apps/xonixjr/README.md).
+
+![Xonix Junior title](docs/shots/xonixjr-title.png) ![Xonix Junior (emulator)](docs/shots/xonixjr-play.png)
+
+These two pictures are emulator captures.
+
 Also `apps/basic`: the first few BASIC programs CodeJr wrote for the PCjr's cartridge BASIC.
 
 ### Written on the laptop, for the PCjr
@@ -80,6 +106,24 @@ A two and a half minute demoscene-style demo with a three-voice chiptune and spo
 ![JRAI tunnel](docs/shots/jrai-tunnel.png) ![JRAI meeting](docs/shots/jrai-meeting.png)
 
 The plasma behind the title is drawn once and moved by rotating the palette, so its real colors differ from this capture.
+
+#### SHREDDY (`apps/shreddy`)
+
+A dirt jump rider doing tricks, each with its name, as a seamless one-minute loop in 320x200 with four greys, and the ride's sound (tire hiss, wind, freehub buzz, landings) on the PCjr's sound chip. The physics comes from Knuckle, a modern bike trick app, worked out ahead of time; the PCjr draws 1,167 frames of it with Bresenham lines in assembly, about 7 frames a second on the real machine. [More about SHREDDY](apps/shreddy/README.md).
+
+![SHREDDY (emulator)](docs/shots/shreddy-play.png)
+
+#### Jr's Quest (`apps/jrquest`)
+
+A King's Quest style adventure about the AI world of 2025 and 2026, on our own AGI v2 compatible engine with an AI parser behind the word list and a live talk with the Mirror at the end. All 16 rooms play in a browser on the JavaScript reference interpreter; the 8088 version is next. [More about Jr's Quest](apps/jrquest/README.md).
+
+![Jr's Quest title](docs/shots/jrquest-title.png) ![Jr's Quest, the Bazaar](docs/shots/jrquest-bazaar.png)
+
+#### ChromeJr (`apps/chromejr`)
+
+A web browser for the PCjr. Real Chromium runs hidden on the laptop and holds the cookies and the encryption; an LLM turns each page into a short numbered view, and the PCjr shows it and sends back keys. Tried on the real PCjr in its text version; `CHROMEJR.EXE` so far in the emulator. [More about ChromeJr](apps/chromejr/README.md).
+
+![ChromeJr on a test page (emulator)](docs/shots/chromejr-page.png)
 
 #### SAY (`apps/say`)
 
@@ -135,6 +179,7 @@ Type a request and press Enter. Commands: `/files`, `/sync`, `/run`, `/send NAME
 
 ## Docs
 
+- [`docs/ESSAY.md`](docs/ESSAY.md): The software wasn't there.
 - `docs/HANDOFF.md`: current state, what to test, what to build next, facts and mistakes.
 - `docs/JOURNAL.md`: how it was built and debugged, step by step.
 - `docs/design/PLAN.md`, `docs/design/CLIENT.md`: the original plans, with status notes.
@@ -149,9 +194,13 @@ Type a request and press Enter. Commands: `/files`, `/sync`, `/run`, `/send NAME
 | `server/` | the Go server (`just build`, `just restart`, `just live`) |
 | `client/` | `CODEJR.EXE`, the PCjr client |
 | `lib/` | JRGFX, the graphics, input, timing and sound library |
-| `apps/` | programs for the PCjr, one folder each: `jrdoom`, `jrflight`, `jrcube`, `jrai`, `say`, `sopwith`, and the ones CodeJr wrote on the PCjr itself (`lemmjr`, `jumpjr`, `swords`, `mandel`, `basic`) |
+| `apps/` | programs for the PCjr, one folder each: `jrdoom`, `jrflight`, `jrcube`, `jrai`, `say`, `shreddy`, `sopwith`, `sopwith26`, `chromejr`, `jrquest`, and the ones CodeJr wrote on the PCjr itself (`lemmjr`, `jumpjr`, `swords`, `mandel`, `junris`, `xonixjr`, `basic`) |
 | `tools/` | serial test tools for the PCjr |
 | `emu/` | headless emulator tests |
 | `docs/` | handoff, journal, and the original plans in `design/` |
 
 On the PCjr, CodeJr's own files are in `C:\CODEJR` and the programs are in `C:\CODEJR\PROGS`, one folder per app.
+
+## License
+
+MIT ([`LICENSE`](LICENSE)), by Steve Iverson. The exception is Sopwith (`apps/sopwith`, `apps/sopwith26`): David L. Clark's code, which keeps its own license ([`apps/sopwith/license.txt`](apps/sopwith/license.txt)): free to share and change, never for money, source included.

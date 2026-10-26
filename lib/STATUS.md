@@ -26,7 +26,7 @@ Everything in the header is implemented. Phase 1 and Phase 2 are done.
 Use the large memory model with 8088 instructions only:
 
 ```sh
-. /home/steve/Github/CodeJr/CodeJr/client/owenv.sh
+. client/owenv.sh          # from the repo root
 cd apps/jrdoom
 wcl -q -bt=dos -ml -0 -ox -wx -fe=DOOM.EXE doom.c ../../lib/jrgfx.lib
 ```

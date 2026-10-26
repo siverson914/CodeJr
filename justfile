@@ -349,7 +349,7 @@ quest:
     cd apps/jrquest && node tools/mkviews.js game/view && node tools/pack.js game build && node tools/bundle.js build build/jrquest.html && node tools/review.js build build/review.html
 
 # Build the review page (build/review.html): every room, sprite and line of text, with comments.
-# Open the file, or run `just quest-serve` and go to http://127.0.0.1:4850/admin so comments land in apps/jrquest/review/
+# Open the file, or run `just quest-serve` and go to http://127.0.0.1:4861/admin so comments land in apps/jrquest/review/
 quest-review:
     cd apps/jrquest && node tools/mkviews.js game/view && node tools/pack.js game build && node tools/review.js build build/review.html
 
