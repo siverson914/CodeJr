@@ -228,6 +228,20 @@ deploy-shreddy:
     cp apps/shreddy/SHREDDY.EXE apps/shreddy/SHREDDY.DAT "{{ws}}/SHREDDY/"
     @echo "queued: sent on the PCjr's next connection"
 
+# Build AIRBORNE (apps/airborne): its data from the original disk's files (kept outside
+# the repo, in ~/.local/share/codejr/airborne), then the C port checked tick for tick
+# against the original's code, then the PCjr build
+airborne:
+    ~/.local/share/codejr/airborne/.venv/bin/python apps/airborne/tools/mkdat.py
+    apps/airborne/tools/mksong.py
+    apps/airborne/build.sh
+
+# Build AIRBORNE and queue it with its data for the PCjr
+deploy-airborne: airborne
+    mkdir -p "{{ws}}/AIRBORNE"
+    cp apps/airborne/AIRBORNE.EXE apps/airborne/AIRBORNE.DAT apps/airborne/AIRSONG.SND "{{ws}}/AIRBORNE/"
+    @echo "queued: sent on the PCjr's next connection"
+
 # Build Sopwith 2 from source (apps/sopwith)
 sopwith:
     apps/sopwith/build.sh

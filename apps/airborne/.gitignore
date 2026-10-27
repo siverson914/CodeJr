@@ -1,0 +1,12 @@
+# The original game's data, made from the 1985 disk by tools/mkdat.py: never committed
+AIRBORNE.DAT
+AIRBORNE.HI
+build/
+SHOT*.PPM
+host
+AIRSONG.SND
+# The game core (the original's 68000 code translated into C): kept on the
+# laptop in ~/.local/share/codejr/airborne/port, not on GitHub
+game.c
+game.h
+tools/__pycache__/
