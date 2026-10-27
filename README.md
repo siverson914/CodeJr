@@ -14,9 +14,44 @@ The PCjr is a 4.77 MHz 8088 with 16 colors, a three-voice sound chip, and no net
 
 **[The software wasn't there](docs/ESSAY.md):** a short note on what this says about 1984, and about today.
 
+```mermaid
+flowchart LR
+    subgraph JR["IBM PCjr, 1984"]
+        C["CODEJR.EXE<br/>DOS client"]
+        D[("C:\CODEJR\PROGS")]
+    end
+    M["WiFi modem<br/>Zimodem"]
+    subgraph PC["Modern machine"]
+        S["codejr<br/>Go server"]
+        A["claude -p<br/>headless Claude Code"]
+        W["Open Watcom<br/>8088 compiler"]
+        E["DOSBox<br/>emulated PCjr"]
+    end
+    C <-->|"serial port<br/>37287 baud"| M
+    M <-->|"WiFi, TCP 4860"| S
+    C --> D
+    S <--> A
+    S --> W
+    S --> E
 ```
-PCjr ──serial── WiFi modem ──TCP 4860── codejr (Go server on a modern machine)
-                                          └─ claude -p (headless Claude Code)
+
+Asking for a program, from the PCjr's keyboard:
+
+```mermaid
+sequenceDiagram
+    participant J as PCjr
+    participant S as Go server
+    participant C as Claude
+    J->>S: "write me a Lemmings game"
+    S->>C: the request
+    C->>S: code, then build and test in the emulator
+    S->>J: the program, in compressed bursts
+    C->>S: run it on the PCjr, press keys
+    S->>J: run, keys
+    J->>S: log and a picture of the screen
+    S->>C: what happened
+    C->>S: fixes, sent as changes only
+    S->>J: the changed parts
 ```
 
 The server keeps the chat going, runs Claude in a workspace folder, compiles what Claude writes with Open Watcom, tests it in an emulated PCjr, and sends the result down the line to `C:\CODEJR\PROGS`. Claude can also run the program on the real machine, press keys for it, read its log and look at a picture of its screen, so it can fix what the emulator got wrong.

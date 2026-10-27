@@ -10,8 +10,18 @@ the game logic, the sprites, the sound, the pictures). None of the
 original's data is in this repo: `tools/mkdat.py` makes `AIRBORNE.DAT` from
 those files on this laptop.
 
-![Title](screenshots/title.png)
-![Level 10](screenshots/level10.png)
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="screenshots/title.png" alt="Title" width="400"><br>
+      <em>The title screen and high scores</em>
+    </td>
+    <td align="center" width="50%">
+      <img src="screenshots/level10.png" alt="Level 10" width="400"><br>
+      <em>Level 10: helicopters and paratroopers</em>
+    </td>
+  </tr>
+</table>
 
 ## Not on GitHub
 
@@ -101,12 +111,48 @@ G shells, S the song, I instructions (the original's five pages, then the PCjr k
 DOSBox (`lib/emu.sh`, `/KEYS:PPEPIPIIIIIPXX` for the menus, `/DEMO` with
 `/SHOT` for the game), shown at 2x:
 
-| | |
-|---|---|
-| ![Presents](screenshots/presents.png) | ![Box](screenshots/box.png) |
-| ![Title](screenshots/title.png) | ![Credits](screenshots/credits.png) |
-| ![PCjr keys](screenshots/pcjr-keys.png) | ![Level 1](screenshots/level1.png) |
-| ![Level 5](screenshots/level5.png) | ![Level 10](screenshots/level10.png) |
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="screenshots/presents.png" alt="Presents" width="400"><br>
+      <em>Silicon Beach Software presents</em>
+    </td>
+    <td align="center" width="50%">
+      <img src="screenshots/box.png" alt="Box picture" width="400"><br>
+      <em>The box picture, while the startup song plays</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="screenshots/title.png" alt="Title" width="400"><br>
+      <em>The title screen, menu and high scores</em>
+    </td>
+    <td align="center" width="50%">
+      <img src="screenshots/credits.png" alt="Credits" width="400"><br>
+      <em>The original's credits page</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="screenshots/pcjr-keys.png" alt="PCjr keys" width="400"><br>
+      <em>The PCjr keys, the last instructions page</em>
+    </td>
+    <td align="center" width="50%">
+      <img src="screenshots/level1.png" alt="Level 1" width="400"><br>
+      <em>Level 1: the first helicopters</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="screenshots/level5.png" alt="Level 5" width="400"><br>
+      <em>Level 5: paratroopers coming down</em>
+    </td>
+    <td align="center" width="50%">
+      <img src="screenshots/level10.png" alt="Level 10" width="400"><br>
+      <em>Level 10: troopers landing by the cactus</em>
+    </td>
+  </tr>
+</table>
 
 ## Status (2026-10-27)
 
