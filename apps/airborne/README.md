@@ -13,11 +13,11 @@ those files on this laptop.
 <table>
   <tr>
     <td align="center" width="50%">
-      <img src="screenshots/title.png" alt="Title" width="400"><br>
+      <img src="screenshots/title.png" alt="Title" width="420"><br>
       <em>The title screen and high scores</em>
     </td>
     <td align="center" width="50%">
-      <img src="screenshots/level10.png" alt="Level 10" width="400"><br>
+      <img src="screenshots/level10.png" alt="Level 10" width="420"><br>
       <em>Level 10: helicopters and paratroopers</em>
     </td>
   </tr>
@@ -114,41 +114,41 @@ DOSBox (`lib/emu.sh`, `/KEYS:PPEPIPIIIIIPXX` for the menus, `/DEMO` with
 <table>
   <tr>
     <td align="center" width="50%">
-      <img src="screenshots/presents.png" alt="Presents" width="400"><br>
+      <img src="screenshots/presents.png" alt="Presents" width="420"><br>
       <em>Silicon Beach Software presents</em>
     </td>
     <td align="center" width="50%">
-      <img src="screenshots/box.png" alt="Box picture" width="400"><br>
+      <img src="screenshots/box.png" alt="Box picture" width="420"><br>
       <em>The box picture, while the startup song plays</em>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="screenshots/title.png" alt="Title" width="400"><br>
+      <img src="screenshots/title.png" alt="Title" width="420"><br>
       <em>The title screen, menu and high scores</em>
     </td>
     <td align="center" width="50%">
-      <img src="screenshots/credits.png" alt="Credits" width="400"><br>
+      <img src="screenshots/credits.png" alt="Credits" width="420"><br>
       <em>The original's credits page</em>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="screenshots/pcjr-keys.png" alt="PCjr keys" width="400"><br>
+      <img src="screenshots/pcjr-keys.png" alt="PCjr keys" width="420"><br>
       <em>The PCjr keys, the last instructions page</em>
     </td>
     <td align="center" width="50%">
-      <img src="screenshots/level1.png" alt="Level 1" width="400"><br>
+      <img src="screenshots/level1.png" alt="Level 1" width="420"><br>
       <em>Level 1: the first helicopters</em>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="screenshots/level5.png" alt="Level 5" width="400"><br>
+      <img src="screenshots/level5.png" alt="Level 5" width="420"><br>
       <em>Level 5: paratroopers coming down</em>
     </td>
     <td align="center" width="50%">
-      <img src="screenshots/level10.png" alt="Level 10" width="400"><br>
+      <img src="screenshots/level10.png" alt="Level 10" width="420"><br>
       <em>Level 10: troopers landing by the cactus</em>
     </td>
   </tr>

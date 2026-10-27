@@ -1,6 +1,6 @@
 # CodeJr
 
-Claude Code for a real IBM PCjr: a Go server on this laptop, a native DOS client (and an MS-Kermit fallback) on the PCjr, a graphics library and two games.
+Claude Code for a real IBM PCjr: a Go server on this laptop, a native DOS client (and an MS-Kermit fallback) on the PCjr, a graphics library, and the games and demos written with it.
 
 **Read `docs/HANDOFF.md` before doing anything.** It has the current state, what is proven on the real machine and what isn't, the facts that took hours to find, and the mistakes not to repeat. `docs/JOURNAL.md` is the full history; append to it as you work (Steve wants the whole story, wrong turns included).
 

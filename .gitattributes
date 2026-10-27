@@ -1,0 +1,2 @@
+# GitHub language stats: the JR Quest room pictures (*.pic) are game data, not Roff
+*.pic linguist-detectable=false
